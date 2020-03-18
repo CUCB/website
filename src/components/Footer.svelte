@@ -1,8 +1,12 @@
 <style>
     p {
         text-align: center;
-        color: rgba(0,0,0,0.5);
-        position: absolute;
+        color: #00000080;
+        line-height: 0.5em;
+        font-size: 0.8rem;
+    }
+    footer {
+        position: relative;
         bottom: 0;
         left: 0;
         right: 0;
@@ -11,6 +15,12 @@
 
 
 
+<footer>
 
+<p>This site is maintained by  <a href="mailto:webmaster@cucb.co.uk">the Webmaster</a>, please use this address if you have any comments or queries about the site!</p>
 
-<p>Hello, I'm a footer. Email <a href="mailto:james">James</a>, he loves email</p>
+<p>Any Ceilidh queries should be directed to <a href="mailto:secretary@cucb.co.uk">the Secretary</a>.</p>
+
+<p>You can read our constitution <a href="/docs/constitution">here</a> and our privacy notice <a href="/docs/gdpr">here</a>.</p>
+
+</footer>
