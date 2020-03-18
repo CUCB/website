@@ -33,12 +33,12 @@
 		color:rgb(7,92,1);
 	}
 
-	a:hover {
+	a:not([aria-current]):hover {
 		position: relative;
 		display: inline-block;
 	}
 
-	a:hover::after {
+	a:not([aria-current]):hover::after {
 		position: absolute;
 		content: '';
 		width: calc(100% - 1em);
