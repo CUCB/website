@@ -2,7 +2,6 @@
     p {
         text-align: center;
         color: #00000080;
-        line-height: 0.5em;
         font-size: 0.8rem;
     }
     footer {
@@ -10,6 +9,8 @@
         bottom: 0;
         left: 0;
         right: 0;
+        max-width: 600px;
+        margin: auto;
     }
 </style>
 
@@ -17,10 +18,10 @@
 
 <footer>
 
-<p>This site is maintained by  <a href="mailto:webmaster@cucb.co.uk">the Webmaster</a>, please use this address if you have any comments or queries about the site!</p>
+<p>This site is maintained by  <a href="mailto:webmaster@cucb.co.uk">the Webmaster</a>, please use this address if you have any comments or queries about the site!
 
-<p>Any Ceilidh queries should be directed to <a href="mailto:secretary@cucb.co.uk">the Secretary</a>.</p>
+Any Ceilidh queries should be directed to <a href="mailto:secretary@cucb.co.uk">the Secretary</a>.
 
-<p>You can read our constitution <a href="/docs/constitution">here</a> and our privacy notice <a href="/docs/gdpr">here</a>.</p>
+You can read our constitution <a href="/docs/constitution">here</a> and our privacy notice <a href="/docs/gdpr">here</a>.</p>
 
 </footer>
