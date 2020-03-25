@@ -4,14 +4,6 @@
         color: #00000080;
         font-size: 0.8rem;
     }
-    footer {
-        position: relative;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        max-width: 600px;
-        margin: auto;
-    }
 </style>
 
 
