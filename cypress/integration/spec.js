@@ -7,23 +7,23 @@ describe("CUCB homepage", () => {
         cy.contains("h1", "Welcome to CUCB!");
     });
 
-	it("has a visible header", () => {
-		cy.get("header")
-			.should("be.visible");
-	});
+    it("has a visible header", () => {
+        cy.get("header")
+            .should("be.visible");
+    });
 
-	it("should show the logo in the header", () => {
-		cy.get("header img")
-			.should("be.visible")
-			.and(($img) => {
-				expect($img[0].naturalWidth).to.be.greaterThan(0)
-			});
-	});
+    it("should show the logo in the header", () => {
+        cy.get("header img")
+            .should("be.visible")
+            .and(($img) => {
+                expect($img[0].naturalWidth).to.be.greaterThan(0)
+            });
+    });
 
-	it("has a visible navbar", () => {
-		cy.get("header nav")
-			.should("be.visible");
-	});
+    it("has a visible navbar", () => {
+        cy.get("header nav")
+            .should("be.visible");
+    });
 
     it("navigates to /about", () => {
         cy.get("header nav a")
@@ -44,12 +44,19 @@ describe("CUCB homepage", () => {
             .contains("join us")
             .click();
         cy.url().should("include", "/join");
-	});
-	
-	it("has a visible footer", () => {
-		cy.get("footer p")
-			.should("be.visible");
-	});
+    });
+
+    it("has a link to our FB page", () => {
+        cy.get("li a")
+            .contains("Facebook")
+            .should('have.prop', 'href')
+            .and('include', 'facebook.com/CUCeilidhBand')
+    });
+
+    it("has a visible footer", () => {
+        cy.get("footer p")
+            .should("be.visible");
+    });
 
     it("diplays webmaster's email in the footer", () => {
         cy.get("footer a")
@@ -63,5 +70,5 @@ describe("CUCB homepage", () => {
             .contains("Secretary")
             .should("have.attr", "href")
             .and("include", "mailto:secretary@cucb.co.uk");
-	});
+    });
 });
