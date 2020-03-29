@@ -1,0 +1,10 @@
+stages:
+  - test
+
+# this job installs NPM dependencies and Cypress
+install:
+  image: cypress/base:10
+  stage: test
+  script:
+    - npm install
+    - npm run test 
