@@ -1,5 +1,4 @@
-<script>
-export let text;
+<script>76
 export let person;
 </script>
 
@@ -25,7 +24,7 @@ export let person;
 </style>
 
 
-<div>
-<p id="text">{text}</p>
+<div class="testimonial">
+<p id="text"><slot></slot></p>
 <p id="person">{person}</p>
 </div>
