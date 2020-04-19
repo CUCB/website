@@ -1,34 +1,12 @@
-# sapper-template
+# CUCB Website
 
-The default [Sapper](https://github.com/sveltejs/sapper) template, available for Rollup and webpack.
+This is the new rewrite of the CUCB website, which uses [sapper](https://sapper.svelte.dev) to do the frontend, and [hasura](https://hasura.io/) for the backend.
 
-
-## Getting started
-
-
-### Using `degit`
-
-[`degit`](https://github.com/Rich-Harris/degit) is a scaffolding tool that lets you create a directory from a branch in a repository. Use either the `rollup` or `webpack` branch in `sapper-template`:
-
-```bash
-# for Rollup
-npx degit "sveltejs/sapper-template#rollup" my-app
-# for webpack
-npx degit "sveltejs/sapper-template#webpack" my-app
-```
-
-
-### Using GitHub templates
-
-Alternatively, you can use GitHub's template feature with the [sapper-template-rollup](https://github.com/sveltejs/sapper-template-rollup) or [sapper-template-webpack](https://github.com/sveltejs/sapper-template-webpack) repositories.
-
-
-### Running the project
+## Running the project
 
 However you get the code, you can install dependencies and run the project in development mode with:
 
 ```bash
-cd my-app
 npm install # or yarn
 npm run dev
 ```
@@ -78,7 +56,7 @@ import { files } from '@sapper/service-worker';
 
 ## Bundler config
 
-Sapper uses Rollup or webpack to provide code-splitting and dynamic imports, as well as compiling your Svelte components. With webpack, it also provides hot module reloading. As long as you don't do anything daft, you can edit the configuration files to add whatever plugins you'd like.
+The website uses Rollup and dynamic imports, as well as compiling your Svelte components. The configuration can be edited to add plugins, which currently includes the sass preprocessor, which allows us to write sass code instead of css.
 
 
 ## Production mode and deployment
@@ -105,7 +83,3 @@ Because of that, it's essential that the bundler doesn't treat the package as an
 npm install -D @sveltejs/svelte-virtual-list
 ```
 
-
-## Bugs and feedback
-
-Sapper is in early development, and may have the odd rough edge here and there. Please be vocal over on the [Sapper issue tracker](https://github.com/sveltejs/sapper/issues).
