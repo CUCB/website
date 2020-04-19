@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open up [localhost:3000](http://localhost:3000) and start clicking around.
+Open up [localhost:4000](http://localhost:4000) and start clicking around once you've got the server running.
 
 Consult [sapper.svelte.dev](https://sapper.svelte.dev) for help getting started.
 
