@@ -14,7 +14,7 @@
 
 
     #logo {
-        max-width: 200px;
+        max-width: 160px;
         grid-area: logo;
     }
 
@@ -28,7 +28,7 @@
 </style>
 
 <header>
-    <img id="logo" src="https://www.cucb.co.uk/resources/branded/logo_rounded.svg" alt="Band logo" />
+    <img id="logo" src="/logo.svg" alt="Band logo" />
     <h1 id="title">Cambridge University Ceilidh Band</h1>
     <Nav {segment} />
 </header>

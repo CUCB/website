@@ -3,6 +3,12 @@ describe("CUCB homepage", () => {
         cy.visit("/");
     });
 
+    it("has the correct favicon", () => {
+        cy.document().its('head').find('link[rel="icon"]')
+            .should('have.attr', 'href')
+            .should('eq', "favicon.ico");
+    });
+
     it("has the correct <h1>", () => {
         cy.contains("h1", "Welcome to CUCB!");
     });
