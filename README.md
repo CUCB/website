@@ -7,7 +7,7 @@ This is the new rewrite of the CUCB website, which uses [sapper](https://sapper.
 However you get the code, you can install dependencies and run the project in development mode with:
 
 ```bash
-npm install # or yarn
+npm install
 npm run dev
 ```
 
