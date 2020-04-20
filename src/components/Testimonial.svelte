@@ -1,4 +1,4 @@
-<script>76
+<script>
 export let person;
 </script>
 
