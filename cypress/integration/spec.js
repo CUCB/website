@@ -18,7 +18,7 @@ describe("CUCB homepage", () => {
             .should("be.visible");
     });
 
-    it("should show the logo in the header", () => {
+    it("shows the logo in the header", () => {
         cy.get("header img")
             .should("be.visible")
             .and(($img) => {
@@ -76,5 +76,16 @@ describe("CUCB homepage", () => {
             .contains("Secretary")
             .should("have.attr", "href")
             .and("include", "mailto:secretary@cucb.co.uk");
+    });
+});
+
+describe("CUCB book us", () => {
+    beforeEach(() => {
+        cy.visit("/book");
+    });
+
+    it("has testimonial", () => {
+        cy.get(".testimonial")
+        .should("be.visible");
     });
 });
