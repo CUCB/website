@@ -1,8 +1,7 @@
-<svelte:options immutable={false}/>
-
 <script>
     import Entry from "./Entry.svelte";
     import { Map, List } from "immutable";
+    import { cache } from "../../../state";
 
     export let people;
     export let gigId;
@@ -10,9 +9,6 @@
     export let updaters;
 
     let peopleStore = Map(people);
-    $: updateEntries = peopleStore
-        .mapEntries(([id, _]) => [id, updateEntryImmutable(id)])
-        .toObject();
     let errors = List();
 
     const wrap = (userId, fn) => async (...args) => {
@@ -25,18 +21,17 @@
         errors = res.errors;
     };
 
-    const updateEntryImmutable = userId => {
-        return {
-            instruments: {
-                setApproved: wrap(userId, updaters.setInstrumentApproved)
-            },
-            setRole: wrap(userId, updaters.setRole)
-        };
-    };
+    const updateEntry = cache(userId => ({
+        instruments: {
+            setApproved: wrap(userId, updaters.setInstrumentApproved)
+        },
+        setRole: wrap(userId, updaters.setRole)
+    }));
 </script>
 
+<svelte:options immutable="{false}" />
 {#each Object.entries(peopleStore.toObject()) as [id, person]}
-    <Entry {person} updateEntry="{updateEntries[id]}" />
+    <Entry {person} updateEntry="{updateEntry(id)}" />
 {/each}
 <ul>
     {#each errors.toArray() as error}
