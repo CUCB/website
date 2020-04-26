@@ -1,6 +1,6 @@
 <script context="module">
-    import { makeClient, handleErrors } from '../../../graphql/client';
-    import { QueryGigDetails } from '../../../graphql/gigs';
+    import { makeClient, handleErrors } from '../../../../graphql/client';
+    import { QueryGigDetails } from '../../../../graphql/gigs';
 
     export async function preload({ params }) {
         let { gig_id } = params;

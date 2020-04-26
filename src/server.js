@@ -34,7 +34,7 @@ if (!process.env.SESSION_SECRET) {
     process.exit(1);
 }
 
-polka() // You can also use Express
+polka()
 	.all(`${GRAPHQL_PATH}`, function(req, res) {
 		apiProxy.web(req, res, { target: GRAPHQL_REMOTE });
 	})

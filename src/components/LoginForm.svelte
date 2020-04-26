@@ -1,9 +1,9 @@
 <script>
-    import { stores } from '@sapper/app';
+    export let redirectTo;
 
-    let username, password;
+    let username = '';
+    let password = '';
     let error;
-    const { page } = stores();
 
     async function submit() {
         const body = new URLSearchParams();
@@ -23,18 +23,23 @@
 
         if (isSuccessful(res.status)) {
             // Reload the page so the session is up-to-date
-            window.location.href = $page.path;
-        } else if (res.status === 401) {
+            window.location.href = redirectTo;
+        } else {
             error = await res.text();
         }
     }
 </script>
 
+<h1>Sign in</h1>
 <form on:submit|preventDefault="{submit}">
-    <input type="text" bind:value="{username}" placeholder="Username" />
-    <input type="password" bind:value="{password}" placeholder="Password" />
-    <input type="submit" value="Login" />
+    <input type="text" bind:value="{username}" placeholder="Username" data-test="username" />
+    <input type="password" bind:value="{password}" placeholder="Password" data-test="password" />
+    <input type="submit" value="Login" data-test="submit" />
 </form>
+
+Don't have an account already? <a href="/auth/register" data-test="register">Click here</a> to sign up to the website.
+<ul data-test="errors">
 {#if error}
-    <p>{error}</p>
+    <li>{error}</li>
 {/if}
+</ul>

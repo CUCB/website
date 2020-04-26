@@ -1,8 +1,8 @@
 <script context="module">
     import gql from "graphql-tag";
-    import { extractAttributes } from "../../../../graphql/gigs/lineups/users/attributes";
-    import { QueryGigLineup } from "../../../../graphql/gigs/lineups";
-    import { handleErrors, makeClient } from "../../../../graphql/client";
+    import { extractAttributes } from "../../../../../graphql/gigs/lineups/users/attributes";
+    import { QueryGigLineup } from "../../../../../graphql/gigs/lineups";
+    import { handleErrors, makeClient } from "../../../../../graphql/client";
 
     export async function preload({ params }) {
         let { gig_id } = params;
@@ -46,11 +46,11 @@
 </script>
 
 <script>
-    import Editor from "../../../../components/Lineup/Editor/Editor.svelte";
-    import { setInstrumentApproved } from "../../../../graphql/gigs/lineups/users/instruments";
-    import { setRole } from "../../../../graphql/gigs/lineups/users/roles";
+    import Editor from "../../../../../components/Lineup/Editor/Editor.svelte";
+    import { setInstrumentApproved } from "../../../../../graphql/gigs/lineups/users/instruments";
+    import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
     import { onMount, getContext } from "svelte";
-    import { client } from "../../../../graphql/client";
+    import { client } from "../../../../../graphql/client";
     export let people;
     export let gigId;
 

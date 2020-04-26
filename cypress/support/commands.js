@@ -1,16 +1,4 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-Cypress.Commands.add("login", (username, password) =>
+Cypress.Commands.add("login", (username, password, options) =>
     cy.request({
         method: 'POST',
         url: '/auth/login', // baseUrl is prepended to url
@@ -18,22 +6,22 @@ Cypress.Commands.add("login", (username, password) =>
         body: {
             username,
             password
-        }
+        },
+        ...options
     })
-)
+);
 
 Cypress.Commands.add("executeSqlFile", (filename) =>
     cy.exec(`bash -c 'PGPASSWORD=${Cypress.env('PG_PASSWORD')} psql -h ${Cypress.env('PG_HOST')} -U ${Cypress.env('PG_USER')} -d ${Cypress.env('PG_DATABASE')} -f ${filename}'`)
-)
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This is will overwrite an existing command --
-// Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+);
+
+// Open the fetch polyfill, which is required for stubbing responses to work
+// This is required due to https://github.com/cypress-io/cypress/issues/95 not being resolved (yet)
+Cypress.Commands.add("fetchPolyfill", () =>
+    cy.readFile("cypress/deps/unfetch.umd.js")
+);
+
+// Click a link so cypress checks the response status code
+Cypress.Commands.add("clickLink", {
+    prevSubject: true
+}, (subject, options) => cy.visit({ ...options, url: subject[0].href }));
