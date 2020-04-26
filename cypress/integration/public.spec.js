@@ -1,4 +1,4 @@
-describe("CUCB homepage", () => {
+describe("homepage", () => {
     beforeEach(() => {
         cy.visit("/");
     });
@@ -18,39 +18,11 @@ describe("CUCB homepage", () => {
             .should("be.visible");
     });
 
-    it("shows the logo in the header", () => {
-        cy.get("header img")
-            .should("be.visible")
-            .and(($img) => {
-                expect($img[0].naturalWidth).to.be.greaterThan(0)
-            });
-    });
-
     it("has a visible navbar", () => {
         cy.get("header nav")
             .should("be.visible");
     });
 
-    it("navigates to /about", () => {
-        cy.get("header nav a")
-            .contains("about")
-            .click();
-        cy.url().should("include", "/about");
-    });
-
-    it("navigates to /book", () => {
-        cy.get("header nav a")
-            .contains("book us")
-            .click();
-        cy.url().should("include", "/book");
-    });
-
-    it("navigates to /join", () => {
-        cy.get("header nav a")
-            .contains("join us")
-            .click();
-        cy.url().should("include", "/join");
-    });
 
     it("has a link to our FB page", () => {
         cy.get("li a")
@@ -79,13 +51,13 @@ describe("CUCB homepage", () => {
     });
 });
 
-describe("CUCB book us", () => {
+describe("book us page", () => {
     beforeEach(() => {
         cy.visit("/book");
     });
 
     it("has testimonial", () => {
         cy.get(".testimonial")
-        .should("be.visible");
+            .should("be.visible");
     });
 });

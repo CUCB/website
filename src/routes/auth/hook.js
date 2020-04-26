@@ -1,5 +1,4 @@
 export function get(req, res, next) {
-    console.log("called hook");
     if (req.session && req.session.userId) {
         res.writeHead(200, {
             'Content-Type': 'application/json'

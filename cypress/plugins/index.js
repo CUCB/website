@@ -16,6 +16,8 @@ require('dotenv').config();
 module.exports = (on, config) => {
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
+  require('cypress-plugin-retries/lib/plugin')(on)
+
   config.env.PG_PASSWORD = config.env.PG_PASSWORD || process.env.PG_PASSWORD;
   config.env.PG_HOST = config.env.PG_HOST || process.env.PG_HOST;
   config.env.PG_USER = config.env.PG_USER || process.env.PG_USER;
