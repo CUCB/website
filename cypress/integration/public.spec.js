@@ -51,6 +51,7 @@ describe("homepage", () => {
     });
 
     it("shows dark theme correctly", () => {
+        cy.visit("/?color=dark")
         cy.percySnapshot();
     });
 });
