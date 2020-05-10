@@ -6,7 +6,7 @@ export let person;
     div {
         border-style: solid;
         border-width: 2px;
-        border-color: rgb(200, 0, 200); 
+        border-color: var(--accent); 
         padding: 5px;
     }
 

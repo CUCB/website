@@ -4,7 +4,6 @@
 
 <style>
 	nav {
-		border-bottom: 1px solid rgba(7,92,1,0.1);
 		font-weight: 400;
 		padding: 0 1em;
 		display: flex;
@@ -21,7 +20,7 @@
 		content: '';
 		width: calc(100% - 1em);
 		height: 2px;
-		background-color: rgb(7,92,1);
+		background-color: var(--accent);
 		display: block;
 		bottom: -1px;
 	}
@@ -30,7 +29,7 @@
 		text-decoration: none;
 		padding: 1em 0.5em;
 		display: block;
-		color:rgb(7,92,1);
+		color: var(--accent);
 	}
 
 	a:not([aria-current]):hover {
@@ -43,7 +42,6 @@
 		content: '';
 		width: calc(100% - 1em);
 		height: 2px;
-		background-color: rgba(7,92,1, 0.5);
 		display: block;
 		bottom: -1px;
   	}
