@@ -1,0 +1,8 @@
+version: "3.6"
+services:
+    cypress:
+        environment:
+            CYPRESS_RECORD_KEY: ${CYPRESS_KEY}
+            PERCY_TOKEN: ${PERCY_TOKEN}
+        command: >
+            bash -c "apt update && apt install -y postgresql-client; cd /root/site; npm install; npm run test:ci"

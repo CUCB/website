@@ -49,6 +49,10 @@ describe("homepage", () => {
             .should("have.attr", "href")
             .and("include", "mailto:secretary@cucb.co.uk");
     });
+
+    it("shows dark theme correctly", () => {
+        cy.percySnapshot();
+    });
 });
 
 describe("book us page", () => {
