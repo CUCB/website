@@ -1,12 +1,10 @@
 <style>
     p {
         text-align: center;
-        color: #00000080;
+        color: var(--footer_color);
         font-size: 0.8rem;
     }
 </style>
-
-
 
 <footer>
 

@@ -49,20 +49,20 @@ describe("login page", () => {
         it("shows an error on incorrect username/password", () => {
             cy.get("input[data-test=username]").type("cypress_user");
             cy.get("input[data-test=password]").type("abc1e23{enter}");
-            cy.get("[data-test=errors]").contains("Incorrect username or password", { timeout: 100 });
+            cy.get("[data-test=errors]").contains("Incorrect username or password", { timeout: 200 });
 
             cy.get("input[data-test=username]").clear().type("cypres_user");
             cy.get("input[data-test=password]").clear().type("abc123{enter}");
-            cy.get("[data-test=errors]").contains("Incorrect username or password", { timeout: 100 });
+            cy.get("[data-test=errors]").contains("Incorrect username or password", { timeout: 200 });
         });
 
         it("shows an error on missing username/password", () => {
             cy.get("input[data-test=password]").type("abc123{enter}");
-            cy.get("[data-test=errors]").contains("Missing username or password", { timeout: 100 });
+            cy.get("[data-test=errors]").contains("Missing username or password", { timeout: 200 });
 
             cy.get("input[data-test=username]").type("cypress_user");
             cy.get("input[data-test=password]").clear().type("{enter}");
-            cy.get("[data-test=errors]").contains("Missing username or password", { timeout: 100 });
+            cy.get("[data-test=errors]").contains("Missing username or password", { timeout: 200 });
         });
     });
 });
