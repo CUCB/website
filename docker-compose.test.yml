@@ -6,7 +6,7 @@ services:
         volumes:
             - db_data:/var/lib/postgresql/data
         environment:
-            POSTGRES_PASSWORD: postgrespassword
+            POSTGRES_PASSWORD: ${PG_PASSWORD}
     graphql-engine:
         image: hasura/graphql-engine:v1.1.1.cli-migrations
         volumes:
@@ -15,12 +15,12 @@ services:
             - "postgres"
         restart: always
         environment:
-            HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
             HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # set to "false" to disable console
             HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
             ## uncomment next line to set an admin secret
             HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
             HASURA_GRAPHQL_AUTH_HOOK: http://cypress:4000/auth/hook
+            HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
     cypress:
         image: cypress/base:10
         volumes:
@@ -34,8 +34,8 @@ services:
             PG_USER: postgres
             PG_HOST: postgres
             PG_DATABASE: postgres
-            PG_PASSWORD: postgrespassword
             PG_PORT: 5432
+            PG_PASSWORD: ${PG_PASSWORD}
         command: >
             bash -c "apt update && apt install -y postgresql-client; cd /root/site; npm install; npm run test"
 
