@@ -27,3 +27,16 @@ Cypress.Commands.add("fetchPolyfill", () =>
 Cypress.Commands.add("clickLink", {
     prevSubject: true
 }, (subject, options) => cy.visit({ ...options, url: subject[0].href }));
+
+Cypress.Commands.add("checkFileExists", (filename) => {
+    // `cat` returns a non-zero exit status if the file doesn't exist
+    cy.exec(`cat ${filename}`, { log: false })
+        .its('code', { log: false })
+        .should('eq', 0);
+    Cypress.log({ message: filename, name: 'checkFileExists', displayName: 'fileExists' });
+});
+
+Cypress.Commands.add("removeFile", (filepath) => {
+    cy.exec(`rm ${filepath}`, { log: false });
+    Cypress.log({ message: filepath, name: 'removeFile', displayName: 'removeFile' })
+});
