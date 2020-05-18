@@ -7,6 +7,7 @@
 			return data;
 		} else {
 			this.error(res.status, data.message);
+			return
 		}
     }
 </script>
