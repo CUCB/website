@@ -8,7 +8,7 @@ services:
             HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
     cypress:
         environment:
-            CYPRESS_RECORD_KEY: ${CYPRESS_KEY}
+            #CYPRESS_RECORD_KEY: ${CYPRESS_KEY}
             PERCY_TOKEN: ${PERCY_TOKEN}
             PG_PASSWORD: postgrespassword
         command: >
