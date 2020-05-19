@@ -66,3 +66,16 @@ describe("book us page", () => {
             .should("be.visible");
     });
 });
+
+describe("sessions page", () => {
+    beforeEach(() => {
+        cy.visit("/session");
+    });
+
+    it("has a link to mailing lists", () => {
+        cy.get("a")
+            .contains("mailing list")
+            .should('have.prop', 'href')
+            .and('include', '/lists')
+    });
+});
