@@ -1,15 +1,15 @@
 version: "3.6"
 services:
-    postgres:
-        environment:
-            POSTGRES_PASSWORD: postgrespassword
-    graphql-engine:
-        environment:
-            HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
-    cypress:
-        environment:
-            #CYPRESS_RECORD_KEY: ${CYPRESS_KEY}
-            PERCY_TOKEN: ${PERCY_TOKEN}
-            PG_PASSWORD: postgrespassword
-        command: >
-            bash -c "apt update && apt install -y postgresql-client; cd /root/site; npm install; npm run test:ci"
+  postgres:
+    environment:
+      POSTGRES_PASSWORD: postgrespassword
+  graphql-engine:
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
+  cypress:
+    environment:
+      #CYPRESS_RECORD_KEY: ${CYPRESS_KEY}
+      PERCY_TOKEN: ${PERCY_TOKEN}
+      PG_PASSWORD: postgrespassword
+    command: >
+      bash -c "apt update && apt install -y postgresql-client; cd /root/site; npm install; npm run test:ci"
