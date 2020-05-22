@@ -30,8 +30,8 @@ The project uses a `.env` file in the root of the repo. There is a `.env.templat
 
 Since environment variables will only work server side, and not client side, the project uses [@rollup/plugin-replace](https://github.com/rollup/plugins/tree/master/packages/replace). This does text replacement for the variables specified in `rollup.config.js`, and this causes a couple of slight differences in how they can be used:
 
--   You cannot use them directly in template string (e.g. `MY_VAR is ${process.env.MY_VAR}`), so assign a variable to the value `process.env.MY_VAR` and reference that instead
--   You cannot destructure e.g. `const { MY_VARIABLE } = process.env`, do `const MY_VARIABLE = process.env.MY_VARIABLE` instead
+- You cannot use them directly in template string (e.g. `MY_VAR is ${process.env.MY_VAR}`), so assign a variable to the value `process.env.MY_VAR` and reference that instead
+- You cannot destructure e.g. `const { MY_VARIABLE } = process.env`, do `const MY_VARIABLE = process.env.MY_VARIABLE` instead
 
 ### Docker
 
@@ -138,9 +138,9 @@ This is the heart of your Sapper app. There are two kinds of routes — _pages_,
 
 There are three simple rules for naming the files that define your routes:
 
--   A file called `src/routes/about.svelte` corresponds to the `/about` route. A file called `src/routes/blog/[slug].svelte` corresponds to the `/blog/:slug` route, in which case `params.slug` is available to the route
--   The file `src/routes/index.svelte` (or `src/routes/index.js`) corresponds to the root of your app. `src/routes/about/index.svelte` is treated the same as `src/routes/about.svelte`.
--   Files and directories with a leading underscore do _not_ create routes. This allows you to colocate helper modules and components with the routes that depend on them — for example you could have a file called `src/routes/_helpers/datetime.js` and it would _not_ create a `/_helpers/datetime` route
+- A file called `src/routes/about.svelte` corresponds to the `/about` route. A file called `src/routes/blog/[slug].svelte` corresponds to the `/blog/:slug` route, in which case `params.slug` is available to the route
+- The file `src/routes/index.svelte` (or `src/routes/index.js`) corresponds to the root of your app. `src/routes/about/index.svelte` is treated the same as `src/routes/about.svelte`.
+- Files and directories with a leading underscore do _not_ create routes. This allows you to colocate helper modules and components with the routes that depend on them — for example you could have a file called `src/routes/_helpers/datetime.js` and it would _not_ create a `/_helpers/datetime` route
 
 ### static
 
