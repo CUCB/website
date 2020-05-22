@@ -54,7 +54,9 @@ describe("login page", () => {
       cy.route("POST", "/auth/login").as("postLogin");
       cy.get("input[data-test=username]").type("cypress_user");
       cy.get("input[data-test=password]").type("abc123{enter}");
-      cy.wait("@postLogin", { timeout: 50 });
+      cy.wait("@postLogin", {
+        timeout: 200,
+      });
     });
 
     it("shows an error on incorrect username/password", () => {
