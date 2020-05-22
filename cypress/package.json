@@ -1,0 +1,9 @@
+{
+  "name": "cucb-website-cy",
+  "description": "meow meow meow",
+  "version": "0.0.1",
+  "devDependencies": {
+    "@percy/cypress": "^2.3.1",
+    "cypress-plugin-retries": "^1.5.2"
+  }
+}

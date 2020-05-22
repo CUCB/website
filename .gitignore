@@ -7,3 +7,5 @@ yarn-error.log
 .vscode
 .env
 cached_content
+/cypress/node_modules/
+npm-debug.log

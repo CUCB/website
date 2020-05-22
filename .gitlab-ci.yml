@@ -12,7 +12,7 @@ test:
         - apk add docker-compose
     stage: test
     script:
-        - docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from cypress
+        - docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from cypress
     artifacts:
         when: always
         paths:
