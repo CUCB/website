@@ -3,7 +3,8 @@ services:
   cypress:
     image: cypress/included:4.6.0
     environment:
-      - CYPRESS_baseUrl=http://sapper:4000
+      CYPRESS_baseUrl: http://sapper:4000
+      GRAPHQL_REMOTE: http://graphql-engine:8080
     entrypoint: bash -c "cd /app/cypress && npm install && cd .. && cypress run"
     volumes:
       - ./cypress:/app/cypress

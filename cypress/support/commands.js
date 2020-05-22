@@ -13,14 +13,20 @@ Cypress.Commands.add("login", (username, password, options) =>
   }),
 );
 
-Cypress.Commands.add("executeSqlFile", filename =>
-  cy.exec(
-    `bash -c 'PGPASSWORD=${Cypress.env("PG_PASSWORD")} psql -h ${Cypress.env(
-      "PG_HOST",
-    )} -U ${Cypress.env("PG_USER")} -d ${Cypress.env(
-      "PG_DATABASE",
-    )} -f ${filename}'`,
-  ),
+Cypress.Commands.add("executeMutation", (mutation, params) => 
+  cy.request({
+    url: `${Cypress.env("GRAPHQL_REMOTE")}${Cypress.env("GRAPHQL_PATH")}`,
+    headers: {
+      "x-hasura-admin-secret": Cypress.env("HASURA_GRAPHQL_ADMIN_SECRET"),
+    },
+    body: {
+      query: mutation,
+      ...params
+    },
+    method: "POST",
+  })
+    .its("body")
+    .should("not.have.key", "errors")
 );
 
 // Open the fetch polyfill, which is required for stubbing responses to work

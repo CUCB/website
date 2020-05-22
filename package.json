@@ -13,7 +13,8 @@
     "docker:start": "docker-compose up -d",
     "docker:stop": "docker-compose stop",
     "docker:down": "docker-compose down",
-    "docker:test": "docker-compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from cypress"
+    "docker:test": "docker-compose -f docker-compose.yml -f docker-compose.test.yml up --exit-code-from cypress",
+    "hasura:console": "cd hasura && hasura console --endpoint \"http://localhost:8080\" --admin-secret myadminsecretkey"
   },
   "dependencies": {
     "apollo-boost": "^0.4.7",
@@ -27,6 +28,7 @@
     "graphql-import": "^1.0.0",
     "graphql-tag": "^2.10.3",
     "graphql-tools": "^3.0.2",
+    "hasura-cli": "^1.2.1",
     "http-proxy": "^1.18.0",
     "immutable": "^4.0.0-rc.12",
     "node": "^13.12.0",
