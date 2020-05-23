@@ -16,3 +16,6 @@ services:
   sapper:
     build:
       context: .
+    environment:
+      PG_PASSWORD: postgrespassword
+      SESSION_SECRET: sessionsecret
