@@ -16,7 +16,6 @@ services:
   sapper:
     build:
       context: .
-    volumes:
     environment:
       PG_PASSWORD: postgrespassword
       SESSION_SECRET: sessionsecret
