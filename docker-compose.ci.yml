@@ -17,11 +17,6 @@ services:
     build:
       context: .
     volumes:
-      - .:/usr/src/app/
-      - node_modules_ci:/usr/src/app/node_modules/
     environment:
       PG_PASSWORD: postgrespassword
       SESSION_SECRET: sessionsecret
-
-volumes:
-  node_modules_ci:
