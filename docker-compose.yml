@@ -25,7 +25,7 @@ services:
     ports:
       - "8080:8080"
   sapper:
-      image: node:13
+      image: node:14
       environment:
         GRAPHQL_REMOTE: http://graphql-engine:8080
         GRAPHQL_PATH: /v1/graphql
