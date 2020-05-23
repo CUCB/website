@@ -10,7 +10,7 @@ services:
     environment:
       PERCY_TOKEN: ${PERCY_TOKEN}
     command: >
-      bash -c "cd /app/cypress && npm install && cd .. && percy exec -- cypress run"
+      bash -c "cd /app/cypress && npm install && cd .. && npm run ci"
     depends_on:
       - sapper
   sapper:

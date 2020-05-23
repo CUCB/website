@@ -2,6 +2,9 @@
   "name": "cucb-website-cy",
   "description": "meow meow meow",
   "version": "0.0.1",
+  "scripts": {
+    "ci": "percy exec -- cypress run"
+  },
   "devDependencies": {
     "@percy/cypress": "^2.3.1",
     "cypress": "^4.6.0",
