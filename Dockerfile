@@ -1,3 +1,4 @@
 FROM node:14
-RUN "npm install"
+COPY ./ .
+RUN npm install
 ENTRYPOINT ["npm", "run", "dev"]

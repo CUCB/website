@@ -19,3 +19,5 @@ test:
             - cypress/videos/**/*.mp4
             - cypress/screenshots/**/*.png
         expire_in: 1 day
+    cache:
+        - /var/lib/docker/*
