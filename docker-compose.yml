@@ -35,13 +35,13 @@ services:
         PG_PORT: 5432
         PG_PASSWORD: ${PG_PASSWORD}
       volumes:
-        - .:/root/site
-        - node_modules:/root/site/node_modules/
+        - .:/usr/src/app
+        - node_modules:/usr/src/app/node_modules/
       ports:
         - "4000:4000"
         - "10000:10000"
       command: >
-        bash -c "cd /root/site; npm install; npm run dev"
+        bash -c "cd /usr/src/app; npm install; npm run dev"
 volumes:
   db_data:
   node_modules:
