@@ -17,8 +17,8 @@ services:
     build:
       context: .
     volumes:
-      - .:/
-      - node_modules_ci:/node_modules/
+      - .:/usr/src/app/
+      - node_modules_ci:/usr/src/app/node_modules/
     environment:
       PG_PASSWORD: postgrespassword
       SESSION_SECRET: sessionsecret
