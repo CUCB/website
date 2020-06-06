@@ -13,6 +13,8 @@ test:
     stage: test
     script:
         - docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from cypress
+    cache:
+      - node_modules/*
     artifacts:
         when: always
         paths:
