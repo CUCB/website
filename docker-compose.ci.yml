@@ -12,6 +12,6 @@ services:
       PG_PASSWORD: postgrespassword
       SESSION_SECRET: sessionsecret
     volumes:
-      - ./node_modules:app/node_modules
+      - ./node_modules:/app/node_modules
     command: >
-      bash -c "cd /app/cypress && npm install && cd .. && npm run test:ci"
+      bash -c "cd /app/cypress && npm install && cd .. && npm install && npm run test:ci"
