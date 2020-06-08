@@ -4,7 +4,7 @@ services:
     image: postgres:12
     restart: always
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data_test:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
   graphql-engine:
@@ -25,8 +25,8 @@ services:
     image: cypress/base:10
     volumes:
       - .:/root/site
-      - node_modules:/root/site/node_modules/
-      - cypress_cache:/root/.cache/Cypress
+      - node_modules_test:/root/site/node_modules/
+      - cypress_cache_test:/root/.cache/Cypress
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
@@ -37,9 +37,9 @@ services:
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
     command: >
-      bash -c "apt update && apt install -y postgresql-client; cd /root/site; npm install; npm run test"
+      bash -c "cd /root/site; npm install; chmod a+x wait-for-it.sh; npm run test"
 
 volumes:
-  db_data:
-  node_modules:
-  cypress_cache:
+  db_data_test:
+  node_modules_test:
+  cypress_cache_test:

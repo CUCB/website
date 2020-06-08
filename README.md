@@ -4,13 +4,15 @@ This is the new rewrite of the CUCB website, which uses [sapper](https://sapper.
 
 ## Running the project
 
-To run the project, you need docker and docker-compose. See the section on [docker](#docker) for more information about this.
+To run the project, you need docker and docker-compose. See the section on [docker](#docker) for more information about this. **If you're running on Windows** look at [the relevant page on the wiki](/cucb/website/-/wikis/How-to-Windows) before trying to do this.
 
 However you get the code, you can install dependencies and run the project in development mode with:
 
 ```bash
-docker-compose up
+npm run docker:start
 ```
+
+Or you can use VSCode to start it. Make sure you have the docker extension installed, the find the file called `docker-compose.yml`, right click it, and select "Compose Up".
 
 Open up [localhost:4000](http://localhost:4000) and start clicking around once you've got the server running.
 
@@ -38,7 +40,7 @@ Since environment variables will only work server side, and not client side, the
 The project should now be set up correctly to use `docker-compose`. This should allow you to run the database, backend, and frontend all with one command. It also makes sure they can all communicate as intended; **if you run sapper from outside docker, Hasura will not be able to connect to it for the auth hook**. Follow the instructions [here](https://docs.docker.com/compose/) to install it, and then run
 
 ```bash
-docker-compose up
+npm run docker:start
 ```
 
 from the root of the repository. This will run postgres, Hasura, and sapper. You probably only want to see the sapper logs though, the others don't really log generally useful stuff, and tend to work pretty reliably. In this instance, run:
@@ -51,7 +53,7 @@ docker-compose up sapper
 which will run postgres and Hasura in detached (ie headless) mode and sapper normally, so it displays the logs. To stop the server, press Ctrl+C and then run
 
 ```bash
-docker-compose stop
+npm run docker:stop
 ```
 
 The Hasura image is the cli version, which means it will automatically run migrations from the `hasura/migrations` directory when it starts up.
@@ -72,7 +74,7 @@ This has a really nice GUI to let you inspect tests and see exactly what cypress
 npm run cy:open
 ```
 
-**NB** you need to have run `npm install` before you do this for the first time.
+**NB** you need to have run `npm install` before you do this for the first time. The wiki has instructions on how to set this up to run properly on Windows [here](https://gitlab.com/cucb/website/-/wikis/How-to-Windows).
 
 This will open a window with a list of the test files. Click on a filename to run the tests in that file, or click "Run" to run all the tests. It will open up a browser window to run the tests in.
 
@@ -81,10 +83,14 @@ This will open a window with a list of the test files. Click on a filename to ru
 This involves using the CI docker-compose file, which is called `docker-compose.test.yml`. Simply run
 
 ```bash
-docker-compose -f docker-compose.test.yml up
+npm run docker:test
 ```
 
-to run the tests. This won't give you a GUI, but should allow you to see which tests will pass and fail. If there is a discrepancy between your local test results and GitLab CI's test results, it's probably due to data still lurking in your database. Run
+to run the tests. This won't give you a GUI, but should allow you to see which tests will pass and fail. If there is a discrepancy between your local test results and GitLab CI's test results, it's probably due to data still lurking in your database.
+
+To solve this using VSCode, go into the Docker panel and find the volumes section. There should be a volume called `<DIR>_db_data_test`, where `<DIR>` is the name of the directory the repository is cloned into. Right click this volume and select delete. Hopefully there shouldn't be too many issues with the test database, it's separate from the general dev server database, so your local data shouldn't make a difference to how it runs.
+
+To do this manually with the command line, run
 
 ```bash
 docker volume ls
