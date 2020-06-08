@@ -1,21 +1,25 @@
 stages:
-    - test
+  - test
 
 test:
-    image: docker:latest
-    variables:
-        DOCKER_DRIVER: overlay
-    services:
-        - docker:dind
-    before_script:
-        - docker info
-        - apk add docker-compose
-    stage: test
-    script:
-        - docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from cypress
-    artifacts:
-        when: always
-        paths:
-            - cypress/videos/**/*.mp4
-            - cypress/screenshots/**/*.png
-        expire_in: 1 day
+  image: docker:latest
+  variables:
+    DOCKER_DRIVER: overlay
+  services:
+    - docker:dind
+  before_script:
+    - docker info
+    - apk add docker-compose
+  stage: test
+  script:
+    - docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from cypress
+  cache:
+    key: fucking-everything
+    paths:
+      - cypress_cache/
+  artifacts:
+    when: always
+    paths:
+      - cypress/videos/**/*.mp4
+      - cypress/screenshots/**/*.png
+    expire_in: 1 day

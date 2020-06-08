@@ -7,9 +7,11 @@ services:
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
   cypress:
+    volumes:
+      - ./node_modules:/root/site/node_modules/
+      - ./cypress_cache:/root/.cache/Cypress
     environment:
-      #CYPRESS_RECORD_KEY: ${CYPRESS_KEY}
       PERCY_TOKEN: ${PERCY_TOKEN}
       PG_PASSWORD: postgrespassword
     command: >
-      bash -c "apt update && apt install -y postgresql-client; cd /root/site; npm install; npm run test:ci"
+      bash -c "cd /root/site; npm install; chmod a+x wait-for-it.sh; npm run test:ci"

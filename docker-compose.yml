@@ -1,4 +1,4 @@
-version: '3.6'
+version: "3.6"
 services:
   postgres:
     image: postgres:12
@@ -25,23 +25,23 @@ services:
     ports:
       - "8080:8080"
   sapper:
-      image: node:13
-      environment:
-        GRAPHQL_REMOTE: http://graphql-engine:8080
-        GRAPHQL_PATH: /v1/graphql
-        PG_USER: postgres
-        PG_HOST: postgres
-        PG_DATABASE: postgres
-        PG_PORT: 5432
-        PG_PASSWORD: ${PG_PASSWORD}
-      volumes:
-        - .:/root/site
-        - node_modules:/root/site/node_modules/
-      ports:
-        - "4000:4000"
-        - "10000:10000"
-      command: >
-        bash -c "cd /root/site; npm install; npm run dev"
+    image: node:13
+    environment:
+      GRAPHQL_REMOTE: http://graphql-engine:8080
+      GRAPHQL_PATH: /v1/graphql
+      PG_USER: postgres
+      PG_HOST: postgres
+      PG_DATABASE: postgres
+      PG_PORT: 5432
+      PG_PASSWORD: ${PG_PASSWORD}
+    volumes:
+      - .:/root/site
+      - node_modules:/root/site/node_modules/
+    ports:
+      - "4000:4000"
+      - "10000:10000"
+    command: >
+      bash -c "cd /root/site; npm install; chmod a+x ./wait-for-it.sh; npm run dev"
 volumes:
   db_data:
   node_modules:
