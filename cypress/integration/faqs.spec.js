@@ -12,6 +12,22 @@ describe("FAQs pages", () => {
     cy.visit("/faqs/members");
   });
 
+  describe("Booking FAQs", () => {
+    beforeEach(() => cy.visit("/faqs/book"));
+
+    it("includes the title", () => {
+      cy.contains("h1", "Frequently Asked Questions");
+    });
+
+    it("has an appropriate subheading", () => {
+      cy.contains("h2", "Book");
+    });
+
+    it("has an FAQ question", () => {
+      cy.contains("h3", "?");
+    });
+  });
+
   describe("caching", () => {
     it("creates cached_content dir if not exists", () => {
       cy.exec(`rm -rf cached_content`);
