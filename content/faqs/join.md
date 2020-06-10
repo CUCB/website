@@ -1,0 +1,49 @@
+## Join Us
+
+### What do I need to bring to my first rehearsal?
+
+Yourself, your instrument and a smile! For the first few rehearsals of Michaelmas term the music will be provided, after that you will have the chance to buy your very own (heavily subsidised) Ceilidh Band Folder containing all the music we play.
+
+### What happens in rehearsals?
+
+We generally play through some of the tunes in the folder, have a break for drink and biscuits (free!) and then play some more. However, we have special rehearsals and _ceilidh band ceilidhs_ as well - sign up to the [mailing list](/mailinglists) to find out more and keep up to date!
+
+### I missed all the rehearsals in Michaelmas/Easter/Lent term - can I still come?
+
+Yes, you can turn up whenever is convenient. If you would like a folder then just grab a friendly band member (which is more or less any of them) and ask.
+
+### What instruments can I play in the Ceilidh Band?
+
+We cater for all instruments and can provide folders in different clefs and transpositions. The band has a massive range of instruments from traditional Ceilidh instruments such as fiddles (violin), tin whistles/recorders, boxes of various flavours, guitars and bodhrans, anything you would see in an orchestra and pretty much anything else - from kazoo to flute, cajón to snare drum, saxophone to bass trombone and ukulele to bouzouki. If you play it, bring it (and whatever you need to play it with) along!
+
+### What kind of music does the ceilidh band play?
+
+Our repertoire for gigs is mainly folk music from the British Isles (Scottish, Irish, English and Welsh), though tunes from the continent and across the Atlantic also find their way in - for some idea, most if not all of the tunes we play can be found on [The Session](http://thesession.org/), a folk music website. Our members tend to have a slightly more eclectic taste, so in [sessions](/session) (where we play tunes down the pub) you may hear a wider variety of tunes.
+
+### I've never played folk music before - is that a problem?
+
+No, not at all, just come along and enjoy yourself.
+
+### Do I have to come along every week?
+
+No, we're a non-commitment band - you turn up for as much as you want and there is no pressure to play gigs.
+
+### I can't read music, is that a problem?
+
+No - if you're a chord player, then chord letters are provided; for tune players you can either pick things up by ear, or chat to anybody in the band since we will be happy to help you learn!
+
+### I'm not very good, can I still come along?
+
+Of course, we're a non-audition band so happily take anyone of any ability - the main thing is to have fun and enjoy yourself.
+
+### Can I just turn up for gigs without coming to the rehearsals?
+
+No - please come along and try out the band first.
+
+### Will I be taught to play folk music?
+
+Instead of having any formal teaching of any kind, there are always couple of people in the band who you can go to to chat about any given topic - for instance, there are good people to chat to if you have a question about e.g. wind instruments, or about playing rhythm accompaniment for dance, and so on. We also occasionally run workshops where you can learn instrument-specific tricks and tips. Mostly, if you have specific questions, just grab a likely looking band member, since they will either be able to help you or point you at someone who will. We are very informal in what we do, but generally we find that people really improve their playing through a mixture of practice, osmosis and asking for tips!
+
+### I'm a keen ceilidh dancer but not a musician - do you have a mailing list for your gigs?
+
+Yes, [click here](/mailinglists) and subscribe to our 'Interested' list - don't worry, we won't spam you with huge numbers of e-mails.

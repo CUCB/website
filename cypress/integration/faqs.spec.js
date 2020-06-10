@@ -28,6 +28,22 @@ describe("FAQs pages", () => {
     });
   });
 
+  describe("Joining FAQs", () => {
+    beforeEach(() => cy.visit("/faqs/join"));
+
+    it("includes the title", () => {
+      cy.contains("h1", "Frequently Asked Questions");
+    });
+
+    it("has an appropriate subheading", () => {
+      cy.contains("h2", "Join");
+    });
+
+    it("has an FAQ question", () => {
+      cy.contains("h3", "?");
+    });
+  });
+
   describe("caching", () => {
     it("creates cached_content dir if not exists", () => {
       cy.exec(`rm -rf cached_content`);
