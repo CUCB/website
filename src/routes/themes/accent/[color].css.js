@@ -4,6 +4,7 @@ import { hexToRgb, Color, Solver } from "./_filter-calculator";
 export function get(req, res, next) {
   let { color } = req.params;
   let { logo } = req.query;
+  logo = logo === "undefined" ? undefined : logo;
 
   let result;
   if (logo) {
@@ -21,7 +22,7 @@ export function get(req, res, next) {
 
   res.end(`
 header #logo {
-    ${result ? result.filter : ""}
+    /*${result ? result.filter : ""}*/
 }
-        :root{--accent: #${color}}`);
+        :root{--accent: #${color}; ${logo ? `--logo_color: #${logo}` : ``}}`);
 }

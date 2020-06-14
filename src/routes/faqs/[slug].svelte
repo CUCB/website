@@ -3,7 +3,7 @@
     margin-top: 0em;
   }
   :global(h3) {
-    font-weight: bold !important;
+    font-style: oblique;
     margin-bottom: 0em !important;
   }
 </style>

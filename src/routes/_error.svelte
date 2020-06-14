@@ -1,23 +1,9 @@
 <style>
-  h1,
-  p {
-    margin: 0 auto;
-  }
-
-  h1 {
-    font-size: 2.8em;
-    font-weight: 700;
-    margin: 0 0 0.5em 0;
-  }
-
-  p {
-    margin: 1em auto;
-  }
-
-  @media (min-width: 480px) {
-    h1 {
-      font-size: 4em;
-    }
+  img {
+    display: block;
+    margin: auto;
+    max-width: 100%;
+    width: 600px;
   }
 </style>
 
@@ -34,13 +20,12 @@
 
 <h1>Oh Noes! {status}</h1>
 
-<p>
-  It borked: {error.message}
-  <img
-    src="https://http.cat/{status}.jpg"
-    alt="The HTTP Status Cat for status code {status}"
-  />
-</p>
+<p>It borked: {error.message}</p>
+
+<img
+  src="https://http.cat/{status}.jpg"
+  alt="The HTTP Status Cat for status code {status}"
+/>
 
 {#if dev && error.stack}
   <pre>{error.stack}</pre>

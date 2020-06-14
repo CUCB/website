@@ -1,10 +1,10 @@
 body {
-    margin: 0;
-    font-size: 14px;
-    font-family: var(--text);
-    line-height: 1.5;
-    color: var(--text_color);
-    background: var(--background);
+  margin: 0;
+  font-size: 14px;
+  font-family: var(--text);
+  line-height: 1.5;
+  color: var(--text_color);
+  background: var(--background);
 }
 
 h1,
@@ -14,7 +14,7 @@ h4,
 h5,
 h6,
 nav {
-    font-family: var(--title);
+  font-family: var(--title), var(--text);
 }
 
 h1,
@@ -23,31 +23,41 @@ h3,
 h4,
 h5,
 h6 {
-    margin: 0 0 0.5em 0;
-    font-weight: 400;
-    line-height: 1.2;
+  margin: 0 0 0.5em 0;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 a {
-    color: var(--accent);
-    text-decoration: none;
+  color: var(--accent);
+  text-decoration: none;
 }
 
 a:hover {
-    filter: brightness(150%);
+  filter: brightness(150%);
 }
 
 code {
-    font-family: menlo, inconsolata, monospace;
-    font-size: calc(1em - 2px);
-    color: var(--code_color);
-    background-color: var(--code_background);
-    padding: 0.2em 0.4em;
-    border-radius: 2px;
+  font-family: menlo, inconsolata, monospace;
+  font-size: calc(1em - 2px);
+  color: var(--code_color);
+  background-color: var(--code_background);
+  padding: 0.2em 0.4em;
+  border-radius: 2px;
 }
 
-@media (min-width: 400px) {
-    body {
-        font-size: 16px;
-    }
+@media (max-width: 500px) {
+  h1 {
+    font-size: 1.5em;
+  }
+
+  ul {
+    padding-left: 20px;
+  }
+}
+
+@media (min-width: 500px) {
+  body {
+    font-size: 16px;
+  }
 }
