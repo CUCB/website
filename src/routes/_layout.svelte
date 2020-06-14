@@ -3,28 +3,32 @@
     display: grid;
     min-height: 100vh;
     grid-template-rows: auto 1fr auto;
+    max-width: 60em;
+    width: 100%;
+    margin: auto;
     align-items: stretch;
+    padding: 0.5em 2em;
+    box-sizing: border-box;
   }
 
   main {
     position: relative;
-    max-width: 56em;
-    padding: 2em 2em 0 2em;
+    padding-top: 1em;
     width: 100%;
+    max-width: 56em;
     box-sizing: border-box;
     justify-self: center;
   }
 
-  :global(footer) {
-    max-width: 40em;
-    padding: 0 2em 1em 2em;
-    justify-self: center;
+  @media (max-width: 800px) {
+    .layout {
+      padding: 0.5em 1em;
+    }
   }
 
-  .customiser {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
+  :global(footer) {
+    max-width: 40em;
+    justify-self: center;
   }
 </style>
 
@@ -56,7 +60,7 @@
   import Header from "../components/Header.svelte";
   import Footer from "../components/Footer.svelte";
   import Customiser from "../components/Customiser.svelte";
-  import { goto } from "@sapper/app";
+  import { goto, stores } from "@sapper/app";
   import { makeClient, client } from "../graphql/client";
   import { onMount, setContext } from "svelte";
   import { readable } from "svelte/store";
@@ -67,11 +71,16 @@
   export let accent;
   export let logo;
 
-  onMount(() => {
-    client.set(makeClient(fetch, window.location.href.split("/", 1)[0]));
-  });
-
   let query = { color, font, accent, logo };
+  let { page, session } = stores();
+
+  onMount(() => {
+    const browserDomain = window.location.href
+      .split("/", 3)
+      .slice(0, 3)
+      .join("/");
+    client.set(makeClient(fetch, browserDomain));
+  });
 
   $: color = query.color;
   $: font = query.font;
@@ -93,20 +102,17 @@
   <link
     rel="stylesheet"
     type="text/css"
-    href="themes/accent/{accent}.css?logo={logo}"
+    href="themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}"
   />
   <link rel="stylesheet" type="text/css" href="global.css" />
 </svelte:head>
 
 <div class="layout">
-  <Header {segment} />
+  <Header {segment} user="{$session}" />
 
   <main>
     <slot />
   </main>
 
   <Footer />
-  <div class="customiser">
-    <Customiser bind:value="{query}" on:submit="{update}" />
-  </div>
 </div>

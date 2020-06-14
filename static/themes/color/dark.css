@@ -1,12 +1,13 @@
 :root {
-    --text_color: #ccc;
-    --code_background: #555;
-    --code_color: #f0f0f0;
-    --background: #222;
-    --footer_color: rgba(204, 204, 204, 0.8);
+  --text_color: #ccc;
+  --code_background: #555;
+  --code_color: #f0f0f0;
+  --background: #222;
+  --footer_color: rgba(204, 204, 204, 0.8);
+  --logo_color: var(--text_color);
 }
 
-header #logo {
+/* header #logo {
     filter: invert(100%) sepia(0%) saturate(3630%) hue-rotate(183deg)
         brightness(79%) contrast(102%);
-}
+} */
