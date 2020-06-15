@@ -6,11 +6,7 @@
 <p>
   The Cambridge University Ceilidh Band warmly welcomes all enquiries. We are
   available for hire all year round, and have experience playing at a wide
-  variety of events.
-</p>
-<p>
-  <a href="/book/pastceilidhs/">Click here</a>
-  to see where we've been recently! Or, if you're ready,
+  variety of events. If you're ready to book us,
   <a href="/book/#book_contact">get in touch!</a>
 </p>
 <p>
@@ -39,3 +35,6 @@
   Thank you so much for making our 15th wedding anniversary ceilidh so
   brilliant! You were all fabulous!
 </Testimonial>
+
+<!-- TODO should we put a pic in here -->
+<!-- TODO should the contact form be on this page or a separate page? above or below images/testimonials? -->
