@@ -2,7 +2,9 @@
   import Testimonial from "../components/Testimonial.svelte";
 </script>
 
+<h1>Book CUCB</h1>
 <h2>Perfect for May Balls, birthday parties, student events and weddings</h2>
+
 <p>
   The Cambridge University Ceilidh Band warmly welcomes all enquiries. We are
   available for hire all year round, and have experience playing at a wide
