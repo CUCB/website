@@ -10,6 +10,10 @@ Think "Kaylee"! (Or /ˈkeɪli/ if you can read IPA!) This is a Scottish spelling
 
 Most of these terms don't have a hard-and-fast definition. However, a ceilidh mainly contains traditional Irish and Scottish dances whereas a barn dance is generally more English dances, and notably has square dances. CUCB callers perform a variety of these depending on their personal preferences and the event. Often, in modern usage, these terms are used fairly interchangeably. (See [this page](http://www.webfeet.org/eceilidh/Overview.html) for another attempt to explain things.)
 
+### What kind of events do you play at?
+
+We regularly play at a variety of events in and around Cambridge, including May Balls and other University events, charity fundraisers, wedding receptions, birthday parties, seasonal parties, Burns' Night ceilidhs, festivals and summer schools. Whatever your event, we can add an extra something special.
+
 ### What should I expect from my ceilidh?
 
 We will provide a full line-up of musicians (usually around 5-8), all the amplification equipment required and an experienced caller to take you through the dances. See also:
