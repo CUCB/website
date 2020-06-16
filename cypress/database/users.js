@@ -27,5 +27,5 @@ export const CreateUser = `
 `;
 
 export const HASHED_PASSWORDS = {
-    abc123: "$2b$10$fsfeK3cSN/04rNTVm3dkNuKaaFzo/Xj6HBBzgi1uooabY7XX1vABq"
-}
+  abc123: "$2b$10$fsfeK3cSN/04rNTVm3dkNuKaaFzo/Xj6HBBzgi1uooabY7XX1vABq",
+};

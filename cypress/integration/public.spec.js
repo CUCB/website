@@ -76,3 +76,21 @@ describe("sessions page", () => {
       .and("include", "/lists");
   });
 });
+
+describe("join page", () => {
+    beforeEach(() => {
+        cy.visit("/join");
+    });
+
+    it("has a link to mailing list", () => {
+        cy.get("p a")
+            .contains("mailing list")
+            .should('have.prop', 'href')
+            .and('include', '/mailinglists/')
+    });
+
+    it("has map", () => {
+        cy.get("[data-test=map]")
+            .should("be.visible");
+    });
+});
