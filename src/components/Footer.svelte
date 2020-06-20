@@ -6,14 +6,19 @@
   }
 </style>
 
+<script>
+  import Mailto from "./Mailto.svelte";
+  export let committee;
+</script>
+
 <footer>
 
   <p>
     This site is maintained by
-    <a href="mailto:webmaster@cucb.co.uk">the Webmaster</a>
+    <Mailto person="{committee.webmaster}">{committee.webmaster.name}</Mailto>
     , please use this address if you have any comments or queries about the
     site! Any Ceilidh queries should be directed to
-    <a href="mailto:secretary@cucb.co.uk">the Secretary</a>
+    <Mailto person="{committee.secretary}">{committee.secretary.name}</Mailto>
     . You can read our constitution
     <a href="/docs/constitution">here</a>
     and our privacy notice

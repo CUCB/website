@@ -8,7 +8,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
   graphql-engine:
-    image: hasura/graphql-engine:v1.1.1.cli-migrations
+    image: hasura/graphql-engine:v1.2.2.cli-migrations
     volumes:
       - ./hasura/migrations:/hasura-migrations
     depends_on:

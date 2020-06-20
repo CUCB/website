@@ -33,7 +33,65 @@
 </style>
 
 <script context="module">
-  export function preload({ query }, session) {
+  import { makeClient } from "../graphql/client";
+
+  export async function preload({ query }, session) {
+    let client = await makeClient(this.fetch);
+    let committee = {};
+    let fallbackPeople = [
+      {
+        name: "The President",
+        casual_name: "The President",
+        email_obfus: "p_r__esid_ent@cu_cb.co.uk",
+        committee_key: {
+          name: "president",
+          __typename: "cucb_committee_keys",
+        },
+        __typename: "cucb_committee_members",
+      },
+      {
+        name: "The Secretary",
+        casual_name: "The Secretary",
+        email_obfus: "se_cre_tar_y@cucb.co.uk",
+        committee_key: {
+          name: "secretary",
+          __typename: "cucb_committee_keys",
+        },
+        __typename: "cucb_committee_members",
+      },
+      {
+        name: "The Webmaster",
+        casual_name: "The Webmaster",
+        email_obfus: "we__bma_ster_@cucb._co.uk",
+        committee_key: {
+          name: "webmaster",
+          __typename: "cucb_committee_keys",
+        },
+        __typename: "cucb_committee_members",
+      },
+    ];
+
+    try {
+      const res = await this.fetch("/committee.json").then(r => r.json());
+
+      for (let person of res.committee) {
+        committee[person.committee_key.name] = {
+          ...person,
+        };
+      }
+    } catch (e) {
+      // Swallow error, we can generate generic committee details instead
+    }
+
+    let fallbackCommittee = {};
+    for (let person of fallbackPeople) {
+      fallbackCommittee[person.committee_key.name] = {
+        ...person,
+      };
+    }
+
+    committee = { ...fallbackCommittee, ...committee };
+
     // Read user session or cookie or url param or ...
     return {
       color:
@@ -52,6 +110,7 @@
         query.logo ||
         (session && session.theme && session.theme.logo) ||
         undefined,
+      committee,
     };
   }
 </script>
@@ -61,7 +120,7 @@
   import Footer from "../components/Footer.svelte";
   import Customiser from "../components/Customiser.svelte";
   import { goto, stores } from "@sapper/app";
-  import { makeClient, client } from "../graphql/client";
+  import { client, clientCurrentUser } from "../graphql/client";
   import { onMount, setContext } from "svelte";
   import { readable } from "svelte/store";
 
@@ -70,16 +129,20 @@
   export let font;
   export let accent;
   export let logo;
+  export let committee;
 
   let query = { color, font, accent, logo };
-  let { page, session } = stores();
+  let { session } = stores();
 
   onMount(() => {
     const browserDomain = window.location.href
       .split("/", 3)
       .slice(0, 3)
       .join("/");
-    client.set(makeClient(fetch, browserDomain));
+    client.set(makeClient(fetch, { host: browserDomain }));
+    clientCurrentUser.set(
+      makeClient(fetch, { host: browserDomain, role: "current_user" }),
+    );
   });
 
   $: color = query.color;
@@ -114,5 +177,5 @@
     <slot />
   </main>
 
-  <Footer />
+  <Footer {committee} />
 </div>

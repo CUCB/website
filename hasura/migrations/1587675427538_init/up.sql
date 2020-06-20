@@ -613,7 +613,7 @@ INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (5, 
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (6, 'Blue Gig Authorized', 'ADMIN_STATUS_HIDDEN_AUTH', 'blue_gig');
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (7, 'Gig Editor', 'ADMIN_STATUS_GIG_EDITOR', 'gig_editor');
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (8, 'Music Only', 'ADMIN_STATUS_MUSIC_ONLY', 'music_only');
-INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (9, 'Normal User', 'ADMIN_STATUS_NONE', 'normal_user');
+INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (9, 'Normal User', 'ADMIN_STATUS_NONE', 'user');
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (11, 'General Member', 'ADMIN_STATUS_GENERAL_MEMBER', 'general_member');
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (10, 'Non Member', 'ADMIN_STATUS_NO_AUTH', 'no_auth');
 
@@ -673,16 +673,10 @@ INSERT INTO cucb.committee_positions (id, name, "position") VALUES (14, 'General
 -- Data for Name: committees; Type: TABLE DATA; Schema: cucb; Owner: cucb
 --
 
-INSERT INTO cucb.committees (id, started, pic_folder) VALUES (1, '1970-01-01 00:00:00+01', NULL);
-
 
 --
 -- Data for Name: committee_members; Type: TABLE DATA; Schema: cucb; Owner: cucb
 --
-
-INSERT INTO cucb.committee_members (id, "position", name, casual_name, crsid, email, email_obfus, pic, committee, lookup_name, april_fools_only, comments, hidden, april_fools_dir, sub_position) VALUES (1, 1, 'Leady Lead', 'Leady', 'tt123', 'president@cucb.co.uk', 'p_r__esid_ent@cu_cb.co.uk', NULL, 1, 1, false, NULL, false, NULL, NULL);
-INSERT INTO cucb.committee_members (id, "position", name, casual_name, crsid, email, email_obfus, pic, committee, lookup_name, april_fools_only, comments, hidden, april_fools_dir, sub_position) VALUES (2, 2, 'Quotey Quote', 'Quotey', 'qq789', 'secretary@cucb.co.uk', 'se_cre_tar_y@cucb.co.uk', NULL, 1, 2, false, NULL, false, NULL, NULL);
-INSERT INTO cucb.committee_members (id, "position", name, casual_name, crsid, email, email_obfus, pic, committee, lookup_name, april_fools_only, comments, hidden, april_fools_dir, sub_position) VALUES (3, 8, 'Codey Code', 'Codey', 'cc294', 'webmaster@cucb.co.uk', 'we__bma_ster_@cucb._co.uk', NULL, 1, 8, false, NULL, false, NULL, NULL);
 
 
 --

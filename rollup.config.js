@@ -1,6 +1,7 @@
 import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import commonjs from "@rollup/plugin-commonjs";
+import json from "@rollup/plugin-json";
 import svelte from "rollup-plugin-svelte";
 import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
@@ -33,7 +34,7 @@ const preprocess = sveltePreprocess({
 const removeWhitespace = {
   markup: input => ({
     code: input.content.replace(
-      /(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9]|[^<]*?>|[^{]*?})/g,
+      /(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9\-&]|[^<]*?>|[^{]*?})/g,
       "$1",
     ),
     //.replace(/(?<!<[^>]*?|{[^}]*?)\s+(<|{)(?![^>]*<\/(?:script|style)>)/g, '$1')
@@ -62,6 +63,7 @@ export default {
         dedupe: ["svelte"],
       }),
       commonjs(),
+      json(),
 
       legacy &&
         babel({

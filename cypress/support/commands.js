@@ -65,7 +65,3 @@ Cypress.Commands.add("removeFile", filepath => {
     displayName: "removeFile",
   });
 });
-
-Cypress.Commands.add("waitForGraphQL", () => {
-  cy.exec(`./wait-for-it.sh ${Cypress.env("GRAPHQL_REMOTE").split("://")[1]}`);
-});

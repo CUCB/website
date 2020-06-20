@@ -35,15 +35,15 @@ describe("homepage", () => {
   });
 
   it("diplays webmaster's email in the footer", () => {
-    cy.get("footer a")
-      .contains("Webmaster")
+    cy.get("footer a[data-test=email_webmaster]")
+      .trigger("mouseover")
       .should("have.attr", "href")
       .and("include", "mailto:webmaster@cucb.co.uk");
   });
 
   it("diplays secretary's email in the footer", () => {
-    cy.get("footer a")
-      .contains("Secretary")
+    cy.get("footer a[data-test=email_secretary]")
+      .trigger("mouseover")
       .should("have.attr", "href")
       .and("include", "mailto:secretary@cucb.co.uk");
   });
@@ -78,19 +78,18 @@ describe("sessions page", () => {
 });
 
 describe("join page", () => {
-    beforeEach(() => {
-        cy.visit("/join");
-    });
+  beforeEach(() => {
+    cy.visit("/join");
+  });
 
-    it("has a link to mailing list", () => {
-        cy.get("p a")
-            .contains("mailing list")
-            .should('have.prop', 'href')
-            .and('include', '/mailinglists/')
-    });
+  it("has a link to mailing list", () => {
+    cy.get("p a")
+      .contains("mailing list")
+      .should("have.prop", "href")
+      .and("include", "/mailinglists/");
+  });
 
-    it("has map", () => {
-        cy.get("[data-test=map]")
-            .should("be.visible");
-    });
+  it("has map", () => {
+    cy.get("[data-test=map]").should("be.visible");
+  });
 });

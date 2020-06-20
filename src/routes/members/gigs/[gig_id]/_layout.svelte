@@ -1,9 +1,13 @@
 <script context="module">
   import { makeClient, handleErrors } from "../../../../graphql/client";
   import { QueryGigDetails } from "../../../../graphql/gigs";
+  import { notLoggedIn } from "../../../../client-auth.js";
 
-  export async function preload({ params }) {
+  export async function preload({ params }, session) {
     let { gig_id } = params;
+
+    if (notLoggedIn.bind(this)(session)) return;
+
     let client = await makeClient(this.fetch);
 
     let res;
@@ -14,7 +18,7 @@
         variables: { gig_id },
       });
     } catch (e) {
-      await handleErrors.bind(this)(e);
+      await handleErrors.bind(this)(e, session);
       return;
     }
 

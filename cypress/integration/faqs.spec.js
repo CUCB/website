@@ -5,7 +5,7 @@ describe("FAQs pages", () => {
       failOnStatusCode: false,
     })
       .its("status")
-      .should("be", 404);
+      .should("eq", 404);
   });
 
   it("returns a 200 status when the page does exist", () => {
@@ -96,7 +96,7 @@ describe("FAQs pages", () => {
       cy.removeFile("content/faqs/tests.md");
       cy.request({ url: `/faqs/tests`, failOnStatusCode: false })
         .its("status")
-        .should("be", 404);
+        .should("eq", 404);
 
       // Cleanup
       cy.removeFile(`cached_content/faqs/tests.html`);

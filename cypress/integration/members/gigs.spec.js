@@ -3,12 +3,12 @@ import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
 describe("lineup editor", () => {
   before(() => {
-    cy.waitForGraphQL();
     cy.executeMutation(CreateGig, {
       variables: {
         id: 15274,
         title: "Cypress Demo Gig",
         type: 1,
+        adminsOnly: false,
       },
     });
     cy.executeMutation(CreateUser, {
@@ -47,7 +47,9 @@ describe("lineup editor", () => {
       cy.request({
         url: "/members/gigs/15275/lineup-editor",
         failOnStatusCode: false,
-      }).should(response => expect(response.status).to.eq(404));
+      })
+        .its("status")
+        .should("eq", 404);
     });
   });
 
@@ -56,24 +58,33 @@ describe("lineup editor", () => {
       cy.request({
         url: "/members/gigs/15274/lineup-editor",
         failOnStatusCode: false,
-      }).should(response => expect(response.status).to.eq(401));
+      })
+        .its("status")
+        .should("eq", 401);
     });
 
-    it("shows correct error on non existent gig", () => {
+    it("shows not logged in error on non existent gig", () => {
       cy.request({
         url: "/members/gigs/15275/lineup-editor",
         failOnStatusCode: false,
-      }).should(response => expect(response.status).to.eq(401));
+      })
+        .its("status")
+        .should("eq", 401);
     });
   });
 
   context("authorized as normal user", () => {
-    it("isn't accessible", () => {
+    beforeEach(() => {
       cy.login("cypress_user", "abc123");
+    });
+
+    it("isn't accessible", () => {
       cy.request({
         url: "/members/gigs/15274/lineup-editor",
         failOnStatusCode: false,
-      }).should(response => expect(response.status).to.eq(403));
+      })
+        .its("status")
+        .should("eq", 403);
     });
   });
 });
