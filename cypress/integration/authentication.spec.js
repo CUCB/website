@@ -4,7 +4,6 @@ describe("login page", () => {
   let polyfill;
 
   before(() => {
-    cy.waitForGraphQL();
     cy.executeMutation(CreateUser, {
       variables: {
         id: 27250,

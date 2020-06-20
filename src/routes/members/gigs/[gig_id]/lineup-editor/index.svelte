@@ -3,9 +3,12 @@
   import { extractAttributes } from "../../../../../graphql/gigs/lineups/users/attributes";
   import { QueryGigLineup } from "../../../../../graphql/gigs/lineups";
   import { handleErrors, makeClient } from "../../../../../graphql/client";
+  import { notLoggedIn } from "../../../../../client-auth.js";
 
-  export async function preload({ params }) {
+  export async function preload({ params }, session) {
     let { gig_id } = params;
+
+    if (notLoggedIn.bind(this)(session)) return;
 
     let client = await makeClient(this.fetch);
 
@@ -17,7 +20,7 @@
         variables: { gig_id },
       });
     } catch (e) {
-      await handleErrors.bind(this)(e);
+      await handleErrors.bind(this)(e, session);
       return;
     }
 

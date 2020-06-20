@@ -8,15 +8,19 @@ const host = process.env.GRAPHQL_REMOTE;
 const path = process.env.GRAPHQL_PATH;
 
 export const client = writable(null);
+export const clientCurrentUser = writable(null);
 
-export function makeClient(fetch, clientHost) {
+export function makeClient(fetch, kwargs) {
   const httpLink = createHttpLink({
-    uri: `${clientHost || host}${path}`,
+    uri: `${(kwargs && kwargs.host) || host}${path}`,
     fetch,
   });
 
+  const role = kwargs && kwargs.role;
+
   const authLink = setContext((_, { headers }) => {
     // return the headers to the context so httpLink can read them
+    headers = role ? { ...headers, "X-Hasura-Role": role } : headers;
     return {
       headers,
       credentials: "include",
@@ -29,14 +33,18 @@ export function makeClient(fetch, clientHost) {
   });
 }
 
-export function handleErrors(e) {
+export function handleErrors(e, session) {
   if (!e) {
     return;
   } else if (e.graphQLErrors && e.graphQLErrors[0]) {
     const code = e.graphQLErrors[0].extensions.code;
-    if (code === "access-denied") {
-      this.error(401, "Not logged in");
-    } else if (code === "validation-failed") {
+    if (code === "validation-failed") {
+      if (session && session.hasuraRole) {
+        this.error(403, "You're not supposed to be here!");
+      } else {
+        this.error(401, "Not logged in");
+      }
+    } else if (code === "access-denied") {
       this.error(403, "You're not supposed to be here!");
     } else {
       this.error(

@@ -1,0 +1,7 @@
+- args:
+    cascade: false
+    read_only: false
+    sql:
+      "alter table \"cucb\".\"gigs_lineups_instruments\"\n    add constraint \"gigs_lineups_instruments_pkey\"
+      \n    primary key ( \"gig_id\", \"user_id\", \"user_instrument_id\" );"
+  type: run_sql

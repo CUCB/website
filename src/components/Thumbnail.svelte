@@ -1,29 +1,27 @@
-<script>
-export let src;
-export let description;
-</script>
-
 <style>
+  figcaption {
+    font-size: 10px;
+    text-align: center;
+  }
 
-    figcaption {
-        font-size: 10px;
-        text-align: center;
-    }
+  #thumbnail {
+    width: 180px;
+    margin: 10px 10px;
+  }
 
-    #thumbnail {
-        width: 180px;
-        margin: 10px 10px;
-    }
-
-    img {
-        width: 100%;
-    }
-
+  img {
+    width: 100%;
+  }
 </style>
 
+<script>
+  export let src;
+  export let description;
+</script>
+
 <figure id="thumbnail">
-    <a href={src}  title={description}>
-        <img src={src} alt={description}>
-    </a>
-    <figcaption>{description}</figcaption>
+  <a href="{src}" title="{description}">
+    <img {src} alt="{description}" />
+  </a>
+  <figcaption>{description}</figcaption>
 </figure>

@@ -30,7 +30,7 @@
 </script>
 
 <svelte:options immutable="{false}" />
-{#each Object.entries(peopleStore.toObject()) as [id, person]}
+{#each Object.entries(peopleStore.toObject()) as [id, person] (id)}
   <Entry {person} updateEntry="{updateEntry(id)}" />
 {/each}
 <ul>
