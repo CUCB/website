@@ -2,6 +2,7 @@
   .layout {
     display: grid;
     min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
     grid-template-rows: auto 1fr auto;
     max-width: 60em;
     width: 100%;
@@ -134,7 +135,13 @@
   let query = { color, font, accent, logo };
   let { session } = stores();
 
+  function correctMobileHeight() {
+    let vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty("--vh", `${vh}px`);
+  }
+
   onMount(() => {
+    correctMobileHeight();
     const browserDomain = window.location.href
       .split("/", 3)
       .slice(0, 3)
@@ -169,6 +176,8 @@
   />
   <link rel="stylesheet" type="text/css" href="global.css" />
 </svelte:head>
+
+<svelte:window on:resize="{correctMobileHeight}" />
 
 <div class="layout">
   <Header {segment} user="{$session}" />
