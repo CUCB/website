@@ -49,6 +49,7 @@ describe("homepage", () => {
   });
 
   it("shows dark theme correctly", () => {
+    cy.viewport(1280, 1024);
     cy.visit("/?color=dark");
     cy.percySnapshot();
   });
