@@ -30,6 +30,7 @@
   :global(footer) {
     max-width: 40em;
     justify-self: center;
+    padding-bottom: 2.5rem;
   }
 </style>
 
@@ -124,6 +125,7 @@
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount, setContext } from "svelte";
   import { readable } from "svelte/store";
+  import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 
   export let segment;
   export let color;
@@ -133,7 +135,12 @@
   export let committee;
 
   let query = { color, font, accent, logo };
+  let windowWidth;
   let { session } = stores();
+  let navVisible;
+  $: navVisible && windowWidth <= 600
+    ? disableBodyScroll()
+    : enableBodyScroll();
 
   function correctMobileHeight() {
     let vh = window.innerHeight * 0.01;
@@ -177,10 +184,13 @@
   <link rel="stylesheet" type="text/css" href="global.css" />
 </svelte:head>
 
-<svelte:window on:resize="{correctMobileHeight}" />
+<svelte:window
+  on:resize="{correctMobileHeight}"
+  bind:innerWidth="{windowWidth}"
+/>
 
-<div class="layout">
-  <Header {segment} user="{$session}" />
+<div class="layout" class:locked="{navVisible}">
+  <Header {segment} user="{$session}" bind:navVisible />
 
   <main>
     <slot />

@@ -22,8 +22,10 @@
     bottom: -1px;
   }
 
-  a:first-child {
-    padding-left: 0;
+  @media only screnn and (min-width: 600px) {
+    a:first-child {
+      padding-left: 0;
+    }
   }
 
   a {
@@ -39,27 +41,24 @@
 
   @media only screen and (max-width: 600px) {
     nav {
-      overflow: hidden;
-      transition: max-height 0.7s;
+      transition: visibility 0s, opacity 0.2s;
       flex-direction: column;
-      position: relative;
-      top: 0;
+      justify-content: flex-end;
+      font-size: 1.5rem;
+      visibility: hidden;
+      opacity: 0;
     }
-    nav.hidden {
-      max-height: 0;
+
+    .visible {
+      opacity: 1;
+      visibility: visible;
     }
-    nav.visible {
-      max-height: 400px;
-      animation: fadeIn ease-in-out 0.3s;
+
+    .hiding {
+      opacity: 0;
+      visibility: visible;
     }
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
-    }
+
     a.split {
       margin-left: unset;
     }
@@ -71,13 +70,15 @@
   export let user;
   export let visible;
 
-  $: navClass = visible ? "visible" : "hidden";
-
-  let transitions = 0;
-  const transitionDelay = () => 100 * transitions++;
+  $: wasVisible = visible || wasVisible;
+  $: navClass = visible ? "visible" : navClass;
+  $: wasVisible &&
+    !visible &&
+    (navClass = "hiding") &&
+    window.setTimeout(() => (navClass = undefined), 200);
 </script>
 
-<nav class="{navClass}" on:click>
+<nav on:click class="{navClass}" aria-hidden="{!visible}">
   <a aria-current="{segment === undefined ? 'page' : undefined}" href=".">
     home
   </a>
@@ -105,9 +106,4 @@
   {:else}
     <a href="auth/login" class="split">log in</a>
   {/if}
-
-  <!-- for the blog link, we're using rel=prefetch so that Sapper prefetches
-	     the blog data when we hover over the link or tap it on a touchscreen
-	<a rel=prefetch aria-current='{segment === "blog" ? "page" : undefined}' href='blog'>blog</a>  -->
 </nav>
-<!-- </div> -->
