@@ -30,7 +30,12 @@
   :global(footer) {
     max-width: 40em;
     justify-self: center;
-    padding-bottom: 2.5rem;
+  }
+
+  @media (max-width: 600px) {
+    :global(footer) {
+      padding-bottom: 2.5rem;
+    }
   }
 </style>
 
@@ -94,12 +99,14 @@
 
     committee = { ...fallbackCommittee, ...committee };
 
+    let color =
+      query.color ||
+      (session && session.theme && session.theme.color) ||
+      "light";
+
     // Read user session or cookie or url param or ...
     return {
-      color:
-        query.color ||
-        (session && session.theme && session.theme.color) ||
-        "light",
+      color,
       font:
         query.font ||
         (session && session.theme && session.theme.font) ||
@@ -107,7 +114,9 @@
       accent:
         query.accent ||
         (session && session.theme && session.theme.accent) ||
-        "075c01",
+        color === "dark"
+          ? "858585"
+          : "075c01",
       logo:
         query.logo ||
         (session && session.theme && session.theme.logo) ||
@@ -174,6 +183,10 @@
 </script>
 
 <svelte:head>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" type="text/css" href="themes/color/{color}.css" />
   <link rel="stylesheet" type="text/css" href="themes/font/{font}.css" />
   <link

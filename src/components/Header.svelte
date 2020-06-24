@@ -67,7 +67,7 @@
       font-family: var(--title);
     }
 
-    :global(nav) {
+    :global(header nav) {
       position: fixed;
       top: 0;
       left: 0;

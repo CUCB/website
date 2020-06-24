@@ -6,6 +6,7 @@
   --background: rgb(var(--background_triple));
   --footer_color: rgba(204, 204, 204, 0.8);
   --logo_color: var(--text_color);
+  --form_color: #555;
 }
 
 /* header #logo {

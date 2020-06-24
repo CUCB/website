@@ -3,6 +3,7 @@
   --background: rgb(var(--background_triple));
   --code_color: #555;
   --code_background: #f0f0f0;
+  --form_color: #777;
   --text_color: #222;
   --footer_color: rgba(33, 33, 33, 0.8);
   --logo_color: var(--text_color);

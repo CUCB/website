@@ -31,18 +31,14 @@
 
 <h1>Sign in</h1>
 <form on:submit|preventDefault="{submit}">
-  <input
-    type="text"
-    bind:value="{username}"
-    placeholder="Username"
-    data-test="username"
-  />
-  <input
-    type="password"
-    bind:value="{password}"
-    placeholder="Password"
-    data-test="password"
-  />
+  <label>
+    Username
+    <input type="text" bind:value="{username}" data-test="username" />
+  </label>
+  <label>
+    Password
+    <input type="password" bind:value="{password}" data-test="password" />
+  </label>
   <input type="submit" value="Login" data-test="submit" />
 </form>
 Don't have an account already?

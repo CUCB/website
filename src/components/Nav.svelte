@@ -30,7 +30,6 @@
 
   a {
     text-decoration: none;
-    border: none;
     padding: 0.5em;
     display: block;
     color: var(--accent);
