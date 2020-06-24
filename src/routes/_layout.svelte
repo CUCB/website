@@ -31,6 +31,12 @@
     max-width: 40em;
     justify-self: center;
   }
+
+  @media (max-width: 600px) {
+    :global(footer) {
+      padding-bottom: 2.5rem;
+    }
+  }
 </style>
 
 <script context="module">
@@ -93,12 +99,14 @@
 
     committee = { ...fallbackCommittee, ...committee };
 
+    let color =
+      query.color ||
+      (session && session.theme && session.theme.color) ||
+      "light";
+
     // Read user session or cookie or url param or ...
     return {
-      color:
-        query.color ||
-        (session && session.theme && session.theme.color) ||
-        "light",
+      color,
       font:
         query.font ||
         (session && session.theme && session.theme.font) ||
@@ -106,7 +114,9 @@
       accent:
         query.accent ||
         (session && session.theme && session.theme.accent) ||
-        "075c01",
+        color === "dark"
+          ? "858585"
+          : "075c01",
       logo:
         query.logo ||
         (session && session.theme && session.theme.logo) ||
@@ -124,6 +134,7 @@
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount, setContext } from "svelte";
   import { readable } from "svelte/store";
+  import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 
   export let segment;
   export let color;
@@ -133,7 +144,12 @@
   export let committee;
 
   let query = { color, font, accent, logo };
+  let windowWidth;
   let { session } = stores();
+  let navVisible;
+  $: navVisible && windowWidth <= 600
+    ? disableBodyScroll()
+    : enableBodyScroll();
 
   function correctMobileHeight() {
     let vh = window.innerHeight * 0.01;
@@ -167,6 +183,10 @@
 </script>
 
 <svelte:head>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap"
+    rel="stylesheet"
+  />
   <link rel="stylesheet" type="text/css" href="themes/color/{color}.css" />
   <link rel="stylesheet" type="text/css" href="themes/font/{font}.css" />
   <link
@@ -177,10 +197,13 @@
   <link rel="stylesheet" type="text/css" href="global.css" />
 </svelte:head>
 
-<svelte:window on:resize="{correctMobileHeight}" />
+<svelte:window
+  on:resize="{correctMobileHeight}"
+  bind:innerWidth="{windowWidth}"
+/>
 
-<div class="layout">
-  <Header {segment} user="{$session}" />
+<div class="layout" class:locked="{navVisible}">
+  <Header {segment} user="{$session}" bind:navVisible />
 
   <main>
     <slot />

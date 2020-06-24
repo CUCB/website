@@ -3,27 +3,29 @@
     display: flex;
   }
 
-  [aria-current] {
-    position: relative;
-    display: inline-block;
-  }
+  @media only screen and (min-width: 600px) {
+    a:first-child {
+      padding-left: 0;
+    }
 
-  [aria-current]:first-child::after {
-    padding-left: 0.5em;
-  }
+    [aria-current] {
+      position: relative;
+      display: inline-block;
+    }
 
-  [aria-current]::after {
-    position: absolute;
-    content: "";
-    width: calc(100% - 1em);
-    height: 2px;
-    background-color: var(--accent);
-    display: block;
-    bottom: -1px;
-  }
+    [aria-current]:first-child::after {
+      padding-left: 0.5em;
+    }
 
-  a:first-child {
-    padding-left: 0;
+    [aria-current]::after {
+      position: absolute;
+      content: "";
+      width: calc(100% - 1em);
+      height: 2px;
+      background-color: var(--accent);
+      display: block;
+      bottom: -1px;
+    }
   }
 
   a {
@@ -39,27 +41,28 @@
 
   @media only screen and (max-width: 600px) {
     nav {
-      overflow: hidden;
-      transition: max-height 0.7s;
+      transition: visibility 0s, opacity 0.2s;
       flex-direction: column;
-      position: relative;
-      top: 0;
+      justify-content: flex-end;
+      font-size: 1.5rem;
+      visibility: hidden;
+      opacity: 0;
     }
-    nav.hidden {
-      max-height: 0;
+
+    [aria-current] {
+      background: rgba(var(--accent_triple), 0.2);
     }
-    nav.visible {
-      max-height: 400px;
-      animation: fadeIn ease-in-out 0.3s;
+
+    .visible {
+      opacity: 1;
+      visibility: visible;
     }
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-      }
-      100% {
-        opacity: 1;
-      }
+
+    .hiding {
+      opacity: 0;
+      visibility: visible;
     }
+
     a.split {
       margin-left: unset;
     }
@@ -71,13 +74,15 @@
   export let user;
   export let visible;
 
-  $: navClass = visible ? "visible" : "hidden";
-
-  let transitions = 0;
-  const transitionDelay = () => 100 * transitions++;
+  $: wasVisible = visible || wasVisible;
+  $: navClass = visible ? "visible" : navClass;
+  $: wasVisible &&
+    !visible &&
+    (navClass = "hiding") &&
+    window.setTimeout(() => (navClass = undefined), 200);
 </script>
 
-<nav class="{navClass}" on:click>
+<nav on:click class="{navClass}" aria-hidden="{!visible}">
   <a aria-current="{segment === undefined ? 'page' : undefined}" href=".">
     home
   </a>
@@ -105,9 +110,4 @@
   {:else}
     <a href="auth/login" class="split">log in</a>
   {/if}
-
-  <!-- for the blog link, we're using rel=prefetch so that Sapper prefetches
-	     the blog data when we hover over the link or tap it on a touchscreen
-	<a rel=prefetch aria-current='{segment === "blog" ? "page" : undefined}' href='blog'>blog</a>  -->
 </nav>
-<!-- </div> -->

@@ -32,20 +32,53 @@
   :global(nav) {
     grid-area: nav;
   }
+
+  .button-background {
+    display: none;
+  }
+
   button {
     background: none;
     border-radius: 5px;
-    display: none;
     grid-area: navButton;
     cursor: pointer;
   }
 
   @media only screen and (max-width: 600px) {
+    .button-background {
+      background-color: var(--background);
+      height: 3rem;
+      width: 100%;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      padding: 5px;
+      box-sizing: border-box;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+    }
+
     button {
-      display: unset;
-      align-self: center;
       width: 4em;
+      font-size: 1.5rem;
       padding: 2px 0;
+      margin: auto;
+      font-family: var(--title);
+    }
+
+    :global(header nav) {
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-bottom: 4rem;
+      height: 100%;
+      width: 100%;
+      grid-area: unset;
+      z-index: 5;
+      background-color: rgba(var(--background_triple), 0.9);
+      margin: 0;
+      box-sizing: border-box;
     }
   }
 </style>
@@ -59,7 +92,7 @@
   export let user;
   let animate = false;
   let button;
-  let navVisible = false;
+  export let navVisible = false;
   let toggleNav = () => {
     navVisible = !navVisible;
     button.blur();
@@ -79,9 +112,11 @@
       <h1 id="title">Cambridge University Ceilidh Band</h1>
     </noscript>
   {/if}
-  <button bind:this="{button}" on:click="{toggleNav}">
-    {navVisible ? 'hide' : 'menu'}
-  </button>
+  <div class="button-background">
+    <button bind:this="{button}" on:click="{toggleNav}">
+      {navVisible ? 'hide' : 'menu'}
+    </button>
+  </div>
   <Nav
     {segment}
     {user}
