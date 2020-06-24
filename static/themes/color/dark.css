@@ -2,7 +2,8 @@
   --text_color: #ccc;
   --code_background: #555;
   --code_color: #f0f0f0;
-  --background: #222;
+  --background_triple: 34, 34, 34;
+  --background: rgb(var(--background_triple));
   --footer_color: rgba(204, 204, 204, 0.8);
   --logo_color: var(--text_color);
 }

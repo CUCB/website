@@ -19,10 +19,10 @@
     , please use this address if you have any comments or queries about the
     site! Any Ceilidh queries should be directed to
     <Mailto person="{committee.secretary}">{committee.secretary.name}</Mailto>
-    . You can read our constitution
-    <a href="/docs/constitution">here</a>
-    and our privacy notice
-    <a href="/docs/gdpr">here</a>
+    . You can read our
+    <a href="/docs/constitution">constitution here</a>
+    and our
+    <a href="/docs/gdpr">privacy notice here</a>
     .
   </p>
 

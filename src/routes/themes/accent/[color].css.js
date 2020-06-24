@@ -4,8 +4,11 @@ import { hexToRgb, Color, Solver } from "./_filter-calculator";
 export function get(req, res, next) {
   let { color } = req.params;
   let { logo } = req.query;
+  let colorTriple = "";
   logo = logo === "undefined" ? undefined : logo;
 
+  const rgb = hexToRgb(color);
+  colorTriple = rgb.join(", ");
   let result;
   if (logo) {
     const rgb = hexToRgb(logo);
@@ -24,5 +27,7 @@ export function get(req, res, next) {
 header #logo {
     /*${result ? result.filter : ""}*/
 }
-        :root{--accent: #${color}; ${logo ? `--logo_color: #${logo}` : ``}}`);
+        :root{--accent: #${color}; --accent_triple: ${colorTriple}; ${
+    logo ? `--logo_color: #${logo};` : ``
+  }}`);
 }

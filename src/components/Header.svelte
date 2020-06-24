@@ -76,7 +76,7 @@
       width: 100%;
       grid-area: unset;
       z-index: 5;
-      background-color: #ffffffe7;
+      background-color: rgba(var(--background_triple), 0.9);
       margin: 0;
       box-sizing: border-box;
     }

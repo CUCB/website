@@ -1,5 +1,6 @@
 :root {
-  --background: #fff;
+  --background_triple: 255, 255, 255;
+  --background: rgb(var(--background_triple));
   --code_color: #555;
   --code_background: #f0f0f0;
   --text_color: #222;
