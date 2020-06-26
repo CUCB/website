@@ -1,5 +1,7 @@
 stages:
   - test
+  - infrastructure-update
+  - deploy
 
 test:
   image: docker:latest
@@ -22,4 +24,66 @@ test:
     paths:
       - cypress/videos/**/*.mp4
       - cypress/screenshots/**/*.png
-    expire_in: 1 day
+    expire_in: 7 days
+
+deploy:
+  type: deploy
+  environment:
+    name: dev
+    url: dev.cucb.co.uk
+  dependencies:
+    - pulumi
+  before_script:
+    - apt-get update -qq
+    - apt-get install -qq git
+    # Setup SSH deploy keys
+    - "which ssh-agent || ( apt-get install -qq openssh-client )"
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+  script:
+    - echo "Deploying to $IP"
+    - echo "$SSH_PRIVATE_KEY" > gitlab_ci
+    - scp gitlab_ci root@$IP:.ssh/
+    - scp pulumi/ssh_keys/gitlab_ci.pub root@$IP:.ssh/
+    - rm gitlab_ci
+    - echo "CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH" > sshenv
+    - scp sshenv root@$IP:~/.ssh/environment
+    - echo "export DROPBOX_ACCESS_TOKEN=$DROPBOX_ACCESS_TOKEN" > dropbox_access_token
+    - ssh root@$IP "mkdir -p .env"
+    - scp dropbox_access_token root@$IP:.env/dropbox_access_token
+    - printf "CLOUDFLARE_EMAIL=webmaster@cucb.co.uk\nCLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY\n" >> cloudflare_api_key
+    - scp cloudflare_api_key root@$IP:.env/cloudflare_api_key
+    - rm dropbox_access_token
+    - scp deploy.sh root@$IP:deploy.sh
+    - ssh root@$IP "chmod +x deploy.sh && ./deploy.sh"
+  only:
+    - master
+
+pulumi:
+  stage: infrastructure-update
+  before_script:
+    - chmod +x ./pulumi/scripts/*.sh
+    - ./pulumi/scripts/setup.sh
+  script:
+    - ./pulumi/scripts/run.sh
+  cache:
+    key: pulumi_node_modules
+    paths:
+      - pulumi/node_modules
+  artifacts:
+    reports:
+      dotenv: ./pulumi/pulumi.env
+  only:
+    - master
+
+pulumi-preview:
+  stage: infrastructure-update
+  before_script:
+    - chmod +x ./pulumi/scripts/*.sh
+    - ./pulumi/scripts/setup.sh
+  script:
+    - ./pulumi/scripts/preview.sh
+  except:
+    - master

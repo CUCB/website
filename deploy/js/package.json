@@ -1,0 +1,16 @@
+{
+  "name": "cucb-deploy-scripts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dropbox": "^5.1.0",
+    "isomorphic-fetch": "^2.2.1",
+    "moment": "^2.27.0"
+  }
+}

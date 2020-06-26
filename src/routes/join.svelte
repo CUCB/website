@@ -28,6 +28,8 @@
 <script>
   import Map from "../components/Map.svelte";
   import Thumbnail from "../components/Thumbnail.svelte";
+  import { title } from "../view.js";
+  $title = "Join us";
 </script>
 
 <h1>Join CUCB</h1>

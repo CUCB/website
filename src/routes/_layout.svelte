@@ -45,6 +45,10 @@
   export async function preload({ query }, session) {
     let client = await makeClient(this.fetch);
     let committee = {};
+
+    // This could be in /committee.json, but this allows us
+    // to deal with an error there which we should ideally
+    // be prepared for
     let fallbackPeople = [
       {
         name: "The President",
@@ -134,6 +138,7 @@
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount, setContext } from "svelte";
   import { readable } from "svelte/store";
+  import { title } from "../view.js";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 
   export let segment;
@@ -195,6 +200,9 @@
     href="themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}"
   />
   <link rel="stylesheet" type="text/css" href="global.css" />
+  <title>
+    {$title ? `${$title} | Cambridge University Ceilidh Band` : `Cambridge University Ceilidh Band`}
+  </title>
 </svelte:head>
 
 <svelte:window

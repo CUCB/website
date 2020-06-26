@@ -1,5 +1,7 @@
 <script>
   import Testimonial from "../components/Testimonial.svelte";
+  import { title } from "../view.js";
+  $title = "Book us";
 </script>
 
 <h1>Book CUCB</h1>

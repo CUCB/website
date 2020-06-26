@@ -1,0 +1,75 @@
+version: "3.6"
+services:
+  postgres:
+    image: postgres:12
+    restart: always
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db_restore:/backups
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+  graphql-engine:
+    image: hasura/graphql-engine:v1.2.2.cli-migrations
+    volumes:
+      - ./hasura/migrations:/hasura-migrations
+    depends_on:
+      - "postgres"
+    restart: always
+    environment:
+      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # use hasura cli console instead
+      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, websocket-log, query-log
+      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
+      HASURA_GRAPHQL_AUTH_HOOK: http://sapper:3000/auth/hook
+    ports:
+      - "8080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+  sapper:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    environment:
+      GRAPHQL_REMOTE: http://graphql-engine:8080
+      GRAPHQL_PATH: /v1/graphql
+      PG_USER: postgres
+      PG_HOST: postgres
+      PG_DATABASE: postgres
+      PG_PORT: 5432
+      PG_PASSWORD: ${PG_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET}
+    volumes:
+      - ./static:/usr/src/app/static
+      - ./content:/usr/src/app/content
+    restart: always
+    command: >
+      bash -c "npm run start"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+  caddy:
+    image: abiosoft/caddy:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CLOUDFLARE_API_KEY: ${CLOUDFLARE_API_KEY}
+      CLOUDFLARE_EMAIL: ${CLOUDFLARE_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile
+      - caddy:/root/.caddy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+
+volumes:
+  db_data:
+  caddy:

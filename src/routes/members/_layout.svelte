@@ -9,10 +9,6 @@
     margin-bottom: 0.5em;
   }
 
-  nav a:first-child {
-    padding-left: 0;
-  }
-
   nav a {
     padding: 0 10px;
     text-transform: lowercase;
@@ -30,6 +26,11 @@
   export function preload(_, session) {
     if (notLoggedIn.bind(this)(session)) return;
   }
+</script>
+
+<script>
+  import { title } from "../../view.js";
+  $title = "Members";
 </script>
 
 <nav>
