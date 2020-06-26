@@ -36,14 +36,12 @@ describe("homepage", () => {
 
   it("diplays webmaster's email in the footer", () => {
     cy.get("footer a[data-test=email_webmaster]")
-      .trigger("mouseover")
       .should("have.attr", "href")
       .and("include", "mailto:webmaster@cucb.co.uk");
   });
 
   it("diplays secretary's email in the footer", () => {
     cy.get("footer a[data-test=email_secretary]")
-      .trigger("mouseover")
       .should("have.attr", "href")
       .and("include", "mailto:secretary@cucb.co.uk");
   });

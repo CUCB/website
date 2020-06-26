@@ -24,6 +24,8 @@
 
 <script>
   export let content;
+  import { title } from "../../view.js";
+  $title = "FAQs";
 </script>
 
 <h1>Frequently Asked Questions</h1>

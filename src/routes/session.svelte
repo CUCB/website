@@ -1,3 +1,8 @@
+<script>
+  import { title } from "../view.js";
+  $title = "Sessions";
+</script>
+
 <svelte:head>
   <title>Sessions</title>
 </svelte:head>

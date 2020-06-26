@@ -18,7 +18,10 @@ export async function get(req, res, next) {
         variables: { current_date: time.toISOString() },
       });
       retrieved = time;
-      cached = graphqlRes.data.cucb_committees[0].committee_members;
+      cached =
+        graphqlRes.data.cucb_committees &&
+        graphqlRes.data.cucb_committees[0] &&
+        graphqlRes.data.cucb_committees[0].committee_members;
     } catch (e) {
       res.writeHead(500, { "Content-Type": "application/json" });
       res.end(
