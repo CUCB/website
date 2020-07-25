@@ -1,8 +1,8 @@
 <style>
-  :global(p) {
+  :global(faq-content p) {
     margin-top: 0em;
   }
-  :global(h3) {
+  :global(faq-content h3) {
     font-style: oblique;
     margin-bottom: 0em !important;
   }
@@ -23,14 +23,17 @@
 </script>
 
 <script>
+  import { makeTitle } from "../../view.js";
   export let content;
-  import { title } from "../../view.js";
-  $title = "FAQs";
 </script>
 
+<svelte:head>
+  <title>{makeTitle('FAQs')}</title>
+</svelte:head>
+
 <h1>Frequently Asked Questions</h1>
-We've collected a few questions people commonly ask here for you to have a look
-through at your own leisure! There are sections on
+We've collected a few questions people commonly ask here for you to have a look through at your own leisure! There are
+sections on
 <a href="/faqs/book">booking us</a>
 and
 <a href="/faqs/join">joining us</a>
@@ -38,4 +41,6 @@ depending on what you're interested in!
 <br />
 <br />
 
-{@html content}
+<faq-content>
+  {@html content}
+</faq-content>

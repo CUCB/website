@@ -1,0 +1,32 @@
+- args:
+    role: current_user
+    table:
+      name: gigs_lineups
+      schema: cucb
+  type: drop_insert_permission
+- args:
+    permission:
+      backend_only: false
+      check:
+        _and:
+          - gig:
+              _and:
+                - admins_only:
+                    _eq: false
+                - allow_signups:
+                    _eq: true
+          - user_id:
+              _eq: X-Hasura-User-Id
+      columns:
+        - gig_id
+        - id
+        - user_available
+        - user_notes
+        - user_only_if_necessary
+      set:
+        user_id: x-hasura-User-Id
+    role: current_user
+    table:
+      name: gigs_lineups
+      schema: cucb
+  type: create_insert_permission

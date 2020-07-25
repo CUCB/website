@@ -1,7 +1,7 @@
 import { CreateUser, HASHED_PASSWORDS } from "../database/users";
 
 describe("header", () => {
-  beforeEach(() => cy.visit("/"));
+  before(() => cy.visit("/"));
 
   describe("navbar", () => {
     it("navigates to /book", () => {

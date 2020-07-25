@@ -1,5 +1,5 @@
 describe("homepage", () => {
-  beforeEach(() => {
+  before(() => {
     cy.visit("/");
   });
 
@@ -49,12 +49,13 @@ describe("homepage", () => {
   it("shows dark theme correctly", () => {
     cy.viewport(1280, 1024);
     cy.visit("/?color=dark");
+    cy.wait(200);
     cy.percySnapshot();
   });
 });
 
 describe("book us page", () => {
-  beforeEach(() => {
+  before(() => {
     cy.visit("/book");
   });
 
@@ -64,7 +65,7 @@ describe("book us page", () => {
 });
 
 describe("sessions page", () => {
-  beforeEach(() => {
+  before(() => {
     cy.visit("/session");
   });
 
@@ -77,7 +78,7 @@ describe("sessions page", () => {
 });
 
 describe("join page", () => {
-  beforeEach(() => {
+  before(() => {
     cy.visit("/join");
   });
 

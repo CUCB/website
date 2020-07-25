@@ -1,0 +1,3882 @@
+- table:
+    schema: cucb
+    name: auth_action_types
+  object_relationships:
+    - name: auth_bitmasks_permission
+      using:
+        foreign_key_constraint_on: auth_bitmask
+  select_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - id
+          - description
+          - auth_bitmask
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - description
+          - auth_bitmask
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - description
+          - auth_bitmask
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - description
+          - auth_bitmask
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - description
+          - auth_bitmask
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - description
+          - auth_bitmask
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - description
+          - auth_bitmask
+        filter: {}
+- table:
+    schema: cucb
+    name: auth_bitmasks_permissions
+  select_permissions:
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - php_title
+          - bitmask
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - php_title
+          - bitmask
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - php_title
+          - bitmask
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - php_title
+          - bitmask
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - php_title
+          - bitmask
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - php_title
+          - bitmask
+        filter: {}
+- table:
+    schema: cucb
+    name: auth_user_types
+  select_permissions:
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - title
+          - php_title
+          - hasura_role
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - title
+          - php_title
+          - hasura_role
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - title
+          - php_title
+          - hasura_role
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - title
+          - php_title
+          - hasura_role
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - title
+          - php_title
+          - hasura_role
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - title
+          - php_title
+          - hasura_role
+        filter: {}
+- table:
+    schema: cucb
+    name: biscuit_poll_entries
+- table:
+    schema: cucb
+    name: biscuit_poll_votes
+- table:
+    schema: cucb
+    name: biscuit_polls
+- table:
+    schema: cucb
+    name: calendar_subscriptions
+  select_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - calendar_type
+          - user_id
+          - last_accessed
+          - ip_address
+        filter:
+          user_id:
+            _eq: X-Hasura-User-Id
+    - role: webmaster
+      permission:
+        columns:
+          - user_id
+          - calendar_type
+          - last_accessed
+          - ip_address
+        filter: {}
+- table:
+    schema: cucb
+    name: captions
+- table:
+    schema: cucb
+    name: committee_keys
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: blue_gig
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - name
+        filter: {}
+- table:
+    schema: cucb
+    name: committee_members
+  object_relationships:
+    - name: committee_key
+      using:
+        foreign_key_constraint_on: lookup_name
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: blue_gig
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - april_fools_dir
+          - april_fools_only
+          - casual_name
+          - comments
+          - committee
+          - email_obfus
+          - id
+          - lookup_name
+          - name
+          - pic
+          - position
+          - sub_position
+        filter: {}
+- table:
+    schema: cucb
+    name: committee_positions
+  array_relationships:
+    - name: committee_members
+      using:
+        foreign_key_constraint_on:
+          column: position
+          table:
+            schema: cucb
+            name: committee_members
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: blue_gig
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - name
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - name
+        filter: {}
+- table:
+    schema: cucb
+    name: committees
+  array_relationships:
+    - name: committee_members
+      using:
+        foreign_key_constraint_on:
+          column: committee
+          table:
+            schema: cucb
+            name: committee_members
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: blue_gig
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - pic_folder
+          - started
+        filter: {}
+- table:
+    schema: cucb
+    name: connection_types
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - name
+          - icon_name
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - icon_name
+          - name
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - name
+          - icon_name
+        filter: {}
+- table:
+    schema: cucb
+    name: contacts
+  object_relationships:
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  array_relationships:
+    - name: gigs_contacts
+      using:
+        foreign_key_constraint_on:
+          column: contact_id
+          table:
+            schema: cucb
+            name: gigs_contacts
+  insert_permissions:
+    - role: president
+      permission:
+        check: {}
+        columns:
+          - caller
+          - email
+          - name
+          - notes
+          - organization
+          - user_id
+    - role: secretary
+      permission:
+        check: {}
+        columns:
+          - caller
+          - email
+          - name
+          - notes
+          - organization
+          - user_id
+    - role: webmaster
+      permission:
+        check: {}
+        columns:
+          - caller
+          - email
+          - name
+          - notes
+          - organization
+          - user_id
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - caller
+          - id
+          - name
+          - organization
+          - user_id
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - caller
+          - id
+          - user_id
+          - notes
+          - email
+          - name
+          - organization
+        filter:
+          user_id:
+            _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - caller
+          - id
+          - name
+          - organization
+          - user_id
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - caller
+          - id
+          - name
+          - organization
+          - user_id
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - caller
+          - id
+          - user_id
+          - notes
+          - email
+          - name
+          - organization
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - caller
+          - id
+          - user_id
+          - notes
+          - email
+          - name
+          - organization
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - caller
+          - id
+          - name
+          - organization
+          - user_id
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - name
+          - user_id
+        filter:
+          caller:
+            _eq: true
+    - role: webmaster
+      permission:
+        columns:
+          - caller
+          - id
+          - user_id
+          - notes
+          - email
+          - name
+          - organization
+        filter: {}
+  update_permissions:
+    - role: president
+      permission:
+        columns:
+          - caller
+          - email
+          - name
+          - notes
+          - organization
+          - user_id
+        filter: {}
+        check: null
+    - role: secretary
+      permission:
+        columns:
+          - caller
+          - email
+          - name
+          - notes
+          - organization
+          - user_id
+        filter: {}
+        check: null
+    - role: webmaster
+      permission:
+        columns:
+          - caller
+          - email
+          - name
+          - notes
+          - organization
+          - user_id
+        filter: {}
+        check: null
+- table:
+    schema: cucb
+    name: galleries
+- table:
+    schema: cucb
+    name: gig_types
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - code
+          - title
+        filter: {}
+- table:
+    schema: cucb
+    name: gig_venues
+  array_relationships:
+    - name: gigs
+      using:
+        foreign_key_constraint_on:
+          column: venue_id
+          table:
+            schema: cucb
+            name: gigs
+  insert_permissions:
+    - role: secretary
+      permission:
+        check: {}
+        columns:
+          - address
+          - distance_miles
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - notes_admin
+          - notes_band
+          - postcode
+          - subvenue
+    - role: webmaster
+      permission:
+        check: {}
+        columns:
+          - address
+          - distance_miles
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - notes_admin
+          - notes_band
+          - postcode
+          - subvenue
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - address
+          - distance_miles
+          - id
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter:
+          _and:
+            - gigs:
+                admins_only:
+                  _eq: false
+            - gigs:
+                advertise:
+                  _eq: true
+    - role: blue_gig
+      permission:
+        columns:
+          - address
+          - distance_miles
+          - id
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - notes_band
+          - postcode
+          - subvenue
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - address
+          - distance_miles
+          - id
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - notes_band
+          - postcode
+          - subvenue
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - latitude
+          - longitude
+          - distance_miles
+          - id
+          - notes_admin
+          - notes_band
+          - address
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - latitude
+          - longitude
+          - distance_miles
+          - id
+          - notes_admin
+          - notes_band
+          - address
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - address
+          - distance_miles
+          - id
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter:
+          gigs:
+            advertise:
+              _eq: true
+    - role: president
+      permission:
+        columns:
+          - latitude
+          - longitude
+          - distance_miles
+          - id
+          - notes_admin
+          - notes_band
+          - address
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - latitude
+          - longitude
+          - distance_miles
+          - id
+          - notes_admin
+          - notes_band
+          - address
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - latitude
+          - longitude
+          - distance_miles
+          - id
+          - notes_admin
+          - notes_band
+          - address
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - address
+          - distance_miles
+          - id
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - notes_band
+          - postcode
+          - subvenue
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - latitude
+          - longitude
+          - distance_miles
+          - id
+          - notes_admin
+          - notes_band
+          - address
+          - map_link
+          - name
+          - postcode
+          - subvenue
+        filter: {}
+  update_permissions:
+    - role: secretary
+      permission:
+        columns:
+          - address
+          - distance_miles
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - notes_admin
+          - notes_band
+          - postcode
+          - subvenue
+        filter: {}
+        check: null
+    - role: webmaster
+      permission:
+        columns:
+          - address
+          - distance_miles
+          - latitude
+          - longitude
+          - map_link
+          - name
+          - notes_admin
+          - notes_band
+          - postcode
+          - subvenue
+        filter: {}
+        check: null
+  delete_permissions:
+    - role: secretary
+      permission:
+        filter: {}
+    - role: webmaster
+      permission:
+        filter: {}
+- table:
+    schema: cucb
+    name: gigs
+  object_relationships:
+    - name: gig_type
+      using:
+        foreign_key_constraint_on: type
+    - name: user
+      using:
+        foreign_key_constraint_on: posting_user
+    - name: venue
+      using:
+        foreign_key_constraint_on: venue_id
+  array_relationships:
+    - name: contacts
+      using:
+        foreign_key_constraint_on:
+          column: gig_id
+          table:
+            schema: cucb
+            name: gigs_contacts
+    - name: lineup
+      using:
+        foreign_key_constraint_on:
+          column: gig_id
+          table:
+            schema: cucb
+            name: gigs_lineups
+  insert_permissions:
+    - role: equipment
+      permission:
+        check: {}
+        set:
+          posting_user: x-hasura-User-Id
+          editing_user: x-hasura-User-Id
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+    - role: gig_editor
+      permission:
+        check: {}
+        set:
+          posting_user: x-hasura-User-Id
+          editing_user: x-hasura-User-Id
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+    - role: president
+      permission:
+        check: {}
+        set:
+          posting_user: x-hasura-User-Id
+          editing_user: x-hasura-User-Id
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+    - role: secretary
+      permission:
+        check: {}
+        set:
+          posting_user: x-hasura-User-Id
+          editing_user: x-hasura-User-Id
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+    - role: treasurer
+      permission:
+        check: {}
+        set:
+          posting_user: x-hasura-User-Id
+          editing_user: x-hasura-User-Id
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+    - role: webmaster
+      permission:
+        check: {}
+        set:
+          posting_user: x-hasura-User-Id
+          editing_user: x-hasura-User-Id
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+  select_permissions:
+    - role: anonymous
+      permission:
+        columns:
+          - date
+          - finish_time
+          - summary
+          - time
+          - title
+        filter:
+          _and:
+            - admins_only:
+                _eq: false
+            - advertise:
+                _eq: true
+    - role: blue_gig
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finish_time
+          - food_provided
+          - id
+          - notes_band
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finish_time
+          - food_provided
+          - id
+          - notes_band
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter:
+          admins_only:
+            _eq: false
+    - role: equipment
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - editing_time
+          - editing_user
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - id
+          - notes_admin
+          - notes_band
+          - posting_time
+          - posting_user
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - editing_time
+          - editing_user
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - id
+          - notes_admin
+          - notes_band
+          - posting_time
+          - posting_user
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - date
+          - finish_time
+          - summary
+          - time
+          - title
+        filter:
+          _and:
+            - admins_only:
+                _eq: false
+            - advertise:
+                _eq: true
+    - role: president
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - editing_time
+          - editing_user
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - id
+          - notes_admin
+          - notes_band
+          - posting_time
+          - posting_user
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - editing_time
+          - editing_user
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - id
+          - notes_admin
+          - notes_band
+          - posting_time
+          - posting_user
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - editing_time
+          - editing_user
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - id
+          - notes_admin
+          - notes_band
+          - posting_time
+          - posting_user
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finish_time
+          - food_provided
+          - id
+          - notes_band
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter:
+          admins_only:
+            _eq: false
+    - role: webmaster
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - editing_time
+          - editing_user
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - id
+          - notes_admin
+          - notes_band
+          - posting_time
+          - posting_user
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+  update_permissions:
+    - role: equipment
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+        check: null
+        set:
+          editing_user: x-hasura-User-Id
+    - role: gig_editor
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+        check: null
+        set:
+          editing_user: x-hasura-User-Id
+    - role: president
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+        check: null
+        set:
+          editing_user: x-hasura-User-Id
+    - role: secretary
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+        check: null
+        set:
+          editing_user: x-hasura-User-Id
+    - role: treasurer
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+        check: null
+        set:
+          editing_user: x-hasura-User-Id
+    - role: webmaster
+      permission:
+        columns:
+          - admins_only
+          - advertise
+          - allow_signups
+          - arrive_time
+          - date
+          - finance
+          - finance_caller_paid
+          - finance_deposit_received
+          - finance_payment_received
+          - finish_time
+          - food_provided
+          - notes_admin
+          - notes_band
+          - quote_date
+          - summary
+          - time
+          - title
+          - type
+          - venue_id
+        filter: {}
+        check: null
+        set:
+          editing_user: x-hasura-User-Id
+  delete_permissions:
+    - role: secretary
+      permission:
+        filter: {}
+    - role: webmaster
+      permission:
+        filter: {}
+- table:
+    schema: cucb
+    name: gigs_contacts
+  object_relationships:
+    - name: contact
+      using:
+        foreign_key_constraint_on: contact_id
+    - name: gig
+      using:
+        foreign_key_constraint_on: gig_id
+  insert_permissions:
+    - role: equipment
+      permission:
+        check: {}
+        columns:
+          - calling
+          - client
+          - contact_id
+          - gig_id
+          - notes
+        backend_only: false
+    - role: gig_editor
+      permission:
+        check: {}
+        columns:
+          - calling
+          - client
+          - contact_id
+          - gig_id
+          - notes
+        backend_only: false
+    - role: president
+      permission:
+        check: {}
+        columns:
+          - calling
+          - client
+          - contact_id
+          - gig_id
+          - notes
+        backend_only: false
+    - role: secretary
+      permission:
+        check: {}
+        columns:
+          - calling
+          - client
+          - contact_id
+          - gig_id
+          - notes
+        backend_only: false
+    - role: treasurer
+      permission:
+        check: {}
+        columns:
+          - calling
+          - client
+          - contact_id
+          - gig_id
+          - notes
+        backend_only: false
+    - role: webmaster
+      permission:
+        check: {}
+        columns:
+          - calling
+          - client
+          - contact_id
+          - gig_id
+          - notes
+        backend_only: false
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - gig_id
+          - contact_id
+          - notes
+          - calling
+          - client
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - calling
+          - contact_id
+          - gig_id
+        filter:
+          calling:
+            _eq: true
+    - role: equipment
+      permission:
+        columns:
+          - gig_id
+          - contact_id
+          - notes
+          - calling
+          - client
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - gig_id
+          - contact_id
+          - notes
+          - calling
+          - client
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - gig_id
+          - contact_id
+          - notes
+          - calling
+          - client
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - gig_id
+          - contact_id
+          - notes
+          - calling
+          - client
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - gig_id
+          - contact_id
+          - notes
+          - calling
+          - client
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - calling
+          - contact_id
+          - gig_id
+        filter:
+          calling:
+            _eq: true
+    - role: webmaster
+      permission:
+        columns:
+          - gig_id
+          - contact_id
+          - notes
+          - calling
+          - client
+        filter: {}
+  update_permissions:
+    - role: equipment
+      permission:
+        columns:
+          - calling
+          - client
+          - notes
+        filter: {}
+        check: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - calling
+          - client
+          - notes
+        filter: {}
+        check: {}
+    - role: president
+      permission:
+        columns:
+          - calling
+          - client
+          - notes
+        filter: {}
+        check: {}
+    - role: secretary
+      permission:
+        columns:
+          - calling
+          - client
+          - notes
+        filter: {}
+        check: {}
+    - role: treasurer
+      permission:
+        columns:
+          - calling
+          - client
+          - notes
+        filter: {}
+        check: {}
+    - role: webmaster
+      permission:
+        columns:
+          - calling
+          - client
+          - notes
+        filter: {}
+        check: {}
+  delete_permissions:
+    - role: equipment
+      permission:
+        filter: {}
+    - role: gig_editor
+      permission:
+        filter: {}
+    - role: president
+      permission:
+        filter: {}
+    - role: secretary
+      permission:
+        filter: {}
+    - role: treasurer
+      permission:
+        filter: {}
+    - role: webmaster
+      permission:
+        filter: {}
+- table:
+    schema: cucb
+    name: gigs_lineups
+  object_relationships:
+    - name: gig
+      using:
+        foreign_key_constraint_on: gig_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  array_relationships:
+    - name: user_instruments
+      using:
+        manual_configuration:
+          remote_table:
+            schema: cucb
+            name: gigs_lineups_instruments
+          column_mapping:
+            user_id: user_id
+            gig_id: gig_id
+  insert_permissions:
+    - role: current_user
+      permission:
+        check:
+          _and:
+            - gig:
+                _and:
+                  - admins_only:
+                      _eq: false
+                  - allow_signups:
+                      _eq: true
+            - user_id:
+                _eq: X-Hasura-User-Id
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - gig_id
+          - user_available
+          - user_notes
+          - user_only_if_necessary
+        backend_only: false
+    - role: president
+      permission:
+        check: {}
+        columns:
+          - admin_notes
+          - approved
+          - driver
+          - equipment
+          - gig_id
+          - leader
+          - money_collector
+          - money_collector_notified
+          - user_id
+        backend_only: false
+    - role: webmaster
+      permission:
+        check: {}
+        columns:
+          - admin_notes
+          - approved
+          - driver
+          - equipment
+          - gig_id
+          - leader
+          - money_collector
+          - money_collector_notified
+          - user_id
+        backend_only: false
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - approved
+          - driver
+          - equipment
+          - gig_id
+          - leader
+          - money_collector
+          - user_id
+        filter:
+          approved:
+            _eq: true
+    - role: current_user
+      permission:
+        columns:
+          - approved
+          - gig_id
+          - id
+          - user_available
+          - user_id
+          - user_notes
+          - user_only_if_necessary
+        filter:
+          _and:
+            - gig:
+                admins_only:
+                  _eq: false
+            - user_id:
+                _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - approved
+          - driver
+          - equipment
+          - gig_id
+          - leader
+          - money_collector
+          - user_id
+        filter:
+          approved:
+            _eq: true
+    - role: gig_editor
+      permission:
+        columns:
+          - approved
+          - driver
+          - equipment
+          - gig_id
+          - leader
+          - money_collector
+          - user_id
+        filter:
+          approved:
+            _eq: true
+    - role: president
+      permission:
+        columns:
+          - id
+          - gig_id
+          - user_id
+          - adding_time
+          - editing_time
+          - approved
+          - equipment
+          - leader
+          - driver
+          - money_collector
+          - money_collector_notified
+          - user_notes
+          - user_available
+          - user_only_if_necessary
+          - admin_notes
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - gig_id
+          - user_id
+          - adding_time
+          - editing_time
+          - approved
+          - equipment
+          - leader
+          - driver
+          - money_collector
+          - money_collector_notified
+          - user_notes
+          - user_available
+          - user_only_if_necessary
+          - admin_notes
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - approved
+          - driver
+          - equipment
+          - gig_id
+          - leader
+          - money_collector
+          - user_id
+        filter:
+          approved:
+            _eq: true
+    - role: user
+      permission:
+        columns:
+          - approved
+          - driver
+          - equipment
+          - gig_id
+          - leader
+          - money_collector
+          - user_id
+        filter:
+          _and:
+            - gig:
+                admins_only:
+                  _eq: false
+            - approved:
+                _eq: true
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - gig_id
+          - user_id
+          - adding_time
+          - editing_time
+          - approved
+          - equipment
+          - leader
+          - driver
+          - money_collector
+          - money_collector_notified
+          - user_notes
+          - user_available
+          - user_only_if_necessary
+          - admin_notes
+        filter: {}
+  update_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - user_available
+          - user_notes
+          - user_only_if_necessary
+        filter:
+          _and:
+            - gig:
+                _and:
+                  - admins_only:
+                      _eq: false
+                  - allow_signups:
+                      _eq: true
+            - user_id:
+                _eq: X-Hasura-User-Id
+        check: null
+    - role: president
+      permission:
+        columns:
+          - admin_notes
+          - approved
+          - driver
+          - equipment
+          - leader
+          - money_collector
+          - money_collector_notified
+        filter: {}
+        check: null
+    - role: secretary
+      permission:
+        columns:
+          - admin_notes
+        filter: {}
+        check: null
+    - role: webmaster
+      permission:
+        columns:
+          - admin_notes
+          - approved
+          - driver
+          - equipment
+          - leader
+          - money_collector
+          - money_collector_notified
+        filter: {}
+        check: null
+- table:
+    schema: cucb
+    name: gigs_lineups_instruments
+  object_relationships:
+    - name: gigs_lineup
+      using:
+        manual_configuration:
+          remote_table:
+            schema: cucb
+            name: gigs_lineups
+          column_mapping:
+            user_id: user_id
+            gig_id: gig_id
+    - name: user_instrument
+      using:
+        foreign_key_constraint_on: user_instrument_id
+  insert_permissions:
+    - role: current_user
+      permission:
+        check:
+          _and:
+            - gigs_lineup:
+                gig:
+                  _and:
+                    - allow_signups:
+                        _eq: true
+                    - admins_only:
+                        _eq: false
+            - user_instrument:
+                user_id:
+                  _eq: X-Hasura-User-Id
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - gig_id
+          - user_instrument_id
+        backend_only: false
+    - role: president
+      permission:
+        check: {}
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - approved
+          - gig_id
+          - user_id
+          - user_instrument_id
+    - role: secretary
+      permission:
+        check: {}
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - approved
+          - gig_id
+          - user_id
+          - user_instrument_id
+    - role: user
+      permission:
+        check: {}
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - gig_id
+          - user_instrument_id
+    - role: webmaster
+      permission:
+        check: {}
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - approved
+          - gig_id
+          - user_id
+          - user_instrument_id
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - gig_id
+          - user_id
+          - user_instrument_id
+          - approved
+        filter:
+          _and:
+            - approved:
+                _eq: true
+    - role: current_user
+      permission:
+        columns:
+          - approved
+          - gig_id
+          - user_id
+          - user_instrument_id
+        filter:
+          _and:
+            - gigs_lineup:
+                gig:
+                  _and:
+                    - allow_signups:
+                        _eq: true
+                    - admins_only:
+                        _eq: false
+            - user_instrument:
+                user_id:
+                  _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - gig_id
+          - user_id
+          - user_instrument_id
+          - approved
+        filter:
+          _and:
+            - approved:
+                _eq: true
+    - role: gig_editor
+      permission:
+        columns:
+          - gig_id
+          - user_id
+          - user_instrument_id
+          - approved
+        filter:
+          _and:
+            - approved:
+                _eq: true
+    - role: president
+      permission:
+        columns:
+          - approved
+          - gig_id
+          - user_id
+          - user_instrument_id
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - approved
+          - gig_id
+          - user_id
+          - user_instrument_id
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - gig_id
+          - user_id
+          - user_instrument_id
+          - approved
+        filter:
+          _and:
+            - approved:
+                _eq: true
+    - role: user
+      permission:
+        columns:
+          - gig_id
+          - user_id
+          - user_instrument_id
+          - approved
+        filter:
+          _and:
+            - approved:
+                _eq: true
+            - gigs_lineup:
+                gig:
+                  admins_only:
+                    _eq: false
+    - role: webmaster
+      permission:
+        columns:
+          - approved
+          - gig_id
+          - user_id
+          - user_instrument_id
+        filter: {}
+  update_permissions:
+    - role: secretary
+      permission:
+        columns:
+          - approved
+        filter: {}
+        check: null
+    - role: webmaster
+      permission:
+        columns:
+          - approved
+        filter: {}
+        check: null
+  delete_permissions:
+    - role: current_user
+      permission:
+        filter:
+          _and:
+            - gigs_lineup:
+                gig:
+                  _and:
+                    - allow_signups:
+                        _eq: true
+                    - admins_only:
+                        _eq: false
+            - _or:
+                - approved:
+                    _eq: false
+                - approved:
+                    _is_null: true
+            - user_id:
+                _eq: X-Hasura-User-Id
+- table:
+    schema: cucb
+    name: instruments
+  object_relationships:
+    - name: parent
+      using:
+        foreign_key_constraint_on: parent_id
+  array_relationships:
+    - name: children
+      using:
+        foreign_key_constraint_on:
+          column: parent_id
+          table:
+            schema: cucb
+            name: instruments
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - novelty
+          - parent_only
+          - id
+          - parent_id
+          - name
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - novelty
+          - parent_only
+          - id
+          - parent_id
+          - name
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - novelty
+          - parent_only
+          - id
+          - parent_id
+          - name
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - novelty
+          - parent_only
+          - id
+          - parent_id
+          - name
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - novelty
+          - parent_only
+          - id
+          - parent_id
+          - name
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - name
+          - novelty
+          - parent_only
+          - parent_id
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - novelty
+          - parent_only
+          - id
+          - parent_id
+          - name
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - novelty
+          - parent_only
+          - id
+          - parent_id
+          - name
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - name
+          - novelty
+          - parent_only
+          - parent_id
+        filter: {}
+- table:
+    schema: cucb
+    name: music
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - title
+          - filename
+          - type
+          - current
+          - show_tune
+        filter: {}
+- table:
+    schema: cucb
+    name: music_types
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - abc_field
+          - name
+          - description
+          - common_type
+        filter: {}
+- table:
+    schema: cucb
+    name: news
+  insert_permissions:
+    - role: webmaster
+      permission:
+        check: {}
+        set:
+          posted_by: x-hasura-User-Id
+        columns:
+          - description
+          - title
+        backend_only: false
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - title
+          - description
+          - posted
+          - posted_by
+        filter: {}
+- table:
+    schema: cucb
+    name: photos
+- table:
+    schema: cucb
+    name: session
+- table:
+    schema: cucb
+    name: session_tunes
+  insert_permissions:
+    - role: current_user
+      permission:
+        check: {}
+        set:
+          contributor: x-hasura-User-Id
+        columns:
+          - contributor_notes
+          - filename
+          - hidden
+          - other_notes
+          - title
+          - touched
+          - type
+        backend_only: false
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: current_user
+      permission:
+        columns:
+          - hidden
+          - contributed_date
+          - touched
+          - contributor
+          - id
+          - type
+          - contributor_notes
+          - other_notes
+          - filename
+          - title
+        filter:
+          contributor:
+            _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: gig_editor
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: music_only
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: president
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: secretary
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: treasurer
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: user
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter:
+          hidden:
+            _ne: true
+    - role: webmaster
+      permission:
+        columns:
+          - contributed_date
+          - contributor
+          - contributor_notes
+          - filename
+          - hidden
+          - id
+          - other_notes
+          - title
+          - touched
+          - type
+        filter: {}
+  update_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - contributor_notes
+          - hidden
+          - id
+          - title
+          - touched
+          - type
+        filter:
+          contributor:
+            _eq: X-Hasura-User-Id
+        check: null
+    - role: webmaster
+      permission:
+        columns:
+          - hidden
+          - other_notes
+          - title
+          - type
+        filter: {}
+        check: null
+- table:
+    schema: cucb
+    name: songs
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - name
+          - filename
+          - tuneid
+          - new
+        filter: {}
+- table:
+    schema: cucb
+    name: user_password_resets
+- table:
+    schema: cucb
+    name: user_pref_types
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: equipment
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - name
+          - default
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - default
+          - id
+          - name
+        filter: {}
+- table:
+    schema: cucb
+    name: user_prefs
+  object_relationships:
+    - name: pref_type
+      using:
+        foreign_key_constraint_on: pref_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  insert_permissions:
+    - role: current_user
+      permission:
+        check: {}
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - pref_id
+          - value
+        backend_only: false
+  select_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - value
+          - pref_id
+          - user_id
+        filter:
+          user_id:
+            _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - pref_id
+          - user_id
+          - value
+        filter:
+          pref_type:
+            name:
+              _like: attribute.%
+    - role: gig_editor
+      permission:
+        columns:
+          - pref_id
+          - user_id
+          - value
+        filter:
+          pref_type:
+            name:
+              _like: attribute.%
+    - role: president
+      permission:
+        columns:
+          - pref_id
+          - user_id
+          - value
+        filter:
+          pref_type:
+            name:
+              _like: attribute.%
+    - role: secretary
+      permission:
+        columns:
+          - pref_id
+          - user_id
+          - value
+        filter:
+          pref_type:
+            name:
+              _like: attribute.%
+    - role: treasurer
+      permission:
+        columns:
+          - pref_id
+          - user_id
+          - value
+        filter:
+          pref_type:
+            name:
+              _like: attribute.%
+    - role: webmaster
+      permission:
+        columns:
+          - user_id
+          - pref_id
+          - value
+        filter: {}
+  update_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - value
+        filter:
+          user_id:
+            _eq: X-Hasura-User-Id
+        check: null
+- table:
+    schema: cucb
+    name: users
+  object_relationships:
+    - name: admin_type
+      using:
+        manual_configuration:
+          remote_table:
+            schema: cucb
+            name: auth_user_types
+          column_mapping:
+            admin: id
+  array_relationships:
+    - name: calendar_subscriptions
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: cucb
+            name: calendar_subscriptions
+    - name: gig_lineups
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: cucb
+            name: gigs_lineups
+    - name: user_instruments
+      using:
+        foreign_key_constraint_on:
+          column: user_id
+          table:
+            schema: cucb
+            name: users_instruments
+  computed_fields:
+    - name: prefs
+      definition:
+        function:
+          schema: cucb
+          name: user_prefs_or_default
+        table_argument: null
+      comment: ""
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - bio
+          - bio_changed_date
+          - first
+          - join_date
+          - last
+          - last_login_date
+          - id
+        filter: {}
+    - role: current_user
+      permission:
+        columns:
+          - admin
+          - bio
+          - bio_changed_date
+          - dietaries
+          - email
+          - first
+          - gig_notes
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - location_info
+          - mobile_contact_info
+          - password_reset_deadline
+          - username
+        filter:
+          id:
+            _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - admin
+          - bio
+          - bio_changed_date
+          - dietaries
+          - email
+          - first
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - location_info
+          - mobile_contact_info
+          - username
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - admin
+          - bio
+          - bio_changed_date
+          - dietaries
+          - email
+          - first
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - location_info
+          - mobile_contact_info
+          - username
+        filter: {}
+    - role: music_only
+      permission:
+        columns:
+          - admin
+          - email
+          - first
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - username
+        filter:
+          id:
+            _eq: X-Hasura-User-Id
+    - role: president
+      permission:
+        columns:
+          - admin
+          - bio
+          - bio_changed_date
+          - dietaries
+          - email
+          - first
+          - gig_notes
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - location_info
+          - mobile_contact_info
+          - username
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - admin
+          - bio
+          - bio_changed_date
+          - dietaries
+          - email
+          - first
+          - gig_notes
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - location_info
+          - mobile_contact_info
+          - username
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - admin
+          - bio
+          - bio_changed_date
+          - dietaries
+          - email
+          - first
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - location_info
+          - mobile_contact_info
+          - username
+        filter: {}
+    - role: user
+      permission:
+        columns:
+          - bio
+          - bio_changed_date
+          - first
+          - join_date
+          - last
+          - last_login_date
+          - id
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - admin
+          - bio
+          - bio_changed_date
+          - dietaries
+          - email
+          - first
+          - gig_notes
+          - id
+          - join_date
+          - last
+          - last_login_date
+          - location_info
+          - mobile_contact_info
+          - username
+        filter: {}
+  update_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - bio
+          - dietaries
+          - email
+          - first
+          - gig_notes
+          - last
+          - location_info
+          - mobile_contact_info
+          - salted_password
+          - username
+        filter:
+          id:
+            _eq: X-Hasura-User-Id
+        check: null
+    - role: equipment
+      permission:
+        columns:
+          - bio
+          - dietaries
+          - email
+          - first
+          - last
+          - location_info
+          - mobile_contact_info
+          - salted_password
+          - username
+        filter:
+          id:
+            _ne: X-Hasura-User-Id
+        check: null
+    - role: gig_editor
+      permission:
+        columns:
+          - bio
+          - dietaries
+          - email
+          - first
+          - last
+          - location_info
+          - mobile_contact_info
+          - salted_password
+          - username
+        filter:
+          id:
+            _ne: X-Hasura-User-Id
+        check: null
+    - role: music_only
+      permission:
+        columns:
+          - email
+          - first
+          - last
+          - salted_password
+        filter:
+          id:
+            _eq: X-Hasura-User-Id
+        check: null
+    - role: president
+      permission:
+        columns:
+          - bio
+          - dietaries
+          - email
+          - first
+          - last
+          - location_info
+          - mobile_contact_info
+          - salted_password
+          - username
+        filter:
+          id:
+            _ne: X-Hasura-User-Id
+        check: null
+    - role: secretary
+      permission:
+        columns:
+          - bio
+          - dietaries
+          - email
+          - first
+          - last
+          - location_info
+          - mobile_contact_info
+          - salted_password
+          - username
+        filter:
+          id:
+            _ne: X-Hasura-User-Id
+        check: null
+    - role: treasurer
+      permission:
+        columns:
+          - bio
+          - dietaries
+          - email
+          - first
+          - last
+          - location_info
+          - mobile_contact_info
+          - salted_password
+          - username
+        filter:
+          id:
+            _ne: X-Hasura-User-Id
+        check: null
+    - role: webmaster
+      permission:
+        columns:
+          - admin
+          - bio
+          - dietaries
+          - email
+          - first
+          - last
+          - location_info
+          - mobile_contact_info
+          - salted_password
+          - username
+        filter:
+          id:
+            _ne: X-Hasura-User-Id
+        check: null
+- table:
+    schema: cucb
+    name: users_instruments
+  object_relationships:
+    - name: instrument
+      using:
+        foreign_key_constraint_on: instr_id
+    - name: user
+      using:
+        foreign_key_constraint_on: user_id
+  array_relationships:
+    - name: connections
+      using:
+        foreign_key_constraint_on:
+          column: user_instrument_id
+          table:
+            schema: cucb
+            name: users_instruments_connections
+    - name: gigs_lineups_instruments
+      using:
+        foreign_key_constraint_on:
+          column: user_instrument_id
+          table:
+            schema: cucb
+            name: gigs_lineups_instruments
+  insert_permissions:
+    - role: current_user
+      permission:
+        check: {}
+        set:
+          user_id: x-hasura-User-Id
+        columns:
+          - instr_id
+          - nickname
+        backend_only: false
+    - role: equipment
+      permission:
+        check: {}
+        columns:
+          - instr_id
+          - nickname
+          - user_id
+        backend_only: false
+    - role: president
+      permission:
+        check: {}
+        columns:
+          - instr_id
+          - nickname
+          - user_id
+        backend_only: false
+    - role: secretary
+      permission:
+        check: {}
+        columns:
+          - instr_id
+          - nickname
+          - user_id
+        backend_only: false
+    - role: webmaster
+      permission:
+        check: {}
+        columns:
+          - instr_id
+          - nickname
+          - user_id
+        backend_only: false
+  select_permissions:
+    - role: blue_gig
+      permission:
+        columns:
+          - deleted
+          - id
+          - instr_id
+          - user_id
+          - nickname
+        filter:
+          _or:
+            - deleted:
+                _ne: true
+            - gigs_lineups_instruments:
+                approved:
+                  _eq: true
+    - role: current_user
+      permission:
+        columns:
+          - deleted
+          - id
+          - instr_id
+          - user_id
+          - nickname
+        filter:
+          user_id:
+            _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - user_id
+          - instr_id
+          - nickname
+          - deleted
+        filter: {}
+    - role: gig_editor
+      permission:
+        columns:
+          - deleted
+          - id
+          - instr_id
+          - user_id
+          - nickname
+        filter:
+          _or:
+            - deleted:
+                _ne: true
+            - gigs_lineups_instruments:
+                approved:
+                  _eq: true
+    - role: president
+      permission:
+        columns:
+          - id
+          - user_id
+          - instr_id
+          - nickname
+          - deleted
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - user_id
+          - instr_id
+          - nickname
+          - deleted
+        filter: {}
+    - role: treasurer
+      permission:
+        columns:
+          - deleted
+          - id
+          - instr_id
+          - user_id
+          - nickname
+        filter:
+          _or:
+            - deleted:
+                _ne: true
+            - gigs_lineups_instruments:
+                approved:
+                  _eq: true
+    - role: user
+      permission:
+        columns:
+          - deleted
+          - id
+          - instr_id
+          - user_id
+          - nickname
+        filter:
+          _or:
+            - deleted:
+                _ne: true
+            - gigs_lineups_instruments:
+                approved:
+                  _eq: true
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - user_id
+          - instr_id
+          - nickname
+          - deleted
+        filter: {}
+  update_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - deleted
+          - nickname
+        filter:
+          user_id:
+            _eq: X-Hasura-User-Id
+        check: null
+    - role: equipment
+      permission:
+        columns:
+          - deleted
+          - nickname
+        filter: {}
+        check: null
+    - role: president
+      permission:
+        columns:
+          - deleted
+          - nickname
+        filter: {}
+        check: null
+    - role: secretary
+      permission:
+        columns:
+          - deleted
+          - nickname
+        filter: {}
+        check: null
+    - role: webmaster
+      permission:
+        columns:
+          - deleted
+          - nickname
+        filter: {}
+        check: null
+- table:
+    schema: cucb
+    name: users_instruments_connections
+  object_relationships:
+    - name: connection_type
+      using:
+        foreign_key_constraint_on: conn_id
+    - name: users_instrument
+      using:
+        foreign_key_constraint_on: user_instrument_id
+  insert_permissions:
+    - role: current_user
+      permission:
+        check:
+          users_instrument:
+            user_id:
+              _eq: X-Hasura-User-Id
+        columns:
+          - conn_id
+          - user_instrument_id
+        backend_only: false
+    - role: equipment
+      permission:
+        check: {}
+        columns:
+          - conn_id
+          - user_instrument_id
+        backend_only: false
+    - role: president
+      permission:
+        check: {}
+        columns:
+          - conn_id
+          - user_instrument_id
+        backend_only: false
+    - role: secretary
+      permission:
+        check: {}
+        columns:
+          - conn_id
+          - user_instrument_id
+        backend_only: false
+    - role: webmaster
+      permission:
+        check: {}
+        columns:
+          - conn_id
+          - user_instrument_id
+        backend_only: false
+  select_permissions:
+    - role: current_user
+      permission:
+        columns:
+          - conn_id
+          - id
+          - user_instrument_id
+        filter:
+          users_instrument:
+            user_id:
+              _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        columns:
+          - id
+          - user_instrument_id
+          - conn_id
+        filter: {}
+    - role: president
+      permission:
+        columns:
+          - id
+          - user_instrument_id
+          - conn_id
+        filter: {}
+    - role: secretary
+      permission:
+        columns:
+          - id
+          - user_instrument_id
+          - conn_id
+        filter: {}
+    - role: webmaster
+      permission:
+        columns:
+          - id
+          - user_instrument_id
+          - conn_id
+        filter: {}
+  delete_permissions:
+    - role: current_user
+      permission:
+        filter:
+          users_instrument:
+            user_id:
+              _eq: X-Hasura-User-Id
+    - role: equipment
+      permission:
+        filter: {}
+    - role: president
+      permission:
+        filter: {}
+    - role: secretary
+      permission:
+        filter: {}
+    - role: webmaster
+      permission:
+        filter: {}

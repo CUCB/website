@@ -1,7 +1,10 @@
-<script>
+<script context="module">
   import LoginForm from "../../components/LoginForm.svelte";
-  import { title } from "../../view.js";
-  $title = "Sign in";
+  import { makeTitle } from "../../view";
 </script>
+
+<svelte:head>
+  <title>{makeTitle('Sign in')}</title>
+</svelte:head>
 
 <LoginForm redirectTo="/members" />

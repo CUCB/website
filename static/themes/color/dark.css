@@ -7,6 +7,10 @@
   --footer_color: rgba(204, 204, 204, 0.8);
   --logo_color: var(--text_color);
   --form_color: #555;
+  --negative: rgb(255, 62, 62);
+  --neutral: rgb(255, 165, 0);
+  --positive: rgb(0, 165, 53);
+  --unselected: gray;
 }
 
 /* header #logo {

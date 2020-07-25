@@ -11,7 +11,7 @@ export const CreateUser = `
         last: $lastName
       }],
       on_conflict: {
-        constraint: idx_17515_primary,
+        constraint: cucb_users_id_key,
         update_columns: [
           username,
           admin,

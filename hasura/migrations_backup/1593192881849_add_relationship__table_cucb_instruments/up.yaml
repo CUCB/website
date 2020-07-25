@@ -1,0 +1,8 @@
+- args:
+    name: parent
+    table:
+      name: instruments
+      schema: cucb
+    using:
+      foreign_key_constraint_on: parent_id
+  type: create_object_relationship

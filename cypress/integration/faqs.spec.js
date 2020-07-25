@@ -13,7 +13,7 @@ describe("FAQs pages", () => {
   });
 
   describe("Booking FAQs", () => {
-    beforeEach(() => cy.visit("/faqs/book"));
+    before(() => cy.visit("/faqs/book"));
 
     it("includes the title", () => {
       cy.contains("h1", "Frequently Asked Questions");
@@ -29,7 +29,7 @@ describe("FAQs pages", () => {
   });
 
   describe("Joining FAQs", () => {
-    beforeEach(() => cy.visit("/faqs/join"));
+    before(() => cy.visit("/faqs/join"));
 
     it("includes the title", () => {
       cy.contains("h1", "Frequently Asked Questions");

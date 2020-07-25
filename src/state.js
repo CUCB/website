@@ -1,3 +1,5 @@
+import { writable } from "svelte/store";
+
 export const cache = fn => {
   let cached = new Map();
   return (...args) => {
@@ -8,3 +10,5 @@ export const cache = fn => {
     return cached.get(key);
   };
 };
+
+export const prefs = writable(null);

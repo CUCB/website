@@ -1,3 +1,34 @@
+<script context="module">
+  import { notLoggedIn } from "../../client-auth";
+  import { makeClient } from "../../graphql/client";
+  import { QueryPrefsLike } from "../../graphql/prefs";
+  import { prefs } from "../../state";
+
+  export async function preload(_, session) {
+    if (notLoggedIn.bind(this)(session)) return;
+
+    let clientCurrentUser = makeClient(this.fetch, {
+      role: "current_user",
+    });
+    let res = await clientCurrentUser.query({
+      query: QueryPrefsLike,
+      variables: { name: "%" },
+    });
+
+    if (!res.data) {
+      // Don't properly fail, we can live without the information, but show an error
+      console.error(res);
+    } else {
+      let prefs_ = {};
+      for (let pref of res.data.cucb_users[0].prefs) {
+        prefs_[pref.pref_type.name] = pref.value;
+      }
+
+      prefs.set(prefs_);
+    }
+  }
+</script>
+
 <style>
   nav {
     display: flex;
@@ -21,25 +52,13 @@
   }
 </style>
 
-<script context="module">
-  import { notLoggedIn } from "../../client-auth.js";
-  export function preload(_, session) {
-    if (notLoggedIn.bind(this)(session)) return;
-  }
-</script>
-
-<script>
-  import { title } from "../../view.js";
-  $title = "Members";
-</script>
-
 <nav>
-  <a href="/members/gigs/search">gig diary</a>
+  <a href="/members/gigs">gig diary</a>
   <a href="/members/music">music</a>
   <a href="/members/whoswho">who's who</a>
   <a href="/faqs/members">FAQs</a>
-  <a href="/members/resources/">Resources</a>
-  <a href="/session/">Sessions</a>
-  <a href="/members/user/">My Profile!</a>
+  <a href="/members/resources/">resources</a>
+  <a href="/session/">sessions</a>
+  <a href="/members/user/">my profile!</a>
 </nav>
 <slot />

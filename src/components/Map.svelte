@@ -12,12 +12,4 @@
   export let title;
 </script>
 
-<iframe
-  data-test="map"
-  {title}
-  frameborder="0"
-  scrolling="no"
-  marginheight="0"
-  marginwidth="0"
-  {src}
-></iframe>
+<iframe data-test="map" {title} frameborder="0" scrolling="no" {src}></iframe>
