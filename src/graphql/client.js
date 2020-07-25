@@ -11,8 +11,16 @@ export const client = writable(null);
 export const clientCurrentUser = writable(null);
 
 export function makeClient(fetch, kwargs) {
+  const browserDomain =
+    typeof window !== "undefined"
+      ? window.location.href
+          .split("/", 3)
+          .slice(0, 3)
+          .join("/")
+      : undefined;
+
   const httpLink = createHttpLink({
-    uri: `${(kwargs && kwargs.host) || host}${path}`,
+    uri: `${browserDomain || host}${path}`,
     fetch,
   });
 

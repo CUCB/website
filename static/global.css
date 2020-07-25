@@ -60,6 +60,12 @@ code {
   ul {
     padding-left: 20px;
   }
+
+  blockquote {
+    margin-left: 20px;
+    margin-right: 20px;
+    font-style: italic;
+  }
 }
 
 @media (min-width: 500px) {
@@ -117,15 +123,23 @@ input[type="submit"]:focus {
   outline: 0;
 }
 
+textarea {
+  resize: none;
+  height: unset;
+  padding: 5px;
+}
+
 button,
 input[type="submit"] {
-  appearance: none;
   color: var(--text_color);
   background: var(--background);
   padding: 0 10px;
   height: 34px;
   border-radius: 0.25em;
   border: 1px solid var(--form_color);
+  cursor: pointer;
+  font-family: var(--text);
+  font-size: 1em;
 }
 
 button:active,

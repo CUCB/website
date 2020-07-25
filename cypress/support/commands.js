@@ -30,11 +30,11 @@ Cypress.Commands.add("executeMutation", (mutation, params) =>
     .should("not.have.key", "errors"),
 );
 
+Cypress.Commands.add("executeQuery", (mutation, params) => cy.executeMutation(mutation, params).its("data"));
+
 // Open the fetch polyfill, which is required for stubbing responses to work
 // This is required due to https://github.com/cypress-io/cypress/issues/95 not being resolved (yet)
-Cypress.Commands.add("fetchPolyfill", () =>
-  cy.readFile("cypress/deps/unfetch.umd.js"),
-);
+Cypress.Commands.add("fetchPolyfill", () => cy.readFile("cypress/deps/unfetch.umd.js"));
 
 // Click a link so cypress checks the response status code
 Cypress.Commands.add(
@@ -64,4 +64,24 @@ Cypress.Commands.add("removeFile", filepath => {
     name: "removeFile",
     displayName: "removeFile",
   });
+});
+
+Cypress.Commands.add("cssProperty", name =>
+  cy
+    .document()
+    .its("documentElement")
+    .then(elem => getComputedStyle(elem[0]))
+    .invoke("getPropertyValue", name)
+    .invoke("trim"),
+);
+
+Cypress.Commands.add("hasTooltip", { prevSubject: true }, (subject, content) => {
+  cy.wrap(subject)
+    .trigger("mouseenter")
+    .then(subject => {
+      cy.get("[data-test='tooltip']")
+        .contains(content)
+        .should("be.visible");
+      cy.wrap(subject).trigger("mouseleave");
+    });
 });

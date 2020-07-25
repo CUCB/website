@@ -1,0 +1,1 @@
+drop function cucb.user_prefs_or_default;

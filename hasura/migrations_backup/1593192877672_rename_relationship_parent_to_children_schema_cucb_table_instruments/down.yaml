@@ -1,0 +1,7 @@
+- args:
+    name: children
+    new_name: parent
+    table:
+      name: instruments
+      schema: cucb
+  type: rename_relationship

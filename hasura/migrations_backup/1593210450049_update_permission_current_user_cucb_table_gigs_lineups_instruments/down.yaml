@@ -1,0 +1,26 @@
+- args:
+    role: current_user
+    table:
+      name: gigs_lineups_instruments
+      schema: cucb
+  type: drop_delete_permission
+- args:
+    permission:
+      filter:
+        _and:
+          - gigs_lineup:
+              gig:
+                _and:
+                  - allow_signups:
+                      _eq: true
+                  - admins_only:
+                      _eq: false
+          - approved:
+              _ne: true
+          - user_id:
+              _eq: X-Hasura-User-Id
+    role: current_user
+    table:
+      name: gigs_lineups_instruments
+      schema: cucb
+  type: create_delete_permission

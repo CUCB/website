@@ -103,6 +103,7 @@
     <a
       aria-current="{segment === 'members' ? 'page' : undefined}"
       href="members"
+      rel="prefetch"
     >
       members
     </a>

@@ -1,6 +1,9 @@
-<script>
-  import { title } from "../view.js";
-  $title = "Committee";
+<script context="module">
+  import { makeTitle } from "../view";
 </script>
 
-<!-- TODO --- this page!! -->
+<svelte:head>
+  <title>{makeTitle('Committee')}</title>
+</svelte:head>
+
+<!-- TODO --- this page!! (issue #19) -->

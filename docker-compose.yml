@@ -11,15 +11,16 @@ services:
     ports:
       - "5432:5432" # exposed so cypress can connect
   graphql-engine:
-    image: hasura/graphql-engine:v1.2.2.cli-migrations
+    image: hasura/graphql-engine:v1.2.2.cli-migrations-v2
     volumes:
       - ./hasura/migrations:/hasura-migrations
+      - ./hasura/metadata:/hasura-metadata
     depends_on:
       - "postgres"
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "true" # set to "false" to disable console
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
       HASURA_GRAPHQL_AUTH_HOOK: http://sapper:4000/auth/hook

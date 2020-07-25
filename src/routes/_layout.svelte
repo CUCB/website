@@ -1,49 +1,7 @@
-<style>
-  .layout {
-    display: grid;
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
-    grid-template-rows: auto 1fr auto;
-    max-width: 60em;
-    width: 100%;
-    margin: auto;
-    align-items: stretch;
-    padding: 0.5em 2em;
-    box-sizing: border-box;
-  }
-
-  main {
-    position: relative;
-    padding-top: 1em;
-    width: 100%;
-    max-width: 56em;
-    box-sizing: border-box;
-    justify-self: center;
-  }
-
-  @media (max-width: 800px) {
-    .layout {
-      padding: 0.5em 1em;
-    }
-  }
-
-  :global(footer) {
-    max-width: 40em;
-    justify-self: center;
-  }
-
-  @media (max-width: 600px) {
-    :global(footer) {
-      padding-bottom: 2.5rem;
-    }
-  }
-</style>
-
 <script context="module">
   import { makeClient } from "../graphql/client";
 
   export async function preload({ query }, session) {
-    let client = await makeClient(this.fetch);
     let committee = {};
 
     // This could be in /committee.json, but this allows us
@@ -103,28 +61,15 @@
 
     committee = { ...fallbackCommittee, ...committee };
 
-    let color =
-      query.color ||
-      (session && session.theme && session.theme.color) ||
-      "light";
+    let color = query.color || (session && session.theme && session.theme.color) || "light";
 
     // Read user session or cookie or url param or ...
     return {
       color,
-      font:
-        query.font ||
-        (session && session.theme && session.theme.font) ||
-        "standard",
+      font: query.font || (session && session.theme && session.theme.font) || "standard",
       accent:
-        query.accent ||
-        (session && session.theme && session.theme.accent) ||
-        color === "dark"
-          ? "858585"
-          : "075c01",
-      logo:
-        query.logo ||
-        (session && session.theme && session.theme.logo) ||
-        undefined,
+        query.accent || (session && session.theme && session.theme.accent) || color === "dark" ? "858585" : "075c01",
+      logo: query.logo || (session && session.theme && session.theme.logo) || undefined,
       committee,
     };
   }
@@ -133,12 +78,10 @@
 <script>
   import Header from "../components/Header.svelte";
   import Footer from "../components/Footer.svelte";
-  import Customiser from "../components/Customiser.svelte";
-  import { goto, stores } from "@sapper/app";
+  import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
-  import { onMount, setContext } from "svelte";
-  import { readable } from "svelte/store";
-  import { title } from "../view.js";
+  import { onMount } from "svelte";
+  import { makeTitle } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
 
   export let segment;
@@ -152,9 +95,7 @@
   let windowWidth;
   let { session } = stores();
   let navVisible;
-  $: navVisible && windowWidth <= 600
-    ? disableBodyScroll()
-    : enableBodyScroll();
+  $: navVisible && windowWidth <= 600 ? disableBodyScroll() : enableBodyScroll();
 
   function correctMobileHeight() {
     let vh = window.innerHeight * 0.01;
@@ -168,47 +109,69 @@
       .slice(0, 3)
       .join("/");
     client.set(makeClient(fetch, { host: browserDomain }));
-    clientCurrentUser.set(
-      makeClient(fetch, { host: browserDomain, role: "current_user" }),
-    );
+    clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
   });
 
   $: color = query.color;
   $: font = query.font;
   $: accent = query.accent;
   $: logo = query.logo;
-
-  $: queryString =
-    "?" +
-    Object.entries(query)
-      .filter(([k, v]) => v)
-      .map(([k, v], _) => `${k}=${v}`)
-      .join("&");
-  const update = () => goto(queryString);
 </script>
+
+<style>
+  .layout {
+    display: grid;
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    grid-template-rows: auto 1fr auto;
+    max-width: 60em;
+    width: 100%;
+    margin: auto;
+    align-items: stretch;
+    padding: 0.5em 2em;
+    box-sizing: border-box;
+  }
+
+  main {
+    position: relative;
+    padding-top: 1em;
+    width: 100%;
+    max-width: 56em;
+    box-sizing: border-box;
+    justify-self: center;
+  }
+
+  @media (max-width: 800px) {
+    .layout {
+      padding: 0.5em 1em;
+    }
+  }
+
+  :global(footer) {
+    max-width: 40em;
+    justify-self: center;
+  }
+
+  @media (max-width: 600px) {
+    :global(footer) {
+      padding-bottom: 2.5rem;
+    }
+  }
+</style>
 
 <svelte:head>
   <link
-    href="https://fonts.googleapis.com/css2?family=Roboto:ital@0;1&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" type="text/css" href="themes/color/{color}.css" />
   <link rel="stylesheet" type="text/css" href="themes/font/{font}.css" />
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}"
-  />
+  <link rel="stylesheet" type="text/css" href="themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}" />
   <link rel="stylesheet" type="text/css" href="global.css" />
-  <title>
-    {$title ? `${$title} | Cambridge University Ceilidh Band` : `Cambridge University Ceilidh Band`}
-  </title>
+  <title>{makeTitle()}</title>
 </svelte:head>
 
-<svelte:window
-  on:resize="{correctMobileHeight}"
-  bind:innerWidth="{windowWidth}"
-/>
+<svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
 <div class="layout" class:locked="{navVisible}">
   <Header {segment} user="{$session}" bind:navVisible />

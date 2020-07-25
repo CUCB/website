@@ -1,0 +1,12 @@
+- args:
+    cascade: false
+    read_only: false
+    sql: alter table "cucb"."gigs_lineups" drop constraint "gigs_lineups_pkey";
+  type: run_sql
+- args:
+    cascade: false
+    read_only: false
+    sql:
+      "alter table \"cucb\".\"gigs_lineups\"\n    add constraint \"cucb_gigs_lineups_id_key\"
+      \n    primary key ( \"id\" );"
+  type: run_sql

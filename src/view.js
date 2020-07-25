@@ -1,3 +1,4 @@
 import { writable } from "svelte/store";
 
-export const title = writable(null);
+const NAME = `Cambridge University Ceilidh Band`;
+export const makeTitle = pageTitle => `${pageTitle} | ${NAME}`;
