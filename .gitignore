@@ -10,3 +10,4 @@ yarn-error.log
 .env
 cached_content
 db_restore
+temp/*

@@ -60,6 +60,7 @@ polka()
           firstName: req.session.firstName,
           lastName: req.session.lastName,
           hasuraRole: req.session.hasuraRole,
+          theme: req.session.theme,
         };
       },
     }),

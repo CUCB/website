@@ -11,7 +11,10 @@ export async function post(req, res, next) {
       req.session.hasuraRole = loginResult.hasura_role;
       req.session.firstName = loginResult.first;
       req.session.lastName = loginResult.last;
-      req.session.save(() => (res.statusCode = 204), res.end());
+      req.session.save(
+        () => (res.statusCode = 200),
+        res.end(req.session.userId),
+      );
     } catch (e) {
       res.statusCode = 401;
       res.end("Incorrect username or password");

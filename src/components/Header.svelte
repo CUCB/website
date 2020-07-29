@@ -2,7 +2,7 @@
   header {
     display: grid;
     grid-template-areas:
-      "logo title navButton"
+      "logo title settingsButton"
       "nav nav nav";
     align-items: center;
     text-align: center;
@@ -37,11 +37,30 @@
     display: none;
   }
 
-  button {
+  #navToggle {
     background: none;
     border-radius: 5px;
     grid-area: navButton;
     cursor: pointer;
+  }
+
+  #settingsToggle {
+    grid-area: settingsButton;
+    border: none;
+    cursor: pointer;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    justify-self: flex-end;
+    font-size: 2rem;
+  }
+
+  #settingsToggle:focus,
+  #settingsToggle:active {
+    border: unset;
+    box-shadow: unset;
+    outline: none;
   }
 
   @media only screen and (max-width: 600px) {
@@ -87,11 +106,16 @@
   import Nav from "./Nav.svelte";
   import Logo from "./Logo.svelte";
   import { fade } from "svelte/transition";
+  import { tweened } from "svelte/motion";
+  import { sineInOut } from "svelte/easing";
   import { onMount } from "svelte";
   export let segment;
   export let user;
+  export let showSettings = false;
   let animate = false;
   let button;
+  let cog;
+  let cogRotation = tweened(0, { duration: 200, easing: sineInOut });
   export let navVisible = false;
   let toggleNav = () => {
     navVisible = !navVisible;
@@ -107,13 +131,31 @@
   <Logo id="logo" />
   {#if animate}
     <h1 id="title" in:fade>Cambridge University Ceilidh Band</h1>
+    {#if user.userId}
+      <button
+        id="settingsToggle"
+        in:fade
+        bind:this="{cog}"
+        on:click="{() => {
+          showSettings = !showSettings;
+          cog.blur();
+        }}"
+      >
+        <i
+          class="las la-cog"
+          style="transform:rotate({$cogRotation}deg)"
+          on:mouseover="{() => cogRotation.update(x => x + 60)}"
+          on:touchstart="{() => cogRotation.update(x => x + 60)}"
+        ></i>
+      </button>
+    {/if}
   {:else}
     <noscript>
       <h1 id="title">Cambridge University Ceilidh Band</h1>
     </noscript>
   {/if}
   <div class="button-background">
-    <button bind:this="{button}" on:click="{toggleNav}">
+    <button bind:this="{button}" on:click="{toggleNav}" id="navToggle">
       {navVisible ? 'hide' : 'menu'}
     </button>
   </div>

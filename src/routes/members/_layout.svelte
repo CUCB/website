@@ -33,7 +33,7 @@
   nav {
     display: flex;
     justify-content: center;
-    background: rgba(var(--accent_triple), 0.1);
+    background: rgba(var(--accent_triple), 0.05);
     overflow: auto;
     flex-wrap: wrap;
     border-radius: 5px;
@@ -41,13 +41,14 @@
   }
 
   nav a {
-    padding: 0 10px;
+    padding: 0 10px 2px 10px;
     text-transform: lowercase;
   }
 
   @media only screen and (max-width: 600px) {
     nav a {
       font-size: 1.3em;
+      padding: 0 5px 2px 5px;
     }
   }
 </style>
