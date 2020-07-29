@@ -11,9 +11,7 @@
   --neutral: rgb(255, 165, 0);
   --positive: rgb(0, 165, 53);
   --unselected: gray;
+  --accent_triple: 0, 165, 53;
+  --accent: rgb(var(--accent_triple));
+  --theme_name: dark;
 }
-
-/* header #logo {
-    filter: invert(100%) sepia(0%) saturate(3630%) hue-rotate(183deg)
-        brightness(79%) contrast(102%);
-} */

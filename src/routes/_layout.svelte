@@ -1,3 +1,45 @@
+<style>
+  .layout {
+    display: grid;
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    grid-template-rows: auto 1fr auto;
+    max-width: 60em;
+    width: 100%;
+    margin: auto;
+    align-items: stretch;
+    padding: 0.5em 2em;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  main {
+    position: relative;
+    padding-top: 1em;
+    width: 100%;
+    max-width: 56em;
+    box-sizing: border-box;
+    justify-self: center;
+  }
+
+  @media (max-width: 800px) {
+    .layout {
+      padding: 0.5em 1em;
+    }
+  }
+
+  :global(footer) {
+    max-width: 40em;
+    justify-self: center;
+  }
+
+  @media (max-width: 600px) {
+    :global(footer) {
+      padding-bottom: 2.5rem;
+    }
+  }
+</style>
+
 <script context="module">
   import { makeClient } from "../graphql/client";
 
@@ -61,14 +103,13 @@
 
     committee = { ...fallbackCommittee, ...committee };
 
-    let color = query.color || (session && session.theme && session.theme.color) || "light";
+    let color = query.color || (session && session.theme && session.theme.color) || "default";
 
     // Read user session or cookie or url param or ...
     return {
       color,
       font: query.font || (session && session.theme && session.theme.font) || "standard",
-      accent:
-        query.accent || (session && session.theme && session.theme.accent) || color === "dark" ? "858585" : "075c01",
+      accent: query.accent || (session && session.theme && session.theme[`accent_${color}`]),
       logo: query.logo || (session && session.theme && session.theme.logo) || undefined,
       committee,
     };
@@ -78,11 +119,14 @@
 <script>
   import Header from "../components/Header.svelte";
   import Footer from "../components/Footer.svelte";
-  import { stores } from "@sapper/app";
+  import Popup from "../components/Popup.svelte";
+  import { goto, stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
   import { makeTitle } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
+  import { HsvPicker } from "svelte-color-picker";
+  import { Map } from "immutable";
 
   export let segment;
   export let color;
@@ -92,17 +136,54 @@
   export let committee;
 
   let query = { color, font, accent, logo };
+  let colors = ["default", "light", "dark"];
   let windowWidth;
   let { session } = stores();
+  let showSettings;
   let navVisible;
+  let settings = Map({ accentOpen: false });
   $: navVisible && windowWidth <= 600 ? disableBodyScroll() : enableBodyScroll();
+
+  $: showSettings ? disableBodyScroll() : enableBodyScroll();
 
   function correctMobileHeight() {
     let vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty("--vh", `${vh}px`);
   }
 
+  let updateLocalStorage = _ => {};
+  let updateSession = () => {};
+
+  const propLocalStorage = name => {
+    const value = localStorage.getItem(`${name}_${$session.userId}`);
+    if (value !== "null") return value;
+  };
+
+  const fromCurrentStyle = prop =>
+    getComputedStyle(document.documentElement)
+      .getPropertyValue(`--${prop}`)
+      .trim();
+
+  const rgbStringToHex = triple =>
+    triple
+      .split(",")
+      .map(i => parseInt(i))
+      .map(i => i.toString(16))
+      .map(i => (i.length === 1 ? "0" + i : i))
+      .join("");
+
+  const updateSettings = () => {
+    if ($session.userId && updateProps) {
+      for (let color of colors) {
+        let prop = `accent_${color}`;
+        !settings.get(prop) && (settings = settings.set(prop, localStorage.getItem(`${prop}_${$session.userId}`)));
+      }
+    }
+  };
+
   onMount(() => {
+    color = propLocalStorage("color") || color;
+    accent = propLocalStorage(`accent_${color}`) || rgbStringToHex(fromCurrentStyle("accent_triple"));
     correctMobileHeight();
     const browserDomain = window.location.href
       .split("/", 3)
@@ -110,63 +191,81 @@
       .join("/");
     client.set(makeClient(fetch, { host: browserDomain }));
     clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
+    settings = Map({ accentOpen: false, color });
+    settings = settings.set(`accent_${color}`, accent);
+    updateSettings();
+    console.log(settings);
+
+    updateLocalStorage = settings => {
+      if ($session.userId) {
+        for (let prop of updateProps) {
+          settings.get(prop) && localStorage.setItem(`${prop}_${$session.userId}`, settings.get(prop));
+        }
+      }
+    };
+
+    updateSession = () => {
+      let theme = new URLSearchParams();
+      for (let prop of updateProps) {
+        theme.append(prop, localStorage.getItem(`${prop}_${$session.userId}`));
+      }
+      fetch("/updatetheme", {
+        method: "POST",
+        body: theme,
+        headers: {
+          "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
+      });
+    };
   });
 
-  $: color = query.color;
+  let updateProps;
   $: font = query.font;
-  $: accent = query.accent;
   $: logo = query.logo;
+  $: color = settings.get("color") || query.color;
+  $: accent = settings.get(`accent_${color}`) || query.accent;
+  $: updateProps = [`accent_${color}`, `color`];
+  $: updateLocalStorage(settings);
+
+  $: queryString =
+    "?" +
+    Object.entries(query)
+      .filter(([k, v]) => v)
+      .map(([k, v], _) => `${k}=${v}`)
+      .join("&");
+  const update = () => goto(queryString);
+
+  function componentToHex(c) {
+    var hex = c.toString(16);
+    return hex.length == 1 ? "0" + hex : hex;
+  }
+
+  function rgbToHex({ r, g, b }) {
+    return componentToHex(r) + componentToHex(g) + componentToHex(b);
+  }
+
+  let timer = {};
+
+  function debounce(setting, value) {
+    timer[setting] && clearTimeout(timer[setting]);
+    timer[setting] = setTimeout(() => {
+      settings = settings.set(setting, value);
+    }, 200);
+  }
 </script>
-
-<style>
-  .layout {
-    display: grid;
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
-    grid-template-rows: auto 1fr auto;
-    max-width: 60em;
-    width: 100%;
-    margin: auto;
-    align-items: stretch;
-    padding: 0.5em 2em;
-    box-sizing: border-box;
-  }
-
-  main {
-    position: relative;
-    padding-top: 1em;
-    width: 100%;
-    max-width: 56em;
-    box-sizing: border-box;
-    justify-self: center;
-  }
-
-  @media (max-width: 800px) {
-    .layout {
-      padding: 0.5em 1em;
-    }
-  }
-
-  :global(footer) {
-    max-width: 40em;
-    justify-self: center;
-  }
-
-  @media (max-width: 600px) {
-    :global(footer) {
-      padding-bottom: 2.5rem;
-    }
-  }
-</style>
 
 <svelte:head>
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
     rel="stylesheet"
   />
+  <link rel="stylesheet" type="text/css" href="themes/color/default.css" />
+  <link rel="stylesheet" type="text/css" href="themes/font/standard.css" />
   <link rel="stylesheet" type="text/css" href="themes/color/{color}.css" />
   <link rel="stylesheet" type="text/css" href="themes/font/{font}.css" />
-  <link rel="stylesheet" type="text/css" href="themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}" />
+  {#if accent}
+    <link rel="stylesheet" type="text/css" href="themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}" />
+  {/if}
   <link rel="stylesheet" type="text/css" href="global.css" />
   <title>{makeTitle()}</title>
 </svelte:head>
@@ -174,11 +273,40 @@
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
 <div class="layout" class:locked="{navVisible}">
-  <Header {segment} user="{$session}" bind:navVisible />
+  <Header {segment} user="{$session}" bind:navVisible bind:showSettings />
 
   <main>
     <slot />
   </main>
 
   <Footer {committee} />
+  {#if showSettings}
+    <Popup
+      on:close="{() => {
+        showSettings = false;
+        updateSession();
+      }}"
+    >
+      <button on:click="{() => (settings = settings.update('accentOpen', x => !x))}">Change accent colour</button>
+      <label>
+        Theme
+        <select
+          value="{settings.get('color')}"
+          on:blur="{event => (settings = settings.set('color', event.target.value))}"
+        >
+          <option value="default">Default (system settings)</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </label>
+    </Popup>
+  {/if}
+  {#if settings.get('accentOpen')}
+    <Popup on:close="{() => (settings = settings.set('accentOpen', false))}" width="auto">
+      <HsvPicker
+        startColor="{accent}"
+        on:colorChange="{event => debounce(`accent_${color}`, rgbToHex(event.detail))}"
+      />
+    </Popup>
+  {/if}
 </div>

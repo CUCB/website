@@ -5,6 +5,22 @@
   let password = "";
   let error;
 
+  let updateProps = ["accent_light", "accent_dark", "accent_default", "color"];
+  const updateSessionTheme = userId => {
+    let theme = new URLSearchParams();
+    for (let prop of updateProps) {
+      let value = localStorage.getItem(`${prop}_${userId}`);
+      if (value !== "null") theme.append(prop, value);
+    }
+    return fetch("/updatetheme", {
+      method: "POST",
+      body: theme,
+      headers: {
+        "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+      },
+    });
+  };
+
   async function submit() {
     const body = new URLSearchParams();
     body.append("username", username);
@@ -21,6 +37,8 @@
     const isSuccessful = status => status >= 200 && status < 300;
 
     if (isSuccessful(res.status)) {
+      // Set theme from localstorage
+      await updateSessionTheme(await res.text());
       // Reload the page so the session is up-to-date
       window.location.href = redirectTo;
     } else {

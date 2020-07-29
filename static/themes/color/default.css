@@ -1,0 +1,37 @@
+:root {
+  --background_triple: 255, 255, 255;
+  --background: rgb(var(--background_triple));
+  --code_color: #555;
+  --code_background: #f0f0f0;
+  --form_color: #777;
+  --text_color: #222;
+  --footer_color: rgba(33, 33, 33, 0.8);
+  --logo_color: var(--text_color);
+  --accent_triple: 7, 92, 1;
+  --accent: rgb(var(--accent_triple));
+  --theme_name: light;
+  --negative: rgb(255, 0, 0);
+  --neutral: rgb(188, 131, 42);
+  --positive: rgb(7, 92, 1);
+  --unselected: gray;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text_color: #ccc;
+    --code_background: #555;
+    --code_color: #f0f0f0;
+    --background_triple: 34, 34, 34;
+    --background: rgb(var(--background_triple));
+    --footer_color: rgba(204, 204, 204, 0.8);
+    --logo_color: var(--text_color);
+    --form_color: #555;
+    --accent_triple: 0, 165, 53;
+    --accent: rgb(var(--accent_triple));
+    --theme_name: dark;
+    --negative: rgb(255, 62, 62);
+    --neutral: rgb(255, 165, 0);
+    --positive: rgb(0, 165, 53);
+    --unselected: gray;
+  }
+}

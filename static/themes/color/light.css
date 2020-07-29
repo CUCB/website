@@ -11,4 +11,7 @@
   --neutral: rgb(188, 131, 42);
   --positive: rgb(7, 92, 1);
   --unselected: gray;
+  --accent_triple: 7, 92, 1;
+  --accent: rgb(var(--accent_triple));
+  --theme_name: light;
 }

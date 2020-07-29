@@ -8,6 +8,7 @@ import { terser } from "rollup-plugin-terser";
 import config from "sapper/config/rollup.js";
 import pkg from "./package.json";
 import sveltePreprocess from "svelte-preprocess";
+import workbox from "rollup-plugin-workbox";
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
@@ -18,9 +19,7 @@ const GRAPHQL_REMOTE = process.env.GRAPHQL_REMOTE;
 const GRAPHQL_PATH = process.env.GRAPHQL_PATH;
 
 const onwarn = (warning, onwarn) =>
-  (warning.code === "CIRCULAR_DEPENDENCY" &&
-    /[/\\]@sapper[/\\]/.test(warning.message)) ||
-  onwarn(warning);
+  (warning.code === "CIRCULAR_DEPENDENCY" && /[/\\]@sapper[/\\]/.test(warning.message)) || onwarn(warning);
 
 const preprocess = sveltePreprocess({
   scss: {
@@ -33,10 +32,7 @@ const preprocess = sveltePreprocess({
 
 const removeWhitespace = {
   markup: input => ({
-    code: input.content.replace(
-      /(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9\-&]|[^<]*?>|[^{]*?})/g,
-      "$1",
-    ),
+    code: input.content.replace(/(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9\-&]|[^<]*?>|[^{]*?})/g, "$1"),
     //.replace(/(?<!<[^>]*?|{[^}]*?)\s+(<|{)(?![^>]*<\/(?:script|style)>)/g, '$1')
   }),
 };
@@ -119,8 +115,7 @@ export default {
       commonjs(),
     ],
     external: Object.keys(pkg.dependencies).concat(
-      require("module").builtinModules ||
-        Object.keys(process.binding("natives")),
+      require("module").builtinModules || Object.keys(process.binding("natives")),
     ),
 
     onwarn,
@@ -128,17 +123,18 @@ export default {
 
   serviceworker: {
     input: config.serviceworker.input(),
-    output: config.serviceworker.output(),
+    output: { file: "temp/service-worker.js" },
     plugins: [
-      resolve(),
-      replace({
-        "process.browser": true,
-        "process.env.NODE_ENV": JSON.stringify(mode),
-        "process.env.GRAPHQL_REMOTE": JSON.stringify(GRAPHQL_REMOTE),
-        "process.env.GRAPHQL_PATH": JSON.stringify(GRAPHQL_PATH),
+      resolve({
+        browser: true,
       }),
-      commonjs(),
       !dev && terser(),
+      workbox.injectManifest({
+        swSrc: "temp/service-worker.js",
+        swDest: config.serviceworker.output().file,
+        globDirectory: "static",
+        globPatterns: ["themes/**/*", "**/*.css"],
+      }),
     ],
 
     onwarn,
