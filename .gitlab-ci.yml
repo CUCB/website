@@ -1,18 +1,18 @@
 stages:
-  - test
+  - build-test
   - infrastructure-update
   - deploy
 
 test:
   image: docker:latest
   variables:
-    DOCKER_DRIVER: overlay
+    DOCKER_DRIVER: overlay2
   services:
     - docker:dind
   before_script:
     - docker info
     - apk add docker-compose
-  stage: test
+  stage: build-test
   script:
     - docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from cypress
   cache:
@@ -26,6 +26,27 @@ test:
       - cypress/screenshots/**/*.png
     expire_in: 7 days
 
+build:
+  type: build
+  variables:
+    DOCKER_DRIVER: overlay2
+  image: docker:latest
+  services:
+    - docker:dind
+  stage: build-test
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
+    - docker build -t $CI_REGISTRY/cucb/website/sapper:latest -f deploy/Dockerfile .
+    - docker push $CI_REGISTRY/cucb/website/sapper:latest
+  cache:
+    key: node-modules-build
+    paths:
+      - node_modules/
+  only:
+    - master
+
 deploy:
   type: deploy
   environment:
@@ -33,6 +54,8 @@ deploy:
     url: dev.cucb.co.uk
   dependencies:
     - pulumi
+    - build
+    - test
   before_script:
     - apt-get update -qq
     - apt-get install -qq git
@@ -49,6 +72,9 @@ deploy:
     - scp pulumi/ssh_keys/gitlab_ci.pub root@$IP:.ssh/
     - rm gitlab_ci
     - echo "CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH" > sshenv
+    - echo "DEPLOY_REGISTRY_USER=$DEPLOY_REGISTRY_USER" >> sshenv
+    - echo "DEPLOY_REGISTRY_PASSWORD=$DEPLOY_REGISTRY_PASSWORD" >> sshenv
+    - echo "DEPLOY_REGISTRY=$CI_REGISTRY" >> sshenv
     - scp sshenv root@$IP:~/.ssh/environment
     - echo "export DROPBOX_ACCESS_TOKEN=$DROPBOX_ACCESS_TOKEN" > dropbox_access_token
     - ssh root@$IP "mkdir -p .env"

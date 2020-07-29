@@ -33,9 +33,7 @@ services:
       options:
         max-size: "50m"
   sapper:
-    build:
-      context: .
-      dockerfile: ./deploy/Dockerfile
+    image: $DEPLOY_REGISTRY/cucb/website/sapper:latest
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
