@@ -37,6 +37,10 @@ if test ! -e .env; then
     cat "~/.env/cloudflare_api_key" >> .env
 fi
 
+echo "Pulling latest build from registry"
+docker login -u $DEPLOY_REGISTRY_USER -p $DEPLOY_REGISTRY_PASSWORD $DEPLOY_REGISTRY
+docker pull $DEPLOY_REGISTRY/cucb/website/sapper:latest
+
 # Start the server, cleaning out unused docker stuff
 echo "Starting server"
 cd /var/www && \
