@@ -3,9 +3,9 @@
   import { QueryGigSignup } from "../../graphql/gigs";
   import { notLoggedIn } from "../../client-auth.js";
 
-  export async function preload(page, session) {
+  export async function preload(_, session) {
     if (notLoggedIn.bind(this)(session)) return;
-    const client = await makeClient(this.fetch, {
+    const client = makeClient(this.fetch, {
       role: "current_user",
     });
     let res = await client.query({ query: QueryGigSignup });

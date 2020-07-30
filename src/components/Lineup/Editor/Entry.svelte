@@ -1,18 +1,3 @@
-<style lang="scss">
-  [aria-selected]::before {
-    content: "✓";
-  }
-
-  ul {
-    list-style-type: none;
-  }
-
-  li {
-    user-select: none;
-    cursor: pointer;
-  }
-</style>
-
 <script>
   import { afterUpdate } from "svelte";
   import flash from "./flash.js";
@@ -27,13 +12,27 @@
   };
 
   const attributeSummary = attributes =>
-    (attributes.includes("leader") ? "L" : "") +
-    (attributes.includes("equipment") ? "T" : "");
+    (attributes.includes("leader") ? "L" : "") + (attributes.includes("equipment") ? "T" : "");
 
   let content;
 
   afterUpdate(() => flash(content));
 </script>
+
+<style>
+  [aria-selected]::before {
+    content: "✓";
+  }
+
+  ul {
+    list-style-type: none;
+  }
+
+  li {
+    user-select: none;
+    cursor: pointer;
+  }
+</style>
 
 <svelte:options immutable />
 <div bind:this="{content}">
@@ -52,12 +51,7 @@
 
   <ul>
     {#each Object.entries(roles) as [role, value]}
-      <li
-        aria-selected="{value ? 'true' : undefined}"
-        on:click="{() => updateEntry.setRole(role, !value)}"
-      >
-        {role}
-      </li>
+      <li aria-selected="{value ? 'true' : undefined}" on:click="{() => updateEntry.setRole(role, !value)}">{role}</li>
     {/each}
   </ul>
 </div>
