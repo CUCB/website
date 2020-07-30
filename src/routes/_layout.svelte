@@ -143,7 +143,7 @@
   onMount(() => {
     color = propLocalStorage("color") || color;
     accent = propLocalStorage(`accent_${color}`) || rgbStringToHex(fromCurrentStyle("accent_triple"));
-    spinnyLogo = JSON.parse(propLocalStorage("spinnyLogo"));
+    spinnyLogo = propLocalStorage("spinnyLogo") && JSON.parse(propLocalStorage("spinnyLogo"));
     correctMobileHeight();
     const browserDomain = window.location.href
       .split("/", 3)
