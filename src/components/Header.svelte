@@ -1,3 +1,29 @@
+<script>
+  import Nav from "./Nav.svelte";
+  import Logo from "./Logo.svelte";
+  import { fade } from "svelte/transition";
+  import { tweened } from "svelte/motion";
+  import { sineInOut } from "svelte/easing";
+  import { onMount } from "svelte";
+  export let segment;
+  export let user;
+  export let showSettings = false;
+  export let spinnyLogo;
+  let animate = false;
+  let button;
+  let cog;
+  let cogRotation = tweened(0, { duration: 200, easing: sineInOut });
+  export let navVisible = false;
+  let toggleNav = () => {
+    navVisible = !navVisible;
+    button.blur();
+  };
+
+  onMount(() => {
+    animate = true;
+  });
+</script>
+
 <style>
   header {
     display: grid;
@@ -102,33 +128,8 @@
   }
 </style>
 
-<script>
-  import Nav from "./Nav.svelte";
-  import Logo from "./Logo.svelte";
-  import { fade } from "svelte/transition";
-  import { tweened } from "svelte/motion";
-  import { sineInOut } from "svelte/easing";
-  import { onMount } from "svelte";
-  export let segment;
-  export let user;
-  export let showSettings = false;
-  let animate = false;
-  let button;
-  let cog;
-  let cogRotation = tweened(0, { duration: 200, easing: sineInOut });
-  export let navVisible = false;
-  let toggleNav = () => {
-    navVisible = !navVisible;
-    button.blur();
-  };
-
-  onMount(() => {
-    animate = true;
-  });
-</script>
-
 <header>
-  <Logo id="logo" />
+  <Logo id="logo" enableSpin="{spinnyLogo}" />
   {#if animate}
     <h1 id="title" in:fade>Cambridge University Ceilidh Band</h1>
     {#if user.userId}
@@ -155,14 +156,7 @@
     </noscript>
   {/if}
   <div class="button-background">
-    <button bind:this="{button}" on:click="{toggleNav}" id="navToggle">
-      {navVisible ? 'hide' : 'menu'}
-    </button>
+    <button bind:this="{button}" on:click="{toggleNav}" id="navToggle">{navVisible ? 'hide' : 'menu'}</button>
   </div>
-  <Nav
-    {segment}
-    {user}
-    visible="{navVisible}"
-    on:click="{() => (navVisible ? toggleNav() : undefined)}"
-  />
+  <Nav {segment} {user} visible="{navVisible}" on:click="{() => (navVisible ? toggleNav() : undefined)}" />
 </header>

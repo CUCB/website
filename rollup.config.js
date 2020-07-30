@@ -33,14 +33,13 @@ const preprocess = sveltePreprocess({
 const removeWhitespace = {
   markup: input => ({
     code: input.content.replace(/(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9\-&]|[^<]*?>|[^{]*?})/g, "$1"),
-    //.replace(/(?<!<[^>]*?|{[^}]*?)\s+(<|{)(?![^>]*<\/(?:script|style)>)/g, '$1')
   }),
 };
 
 export default {
   client: {
     input: config.client.input(),
-    output: config.client.output(),
+    output: { ...config.client.output(), sourcemap: true },
     plugins: [
       replace({
         "process.browser": true,
@@ -96,7 +95,7 @@ export default {
 
   server: {
     input: config.server.input(),
-    output: config.server.output(),
+    output: { ...config.server.output(), sourcemap: true },
     plugins: [
       replace({
         "process.browser": false,

@@ -1,45 +1,3 @@
-<style>
-  .layout {
-    display: grid;
-    min-height: 100vh;
-    min-height: calc(var(--vh, 1vh) * 100);
-    grid-template-rows: auto 1fr auto;
-    max-width: 60em;
-    width: 100%;
-    margin: auto;
-    align-items: stretch;
-    padding: 0.5em 2em;
-    box-sizing: border-box;
-    position: relative;
-  }
-
-  main {
-    position: relative;
-    padding-top: 1em;
-    width: 100%;
-    max-width: 56em;
-    box-sizing: border-box;
-    justify-self: center;
-  }
-
-  @media (max-width: 800px) {
-    .layout {
-      padding: 0.5em 1em;
-    }
-  }
-
-  :global(footer) {
-    max-width: 40em;
-    justify-self: center;
-  }
-
-  @media (max-width: 600px) {
-    :global(footer) {
-      padding-bottom: 2.5rem;
-    }
-  }
-</style>
-
 <script context="module">
   import { makeClient } from "../graphql/client";
 
@@ -135,6 +93,7 @@
   export let logo;
   export let committee;
 
+  let spinnyLogo;
   let query = { color, font, accent, logo };
   let colors = ["default", "light", "dark"];
   let windowWidth;
@@ -184,6 +143,7 @@
   onMount(() => {
     color = propLocalStorage("color") || color;
     accent = propLocalStorage(`accent_${color}`) || rgbStringToHex(fromCurrentStyle("accent_triple"));
+    spinnyLogo = JSON.parse(propLocalStorage("spinnyLogo"));
     correctMobileHeight();
     const browserDomain = window.location.href
       .split("/", 3)
@@ -191,15 +151,14 @@
       .join("/");
     client.set(makeClient(fetch, { host: browserDomain }));
     clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
-    settings = Map({ accentOpen: false, color });
+    settings = Map({ accentOpen: false, color, spinnyLogo });
     settings = settings.set(`accent_${color}`, accent);
     updateSettings();
-    console.log(settings);
 
     updateLocalStorage = settings => {
       if ($session.userId) {
         for (let prop of updateProps) {
-          settings.get(prop) && localStorage.setItem(`${prop}_${$session.userId}`, settings.get(prop));
+          settings.get(prop) !== undefined && localStorage.setItem(`${prop}_${$session.userId}`, settings.get(prop));
         }
       }
     };
@@ -224,7 +183,8 @@
   $: logo = query.logo;
   $: color = settings.get("color") || query.color;
   $: accent = settings.get(`accent_${color}`) || query.accent;
-  $: updateProps = [`accent_${color}`, `color`];
+  $: updateProps = [`accent_${color}`, `color`, `spinnyLogo`];
+  $: settings = settings.set("spinnyLogo", spinnyLogo);
   $: updateLocalStorage(settings);
 
   $: queryString =
@@ -254,6 +214,48 @@
   }
 </script>
 
+<style>
+  .layout {
+    display: grid;
+    min-height: 100vh;
+    min-height: calc(var(--vh, 1vh) * 100);
+    grid-template-rows: auto 1fr auto;
+    max-width: 60em;
+    width: 100%;
+    margin: auto;
+    align-items: stretch;
+    padding: 0.5em 2em;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  main {
+    position: relative;
+    padding-top: 1em;
+    width: 100%;
+    max-width: 56em;
+    box-sizing: border-box;
+    justify-self: center;
+  }
+
+  @media (max-width: 800px) {
+    .layout {
+      padding: 0.5em 1em;
+    }
+  }
+
+  :global(footer) {
+    max-width: 40em;
+    justify-self: center;
+  }
+
+  @media (max-width: 600px) {
+    :global(footer) {
+      padding-bottom: 2.5rem;
+    }
+  }
+</style>
+
 <svelte:head>
   <link
     href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
@@ -273,7 +275,7 @@
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
 <div class="layout" class:locked="{navVisible}">
-  <Header {segment} user="{$session}" bind:navVisible bind:showSettings />
+  <Header {segment} user="{$session}" bind:navVisible bind:showSettings {spinnyLogo} />
 
   <main>
     <slot />
@@ -298,6 +300,10 @@
           <option value="light">Light</option>
           <option value="dark">Dark</option>
         </select>
+      </label>
+      <label>
+        Spinny logo
+        <input type="checkbox" bind:checked="{spinnyLogo}" />
       </label>
     </Popup>
   {/if}
