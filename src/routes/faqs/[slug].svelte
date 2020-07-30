@@ -1,15 +1,5 @@
-<style>
-  :global(faq-content p) {
-    margin-top: 0em;
-  }
-  :global(faq-content h3) {
-    font-style: oblique;
-    margin-bottom: 0em !important;
-  }
-</style>
-
 <script context="module">
-  export async function preload({ params, query }) {
+  export async function preload({ params }) {
     const res = await this.fetch(`faqs/${params.slug}.json`);
     const data = await res.json();
 
@@ -26,6 +16,16 @@
   import { makeTitle } from "../../view.js";
   export let content;
 </script>
+
+<style>
+  :global(faq-content p) {
+    margin-top: 0em;
+  }
+  :global(faq-content h3) {
+    font-style: oblique;
+    margin-bottom: 0em !important;
+  }
+</style>
 
 <svelte:head>
   <title>{makeTitle('FAQs')}</title>

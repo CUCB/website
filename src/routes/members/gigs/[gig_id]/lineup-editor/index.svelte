@@ -1,5 +1,4 @@
 <script context="module">
-  import gql from "graphql-tag";
   import { extractAttributes } from "../../../../../graphql/gigs/lineups/users/attributes";
   import { QueryGigLineup } from "../../../../../graphql/gigs/lineups";
   import { handleErrors, makeClient } from "../../../../../graphql/client";
@@ -10,7 +9,7 @@
 
     if (notLoggedIn.bind(this)(session)) return;
 
-    let client = await makeClient(this.fetch);
+    let client = makeClient(this.fetch);
 
     let res;
     let people;
@@ -52,7 +51,6 @@
   import Editor from "../../../../../components/Lineup/Editor/Editor.svelte";
   import { setInstrumentApproved } from "../../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
-  import { onMount, getContext } from "svelte";
   import { client } from "../../../../../graphql/client";
   export let people;
   export let gigId;

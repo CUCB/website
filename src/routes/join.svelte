@@ -1,3 +1,9 @@
+<script>
+  import Map from "../components/Map.svelte";
+  import Thumbnail from "../components/Thumbnail.svelte";
+  import { makeTitle } from "../view";
+</script>
+
 <style>
   h1,
   h2 {
@@ -25,12 +31,6 @@
   }
 </style>
 
-<script>
-  import Map from "../components/Map.svelte";
-  import Thumbnail from "../components/Thumbnail.svelte";
-  import { makeTitle } from "../view";
-</script>
-
 <svelte:head>
   <title>{makeTitle('Join us')}</title>
 </svelte:head>
@@ -56,7 +56,10 @@
       saxophones, cellos, trombones, recorders, accordions, banjos, and much much more - even a wind synthesiser!)
     </p>
   </div>
-  <img src="/images/join/rehearsal.jpg" alt="A photo from a recent rehearsal" />
+  <img
+    src="/images/join/rehearsal.jpg"
+    alt="Several people sitting in a semicircle around the President, playing instruments"
+  />
   <p>
     We rehearse every Thursday of term-time from 8pm to 10pm, usually in Emmanuel United Reform Church. We've provided a
     map, but do check any e-mails from the official list before turning up in case of a change of venue.
