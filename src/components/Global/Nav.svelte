@@ -1,3 +1,13 @@
+<script>
+  export let segment;
+  export let user;
+  export let visible;
+
+  $: wasVisible = visible || wasVisible;
+  $: navClass = visible ? "visible" : navClass;
+  $: wasVisible && !visible && (navClass = "hiding") && window.setTimeout(() => (navClass = undefined), 200);
+</script>
+
 <style>
   nav {
     display: flex;
@@ -69,44 +79,14 @@
   }
 </style>
 
-<script>
-  export let segment;
-  export let user;
-  export let visible;
-
-  $: wasVisible = visible || wasVisible;
-  $: navClass = visible ? "visible" : navClass;
-  $: wasVisible &&
-    !visible &&
-    (navClass = "hiding") &&
-    window.setTimeout(() => (navClass = undefined), 200);
-</script>
-
 <nav on:click class="{navClass}" aria-hidden="{!visible}">
-  <a aria-current="{segment === undefined ? 'page' : undefined}" href=".">
-    home
-  </a>
-  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book">
-    book us!
-  </a>
-  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join">
-    join us!
-  </a>
-  <a
-    aria-current="{segment === 'committee' ? 'page' : undefined}"
-    href="committee"
-  >
-    committee
-  </a>
+  <a aria-current="{segment === undefined ? 'page' : undefined}" href=".">home</a>
+  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book">book us!</a>
+  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join">join us!</a>
+  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee">committee</a>
 
   {#if user.userId}
-    <a
-      aria-current="{segment === 'members' ? 'page' : undefined}"
-      href="members"
-      rel="prefetch"
-    >
-      members
-    </a>
+    <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members" rel="prefetch">members</a>
     <a href="auth/logout" class="split">log out</a>
   {:else}
     <a href="auth/login" class="split">log in</a>

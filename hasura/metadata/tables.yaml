@@ -245,9 +245,15 @@
     schema: cucb
     name: committee_members
   object_relationships:
+    - name: committeeByCommittee
+      using:
+        foreign_key_constraint_on: committee
     - name: committee_key
       using:
         foreign_key_constraint_on: lookup_name
+    - name: committee_position
+      using:
+        foreign_key_constraint_on: position
   select_permissions:
     - role: anonymous
       permission:
@@ -425,51 +431,61 @@
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: blue_gig
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: equipment
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: gig_editor
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: music_only
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: president
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: secretary
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: treasurer
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: user
       permission:
         columns:
           - name
+          - position
         filter: {}
     - role: webmaster
       permission:
         columns:
           - name
+          - position
         filter: {}
 - table:
     schema: cucb

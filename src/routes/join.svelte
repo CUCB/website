@@ -57,7 +57,7 @@
     </p>
   </div>
   <img
-    src="/images/join/rehearsal.jpg"
+    src="/static/images/join/rehearsal.jpg"
     alt="Several people sitting in a semicircle around the President, playing instruments"
   />
   <p>
@@ -88,7 +88,7 @@
     </p>
   </div>
 
-  <img src="/images/join/whitworth.jpg" alt="One of our ceilidhs" />
+  <img src="/static/images/join/whitworth.jpg" alt="One of our ceilidhs" />
 </section>
 
 <h2>Socials</h2>
@@ -113,7 +113,7 @@
     </ul>
   </div>
 
-  <img src="/images/join/annual-dinner-2013.jpg" alt="Annual dinner 2013" />
+  <img src="/static/images/join/annual-dinner-2013.jpg" alt="Annual dinner 2013" />
 </section>
 
 <p>
@@ -135,19 +135,19 @@
 
 <section>
   <Thumbnail
-    src="/images/join/Alumni_Dinner.jpg"
+    src="/static/images/join/Alumni_Dinner.jpg"
     description="The Alumni Dinner - members past and present reunited!"
   />
   <Thumbnail
-    src="/images/join/Annual_Dinner_2012_Instruments.jpg"
+    src="/static/images/join/Annual_Dinner_2012_Instruments.jpg"
     description="One of the more unusual instruments owned by the band..."
   />
   <Thumbnail
-    src="/images/join/Annual_Dinner_Presents.jpg"
+    src="/static/images/join/Annual_Dinner_Presents.jpg"
     description="The 2014 Annnual Dinner - presents for the old committee"
   />
-  <Thumbnail src="/images/join/Annual_Dinner_Session_Mix.jpg" description="Tunes!" />
-  <Thumbnail src="/images/join/Session_2010_Fliss.jpg" description="Sessions can be *this* fun" />
-  <Thumbnail src="/images/join/Tour2012-Group.jpg" description="Band on tour, 2012" />
-  <Thumbnail src="/images/join/Tour2012-Session_Outside.jpg" description="A session on tour, 2012" />
+  <Thumbnail src="/static/images/join/Annual_Dinner_Session_Mix.jpg" description="Tunes!" />
+  <Thumbnail src="/static/images/join/Session_2010_Fliss.jpg" description="Sessions can be *this* fun" />
+  <Thumbnail src="/static/images/join/Tour2012-Group.jpg" description="Band on tour, 2012" />
+  <Thumbnail src="/static/images/join/Tour2012-Session_Outside.jpg" description="A session on tour, 2012" />
 </section>

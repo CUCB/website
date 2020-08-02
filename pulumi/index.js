@@ -27,13 +27,10 @@ const webBlock = new digitalocean.Volume("website-block", {
 });
 
 // Attach said block storage to said droplet
-const webBlockAttachment = new digitalocean.VolumeAttachment(
-  "website-block-attachment",
-  {
-    dropletId: web.id,
-    volumeId: webBlock.id,
-  },
-);
+const webBlockAttachment = new digitalocean.VolumeAttachment("website-block-attachment", {
+  dropletId: web.id,
+  volumeId: webBlock.id,
+});
 
 // Create a floating ip so we have somewhere to point dns to even if the droplet is destroyed
 const floatingIP = new digitalocean.FloatingIp("website-ip", {
@@ -49,6 +46,15 @@ const domain = new cloudflare.Record("dev-server", {
   value: floatingIP.ipAddress,
   ttl: 1,
   proxied: true,
+});
+
+const sshDomain = new cloudflare.Record("ssh-dev-server", {
+  name: "ssh.dev",
+  zoneId: "4c380f78cda5910d99c725cb96fceebc",
+  type: "A",
+  value: floatingIP.ipAddress,
+  ttl: 1,
+  proxied: false,
 });
 
 module.exports = {

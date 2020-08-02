@@ -44,7 +44,6 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
     volumes:
-      - ./static:/usr/src/app/static
       - ./content:/usr/src/app/content
     restart: always
     command: >
@@ -54,16 +53,15 @@ services:
       options:
         max-size: "50m"
   caddy:
-    image: abiosoft/caddy:latest
+    image: caddy:latest
     ports:
       - "80:80"
       - "443:443"
-    environment:
-      CLOUDFLARE_API_KEY: ${CLOUDFLARE_API_KEY}
-      CLOUDFLARE_EMAIL: ${CLOUDFLARE_EMAIL}
     volumes:
       - ./Caddyfile:/etc/Caddyfile
-      - caddy:/root/.caddy
+      - ${BLOCK_STORAGE}/certs:/root/.caddy/certs
+      - ./static:/srv/static
+      - ${BLOCK_STORAGE}/images:/srv/images
     logging:
       driver: "json-file"
       options:

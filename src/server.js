@@ -38,9 +38,9 @@ polka()
   .all(`${GRAPHQL_PATH}`, function(req, res) {
     apiProxy.web(req, res, { target: GRAPHQL_REMOTE });
   })
+  .use("/static", sirv("static", { dev }))
   .use(
     compression({ threshold: 0 }),
-    sirv("static", { dev }),
     bodyParser.urlencoded({ extended: true }),
     session({
       store: new pgSession({

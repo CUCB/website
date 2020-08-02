@@ -1,4 +1,5 @@
 import { CreateUser, HASHED_PASSWORDS } from "../database/users";
+import { AddCommittee } from "../database/committee";
 
 describe("header", () => {
   before(() => cy.visit("/"));
@@ -19,6 +20,24 @@ describe("header", () => {
     });
 
     it("navigates to /committee", () => {
+      cy.executeMutation(AddCommittee, {
+        variables: {
+          id: 57434,
+          started: "1970-01-01T01:00Z",
+          data: {
+            on_conflict: { constraint: "cucb_committee_members_id_key", update_columns: ["position", "name"] },
+            data: [
+              {
+                id: 17547,
+                position: 1,
+                name: "Leady Lead",
+                casual_name: "Leady",
+                lookup_name: 1,
+              },
+            ],
+          },
+        },
+      });
       cy.get("header nav a")
         .contains("committee")
         .clickLink();

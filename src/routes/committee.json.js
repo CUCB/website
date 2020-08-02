@@ -1,28 +1,22 @@
-import { makeClient, handleErrors } from "../graphql/client";
+import { makeClient } from "../graphql/client";
 import { currentCommittee } from "../graphql/committee";
 import fetch from "node-fetch";
-import moment from "moment-timezone";
+import moment from "moment";
 
 let cached;
 let retrieved;
 
 export async function get(req, res, next) {
   const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const host =
-    req.headers.host.split(":")[0] !== "127.0.0.1"
-      ? `${protocol}://${req.headers.host}`
-      : undefined;
+  const host = req.headers.host.split(":")[0] !== "127.0.0.1" ? `${protocol}://${req.headers.host}` : undefined;
   const client = await makeClient(fetch, { host });
 
   // Return from cache if recent enough
   if (!retrieved || moment() - retrieved > 1000 * 3600) {
     try {
-      let time = moment();
       const graphqlRes = await client.query({
         query: currentCommittee,
-        variables: { current_date: time.toISOString() },
       });
-      retrieved = time;
       cached =
         graphqlRes.data.cucb_committees &&
         graphqlRes.data.cucb_committees[0] &&
