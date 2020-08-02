@@ -1,12 +1,30 @@
-dev.cucb.co.uk:443 {
+dev.cucb.co.uk {
     tls /root/.caddy/certs/dev.cucb.co.uk.crt /root/.caddy/certs/dev.cucb.co.uk.key
     reverse_proxy /v1/graphql graphql-engine:8080
+
+    @hasura {
+        path /hasura
+        path /hasura/*
+    }
+
+    route @hasura {
+        # add a /hasura endpoint for CLI connection if necessary
+        uri strip_prefix /hasura
+        reverse_proxy * graphql-engine:8080
+    }
 
     root /* /srv
     file_server /images/committee/*
     file_server /static/*
 
-    reverse_proxy /* sapper:3000
+    @sapper {
+        not path /images/committee/*
+        not path /static/*
+        not path /hasura
+        not path /hasura/*
+    }
+
+    reverse_proxy @sapper sapper:3000
     
     @notAuth {
         not path /auth/*
