@@ -1,8 +1,8 @@
 <script>
   import tippy from "tippy.js";
   import "tippy.js/dist/tippy.css";
-  import TooltipText from "./TooltipText.svelte";
-  import { prefs } from "../state";
+  import TooltipText from "../TooltipText.svelte";
+  import { prefs } from "../../state";
   import { onMount } from "svelte";
   export let userInstrument;
   let hover = null;

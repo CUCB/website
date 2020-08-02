@@ -8,7 +8,7 @@ describe("homepage", () => {
       .its("head")
       .find('link[rel="icon"]')
       .should("have.attr", "href")
-      .should("eq", "favicon.ico");
+      .should("eq", "static/favicon.ico");
   });
 
   it("has the correct <h1>", () => {

@@ -11,7 +11,7 @@
   import { clientCurrentUser } from "../../graphql/client";
   import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
   import { stores } from "@sapper/app";
-  import InstrumentName from "../InstrumentName.svelte";
+  import InstrumentName from "./InstrumentName.svelte";
   import moment from "moment-timezone";
   export let gig, userInstruments;
   export let showLink = true;

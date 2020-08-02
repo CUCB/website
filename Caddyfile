@@ -1,27 +1,17 @@
-# Uncomment when ready to LetsEncrypt (#73)
-# NB this domain may change to the real one before then
-#dev.cucb.co.uk {
-#    tls {
-#        dns cloudflare
-#    }
-#
-#    proxy /v1/graphql graphql-engine:8080
-#
-#    proxy / sapper:3000
-#
-#    gzip {
-#        # disable gzip for auth API since fetch doesn't like it
-#        not /auth
-#    }
-#}
+dev.cucb.co.uk:443 {
+    tls /root/.caddy/certs/dev.cucb.co.uk.crt /root/.caddy/certs/dev.cucb.co.uk.key
+    reverse_proxy /v1/graphql graphql-engine:8080
 
-0.0.0.0:80 {
-    proxy /v1/graphql graphql-engine:8080
+    root /* /srv
+    file_server /images/committee/*
+    file_server /static/*
 
-    proxy / sapper:3000
-
-    gzip {
-        # disable gzip for auth API since fetch doesn't like it
-        not /auth
+    reverse_proxy /* sapper:3000
+    
+    @notAuth {
+        not path /auth/*
     }
+
+    # disable gzip for auth API since fetch doesn't like it
+    encode @notAuth gzip
 }

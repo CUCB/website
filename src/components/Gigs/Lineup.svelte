@@ -1,3 +1,9 @@
+<script>
+  export let people;
+  import TooltipText from "../TooltipText.svelte";
+  import InstrumentName from "./InstrumentName.svelte";
+</script>
+
 <style>
   gig-lineup {
     border: 1px solid var(--accent);
@@ -33,12 +39,6 @@
     padding: 5px;
   }
 </style>
-
-<script>
-  export let people;
-  import TooltipText from "../TooltipText.svelte";
-  import InstrumentName from "../InstrumentName.svelte";
-</script>
 
 <gig-lineup>
   {#each people as person, i (person.user.id)}

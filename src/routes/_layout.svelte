@@ -75,10 +75,10 @@
 </script>
 
 <script>
-  import Header from "../components/Header.svelte";
-  import Footer from "../components/Footer.svelte";
+  import Header from "../components/Global/Header.svelte";
+  import Footer from "../components/Global/Footer.svelte";
   import Popup from "../components/Popup.svelte";
-  import { goto, stores } from "@sapper/app";
+  import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
   import { makeTitle } from "../view";
@@ -187,14 +187,6 @@
   $: settings = settings.set("spinnyLogo", spinnyLogo);
   $: updateLocalStorage(settings);
 
-  $: queryString =
-    "?" +
-    Object.entries(query)
-      .filter(([k, v]) => v)
-      .map(([k, v], _) => `${k}=${v}`)
-      .join("&");
-  const update = () => goto(queryString);
-
   function componentToHex(c) {
     var hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
@@ -261,14 +253,13 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" type="text/css" href="themes/color/default.css" />
-  <link rel="stylesheet" type="text/css" href="themes/font/standard.css" />
-  <link rel="stylesheet" type="text/css" href="themes/color/{color}.css" />
-  <link rel="stylesheet" type="text/css" href="themes/font/{font}.css" />
+  <link rel="stylesheet" type="text/css" href="static/themes/color/default.css" />
+  <link rel="stylesheet" type="text/css" href="static/themes/font/standard.css" />
+  <link rel="stylesheet" type="text/css" href="static/themes/color/{color}.css" />
+  <link rel="stylesheet" type="text/css" href="static/themes/font/{font}.css" />
   {#if accent}
-    <link rel="stylesheet" type="text/css" href="themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}" />
+    <link rel="stylesheet" type="text/css" href="static/themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}" />
   {/if}
-  <link rel="stylesheet" type="text/css" href="global.css" />
   <title>{makeTitle()}</title>
 </svelte:head>
 

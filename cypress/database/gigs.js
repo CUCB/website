@@ -87,15 +87,9 @@ export const SignupDetails = `
 export const AddInstrument = `
   mutation AddInstrument($instrumentId: bigint!, $nickname: String, $userId: bigint) {
     insert_cucb_users_instruments(
-      objects: {
-        instr_id: $instrumentId
-        nickname: $nickname
-        user_id: $userId
-      }
-      on_conflict: {
-        constraint: cucb_users_instruments_id_key
-        update_columns: nickname
-    }) {
+      objects: { instr_id: $instrumentId, nickname: $nickname, user_id: $userId }
+      on_conflict: { constraint: cucb_users_instruments_id_key, update_columns: nickname }
+    ) {
       affected_rows
     }
   }
@@ -103,7 +97,7 @@ export const AddInstrument = `
 
 export const RemoveInstruments = `
   mutation RemoveInstruments($userId: bigint) {
-    delete_cucb_users_instruments(where: {user_id: {_eq: $userId}}) {
+    delete_cucb_users_instruments(where: { user_id: { _eq: $userId } }) {
       affected_rows
     }
   }
@@ -111,7 +105,7 @@ export const RemoveInstruments = `
 
 export const InstrumentsOnGig = `
   query InstrumentsOnGig($userId: bigint!, $gigId: bigint!) {
-    cucb_gigs_lineups_instruments_aggregate(where: {user_id: {_eq: $userId}, gig_id: {_eq: $gigId}}) {
+    cucb_gigs_lineups_instruments_aggregate(where: { user_id: { _eq: $userId }, gig_id: { _eq: $gigId } }) {
       aggregate {
         count
       }
