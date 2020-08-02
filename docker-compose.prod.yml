@@ -45,6 +45,7 @@ services:
       SESSION_SECRET: ${SESSION_SECRET}
     volumes:
       - ./content:/usr/src/app/content
+      - ./static:/usr/src/app/static # not accessed, but expected by sapper
     restart: always
     command: >
       bash -c "npm run start"
@@ -58,7 +59,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile
       - ${BLOCK_STORAGE}/certs:/root/.caddy/certs
       - ./static:/srv/static
       - ${BLOCK_STORAGE}/images:/srv/images
