@@ -23,7 +23,7 @@ services:
       HASURA_GRAPHQL_AUTH_HOOK: http://cypress:4000/auth/hook
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
   cypress:
-    image: cypress/browsers:node12.14.1-chrome83-ff77
+    image: cypress/base:10
     volumes:
       - .:/root/site
       - node_modules_test:/root/site/node_modules/
@@ -38,7 +38,7 @@ services:
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
     command: >
-      bash -c "cd /root/site; npm install; chmod a+x wait-for-it.sh; npm run test:firefox"
+      bash -c "cd /root/site; npm install; chmod a+x wait-for-it.sh; npm run test"
 
 volumes:
   db_data_test:
