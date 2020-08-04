@@ -147,16 +147,15 @@ describe("gig signup", () => {
   });
 
   it("allows a user to sign up to a gig", () => {
-    cy.visit("/members");
+    cy.visit("/members", useFetchPolyfill);
 
     cy.wait(100);
 
     cy.cssProperty("--positive").then(positive => {
+      cy.route("POST", "/v1/graphql").as("signup");
+      cy.get(`[data-test="gig-15274-signup-yes"]`).click();
+      cy.wait("@signup");
       cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .should("have.css", "color")
-        .and("not.equal", positive);
-      cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .click()
         .should("have.css", "color")
         .and("equal", positive);
     });
@@ -177,8 +176,10 @@ describe("gig signup", () => {
       cy.get(`[data-test="gig-15274-signup-maybe"]`)
         .should("have.css", "color")
         .and("not.equal", neutral);
+      cy.route("POST", "/v1/graphql").as("signup");
+      cy.get(`[data-test="gig-15274-signup-maybe"]`).click();
+      cy.wait("@signup");
       cy.get(`[data-test="gig-15274-signup-maybe"]`)
-        .click()
         .should("have.css", "color")
         .and("equal", neutral);
     });
@@ -213,8 +214,10 @@ describe("gig signup", () => {
       cy.get(`[data-test="gig-15274-signup-no"]`)
         .should("have.css", "color")
         .and("not.equal", negative);
+      cy.route("POST", "/v1/graphql").as("signup");
+      cy.get(`[data-test="gig-15274-signup-no"]`).click();
+      cy.wait("@signup");
       cy.get(`[data-test="gig-15274-signup-no"]`)
-        .click()
         .should("have.css", "color")
         .and("equal", negative);
     });
