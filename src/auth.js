@@ -33,11 +33,9 @@ export const login = async ({ username, password }) =>
       [username],
     )
     .then(async res => {
-      let passwordValid = await bcrypt.compare(
-        password,
-        res && res.rows[0] && res.rows[0].salted_password,
-      );
-      if (passwordValid) {
+      let hashedPassword = res && res.rows[0] && res.rows[0].salted_password.replace("$2y$", "$2b$");
+      let passwordCorrect = await bcrypt.compare(password, hashedPassword);
+      if (passwordCorrect) {
         return res;
       } else {
         throw new Error(errors.INCORRECT_USERNAME_OR_PASSWORD);
