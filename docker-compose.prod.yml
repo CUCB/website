@@ -43,6 +43,8 @@ services:
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
+      EMAIL_POSTFIX_HOST: 172.18.0.1
+      EMAIL_SEND_ADDRESS: root@dev.cucb.co.uk
     volumes:
       - ./content:/usr/src/app/content
       - ./static:/usr/src/app/static # not accessed, but expected by sapper

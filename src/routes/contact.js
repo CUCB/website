@@ -12,10 +12,9 @@ export async function post(req, res, next) {
     casual_name: "Secretary",
     email: "secretary@cucb.co.uk",
   };
-  console.log(secretary);
 
   const client = new SMTPClient({
-    host: "172.18.0.1",
+    host: process.env.EMAIL_POSTFIX_HOST,
     ssl: false,
   });
 
@@ -31,7 +30,7 @@ export async function post(req, res, next) {
         warn: console.warn,
         error: console.error,
       },
-      from: `CUCB Online Contact Form <webmaster@cucb.co.uk>`,
+      from: `CUCB Online Contact Form <${process.env.EMAIL_SEND_ADDRESS}>`,
       "reply-to": `${name.trim()} <${email.trim()}>`,
       to: `CUCB Secretary <${secretary.email}>`,
       subject: `${name} — Online Enquiry`,
@@ -42,6 +41,7 @@ export async function post(req, res, next) {
       )}\n\n-----------------------\n\nMany thanks!\n`,
     },
     (err, message) => {
+      // TODO process the error and feed back to the client
       console.log(err || message);
     },
   );
