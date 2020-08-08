@@ -17,6 +17,7 @@ const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 require("dotenv").config();
 const GRAPHQL_REMOTE = process.env.GRAPHQL_REMOTE;
 const GRAPHQL_PATH = process.env.GRAPHQL_PATH;
+const HCAPTCHA_SITE_KEY = process.env.HCAPTCHA_SITE_KEY;
 
 const onwarn = (warning, onwarn) =>
   (warning.code === "CIRCULAR_DEPENDENCY" && /[/\\]@sapper[/\\]/.test(warning.message)) || onwarn(warning);
@@ -46,6 +47,7 @@ export default {
         "process.env.NODE_ENV": JSON.stringify(mode),
         "process.env.GRAPHQL_REMOTE": JSON.stringify(GRAPHQL_REMOTE),
         "process.env.GRAPHQL_PATH": JSON.stringify(GRAPHQL_PATH),
+        "process.env.HCAPTCHA_SITE_KEY": JSON.stringify(HCAPTCHA_SITE_KEY),
       }),
       svelte({
         dev,
@@ -102,6 +104,7 @@ export default {
         "process.env.NODE_ENV": JSON.stringify(mode),
         "process.env.GRAPHQL_REMOTE": JSON.stringify(GRAPHQL_REMOTE),
         "process.env.GRAPHQL_PATH": JSON.stringify(GRAPHQL_PATH),
+        "process.env.HCAPTCHA_SITE_KEY": JSON.stringify(HCAPTCHA_SITE_KEY),
       }),
       svelte({
         generate: "ssr",

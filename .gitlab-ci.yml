@@ -96,6 +96,8 @@ deploy:
     - echo "DEPLOY_REGISTRY_USER=$DEPLOY_REGISTRY_USER" >> sshenv
     - echo "DEPLOY_REGISTRY_PASSWORD=$DEPLOY_REGISTRY_PASSWORD" >> sshenv
     - echo "DEPLOY_REGISTRY=$CI_REGISTRY" >> sshenv
+    - echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> sshenv
+    - echo "HCAPTCHA_SECRET=$HCAPTCHA_SECRET" >> sshenv
     - scp sshenv root@$IP:~/.ssh/environment
     - echo "export DROPBOX_ACCESS_TOKEN=$DROPBOX_ACCESS_TOKEN" > dropbox_access_token
     - ssh root@$IP "mkdir -p .env"

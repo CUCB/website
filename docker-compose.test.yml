@@ -37,6 +37,8 @@ services:
       PG_DATABASE: postgres
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
+      HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
+      HCAPTCHA_SECRET: "0x0000000000000000000000000000000000000000"
     command: >
       bash -c "cd /root/site; npm install; chmod a+x wait-for-it.sh; npm run test"
 
