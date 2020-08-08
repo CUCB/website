@@ -31,7 +31,15 @@
     const isSuccessful = status => status >= 200 && status < 300;
 
     if (isSuccessful(res.status)) {
-      alert("yay");
+      message = "Your message was sent successfully";
+      name = "";
+      email = "";
+      bookingEnquiry = false;
+      dates = "";
+      times = "";
+      venue = "";
+      message = "";
+      occasion = "";
     } else {
       error = await res.text();
     }

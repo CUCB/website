@@ -1,10 +1,13 @@
 import { SMTPClient } from "emailjs";
 import escapeHtml from "escape-html";
+import fetch from "node-fetch";
 
 export async function post(req, res, next) {
   const { name, email, bookingEnquiry, occasion, dates, times, venue, message } = req.body;
   // TODO error handling
-  const committeeRes = await this.fetch("/committee.json").then(r => r.json());
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+  const host = `${protocol}://${req.headers.host}`;
+  const committeeRes = await fetch(`${host}/committee.json`).then(r => r.json());
   const secretary = (committeeRes && committeeRes.committee.secretary) || {
     casual_name: "Secretary",
     email: "secretary@cucb.co.uk",
@@ -15,7 +18,7 @@ export async function post(req, res, next) {
     ssl: false,
   });
 
-  enquiryInformation = bookingEnquiry
+  const enquiryInformation = bookingEnquiry
     ? `Booking enquiry information:\n\tOccasion:\t${occasion}\n\tDates:\t\t${dates}\n\tTimes:\t\t${times}\n\tVenue:\t\t${venue}\n\n`
     : ``;
 
