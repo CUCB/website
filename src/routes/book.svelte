@@ -26,7 +26,7 @@
   <a href="/faqs/book/">Frequently Asked Questions</a>
   page and the
   <a href="/book/gigpolicy/">Standard Gig Policy</a>
-  - and of course by
+  &mdash; and of course by
   <a href="/book/#book_contact">contacting us!</a>
 </p>
 <Testimonial person="Fiammetta, Birthday Celebration, January 2019">
