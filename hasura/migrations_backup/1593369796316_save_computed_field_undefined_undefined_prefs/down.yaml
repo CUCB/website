@@ -1,6 +1,0 @@
-- args:
-    name: prefs
-    table:
-      name: users
-      schema: cucb
-  type: drop_computed_field

@@ -45,6 +45,8 @@ services:
       SESSION_SECRET: ${SESSION_SECRET}
       EMAIL_POSTFIX_HOST: 172.18.0.1
       EMAIL_SEND_ADDRESS: root@dev.cucb.co.uk
+      HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
+      HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
     volumes:
       - ./content:/usr/src/app/content
       - ./static:/usr/src/app/static # not accessed, but expected by sapper

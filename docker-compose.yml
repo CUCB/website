@@ -36,6 +36,8 @@ services:
       PG_DATABASE: postgres
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
+      HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
+      HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
     volumes:
       - .:/root/site
       - node_modules:/root/site/node_modules/

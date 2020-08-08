@@ -7,6 +7,10 @@ debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Si
 apt install -y postfix cron-apt 
 pip3 install dropbox
 
+# modify postfix network configuration so that connections from docker are allowed 
+postconf -e mynetworks="127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128 172.18.0.0/16"
+postfix reload
+
 locale-gen en_GB.UTF-8
 timedatectl set-timezone Europe/London
 

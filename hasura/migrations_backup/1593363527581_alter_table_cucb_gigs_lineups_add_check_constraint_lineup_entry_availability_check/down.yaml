@@ -1,5 +1,0 @@
-- args:
-    cascade: false
-    read_only: false
-    sql: alter table "cucb"."gigs_lineups" drop constraint "lineup_entry_availability_check";
-  type: run_sql

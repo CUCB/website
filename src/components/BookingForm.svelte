@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from "svelte";
   let name = "";
   let email = "";
   let bookingEnquiry = false;
@@ -8,8 +9,29 @@
   let message = "";
   let occasion = "";
   let error;
+  let captchaKey = undefined;
+  let captchaVisible = false;
+
+  let enableCaptcha = () => {
+    captchaKey = undefined;
+    captchaVisible = true;
+  };
+
+  let onCaptchaVerified = e => {
+    captchaKey = e.key;
+  };
+
+  onMount(async () => {
+    await import("vanilla-hcaptcha");
+    enableCaptcha();
+  });
 
   async function submit() {
+    error = undefined;
+    if (!captchaKey) {
+      error = "Please complete captcha";
+      return;
+    }
     const body = new URLSearchParams();
     body.append("name", name);
     body.append("email", email);
@@ -19,6 +41,7 @@
     body.append("venue", venue);
     body.append("message", message);
     body.append("occasion", occasion);
+    body.append("captchaKey", captchaKey);
 
     let res = await fetch("/contact", {
       method: "post",
@@ -65,6 +88,10 @@
 
   p {
     font-style: italic;
+  }
+
+  .error {
+    color: var(--negative);
   }
 </style>
 
@@ -121,6 +148,18 @@
     <textarea bind:value="{message}" rows="{15}" required></textarea>
   </label>
 
+  {#if captchaVisible}
+    <h-captcha
+      id="captcha"
+      site-key="{process.env.HCAPTCHA_SITE_KEY}"
+      size="normal"
+      dark
+      on:verified="{onCaptchaVerified}"
+    ></h-captcha>
+  {/if}
+
   <input type="submit" value="Send" />
 </form>
-{#if error}{error}{/if}
+{#if error}
+  <span class="error">{error}</span>
+{/if}

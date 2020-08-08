@@ -1,5 +1,0 @@
-- args:
-    cascade: false
-    read_only: false
-    sql: alter table "cucb"."gigs_lineups_instruments" drop constraint "gigs_lineups_instruments_pkey";
-  type: run_sql
