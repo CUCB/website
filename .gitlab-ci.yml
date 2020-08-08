@@ -47,7 +47,7 @@ build:
   only:
     - master
 
-build:
+build_dev:
   type: build
   variables:
     DOCKER_DRIVER: overlay2

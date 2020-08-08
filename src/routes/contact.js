@@ -15,7 +15,7 @@ export async function post(req, res, next) {
   console.log(secretary);
 
   const client = new SMTPClient({
-    host: "localhost",
+    host: "172.18.0.1",
     ssl: false,
   });
 
