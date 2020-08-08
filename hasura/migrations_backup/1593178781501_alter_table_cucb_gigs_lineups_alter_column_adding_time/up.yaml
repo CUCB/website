@@ -1,7 +1,0 @@
-- args:
-    cascade: false
-    read_only: false
-    sql:
-      ALTER TABLE ONLY "cucb"."gigs_lineups" ALTER COLUMN "adding_time" SET DEFAULT
-      now();
-  type: run_sql

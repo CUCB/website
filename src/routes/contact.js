@@ -8,7 +8,8 @@ export async function post(req, res, next) {
   const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
   const host = `${protocol}://${req.headers.host}`;
   const committeeRes = await fetch(`${host}/committee.json`).then(r => r.json());
-  const secretary = (committeeRes && committeeRes.committee.secretary) || {
+  const secretary = committeeRes && committeeRes.committee.filter(member => member.committee_key == "secretary");
+  secretary = secretary || {
     casual_name: "Secretary",
     email: "secretary@cucb.co.uk",
   };
@@ -18,18 +19,13 @@ export async function post(req, res, next) {
     ssl: false,
   });
 
-  const enquiryInformation = bookingEnquiry
-    ? `Booking enquiry information:\n\tOccasion:\t${occasion}\n\tDates:\t\t${dates}\n\tTimes:\t\t${times}\n\tVenue:\t\t${venue}\n\n`
-    : ``;
+  const enquiryInformation =
+    bookingEnquiry && JSON.parse(bookingEnquiry)
+      ? `Booking enquiry information:\n\tOccasion:\t${occasion}\n\tDates:\t\t${dates}\n\tTimes:\t\t${times}\n\tVenue:\t\t${venue}\n\n`
+      : ``;
 
   client.send(
     {
-      logger: {
-        debug: console.log,
-        info: console.info,
-        warn: console.warn,
-        error: console.error,
-      },
       from: `CUCB Online Contact Form <${process.env.EMAIL_SEND_ADDRESS}>`,
       "reply-to": `${name.trim()} <${email.trim()}>`,
       to: `CUCB Secretary <${secretary.email}>`,

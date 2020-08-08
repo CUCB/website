@@ -1,6 +1,0 @@
-- args:
-    relationship: prefs
-    table:
-      name: users
-      schema: cucb
-  type: drop_relationship

@@ -1,6 +1,0 @@
-- args:
-    relationship: parent
-    table:
-      name: instruments
-      schema: cucb
-  type: drop_relationship
