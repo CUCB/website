@@ -47,6 +47,27 @@ build:
   only:
     - master
 
+build_dev:
+  type: build
+  variables:
+    DOCKER_DRIVER: overlay2
+  image: docker:latest
+  services:
+    - docker:dind
+  stage: build-test
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
+    - docker build -t $CI_REGISTRY/cucb/website/sapper:devlatest -f deploy/Dockerfile .
+    - docker push $CI_REGISTRY/cucb/website/sapper:devlatest
+  cache:
+    key: node-modules-build
+    paths:
+      - node_modules/
+  except:
+    - master
+
 deploy:
   type: deploy
   environment:
