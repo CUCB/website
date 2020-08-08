@@ -27,7 +27,10 @@
 
 <h1>Oh Noes! {status}</h1>
 
-<p>It borked: {error.message}</p>
+<p>
+  The error was:
+  <i>{error.message}</i>
+</p>
 
 <img src="https://http.cat/{status}.jpg" alt="The HTTP Status Cat for status code {status}" />
 
