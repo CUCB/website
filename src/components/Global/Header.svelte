@@ -89,6 +89,15 @@
     outline: none;
   }
 
+  a {
+    color: var(--text_color);
+    border-bottom: none;
+  }
+
+  a:hover {
+    color: var(--text_color);
+  }
+
   @media only screen and (max-width: 600px) {
     .button-background {
       background-color: var(--background);
@@ -129,9 +138,13 @@
 </style>
 
 <header>
-  <Logo id="logo" enableSpin="{spinnyLogo}" />
+  <a href="/">
+    <Logo id="logo" enableSpin="{spinnyLogo}" />
+  </a>
   {#if animate}
-    <h1 id="title" in:fade>Cambridge University Ceilidh Band</h1>
+    <h1 id="title" in:fade>
+      <a href="/">Cambridge University Ceilidh Band</a>
+    </h1>
     {#if user.userId}
       <button
         id="settingsToggle"
@@ -152,7 +165,9 @@
     {/if}
   {:else}
     <noscript>
-      <h1 id="title">Cambridge University Ceilidh Band</h1>
+      <h1 id="title" in:fade>
+        <a href="/">Cambridge University Ceilidh Band</a>
+      </h1>
     </noscript>
   {/if}
   <div class="button-background">
