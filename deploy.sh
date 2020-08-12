@@ -35,7 +35,21 @@ if test ! -e .env; then
     echo "Initialising .env file"
     cd /var/www && ./createenv.sh
     cat "~/.env/cloudflare_api_key" >> .env
+    cat "~/.env/hcaptcha" >> .env
 fi
+
+echo "Downloading standard documents from dropbox"
+mkdir -p docs
+mkdir -p docs-new
+apt update && apt install unzip
+curl -X POST https://content.dropboxapi.com/2/files/download \
+    --header "Authorization: Bearer $DROPBOX_ACCESS_TOKEN" \
+    --header "Dropbox-API-Arg: {\"path\": \"/standard-documents.zip\"}" \
+    --output standard-documents.zip && \
+unzip standard-documents.zip -d docs-new && \
+mv docs docs-old && \
+mv docs-new docs && \
+rm -rf docs-old
 
 echo "Pulling latest build from registry"
 docker login -u $DEPLOY_REGISTRY_USER -p $DEPLOY_REGISTRY_PASSWORD $DEPLOY_REGISTRY

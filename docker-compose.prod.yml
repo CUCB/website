@@ -67,6 +67,7 @@ services:
       - ${BLOCK_STORAGE}/certs:/root/.caddy/certs
       - ./static:/srv/static
       - ${BLOCK_STORAGE}/images:/srv/images
+      - ./docs:/srv/docs
     logging:
       driver: "json-file"
       options:

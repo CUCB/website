@@ -20,9 +20,9 @@
     to
     <Mailto person="{committee.secretary}" showEmail="{true}" />
     . You can read our
-    <a href="/docs/constitution">constitution here</a>
+    <a href="/docs/constitution.pdf" target="_blank">constitution here</a>
     and our
-    <a href="/docs/gdpr">privacy notice here</a>
+    <a href="/docs/GDPR.pdf" target="_blank">privacy notice here</a>
     .
   </p>
 

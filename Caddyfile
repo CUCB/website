@@ -16,12 +16,14 @@ dev.cucb.co.uk {
     root /* /srv
     file_server /images/committee/*
     file_server /static/*
+    file_server /docs/*
 
     @sapper {
         not path /images/committee/*
         not path /static/*
         not path /hasura
         not path /hasura/*
+        not path /docs/*
     }
 
     reverse_proxy @sapper sapper:3000

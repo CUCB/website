@@ -31,7 +31,7 @@
 
 <p>
   Make sure you're on the
-  <a href="/lists/">chat mailing list</a>
+  <a href="/mailinglists/">chat mailing list</a>
   to get e-mails about sessions!
 </p>
 

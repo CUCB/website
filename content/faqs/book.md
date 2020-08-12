@@ -1,6 +1,6 @@
 ## Book us
 
-For more information, have a look at our [Standard Gig Policy](/book/gigpolicy), and if you have any questions e-mail [the Secretary](mailto:secretary%40cucb.co.uk?subject=) or use the [online contact form](/book).
+For more information, have a look at our [Standard Gig Policy](/docs/standard-gig-policy.pdf), and if you have any questions e-mail [the Secretary](mailto:secretary%40cucb.co.uk?subject=) or use the [online contact form](/book).
 
 ### How do you pronounce ceilidh?
 

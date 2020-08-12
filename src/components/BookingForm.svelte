@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from "svelte";
+  import { onMount, createEventDispatcher } from "svelte";
   let name = "";
   let email = "";
   let bookingEnquiry = false;
@@ -11,6 +11,11 @@
   let error;
   let captchaKey = undefined;
   let captchaVisible = false;
+  let submitted = false;
+  let success;
+  let dark;
+
+  const dispatch = createEventDispatcher();
 
   let enableCaptcha = () => {
     captchaKey = undefined;
@@ -22,6 +27,8 @@
   };
 
   onMount(async () => {
+    const styles = getComputedStyle(document.documentElement);
+    if (styles.getPropertyValue("--theme_name").trim() === "dark") dark = true;
     await import("vanilla-hcaptcha");
     enableCaptcha();
   });
@@ -44,7 +51,7 @@
     body.append("captchaKey", captchaKey);
 
     let res = await fetch("/contact", {
-      method: "post",
+      method: "POST",
       body,
       headers: {
         "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -54,18 +61,13 @@
     const isSuccessful = status => status >= 200 && status < 300;
 
     if (isSuccessful(res.status)) {
-      message = "Your message was sent successfully";
-      name = "";
-      email = "";
-      bookingEnquiry = false;
-      dates = "";
-      times = "";
-      venue = "";
-      message = "";
-      occasion = "";
+      success = true;
     } else {
+      success = false;
       error = await res.text();
     }
+    submitted = true;
+    dispatch("complete");
   }
 </script>
 
@@ -80,86 +82,108 @@
     max-width: 400px;
     align-items: stretch;
     box-sizing: border-box;
+    margin: auto;
   }
 
   label.checkbox {
-    display: inline;
+    flex-direction: row;
+    align-items: center;
   }
 
-  p {
+  .note {
     font-style: italic;
   }
 
   .error {
     color: var(--negative);
   }
+
+  h-captcha {
+    margin: 1em auto;
+  }
 </style>
 
-<h2>Contact us</h2>
-<form on:submit|preventDefault="{submit}">
-  <label>
-    Your name
-    <input type="text" bind:value="{name}" required />
-  </label>
-  <label>
-    Your e-mail address
-    <input type="email" bind:value="{email}" required />
-  </label>
-  <label class="checkbox">
-    Interested in booking us?
-    <input type="checkbox" bind:checked="{bookingEnquiry}" />
-  </label>
-  {#if bookingEnquiry}
-    <p>
-      It would be very helpful if you could tell us as much as you can about the event now. Don't worry if you don't
-      have details yet, but please do provide what information you can. Similarly, include any further details in the
-      message.
-    </p>
+{#if !submitted}
+  <form on:submit|preventDefault="{submit}">
     <label>
-      Occasion/Event
-      <select required bind:value="{occasion}">
-        <option value="" disabled selected>Select one</option>
-        <option value="Fundraiser">Fundraiser</option>
-        <option value="Wedding">Wedding</option>
-        <option value="Private party">Private party</option>
-        <option value="Corporate event">Corporate event</option>
-        <option value="College JCR/MCR event">College JCR/MCR event</option>
-        <option value="College ball or similar event">College ball or similar event</option>
-        <option value="Other">Other (please give details below)</option>
-      </select>
+      Your name
+      <input type="text" bind:value="{name}" required />
     </label>
+    <label>
+      Your e-mail address
+      <input type="email" bind:value="{email}" required />
+    </label>
+    <label class="checkbox">
+      Interested in booking us?
+      <input type="checkbox" bind:checked="{bookingEnquiry}" />
+    </label>
+    {#if bookingEnquiry}
+      <p class="note">
+        It would be very helpful if you could tell us as much as you can about the event now. Don't worry if you don't
+        have details yet, but please do provide what information you can. Similarly, include any further details in the
+        message.
+      </p>
+      <label>
+        Occasion/Event
+        <select required bind:value="{occasion}">
+          <option value="" disabled selected>Select one</option>
+          <option value="Fundraiser">Fundraiser</option>
+          <option value="Wedding">Wedding</option>
+          <option value="Private party">Private party</option>
+          <option value="Corporate event">Corporate event</option>
+          <option value="College JCR/MCR event">College JCR/MCR event</option>
+          <option value="College ball or similar event">College ball or similar event</option>
+          <option value="Other">Other (please give details below)</option>
+        </select>
+      </label>
+
+      <label>
+        Suggested dates
+        <input type="text" bind:value="{dates}" />
+      </label>
+      <label>
+        Suggested times
+        <input type="text" bind:value="{times}" />
+      </label>
+      <label>
+        Suggested venue
+        <input type="text" bind:value="{venue}" />
+      </label>
+    {/if}
 
     <label>
-      Suggested dates
-      <input type="text" bind:value="{dates}" />
+      Message
+      <textarea bind:value="{message}" rows="{15}" required></textarea>
     </label>
-    <label>
-      Suggested times
-      <input type="text" bind:value="{times}" />
-    </label>
-    <label>
-      Suggested venue
-      <input type="text" bind:value="{venue}" />
-    </label>
+
+    {#if captchaVisible}
+      <h-captcha
+        id="captcha"
+        site-key="{process.env.HCAPTCHA_SITE_KEY}"
+        size="normal"
+        {dark}
+        on:verified="{onCaptchaVerified}"
+      ></h-captcha>
+    {/if}
+
+    <input type="submit" value="Send" />
+  </form>
+  {#if error}
+    <span class="error">{error}</span>
   {/if}
+{:else if success}
+  <p>Thank you, {name}&nbsp;({email})!</p>
 
-  <label>
-    Message
-    <textarea bind:value="{message}" rows="{15}" required></textarea>
-  </label>
-
-  {#if captchaVisible}
-    <h-captcha
-      id="captcha"
-      site-key="{process.env.HCAPTCHA_SITE_KEY}"
-      size="normal"
-      dark
-      on:verified="{onCaptchaVerified}"
-    ></h-captcha>
-  {/if}
-
-  <input type="submit" value="Send" />
-</form>
-{#if error}
-  <span class="error">{error}</span>
+  <p>
+    Your message has been sent to our secretary, and a confirmation message sent to your address. (If you do not receive
+    this within a few hours, please check your e-mail was entered correctly and contact the secretary directly by
+    e-mail.)
+  </p>
+{:else}
+  <p>
+    <span class="error">An error occurred.</span>
+    The error message was: &ldquo;
+    {@html error}
+    &rdquo;
+  </p>
 {/if}

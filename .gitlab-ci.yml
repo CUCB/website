@@ -37,6 +37,7 @@ build:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
+    - echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
     - docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
     - docker build -t $CI_REGISTRY/cucb/website/sapper:latest -f deploy/Dockerfile .
     - docker push $CI_REGISTRY/cucb/website/sapper:latest
@@ -47,27 +48,6 @@ build:
   only:
     - master
 
-build_dev:
-  type: build
-  variables:
-    DOCKER_DRIVER: overlay2
-  image: docker:latest
-  services:
-    - docker:dind
-  stage: build-test
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
-    - docker build -t $CI_REGISTRY/cucb/website/sapper:devlatest -f deploy/Dockerfile .
-    - docker push $CI_REGISTRY/cucb/website/sapper:devlatest
-  cache:
-    key: node-modules-build
-    paths:
-      - node_modules/
-  except:
-    - master
-
 deploy:
   type: deploy
   environment:
@@ -75,8 +55,6 @@ deploy:
     url: dev.cucb.co.uk
   dependencies:
     - pulumi
-    - build
-    - test
   before_script:
     - apt-get update -qq
     - apt-get install -qq git
@@ -96,13 +74,15 @@ deploy:
     - echo "DEPLOY_REGISTRY_USER=$DEPLOY_REGISTRY_USER" >> sshenv
     - echo "DEPLOY_REGISTRY_PASSWORD=$DEPLOY_REGISTRY_PASSWORD" >> sshenv
     - echo "DEPLOY_REGISTRY=$CI_REGISTRY" >> sshenv
-    - echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> sshenv
-    - echo "HCAPTCHA_SECRET=$HCAPTCHA_SECRET" >> sshenv
     - scp sshenv root@$IP:~/.ssh/environment
+    - echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" > hcaptcha
+    - echo "HCAPTCHA_SECRET=$HCAPTCHA_SECRET" >> hcaptcha
     - echo "export DROPBOX_ACCESS_TOKEN=$DROPBOX_ACCESS_TOKEN" > dropbox_access_token
     - ssh root@$IP "mkdir -p .env"
+    - scp hcaptcha root@$IP:.env/hcaptcha
     - scp dropbox_access_token root@$IP:.env/dropbox_access_token
-    - printf "CLOUDFLARE_EMAIL=webmaster@cucb.co.uk\nCLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY\n" >> cloudflare_api_key
+    - echo "CLOUDFLARE_EMAIL=webmaster@cucb.co.uk" > cloudflare_api_key
+    - echo "CLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY" >> cloudflare_api_key
     - scp cloudflare_api_key root@$IP:.env/cloudflare_api_key
     - rm dropbox_access_token
     - scp deploy.sh root@$IP:deploy.sh
