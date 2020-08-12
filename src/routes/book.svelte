@@ -4,6 +4,10 @@
   import BookingForm from "../components/BookingForm.svelte";
 </script>
 
+<script>
+  let bookingFormComplete = false;
+</script>
+
 <svelte:head>
   <title>{makeTitle('Book us')}</title>
 </svelte:head>
@@ -26,7 +30,7 @@
   If this all sounds interesting, plenty more information is available via the
   <a href="/faqs/book/">Frequently Asked Questions</a>
   page and the
-  <a href="/book/gigpolicy/">Standard Gig Policy</a>
+  <a href="/docs/standard-gig-policy.pdf" target="_blank">Standard Gig Policy</a>
   &mdash; and of course by contacting us!
 </p>
 <Testimonial person="Fiammetta, Birthday Celebration, January 2019">
@@ -38,5 +42,22 @@
   Thank you so much for making our 15th wedding anniversary ceilidh so brilliant! You were all fabulous!
 </Testimonial>
 <br />
+<h2>Contact us</h2>
+{#if !bookingFormComplete}
+  <p>
+    <i>Note:</i>
+    For a quote, it would be useful for you to mention the location and purpose of the ceilidh (e.g. wedding, ball,
+    fundraiser...). However, do get in touch even if you're not sure of any details yet, and just want to find out a bit
+    more about who we are and what we do.
+  </p>
+
+  <p>
+    If you're interesting in booking us, please also look at our
+    <a href="/docs/standard-gig-policy.pdf" target="_blank">Standard Gig Policy</a>
+    and also the
+    <a href="/faqs/book">Frequently Asked Questions</a>
+    !
+  </p>
+{/if}
 <!-- TODO should we put a pic in here -->
-<BookingForm />
+<BookingForm on:complete="{() => (bookingFormComplete = true)}" />

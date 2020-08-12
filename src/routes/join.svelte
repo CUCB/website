@@ -1,6 +1,5 @@
 <script>
   import Map from "../components/Map.svelte";
-  import Thumbnail from "../components/Thumbnail.svelte";
   import { makeTitle } from "../view";
 </script>
 
@@ -21,6 +20,7 @@
   section div {
     flex-basis: 400px;
     flex-grow: 1;
+    margin-right: 1em;
   }
 
   img {
@@ -28,6 +28,7 @@
     max-width: 100%;
     margin: 5px;
     flex-shrink: 0;
+    box-shadow: 0 0 5px var(--form_color);
   }
 </style>
 
@@ -56,10 +57,7 @@
       saxophones, cellos, trombones, recorders, accordions, banjos, and much much more - even a wind synthesiser!)
     </p>
   </div>
-  <img
-    src="/static/images/join/rehearsal.jpg"
-    alt="Several people sitting in a semicircle around the President, playing instruments"
-  />
+  <img src="/static/images/join/cbc.jpg" alt="Some people dancing in a church in front of the band" />
   <p>
     We rehearse every Thursday of term-time from 8pm to 10pm, usually in Emmanuel United Reform Church. We've provided a
     map, but do check any e-mails from the official list before turning up in case of a change of venue.
@@ -88,7 +86,7 @@
     </p>
   </div>
 
-  <img src="/static/images/join/whitworth.jpg" alt="One of our ceilidhs" />
+  <img src="/static/images/join/claremb.jpg" alt="People in black tie doing ceilidh dancing" />
 </section>
 
 <h2>Socials</h2>
@@ -113,14 +111,12 @@
     </ul>
   </div>
 
-  <img src="/static/images/join/annual-dinner-2013.jpg" alt="Annual dinner 2013" />
+  <img src="/static/images/join/annual_dinner_2020.jpg" alt="People in formal dress after annual dinner" />
 </section>
 
 <p>
   Some of our money gets spent on our Annual Tour every September. Recent destinations include: Callander, the Lake
-  District, and the Peak District. More can be read on the
-  <a href="/members/tour/">tour page</a>
-  .
+  District, and the Peak District.
 </p>
 <p>
   If you are interested, feel free to join our
@@ -129,25 +125,3 @@
   <a href="/committee/">contact a member of the committee</a>
   . We look forward to seeing you at a rehearsal sometime soon.
 </p>
-
-<h2>Band Pics!</h2>
-<p>Our thanks to Amelia Penny, Tom Furnival, Zhao Songyuan, Danielle Ainsworth and many others for all the photos!</p>
-
-<section>
-  <Thumbnail
-    src="/static/images/join/Alumni_Dinner.jpg"
-    description="The Alumni Dinner - members past and present reunited!"
-  />
-  <Thumbnail
-    src="/static/images/join/Annual_Dinner_2012_Instruments.jpg"
-    description="One of the more unusual instruments owned by the band..."
-  />
-  <Thumbnail
-    src="/static/images/join/Annual_Dinner_Presents.jpg"
-    description="The 2014 Annnual Dinner - presents for the old committee"
-  />
-  <Thumbnail src="/static/images/join/Annual_Dinner_Session_Mix.jpg" description="Tunes!" />
-  <Thumbnail src="/static/images/join/Session_2010_Fliss.jpg" description="Sessions can be *this* fun" />
-  <Thumbnail src="/static/images/join/Tour2012-Group.jpg" description="Band on tour, 2012" />
-  <Thumbnail src="/static/images/join/Tour2012-Session_Outside.jpg" description="A session on tour, 2012" />
-</section>

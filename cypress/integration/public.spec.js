@@ -73,7 +73,7 @@ describe("sessions page", () => {
     cy.get("a")
       .contains("mailing list")
       .should("have.prop", "href")
-      .and("include", "/lists");
+      .and("include", "/mailinglists");
   });
 });
 
