@@ -89,6 +89,6 @@
     <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members" rel="prefetch">members</a>
     <a href="auth/logout" class="split">log out</a>
   {:else}
-    <a href="auth/login" class="split">log in</a>
+    <a href="auth/login" class="split" on:click="{() => (window.location.href = '/auth/login')}">log in</a>
   {/if}
 </nav>
