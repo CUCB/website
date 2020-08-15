@@ -54,13 +54,58 @@ describe("homepage", () => {
   });
 });
 
+let polyfill;
+const useFetchPolyfill = {
+  onBeforeLoad(win) {
+    delete win.fetch;
+    win.eval(polyfill);
+    win.fetch = win.unfetch;
+  },
+};
+
 describe("book us page", () => {
   before(() => {
-    cy.visit("/book");
+    cy.fetchPolyfill().then(result => (polyfill = result));
+  });
+
+  beforeEach(() => {
+    cy.visit("/book", useFetchPolyfill);
   });
 
   it("has testimonial", () => {
     cy.get(".testimonial").should("be.visible");
+  });
+
+  it("allows a user to submit a booking request", () => {
+    cy.server();
+    cy.route("POST", "/contact").as("contact");
+    cy.get("[data-test='booking-name']").type("Testy test");
+    cy.get("[data-test='booking-email']").type("testy@te.st");
+    cy.get("[data-test='booking-message']").type("testy test");
+    cy.get("#captcha > iframe").then($element => {
+      const $body = $element.contents().find("body");
+      cy.wrap($body)
+        .find("#checkbox")
+        .click();
+      cy.wrap($body).find("#checkbox.checked");
+    });
+    cy.get("[data-test='booking-send']").click();
+    cy.wait("@contact");
+  });
+
+  it("prevents a user from submitting the booking form when not captcha'd", () => {
+    cy.server();
+    cy.route("POST", "/contact").as("contact");
+    cy.get("[data-test='booking-name']").type("Testy test");
+    cy.get("[data-test='booking-email']").type("testy@te.st");
+    cy.get("[data-test='booking-message']").type("testy test");
+    cy.get("[data-test='booking-send']").click();
+    cy.get(".error").contains("captcha");
+    cy.cssProperty("--negative").then(color => {
+      cy.get(".error")
+        .should("have.css", "color")
+        .and("eq", color);
+    });
   });
 });
 

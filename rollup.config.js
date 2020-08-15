@@ -20,7 +20,9 @@ const GRAPHQL_PATH = process.env.GRAPHQL_PATH;
 const HCAPTCHA_SITE_KEY = process.env.HCAPTCHA_SITE_KEY;
 
 const onwarn = (warning, onwarn) =>
-  (warning.code === "CIRCULAR_DEPENDENCY" && /[/\\]@sapper[/\\]/.test(warning.message)) || onwarn(warning);
+  (warning.code === "MISSING_EXPORT" && /'preload'/.test(warning.message)) ||
+  (warning.code === "CIRCULAR_DEPENDENCY" && /[/\\]@sapper[/\\]/.test(warning.message)) ||
+  onwarn(warning);
 
 const preprocess = sveltePreprocess({
   scss: {
@@ -108,6 +110,7 @@ export default {
       }),
       svelte({
         generate: "ssr",
+        hydratable: true,
         dev,
         preprocess: [preprocess, removeWhitespace],
       }),

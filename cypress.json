@@ -2,5 +2,6 @@
   "baseUrl": "http://localhost:4000",
   "video": false,
   "projectId": "5wemfg",
-  "defaultCommandTimeout": 4000
+  "defaultCommandTimeout": 4000,
+  "chromeWebSecurity": false
 }

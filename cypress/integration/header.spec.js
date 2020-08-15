@@ -52,9 +52,9 @@ describe("header", () => {
       });
 
       it("navigates to login page", () => {
-        cy.get("header nav a")
+        cy.get("header nav")
           .contains("log in")
-          .clickLink();
+          .click();
       });
     });
 

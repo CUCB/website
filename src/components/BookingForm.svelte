@@ -107,15 +107,15 @@
   <form on:submit|preventDefault="{submit}">
     <label>
       Your name
-      <input type="text" bind:value="{name}" required />
+      <input type="text" bind:value="{name}" required data-test="booking-name" />
     </label>
     <label>
       Your e-mail address
-      <input type="email" bind:value="{email}" required />
+      <input type="email" bind:value="{email}" required data-test="booking-email" />
     </label>
     <label class="checkbox">
       Interested in booking us?
-      <input type="checkbox" bind:checked="{bookingEnquiry}" />
+      <input type="checkbox" bind:checked="{bookingEnquiry}" data-test="booking-enquiry" />
     </label>
     {#if bookingEnquiry}
       <p class="note">
@@ -125,7 +125,7 @@
       </p>
       <label>
         Occasion/Event
-        <select required bind:value="{occasion}">
+        <select required bind:value="{occasion}" data-test="booking-occasion">
           <option value="" disabled selected>Select one</option>
           <option value="Fundraiser">Fundraiser</option>
           <option value="Wedding">Wedding</option>
@@ -139,21 +139,21 @@
 
       <label>
         Suggested dates
-        <input type="text" bind:value="{dates}" />
+        <input type="text" bind:value="{dates}" data-test="booking-dates" />
       </label>
       <label>
         Suggested times
-        <input type="text" bind:value="{times}" />
+        <input type="text" bind:value="{times}" data-test="booking-times" />
       </label>
       <label>
         Suggested venue
-        <input type="text" bind:value="{venue}" />
+        <input type="text" bind:value="{venue}" data-test="booking-venue" />
       </label>
     {/if}
 
     <label>
       Message
-      <textarea bind:value="{message}" rows="{15}" required></textarea>
+      <textarea bind:value="{message}" rows="{15}" required data-test="booking-message"></textarea>
     </label>
 
     {#if captchaVisible}
@@ -166,11 +166,11 @@
       ></h-captcha>
     {/if}
 
-    <input type="submit" value="Send" />
+    {#if error}
+      <span class="error">{error}</span>
+    {/if}
+    <input type="submit" value="Send" data-test="booking-send" />
   </form>
-  {#if error}
-    <span class="error">{error}</span>
-  {/if}
 {:else if success}
   <p>Thank you, {name}&nbsp;({email})!</p>
 

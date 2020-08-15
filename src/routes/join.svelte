@@ -60,7 +60,9 @@
   <img src="/static/images/join/cbc.jpg" alt="Some people dancing in a church in front of the band" />
   <p>
     We rehearse every Thursday of term-time from 8pm to 10pm, usually in Emmanuel United Reform Church. We've provided a
-    map, but do check any e-mails from the official list before turning up in case of a change of venue.
+    map, but do check any e-mails from the
+    <a href="/mailinglists">official list</a>
+    before turning up in case of a change of venue.
   </p>
   <Map
     title="Map showing location of Emmanuel United Reform Church"

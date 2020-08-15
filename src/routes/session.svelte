@@ -1,11 +1,11 @@
 <script context="module">
   import { makeTitle } from "../view.js";
+  import CaptionedImage from "../components/CaptionedImage.svelte";
 </script>
 
 <svelte:head>
   <title>{makeTitle('Sessions')}</title>
 </svelte:head>
-
 <h1>Sessions</h1>
 
 <p>
@@ -46,7 +46,9 @@
   going to mind if you take a peek at the dots, and you'll probably find you get swept along and pick up more than you'd
   expect of the jigs, reels and whatever else gets thrown in the mix!
 </p>
-
+<CaptionedImage src="/static/images/session/scotland-boat.jpg" alt="People playing instruments in a session on a boat">
+  Some people playing in a session on tour in Scotland
+</CaptionedImage>
 <p>
   We know that sessions can be a little scary to begin with, and we try hard to make ours as welcoming as possible. For
   many of our members, both new and old to traditional music, they are the highlight of the CUCB calendar. Please come

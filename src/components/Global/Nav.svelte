@@ -38,14 +38,30 @@
     }
   }
 
-  a {
+  a,
+  button {
     text-decoration: none;
     padding: 0.5em;
     display: block;
     color: var(--accent);
   }
 
-  a.split {
+  button {
+    border: none;
+    font-family: var(--title);
+    background: none;
+  }
+
+  button:hover {
+    filter: brightness(110%);
+  }
+
+  button:focus {
+    box-shadow: none;
+    outline: 1px dotted black;
+  }
+
+  .split {
     margin-left: auto;
   }
 
@@ -73,7 +89,7 @@
       visibility: visible;
     }
 
-    a.split {
+    .split {
       margin-left: unset;
     }
   }
@@ -89,6 +105,6 @@
     <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members" rel="prefetch">members</a>
     <a href="auth/logout" class="split">log out</a>
   {:else}
-    <a href="auth/login" class="split" on:click="{() => (window.location.href = '/auth/login')}">log in</a>
+    <button class="split" on:click="{() => (window.location.href = '/auth/login')}">log in</button>
   {/if}
 </nav>
