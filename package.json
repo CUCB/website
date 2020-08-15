@@ -79,8 +79,8 @@
     "rollup-plugin-sourcemaps": "^0.6.2",
     "rollup-plugin-svelte": "^5.0.1",
     "rollup-plugin-terser": "^4.0.4",
-    "sapper": "^0.27.0",
-    "svelte": "^3.0.0",
+    "sapper": "^0.28.0",
+    "svelte": "^3.24.1",
     "svelte-color-picker": "^1.0.7",
     "svelte-preprocess": "^3.5.0"
   },

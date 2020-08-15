@@ -44,7 +44,7 @@ services:
       PG_PASSWORD: ${PG_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
       EMAIL_POSTFIX_HOST: 172.18.0.1
-      EMAIL_SEND_ADDRESS: root@dev.cucb.co.uk
+      EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
       HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
     volumes:
