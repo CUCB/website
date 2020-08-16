@@ -1,6 +1,15 @@
+<script>
+    import { makeTitle, committee } from "../../view";
+    import Mailto from "../../components/Mailto.svelte";
+</script>
+
+<svelte:head>
+    <title>{makeTitle("Book us | FAQs")}</title>
+</svelte:head>
+
 ## Book us
 
-For more information, have a look at our [Standard Gig Policy](/docs/standard-gig-policy.pdf), and if you have any questions e-mail [the Secretary](mailto:secretary%40cucb.co.uk?subject=) or use the [online contact form](/book).
+For more information, have a look at our [Standard Gig Policy](/docs/standard-gig-policy.pdf), and if you have any questions e-mail <Mailto person={$committee.secretary}>the Secretary</Mailto> or use the [online contact form](/book).
 
 ### How do you pronounce ceilidh?
 
@@ -41,3 +50,4 @@ CUCB is a student society, and most of our members are current students, or ex-s
 ### Do you do special requests?
 
 The band tries its best to accommodate requests; however some things are not possible for a student band. Please simply let us know when you ask for a quote if you have anything specific in mind and we will let you know what we can do!
+

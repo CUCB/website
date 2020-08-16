@@ -7,14 +7,14 @@ describe("header", () => {
   describe("navbar", () => {
     it("navigates to /book", () => {
       cy.get("header nav a")
-        .contains("book us")
+        .contains("Book us")
         .clickLink();
       cy.url().should("include", "/book");
     });
 
     it("navigates to /join", () => {
       cy.get("header nav a")
-        .contains("join us")
+        .contains("Join us")
         .clickLink();
       cy.url().should("include", "/join");
     });
@@ -39,7 +39,7 @@ describe("header", () => {
         },
       });
       cy.get("header nav a")
-        .contains("committee")
+        .contains("Committee")
         .clickLink();
       cy.url().should("include", "/committee");
     });
@@ -47,13 +47,13 @@ describe("header", () => {
     context("when not logged in", () => {
       it("doesn't navigate to /members", () => {
         cy.get("header nav a")
-          .contains("members")
+          .contains("Members")
           .should("not.exist");
       });
 
       it("navigates to login page", () => {
         cy.get("header nav")
-          .contains("log in")
+          .contains("Log in")
           .click();
       });
     });
@@ -80,17 +80,17 @@ describe("header", () => {
 
       it("navigates to /members", () => {
         cy.get("header nav a")
-          .contains("members")
+          .contains("Members")
           .clickLink();
         cy.url().should("include", "members");
       });
 
       it("contains working logout button", () => {
         cy.get("header nav a")
-          .contains("log out")
+          .contains("Log out")
           .clickLink();
         cy.get("header nav a")
-          .contains("members")
+          .contains("Members")
           .should("not.exist");
       });
     });

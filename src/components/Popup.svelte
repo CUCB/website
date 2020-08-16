@@ -1,3 +1,24 @@
+<script context="module">
+  let count = 0;
+</script>
+
+<script>
+  import { fade } from "svelte/transition";
+  import { createEventDispatcher, onMount, onDestroy } from "svelte";
+  export let dirty = false;
+  export let icons = true;
+  export let width = undefined;
+
+  const dispatch = createEventDispatcher();
+  const closeOrCancel = () => dispatch(dirty ? "cancel" : "close");
+
+  let index;
+
+  onMount(() => (index = count++));
+  onDestroy(() => count--);
+  $: current = index === count - 1;
+</script>
+
 <style>
   .icons {
     display: flex;
@@ -26,34 +47,14 @@
   box-container {
     position: absolute;
     width: 100%;
-    height: min(100%, calc(100 * var(--vh)));
+    height: 100%;
+    max-height: calc(100 * var(--vh));
     margin: 0;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 </style>
-
-<script context="module">
-  let count = 0;
-</script>
-
-<script>
-  import { fade } from "svelte/transition";
-  import { createEventDispatcher, onMount, onDestroy } from "svelte";
-  export let dirty = false;
-  export let icons = true;
-  export let width = undefined;
-
-  const dispatch = createEventDispatcher();
-  const closeOrCancel = () => dispatch(dirty ? "cancel" : "close");
-
-  let index;
-
-  onMount(() => (index = count++));
-  onDestroy(() => count--);
-  $: current = index === count - 1;
-</script>
 
 <box-container on:click|self="{() => current && !dirty && dispatch('close')}">
   <popup-box on:click transition:fade="{{ duration: 250 }}" style="{width ? `width: ${width}` : ``}">

@@ -5,6 +5,13 @@ body {
   line-height: 1.5;
   color: var(--text_color);
   background: var(--background);
+  -webkit-tap-highlight-color: rgba(var(--form_triple), 0.3);
+}
+
+@media (pointer: none), (pointer: coarse) {
+  a:active {
+    background: rgba(var(--form_triple), 0.3);
+  }
 }
 
 h1,

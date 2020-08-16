@@ -59,14 +59,16 @@
   </div>
   <img src="/static/images/join/cbc.jpg" alt="Some people dancing in a church in front of the band" />
   <p>
-    We rehearse every Thursday of term-time from 8pm to 10pm, usually in Emmanuel United Reform Church. We've provided a
-    map, but do check any e-mails from the
+    We rehearse every Thursday of term-time from 8pm to 10pm, currently in the
+    <b>University Social Club (Upstairs Main Hall)</b>
+    . We are anticipating being able to continue rehearsals in Michaelmas 2020 that comply with social distancing
+    guidelines. Please check any e-mails from the
     <a href="/mailinglists">official list</a>
     before turning up in case of a change of venue.
   </p>
   <Map
-    title="Map showing location of Emmanuel United Reform Church"
-    src="https://maps.google.com/maps?f=q&source=s_q&hl=en&geocode=&q=Emmanuel+URC+Church,+Trumpington+Street,+Cambridge,+UK&aq=0&oq=emma&sll=37.0625,-95.677068&sspn=62.870523,135.263672&ie=UTF8&hq=Emmanuel+URC+Church,&hnear=Trumpington+St,+Cambridge,+United+Kingdom&t=m&ll=52.204267,0.120163&spn=0.012098,0.023603&z=15&iwloc=A&output=embed"
+    title="Map showing location of the University Social Club"
+    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d514.0610247491702!2d0.11630405824783323!3d52.20159347864946!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d870a3328d9a8f%3A0xf2286283e2e1415f!2sUniversity%20Social%20Club!5e0!3m2!1sen!2suk!4v1597540877576!5m2!1sen!2suk"
   />
 </section>
 

@@ -8,7 +8,6 @@ yarn-error.log
 /__sapper__/
 .vscode
 .env
-cached_content
 db_restore
 temp/*
 images/*
