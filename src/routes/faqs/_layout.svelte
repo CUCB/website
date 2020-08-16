@@ -20,7 +20,7 @@ We've collected a few questions people commonly ask here for you to have a look 
 sections on
 <a href="/faqs/book" sapper:noscroll>booking us</a>
 {#if !loggedIn}
-  and
+  &nbsp;and
   <a href="/faqs/join" sapper:noscroll>joining us</a>
 {:else}
   ,
