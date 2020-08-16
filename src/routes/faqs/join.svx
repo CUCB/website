@@ -1,3 +1,11 @@
+<script>
+    import { makeTitle } from "../../view";
+</script>
+
+<svelte:head>
+    <title>{makeTitle("Join us | FAQs")}</title>
+</svelte:head>
+
 ## Join Us
 
 ### What do I need to bring to my first rehearsal?

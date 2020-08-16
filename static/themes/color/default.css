@@ -3,7 +3,8 @@
   --background: rgb(var(--background_triple));
   --code_color: #555;
   --code_background: #f0f0f0;
-  --form_color: #777;
+  --form_triple: 119, 119, 119;
+  --form_color: rgb(var(--form_triple));
   --text_color: #222;
   --footer_color: rgba(33, 33, 33, 0.8);
   --logo_color: var(--text_color);
@@ -25,7 +26,8 @@
     --background: rgb(var(--background_triple));
     --footer_color: rgba(204, 204, 204, 0.8);
     --logo_color: var(--text_color);
-    --form_color: #555;
+    --form_triple: 85, 85, 85;
+    --form_color: rgb(var(--form_triple));
     --accent_triple: 0, 165, 53;
     --accent: rgb(var(--accent_triple));
     --theme_name: dark;

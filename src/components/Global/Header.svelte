@@ -98,6 +98,12 @@
     color: var(--text_color);
   }
 
+  @media only screen and (max-width: 1200px) {
+    :global(#logo) {
+      max-width: 100px;
+    }
+  }
+
   @media only screen and (max-width: 600px) {
     .button-background {
       background-color: var(--background);

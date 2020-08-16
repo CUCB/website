@@ -13,18 +13,18 @@
     display: flex;
   }
 
-  @media only screen and (min-width: 600px) {
+  nav * {
+    user-select: none;
+  }
+
+  @media only screen and (min-width: 601px) {
     a:first-child {
-      padding-left: 0;
+      margin-left: -0.5em;
     }
 
     [aria-current] {
       position: relative;
       display: inline-block;
-    }
-
-    [aria-current]:first-child::after {
-      padding-left: 0.5em;
     }
 
     [aria-current]::after {
@@ -36,14 +36,24 @@
       display: block;
       bottom: -1px;
     }
-  }
 
+    .split {
+      margin-left: auto;
+    }
+    a,
+    button {
+      padding: 0.5em;
+    }
+  }
   a,
   button {
-    text-decoration: none;
-    padding: 0.5em;
     display: block;
     color: var(--accent);
+  }
+
+  nav a,
+  nav button {
+    font-size: 1.2em;
   }
 
   button {
@@ -61,18 +71,32 @@
     outline: 1px dotted black;
   }
 
-  .split {
-    margin-left: auto;
-  }
-
   @media only screen and (max-width: 600px) {
     nav {
       transition: visibility 0s, opacity 0.2s;
       flex-direction: column;
       justify-content: flex-end;
-      font-size: 1.5rem;
+      justify-items: stretch;
       visibility: hidden;
       opacity: 0;
+    }
+
+    nav a,
+    nav button {
+      font-size: 1.5rem;
+      line-height: 1.5;
+      padding: 0.4em 0;
+    }
+
+    button {
+      height: unset;
+      width: unset;
+      line-height: 1.5;
+    }
+
+    button:active {
+      background: rgba(var(--form_triple), 0.3);
+      outline: none;
     }
 
     [aria-current] {
@@ -88,23 +112,19 @@
       opacity: 0;
       visibility: visible;
     }
-
-    .split {
-      margin-left: unset;
-    }
   }
 </style>
 
 <nav on:click class="{navClass}" aria-hidden="{!visible}">
-  <a aria-current="{segment === undefined ? 'page' : undefined}" href=".">home</a>
-  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book">book us!</a>
-  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join">join us!</a>
-  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee">committee</a>
+  <a aria-current="{segment === undefined ? 'page' : undefined}" href="." rel="prefetch">Home</a>
+  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" rel="prefetch">Book us!</a>
+  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" rel="prefetch">Join us!</a>
+  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee" rel="prefetch">Committee</a>
 
   {#if user.userId}
-    <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members" rel="prefetch">members</a>
-    <a href="auth/logout" class="split">log out</a>
+    <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members" rel="prefetch">Members</a>
+    <a href="auth/logout" class="split">Log out</a>
   {:else}
-    <button class="split" on:click="{() => (window.location.href = '/auth/login')}">log in</button>
+    <button class="split" on:click="{() => (window.location.href = '/auth/login')}">Log in</button>
   {/if}
 </nav>

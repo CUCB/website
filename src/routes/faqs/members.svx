@@ -1,0 +1,11 @@
+<script>
+    import { makeTitle } from "../../view";
+</script>
+
+<svelte:head>
+    <title>{makeTitle("Members | FAQs")}</title>
+</svelte:head>
+
+## Information for Members
+
+WIP

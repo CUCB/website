@@ -10,24 +10,23 @@
   }
 
   nav a {
-    padding: 0 10px 2px 10px;
-    text-transform: lowercase;
+    padding: 0.15em 0.7em;
   }
 
   @media only screen and (max-width: 600px) {
     nav a {
       font-size: 1.3em;
-      padding: 0 5px 2px 5px;
+      padding: 0.1em 0.6em;
     }
   }
 </style>
 
-<nav>
-  <a href="/members/gigs">gig diary</a>
-  <a href="/members/music">music</a>
-  <a href="/members/whoswho">who's who</a>
+<nav class="subnav">
+  <a href="/members/gigs">Gig diary</a>
+  <a href="/members/music">Music</a>
+  <a href="/members/whoswho">Who's who</a>
   <a href="/faqs/members">FAQs</a>
-  <a href="/members/resources/">resources</a>
-  <a href="/session/">sessions</a>
-  <a href="/members/user/">my profile!</a>
+  <a href="/members/resources/">Resources</a>
+  <a href="/session/">Sessions</a>
+  <a href="/members/user/">My profile!</a>
 </nav>

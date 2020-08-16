@@ -9,6 +9,7 @@ import config from "sapper/config/rollup.js";
 import pkg from "./package.json";
 import sveltePreprocess from "svelte-preprocess";
 import workbox from "rollup-plugin-workbox";
+import { mdsvex } from "mdsvex";
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
@@ -35,7 +36,9 @@ const preprocess = sveltePreprocess({
 
 const removeWhitespace = {
   markup: input => ({
-    code: input.content.replace(/(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9\-&]|[^<]*?>|[^{]*?})/g, "$1"),
+    code: input.filename.match(/.*\.svelte/)
+      ? input.content.replace(/(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9\-&]|[^<]*?>|[^{]*?})/g, "$1")
+      : input.content,
   }),
 };
 
@@ -55,7 +58,8 @@ export default {
         dev,
         hydratable: true,
         emitCss: true,
-        preprocess: [preprocess, removeWhitespace],
+        extensions: [".svelte", ".svx"],
+        preprocess: [preprocess, removeWhitespace, mdsvex()],
       }),
       resolve({
         browser: true,
@@ -66,7 +70,7 @@ export default {
 
       legacy &&
         babel({
-          extensions: [".js", ".mjs", ".html", ".svelte"],
+          extensions: [".js", ".mjs", ".html", ".svelte", ".svx"],
           runtimeHelpers: true,
           exclude: ["node_modules/@babel/**"],
           presets: [
@@ -112,7 +116,8 @@ export default {
         generate: "ssr",
         hydratable: true,
         dev,
-        preprocess: [preprocess, removeWhitespace],
+        extensions: [".svelte", ".svx"],
+        preprocess: [preprocess, removeWhitespace, mdsvex()],
       }),
       resolve({
         dedupe: ["svelte"],
@@ -137,8 +142,8 @@ export default {
       workbox.injectManifest({
         swSrc: "temp/service-worker.js",
         swDest: config.serviceworker.output().file,
-        globDirectory: "static",
-        globPatterns: ["themes/**/*", "**/*.css"],
+        globDirectory: ".",
+        globPatterns: ["static/themes/**/*", "static/**/*.css"],
       }),
     ],
 

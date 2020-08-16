@@ -85,6 +85,7 @@
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { HsvPicker } from "svelte-color-picker";
   import { Map } from "immutable";
+  import { committee as committeeStore } from "../view";
 
   export let segment;
   export let color;
@@ -92,6 +93,7 @@
   export let accent;
   export let logo;
   export let committee;
+  committeeStore.set(committee);
 
   let spinnyLogo;
   let query = { color, font, accent, logo };
