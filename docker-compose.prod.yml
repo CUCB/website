@@ -47,9 +47,6 @@ services:
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
       HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
-    volumes:
-      - ./content:/usr/src/app/content
-      - ./static/static:/usr/src/app/static # not accessed, but expected by sapper
     restart: always
     command: >
       bash -c "npm run start"
