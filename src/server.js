@@ -38,8 +38,8 @@ polka()
   .all(`${GRAPHQL_PATH}`, function(req, res) {
     apiProxy.web(req, res, { target: GRAPHQL_REMOTE });
   })
-  .use("/images/committee", sirv("static/images/committee", { dev }))
-  .use("/static", sirv("static", { dev }))
+  .use("/images/committee", sirv("static/static/images/committee", { dev }))
+  .use(sirv("static", { dev }))
   .use(
     compression({ threshold: 0 }),
     bodyParser.urlencoded({ extended: true }),

@@ -139,10 +139,14 @@ export default {
         browser: true,
       }),
       !dev && terser(),
+      replace({
+        "process.browser": true,
+        "process.env.NODE_ENV": JSON.stringify(mode),
+      }),
       workbox.injectManifest({
         swSrc: "temp/service-worker.js",
         swDest: config.serviceworker.output().file,
-        globDirectory: ".",
+        globDirectory: "static",
         globPatterns: ["static/themes/**/*", "static/**/*.css"],
       }),
     ],

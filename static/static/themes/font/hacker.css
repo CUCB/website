@@ -1,6 +1,6 @@
 @import url(https://cdn.jsdelivr.net/gh/tonsky/FiraCode@2/distr/fira_code.css);
 
 :root {
-    --text: menlo, inconsolata, monospace;
-    --title: 'Fira Code';
+  --text: menlo, inconsolata, monospace;
+  --title: "Fira Code";
 }
