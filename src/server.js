@@ -34,12 +34,17 @@ if (!process.env.SESSION_SECRET) {
   process.exit(1);
 }
 
-polka()
+// Host static only on dev server
+const server = dev
+  ? polka()
+      .use("/images/committee", sirv("static/static/images/committee", { dev }))
+      .use(sirv("static", { dev }))
+  : polka();
+
+server
   .all(`${GRAPHQL_PATH}`, function(req, res) {
     apiProxy.web(req, res, { target: GRAPHQL_REMOTE });
   })
-  .use("/images/committee", sirv("static/static/images/committee", { dev }))
-  .use(sirv("static", { dev }))
   .use(
     compression({ threshold: 0 }),
     bodyParser.urlencoded({ extended: true }),
