@@ -49,7 +49,7 @@ services:
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
     volumes:
       - ./content:/usr/src/app/content
-      - ./static:/usr/src/app/static # not accessed, but expected by sapper
+      - ./static/static:/usr/src/app/static # not accessed, but expected by sapper
     restart: always
     command: >
       bash -c "npm run start"
@@ -65,7 +65,7 @@ services:
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
       - ${BLOCK_STORAGE}/certs:/root/.caddy/certs
-      - ./static:/srv/static
+      - ./static/static:/srv/static
       - ${BLOCK_STORAGE}/images:/srv/images
       - ./docs:/srv/docs
     logging:
