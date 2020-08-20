@@ -8,12 +8,10 @@ import { terser } from "rollup-plugin-terser";
 import config from "sapper/config/rollup.js";
 import pkg from "./package.json";
 import sveltePreprocess from "svelte-preprocess";
-import workbox from "rollup-plugin-workbox";
 import { mdsvex } from "mdsvex";
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
-const legacy = !!process.env.SAPPER_LEGACY_BUILD;
 
 require("dotenv").config();
 const GRAPHQL_REMOTE = process.env.GRAPHQL_REMOTE;
@@ -132,7 +130,7 @@ export default {
 
   serviceworker: {
     input: config.serviceworker.input(),
-    output: { file: "temp/service-worker.js" },
+    output: config.serviceworker.output(),
     plugins: [
       resolve({
         browser: true,
@@ -141,12 +139,6 @@ export default {
       replace({
         "process.browser": true,
         "process.env.NODE_ENV": JSON.stringify(mode),
-      }),
-      workbox.injectManifest({
-        swSrc: "temp/service-worker.js",
-        swDest: config.serviceworker.output().file,
-        globDirectory: "static",
-        globPatterns: ["static/themes/**/*", "static/**/*.css"],
       }),
     ],
 

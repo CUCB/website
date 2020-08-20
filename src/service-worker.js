@@ -1,5 +1,4 @@
 import { timestamp, files, shell } from "@sapper/service-worker";
-import { precacheAndRoute } from "workbox-precaching";
 
 const ASSETS = `cache${timestamp}`;
 
@@ -79,5 +78,3 @@ self.addEventListener("fetch", event => {
     }),
   );
 });
-
-precacheAndRoute(self.__WB_MANIFEST);

@@ -9,5 +9,4 @@ yarn-error.log
 .vscode
 .env
 db_restore
-temp/*
 images/*
