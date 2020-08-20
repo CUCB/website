@@ -70,6 +70,7 @@ describe("book us page", () => {
 
   beforeEach(() => {
     cy.visit("/book", useFetchPolyfill);
+    Cypress.currentTest.retries(3); // Retry the test if it fails as svelte inputs are a bit flaky
   });
 
   it("has testimonial", () => {

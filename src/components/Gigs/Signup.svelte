@@ -177,7 +177,7 @@
     cursor: pointer;
   }
 
-  label.notes {
+  .notes {
     font-style: italic;
     max-width: 20em;
   }
@@ -272,26 +272,24 @@
   {#if status === statuses.YES || status === statuses.MAYBE}
     <user-instruments>
       {#if edit}
-        <label class="notes">
-          Instruments
-          {#each userInstruments as userInstrument (userInstrument.id)}
-            <label
-              class="checkbox"
-              data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.instrument.id}-toggle`}"
-              class:disabled="{userInstrument.approved}"
-              use:instrumentTooltip
-            >
-              <input type="checkbox" bind:checked="{userInstrument.chosen}" disabled="{userInstrument.approved}" />
-              {userInstrument.instrument.name}
-            </label>
-          {:else}
-            <p>
-              You haven't added any instruments to your account, try adding one to
-              <a href="/members/user">your profile</a>
-              .
-            </p>
-          {/each}
-        </label>
+        <span class="notes">Instruments</span>
+        {#each userInstruments as userInstrument (userInstrument.id)}
+          <label
+            class="checkbox"
+            data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.instrument.id}-toggle`}"
+            class:disabled="{userInstrument.approved}"
+            use:instrumentTooltip
+          >
+            <input type="checkbox" bind:checked="{userInstrument.chosen}" disabled="{userInstrument.approved}" />
+            {userInstrument.instrument.name}
+          </label>
+        {:else}
+          <p>
+            You haven't added any instruments to your account, try adding one to
+            <a href="/members/user">your profile</a>
+            .
+          </p>
+        {/each}
       {:else}
         <p>Signed up with:</p>
         <ul data-test="{`gig-${gig.id}-signup-instruments-selected`}">
