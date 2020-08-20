@@ -133,8 +133,4 @@ describe("join page", () => {
       .should("have.prop", "href")
       .and("include", "/mailinglists/");
   });
-
-  it("has map", () => {
-    cy.get("[data-test=map]").should("be.visible");
-  });
 });
