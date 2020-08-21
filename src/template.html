@@ -7,17 +7,32 @@
 
     %sapper.base%
 
-    <link rel="stylesheet" href="static/global.css" />
+    <link rel="preload" href="static/global.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="static/global.css"/></noscript>
     <link rel="manifest" href="static/manifest.json" crossorigin="use-credentials" />
     <link rel="icon" type="image/x-icon" href="static/favicon.ico" />
     <link
-      rel="stylesheet"
+      rel="preload"
       href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css"
+    /></noscript>
     <link
-      rel="stylesheet"
+      rel="preload"
       href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript
+      ><link
+        rel="stylesheet"
+        href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
+    /></noscript>
 
     <!-- Sapper generates a <style> tag containing critical CSS
 	     for the current page. CSS for the rest of the app is

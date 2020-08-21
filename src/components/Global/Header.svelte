@@ -160,6 +160,7 @@
           showSettings = !showSettings;
           cog.blur();
         }}"
+        aria-label="Settings"
       >
         <i
           class="las la-cog"

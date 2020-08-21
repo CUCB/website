@@ -9,9 +9,9 @@
   --footer_color: rgba(33, 33, 33, 0.8);
   --logo_color: var(--text_color);
   --negative: rgb(255, 0, 0);
-  --neutral: rgb(188, 131, 42);
+  --neutral: rgb(174, 85, 6);
   --positive: rgb(7, 92, 1);
-  --unselected: gray;
+  --unselected: #696969;
   --accent_triple: 7, 92, 1;
   --accent: rgb(var(--accent_triple));
   --theme_name: light;
