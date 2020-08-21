@@ -12,9 +12,9 @@
   --accent: rgb(var(--accent_triple));
   --theme_name: light;
   --negative: rgb(255, 0, 0);
-  --neutral: rgb(188, 131, 42);
+  --neutral: rgb(174, 85, 6);
   --positive: rgb(7, 92, 1);
-  --unselected: gray;
+  --unselected: #696969;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,6 +34,6 @@
     --negative: rgb(255, 62, 62);
     --neutral: rgb(255, 165, 0);
     --positive: rgb(0, 165, 53);
-    --unselected: gray;
+    --unselected: #8b8b8b;
   }
 }

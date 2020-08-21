@@ -55,7 +55,9 @@
     We run several mailing lists, including one for those interested in hearing about our public gigs.
   </li>
   <li>
-    <a href="https://www.facebook.com/CUCeilidhBand" target="_blank">Like and follow us on Facebook</a>
+    <a href="https://www.facebook.com/CUCeilidhBand" target="_blank" rel="noopener noreferrer">
+      Like and follow us on Facebook
+    </a>
     to see what we've been up to.
   </li>
   <!--TODO work out what social medias we should have and put the links here- #38-->

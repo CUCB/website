@@ -220,6 +220,11 @@
   .disabled {
     color: var(--unselected);
   }
+
+  .none {
+    list-style-type: none;
+    font-style: italic;
+  }
 </style>
 
 <gig-signup>
@@ -298,7 +303,7 @@
               <InstrumentName {userInstrument} />
             </li>
           {:else}
-            <i>No instruments selected</i>
+            <li class="none">No instruments selected</li>
           {/each}
         </ul>
       {/if}

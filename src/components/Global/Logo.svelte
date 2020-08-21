@@ -41,7 +41,7 @@
     padding-top: 100%;
     position: relative;
   }
-  #logo {
+  #svg-logo {
     transform-origin: 50% 60%;
   }
   svg {
@@ -64,13 +64,14 @@
     {#if animate}
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        id="logo"
+        id="svg-logo"
         style="{$session.userId ? `transform:rotate(${$rotation}deg)` : ''}"
         on:mouseover="{triggerRotation}"
         on:mouseout="{triggerDerotation}"
         viewBox="-10 15 230 225"
         data-test="logo"
       >
+        <title>CUCB Logo</title>
         <g>
           <path in:draw="{{ duration: 800 }}" d="{inner}"></path>
         </g>
@@ -78,6 +79,7 @@
     {:else}
       <noscript>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 15 230 225" data-test="logo">
+          <title>CUCB Logo</title>
           <g>
             <path d="{inner}"></path>
           </g>
