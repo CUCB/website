@@ -262,7 +262,7 @@
   {#if accent}
     <link rel="stylesheet" type="text/css" href="static/themes/accent/{accent}.css?{logo ? `logo=${logo}` : ``}" />
   {/if}
-  {#if session.userId}
+  {#if $session.userId}
     <link
       rel="stylesheet"
       href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css"
