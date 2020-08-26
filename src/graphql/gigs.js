@@ -2,6 +2,10 @@ import gql from "graphql-tag";
 
 const FragmentGigDetails = gql`
   fragment GigDetails on cucb_gigs {
+    type: gig_type {
+      code
+      title
+    }
     date
     title
     id
@@ -97,6 +101,32 @@ export const QueryGigDetails = role => {
   }
 };
 
+export const QueryMultiGigDetails = role => {
+  if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
+    return gql`
+      query QueryGigDetails($where: cucb_gigs_bool_exp, $limit: Int, $offset: Int, $order_by: [cucb_gigs_order_by!]) {
+        cucb_gigs(where: $where, limit: $limit, offset: $offset, order_by: $order_by) {
+          ...GigDetails
+          ...GigAdminDetails
+          ...GigFinancials
+        }
+      }
+      ${FragmentGigDetails}
+      ${FragmentGigAdminDetails}
+      ${FragmentGigFinancials}
+    `;
+  } else {
+    return gql`
+      query QueryGigDetails($where: cucb_gigs_bool_exp, $limit: Int, $offset: Int, $order_by: [cucb_gigs_order_by!]) {
+        cucb_gigs(where: $where, limit: $limit, offset: $offset, order_by: $order_by) {
+          ...GigDetails
+        }
+      }
+      ${FragmentGigDetails}
+    `;
+  }
+};
+
 export const QueryGigSignup = gql`
   query QueryGigSignup {
     cucb_gigs(where: { admins_only: { _eq: false }, allow_signups: { _eq: true } }) {
@@ -144,6 +174,50 @@ export const QueryGigSignup = gql`
 export const QuerySingleGig = gql`
   query QuerySingleGig($gig_id: bigint) {
     cucb_gigs(where: { admins_only: { _eq: false }, allow_signups: { _eq: true }, id: { _eq: $gig_id } }) {
+      date
+      title
+      lineup {
+        user_available
+        user_only_if_necessary
+        user_notes
+        user_id
+        user_instruments {
+          user_instrument_id
+          approved
+        }
+        id
+        user {
+          gig_notes
+        }
+      }
+      id
+      venue {
+        id
+        map_link
+        name
+        subvenue
+      }
+      finish_time
+      arrive_time
+      time
+    }
+    cucb_users_instruments(where: { deleted: { _neq: true } }) {
+      nickname
+      instrument {
+        id
+        name
+        novelty
+      }
+      user_id
+      id
+      instr_id
+    }
+  }
+`;
+
+export const QueryMultiGigSignup = gql`
+  query QueryMultiGigSignup($where: cucb_gigs_bool_exp) {
+    cucb_gigs(where: $where) {
       date
       title
       lineup {

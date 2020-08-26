@@ -195,7 +195,7 @@
   gig-signup {
     display: block;
     padding: 1em;
-    margin-bottom: 1em;
+    margin-bottom: 2em;
     border-radius: 5px;
     box-shadow: 0px 0px 5px 0px var(--form_color);
   }

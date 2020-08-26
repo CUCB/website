@@ -3,7 +3,9 @@
   import Signup from "./Signup.svelte";
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
+  import { linear } from "svelte/easing";
   export let gig, signupGig, userInstruments;
+  export let linkHeading = false;
   let arriveFinishFormat = "HH:mm";
   let showSignup = false;
 
@@ -25,14 +27,20 @@
 </script>
 
 <style>
+  .gigtype-gig_enquiry {
+    --shadow: var(--neutral);
+  }
+  .gigtype-gig {
+    --shadow: var(--positive);
+  }
   gig-summary {
+    --shadow: var(--form_color);
     display: block;
     padding: 1em;
-    margin-bottom: 1em;
     border-radius: 5px;
-    box-shadow: 0px 0px 5px 0px var(--form_color);
+    box-shadow: 0px 0px 5px 0px var(--shadow);
     max-width: calc(100%-10px);
-    margin: auto;
+    margin: 0 auto 2em auto;
     box-sizing: border-box;
     word-break: break-word;
   }
@@ -49,6 +57,10 @@
   h2 {
     display: grid;
     grid-template-columns: 1fr auto;
+  }
+
+  h2 a {
+    justify-self: flex-start;
   }
 
   admin-notes,
@@ -80,15 +92,50 @@
   gig-icons {
     margin-right: 0.5em;
   }
+
+  .gigtype-gig_enquiry,
+  .gigtype-gig_cancelled {
+    filter: opacity(0.5);
+    transition: all 0.3s linear;
+  }
+
+  .gigtype-gig_enquiry:hover,
+  .gigtype-gig_cancelled:hover {
+    filter: opacity(1);
+    transition: all 0.1s ease-in;
+  }
+  .gigtype-gig_enquiry h2 {
+    grid-template-columns: auto 1fr auto;
+  }
+  .gigtype-gig_enquiry h2::before {
+    content: "Enquiry:";
+    margin-right: 0.25em;
+    font-style: bold;
+  }
+
+  .gigtype-gig_cancelled h2 {
+    grid-template-columns: auto 1fr auto;
+  }
+  .gigtype-gig_cancelled h2::before {
+    content: "Cancelled:";
+    margin-right: 0.25em;
+    font-style: bold;
+  }
+
+  .gigtype-gig_cancelled > :not(h2):not(h3):not(.date):not(task-list):not(admin-notes):not(gig-finance) {
+    display: none;
+  }
 </style>
 
 {#if !showSignup}
   {#if gig.allow_signups}
     <button on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
   {/if}
-  <gig-summary>
+  <gig-summary class="gigtype-{gig.type.code}">
     <h2>
-      {gig.title}
+      {#if linkHeading}
+        <a href="/members/gigs/{gig.id}">{gig.title}</a>
+      {:else}{gig.title}{/if}
       <gig-icons>
         {#if gig.food_provided}
           <TooltipText content="Food provided">
@@ -106,7 +153,7 @@
       </h3>
     {/if}
     {#if gig.date}
-      <p>
+      <p class="date">
         {moment(gig.date)
           .tz('Europe/London')
           .format('dddd Do MMMM YYYY')}
@@ -220,7 +267,7 @@
         </b>
         {#each clients as client, i (client.id)}
           <a href="/members/gigs/contacts/{client.id}">{client.contact.name}</a>
-          {#if i + 1 < clients.length},{/if}
+          {#if i + 1 < clients.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
@@ -229,11 +276,13 @@
         <b>Calling:&nbsp;</b>
         {#each callers as caller, i (caller.id)}
           <a href="/members/gigs/contacts/{caller.id}">{caller.contact.name}</a>
-          {#if i + 1 < callers.length},{/if}
+          {#if i + 1 < callers.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
-    <Lineup people="{gig.lineup}" />
+    {#if gig.lineup.length > 0}
+      <Lineup people="{gig.lineup}" />
+    {/if}
   </gig-summary>
 {:else}
   <button on:click="{() => (showSignup = !showSignup)}">Show summary</button>
