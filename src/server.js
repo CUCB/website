@@ -56,7 +56,11 @@ server
       saveUninitialized: false,
       resave: true,
       secret: process.env.SESSION_SECRET,
-      cookie: { maxAge: 30 * 24 * 60 * 6000 },
+      cookie: {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        sameSite: "strict",
+        secure: !dev,
+      },
     }),
     sapper.middleware({
       session: (req, res) => {

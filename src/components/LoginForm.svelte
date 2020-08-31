@@ -5,12 +5,21 @@
   let password = "";
   let error;
 
-  let updateProps = ["accent_light", "accent_dark", "accent_default", "color"];
+  let updateProps = [
+    "accent_light",
+    "accent_dark",
+    "accent_default",
+    "color",
+    "logo_light",
+    "logo_dark",
+    "logo_default",
+    "spinnyLogo",
+  ];
   const updateSessionTheme = userId => {
     let theme = new URLSearchParams();
     for (let prop of updateProps) {
       let value = localStorage.getItem(`${prop}_${userId}`);
-      if (value !== "null") theme.append(prop, value);
+      if (value) theme.append(prop, value);
     }
     return fetch("/updatetheme", {
       method: "POST",
