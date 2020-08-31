@@ -81,9 +81,8 @@
       logoOpen: false,
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
     };
-    settings[`accent_${color}`] =
-      query.accent || (session && session.theme && session.theme[`accent_${color}`]) || undefined;
-    settings[`logo_${color}`] = query.logo || (session && session.theme && session.theme[`logo_${color}`]) || undefined;
+    settings[`accent_${color}`] = query.accent || fromSessionTheme(session, `accent_${color}`) || undefined;
+    settings[`logo_${color}`] = query.logo || fromSessionTheme(session, `logo_${color}`) || undefined;
 
     // Read user session or cookie or url param or ...
     return { settings, committee };
@@ -112,7 +111,6 @@
   let { session } = stores();
   let showSettings;
   let navVisible;
-  $: navVisible && windowWidth <= 600 ? disableBodyScroll() : enableBodyScroll();
 
   $: showSettings ? disableBodyScroll() : enableBodyScroll();
 
@@ -198,7 +196,7 @@
 
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
-<div class="layout" class:locked="{navVisible}">
+<div class="layout">
   <Header {segment} user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.get('spinnyLogo')}" />
 
   <main>
