@@ -51,11 +51,7 @@
   let updateSession = () => {};
   const propLocalStorage = name => {
     const value = localStorage.getItem(`${name}_${$session.userId}`);
-    try {
-      return JSON.parse(value);
-    } catch {
-      return value;
-    }
+    return JSON.parse(value);
   };
 
   const updateSettings = () => {
@@ -119,7 +115,8 @@
     updateLocalStorage = settings => {
       if ($session.userId) {
         for (let prop of updateProps) {
-          settings.get(prop) !== undefined && localStorage.setItem(`${prop}_${$session.userId}`, settings.get(prop));
+          settings.get(prop) !== undefined &&
+            localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(settings.get(prop)));
         }
       }
     };
@@ -127,7 +124,7 @@
     updateSession = () => {
       let theme = new URLSearchParams();
       for (let prop of updateProps) {
-        theme.append(prop, propLocalStorage(prop));
+        theme.append(prop, JSON.stringify(propLocalStorage(prop)));
       }
       fetch("/updatetheme", {
         method: "POST",
