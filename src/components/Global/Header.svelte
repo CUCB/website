@@ -49,6 +49,10 @@
     grid-area: logo;
   }
 
+  h1 {
+    margin: 0 0.5em;
+  }
+
   #title {
     justify-self: center;
     grid-area: title;
@@ -98,6 +102,10 @@
     color: var(--text_color);
   }
 
+  a#logo-link:hover {
+    filter: none;
+  }
+
   @media only screen and (max-width: 1200px) {
     :global(#logo) {
       max-width: 100px;
@@ -105,6 +113,10 @@
   }
 
   @media only screen and (max-width: 600px) {
+    h1 {
+      margin: 0;
+    }
+
     .button-background {
       background-color: var(--background);
       height: 3rem;
@@ -144,7 +156,7 @@
 </style>
 
 <header>
-  <a href="/">
+  <a href="/" id="logo-link">
     <Logo id="logo" enableSpin="{spinnyLogo}" />
   </a>
   {#if animate}
