@@ -111,7 +111,6 @@
   let { session } = stores();
   let showSettings;
   let navVisible;
-  $: navVisible && windowWidth <= 600 ? disableBodyScroll() : enableBodyScroll();
 
   $: showSettings ? disableBodyScroll() : enableBodyScroll();
 
@@ -195,7 +194,7 @@
 
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
-<div class="layout" class:locked={navVisible}>
+<div class="layout">
   <Header user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.get('spinnyLogo')}" />
 
   <main>
