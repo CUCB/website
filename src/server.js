@@ -59,8 +59,6 @@ server
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         sameSite: "strict",
-        secure: !dev,
-        proxy: true, // allow the cookie to go through a proxy (e.g. Caddy)
       },
     }),
     sapper.middleware({
