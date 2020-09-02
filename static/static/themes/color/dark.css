@@ -15,6 +15,7 @@
   --accent_triple: 0, 165, 53;
   --accent: rgb(var(--accent_triple));
   --theme_name: dark;
+  --blue_gig: hsla(202.4, 100%, 48.8%, 0.7);
 }
 
 .color-positive {

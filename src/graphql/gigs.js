@@ -63,6 +63,7 @@ const FragmentGigAdminDetails = gql`
     contacts {
       client
     }
+    admins_only
   }
 `;
 

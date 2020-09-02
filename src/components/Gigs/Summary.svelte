@@ -8,6 +8,7 @@
   export let linkHeading = false;
   let arriveFinishFormat = "HH:mm";
   let showSignup = false;
+  let showDetails = !linkHeading;
 
   $: clients = gig.contacts.filter(c => c.client);
   $: callers = gig.contacts.filter(c => c.calling);
@@ -48,10 +49,15 @@
   task-list {
     display: flex;
     flex-direction: column;
+    margin: 1em 0;
   }
 
   gig-summary > :last-child {
     margin-bottom: 0;
+  }
+
+  gig-timings > p {
+    margin: 0.25em 0;
   }
 
   h2 {
@@ -75,10 +81,15 @@
     margin: 1em 0;
   }
 
-  button {
+  button.signup {
     float: right;
     margin-right: 1em;
     margin-top: 1em;
+  }
+
+  button.cancelled-detail {
+    display: block;
+    margin: auto;
   }
 
   gig-finance {
@@ -93,8 +104,8 @@
     margin-right: 0.5em;
   }
 
-  .gigtype-gig_enquiry,
-  .gigtype-gig_cancelled {
+  .gigtype-gig_enquiry.permit-fade,
+  .gigtype-gig_cancelled.permit-fade {
     filter: opacity(0.5);
     transition: all 0.3s linear;
   }
@@ -120,19 +131,29 @@
     content: "Cancelled:";
     margin-right: 0.25em;
     font-style: bold;
+    text-decoration: none;
   }
 
-  .gigtype-gig_cancelled > :not(h2):not(h3):not(.date):not(task-list):not(admin-notes):not(gig-finance) {
+  .gigtype-gig_cancelled:not(.details-visible) > :not(.main-detail) {
     display: none;
+  }
+
+  .gigtype-gig.admins-only {
+    --shadow: var(--blue_gig);
   }
 </style>
 
 {#if !showSignup}
   {#if gig.allow_signups}
-    <button on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
+    <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
   {/if}
-  <gig-summary class="gigtype-{gig.type.code}">
-    <h2>
+  <gig-summary
+    class="gigtype-{gig.type.code}"
+    class:details-visible="{showDetails}"
+    class:permit-fade="{linkHeading}"
+    class:admins-only="{gig.admins_only}"
+  >
+    <h2 class="main-detail">
       {#if linkHeading}
         <a href="/members/gigs/{gig.id}">{gig.title}</a>
       {:else}{gig.title}{/if}
@@ -142,10 +163,15 @@
             <i class="las la-utensils"></i>
           </TooltipText>
         {/if}
+        {#if gig.admins_only}
+          <TooltipText content="Hidden from normal users">
+            <i class="las la-eye-slash"></i>
+          </TooltipText>
+        {/if}
       </gig-icons>
     </h2>
     {#if gig.venue}
-      <h3>
+      <h3 class="main-detail">
         <a href="/members/gigs/venue/{gig.venue.id}">
           {gig.venue.name}
           {#if gig.venue.subvenue}&nbsp;| {gig.venue.subvenue}{/if}
@@ -153,37 +179,39 @@
       </h3>
     {/if}
     {#if gig.date}
-      <p class="date">
+      <p class="date main-detail">
         {moment(gig.date)
           .tz('Europe/London')
           .format('dddd Do MMMM YYYY')}
       </p>
     {/if}
-    {#if gig.arrive_time}
-      <p>
-        <b>Arrive time:&nbsp;</b>
-        {@html moment(gig.arrive_time)
-          .tz('Europe/London')
-          .format(arriveFinishFormat)}
-      </p>
-    {/if}
-    {#if gig.time}
-      <p>
-        <b>Start time:&nbsp;</b>
-        {moment(`2020-01-01 ${gig.time}`)
-          .tz('Europe/London')
-          .format('HH:mm')}
-      </p>
-    {/if}
-    {#if gig.finish_time}
-      <p>
-        <b>Finish time:&nbsp;</b>
-        {moment(gig.finish_time)
-          .tz('Europe/London')
-          .format(arriveFinishFormat)}
-      </p>
-    {/if}
-    <task-list>
+    <gig-timings>
+      {#if gig.arrive_time}
+        <p>
+          <b>Arrive time:&nbsp;</b>
+          {@html moment(gig.arrive_time)
+            .tz('Europe/London')
+            .format(arriveFinishFormat)}
+        </p>
+      {/if}
+      {#if gig.time}
+        <p>
+          <b>Start time:&nbsp;</b>
+          {moment(`2020-01-01 ${gig.time}`)
+            .tz('Europe/London')
+            .format('HH:mm')}
+        </p>
+      {/if}
+      {#if gig.finish_time}
+        <p>
+          <b>Finish time:&nbsp;</b>
+          {moment(gig.finish_time)
+            .tz('Europe/London')
+            .format(arriveFinishFormat)}
+        </p>
+      {/if}
+    </gig-timings>
+    <task-list class="main-detail">
       {#if gig.finance_deposit_received !== undefined}
         {#if gig.finance_deposit_received}
           <task-summary style="color:var(--positive)">
@@ -228,6 +256,8 @@
       <summary-text>
         {#if gig.advertise}
           <b>Public advert:&nbsp;</b>
+        {:else}
+          <b>Summary:&nbsp;</b>
         {/if}
         <blockquote>
           {@html gig.summary
@@ -248,13 +278,13 @@
       </band-notes>
     {/if}
     {#if gig.notes_admin}
-      <admin-notes>
+      <admin-notes class="main-detail">
         <b>Admin notes:&nbsp;</b>
         {@html gig.notes_admin.trim()}
       </admin-notes>
     {/if}
     {#if gig.finance}
-      <gig-finance>
+      <gig-finance class="main-detail">
         <b>Finance:&nbsp;</b>
         {gig.finance.trim()}
       </gig-finance>
@@ -283,8 +313,13 @@
     {#if gig.lineup.length > 0}
       <Lineup people="{gig.lineup}" />
     {/if}
+    {#if gig.type.code === 'gig_cancelled' && linkHeading}
+      <button class="cancelled-detail main-detail" on:click="{() => (showDetails = !showDetails)}">
+        {#if !showDetails}Show full details{:else}Hide full details{/if}
+      </button>
+    {/if}
   </gig-summary>
 {:else}
-  <button on:click="{() => (showSignup = !showSignup)}">Show summary</button>
+  <button class="signup" on:click="{() => (showSignup = !showSignup)}">Show summary</button>
   <Signup gig="{signupGig}" {userInstruments} showLink="{false}" />
 {/if}

@@ -24,12 +24,28 @@
     let client = makeClient(this.fetch);
     let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
 
-    let res_gig, res_signup;
+    let res_gig, res_signup, res_gig_2;
     let gig;
     try {
       res_gig = await client.query({
         query: QueryMultiGigDetails(session.hasuraRole),
         variables: { where: { date: { _gte: "now()" } }, order_by: { date: "asc" } },
+      });
+      res_gig_2 = await client.query({
+        query: QueryMultiGigDetails(session.hasuraRole),
+        variables: {
+          where: {
+            date: {
+              _gte: moment()
+                .startOf("month")
+                .format(),
+              _lte: moment()
+                .endOf("month")
+                .format(),
+            },
+          },
+          order_by: { date: "asc" },
+        },
       });
       res_signup = await clientCurrentUser.query({
         query: QueryMultiGigSignup,
@@ -53,7 +69,7 @@
         }
       }
 
-      return { gigs, userInstruments: res_signup.data.cucb_users_instruments };
+      return { gigs, userInstruments: res_signup.data.cucb_users_instruments, calendarGigs: res_gig_2.data.cucb_gigs };
     } else {
       this.error(500, "Couldn't retrieve gig details");
       return;
@@ -66,14 +82,50 @@
   import { makeClient, handleErrors } from "../../../graphql/client";
   import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
   import Summary from "../../../components/Gigs/Summary.svelte";
-  export let gigs;
+  import Calendar from "../../../components/Gigs/Calendar.svelte";
+  import moment from "moment";
+  export let gigs, calendarGigs;
 </script>
+
+<style>
+  .heading {
+    display: grid;
+    grid-template-columns: 1fr 21em;
+    grid-gap: 1em;
+    margin-bottom: 1em;
+  }
+
+  .calendar {
+    justify-self: end;
+  }
+
+  @media (max-width: 600px) {
+    .heading {
+      grid-template-columns: 1fr;
+    }
+    .calendar {
+      justify-self: stretch;
+    }
+  }
+</style>
 
 <svelte:head>
   <title>{makeTitle('Gigs')}</title>
 </svelte:head>
 
-<h1>Gigs</h1>
+<h1>CUCB Gig Diary</h1>
+<section class="heading">
+
+  <p>
+    This is a listing of all our gigs - for help on how to use it, click here. In particular, see here to find out how
+    to subscribe to either the all gig calendar feed, which will allow you to sync all gigs into your calendar, or your
+    very own personalized calendar feed with just the gigs you're playing! Click here to investigate the venues we've
+    played at, and here to investigate people associated to the band.
+  </p>
+  <div class="calendar">
+    <Calendar gigs="{calendarGigs}" />
+  </div>
+</section>
 
 {#each gigs as gig}
   <Summary {gig} signupGig="{gig}" linkHeading="{true}" />
