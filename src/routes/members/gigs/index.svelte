@@ -29,20 +29,50 @@
     try {
       res_gig = await client.query({
         query: QueryMultiGigDetails(session.hasuraRole),
-        variables: { where: { date: { _gte: "now()" } }, order_by: { date: "asc" } },
+        variables: {
+          where: {
+            _or: [{ date: { _gte: "now()" } }, { arrive_time: { _gte: "now()" } }, { finish_time: { _gte: "now()" } }],
+          },
+          order_by: [{ arrive_time: "asc" }, { date: "asc" }],
+          // TODO ^^^ fix the sorting, we want these to effectively be interleaved
+        },
       });
       res_gig_2 = await client.query({
         query: QueryMultiGigDetails(session.hasuraRole),
         variables: {
           where: {
-            date: {
-              _gte: moment()
-                .startOf("month")
-                .format(),
-              _lte: moment()
-                .endOf("month")
-                .format(),
-            },
+            _or: [
+              {
+                date: {
+                  _gte: moment()
+                    .startOf("month")
+                    .format(),
+                  _lte: moment()
+                    .endOf("month")
+                    .format(),
+                },
+              },
+              {
+                arrive_time: {
+                  _gte: moment()
+                    .startOf("month")
+                    .format(),
+                  _lte: moment()
+                    .endOf("month")
+                    .format(),
+                },
+              },
+              {
+                finish_time: {
+                  _gte: moment()
+                    .startOf("month")
+                    .format(),
+                  _lte: moment()
+                    .endOf("month")
+                    .format(),
+                },
+              },
+            ],
           },
           order_by: { date: "asc" },
         },
@@ -96,10 +126,18 @@
   }
 
   .calendar {
+    margin-top: 0.5em;
+  }
+
+  .heading p:first-of-type {
+    margin-top: 0;
+  }
+
+  .calendar {
     justify-self: end;
   }
 
-  @media (max-width: 600px) {
+  @media only screen and (max-width: 600px) {
     .heading {
       grid-template-columns: 1fr;
     }
@@ -113,19 +151,21 @@
   <title>{makeTitle('Gigs')}</title>
 </svelte:head>
 
-<h1>CUCB Gig Diary</h1>
-<section class="heading">
+<div class="heading">
+  <div>
+    <h1>Gig Diary</h1>
 
-  <p>
-    This is a listing of all our gigs - for help on how to use it, click here. In particular, see here to find out how
-    to subscribe to either the all gig calendar feed, which will allow you to sync all gigs into your calendar, or your
-    very own personalized calendar feed with just the gigs you're playing! Click here to investigate the venues we've
-    played at, and here to investigate people associated to the band.
-  </p>
+    <p>
+      This is a listing of all our gigs - for help on how to use it, click here. In particular, see here to find out how
+      to subscribe to either the all gig calendar feed, which will allow you to sync all gigs into your calendar, or
+      your very own personalized calendar feed with just the gigs you're playing! Click here to investigate the venues
+      we've played at, and here to investigate people associated to the band.
+    </p>
+  </div>
   <div class="calendar">
     <Calendar gigs="{calendarGigs}" />
   </div>
-</section>
+</div>
 
 {#each gigs as gig}
   <Summary {gig} signupGig="{gig}" linkHeading="{true}" />

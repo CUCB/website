@@ -51,7 +51,11 @@
   let updateSession = () => {};
   const propLocalStorage = name => {
     const value = localStorage.getItem(`${name}_${$session.userId}`);
-    return JSON.parse(value);
+    try {
+      return JSON.parse(value);
+    } catch {
+      return value;
+    }
   };
 
   const updateSettings = () => {

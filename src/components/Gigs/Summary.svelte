@@ -32,7 +32,7 @@
     --shadow: var(--neutral);
   }
   .gigtype-gig {
-    --shadow: var(--positive);
+    --shadow: var(--accent);
   }
   gig-summary {
     --shadow: var(--form_color);
@@ -101,7 +101,7 @@
   }
 
   gig-icons {
-    margin-right: 0.5em;
+    margin-right: -0.3em;
   }
 
   .gigtype-gig_enquiry.permit-fade,
@@ -138,8 +138,16 @@
     display: none;
   }
 
+  .gigtype-calendar {
+    --shadow: var(--negative);
+  }
+
   .gigtype-gig.admins-only {
     --shadow: var(--blue_gig);
+  }
+
+  :global(gig-icons > *) {
+    margin: 0 0.3em;
   }
 </style>
 
@@ -166,6 +174,11 @@
         {#if gig.admins_only}
           <TooltipText content="Hidden from normal users">
             <i class="las la-eye-slash"></i>
+          </TooltipText>
+        {/if}
+        {#if gig.type.code === 'calendar'}
+          <TooltipText content="Calendar event">
+            <i class="las la-calendar"></i>
           </TooltipText>
         {/if}
       </gig-icons>

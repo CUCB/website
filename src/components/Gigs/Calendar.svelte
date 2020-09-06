@@ -55,20 +55,24 @@
         tooltip: date.format(),
         moment: date,
         id: `calendar_date_${date.format("YYYYMMDD")}`,
-        gigs: gigs.filter(gig => moment(gig.date, "YYYY-MM-DD").isSame(date, "day")),
+        gigs: gigs.filter(
+          gig =>
+            moment(gig.date, "YYYY-MM-DD").isSame(date, "day") ||
+            ((gig.type === "calendar" || gig.date === null) &&
+              moment(gig.arrive_time).isSameOrBefore(date, "day") &&
+              moment(gig.finish_time).isSameOrAfter(date, "day")),
+        ),
       })),
     );
-  $: console.log(weeks.map(week => week.map(day => day.gigs.map(gig => gig.title))));
 </script>
 
 <style>
+  h3 {
+    text-align: center;
+  }
   .different-month {
     filter: opacity(0.3);
     border-color: rgba(var(--accent_triple), calc(0.1 / 0.3));
-  }
-
-  .has-gigs {
-    background: rgba(var(--accent_triple), 0.1);
   }
 
   table {
@@ -78,6 +82,7 @@
 
   th {
     background: rgba(var(--accent_triple), 0.1);
+    padding: 0.2em 0em;
     font-family: var(--title);
     text-transform: capitalize;
     color: var(--accent);
@@ -86,15 +91,16 @@
   th,
   td {
     width: 3em;
-    padding: 0.2em 0em;
     margin: 0;
     box-sizing: border-box;
     user-select: none;
   }
   td {
     text-align: center;
+    padding: 0.4em 0.2em;
     vertical-align: middle;
     border: 1px solid rgba(var(--accent_triple), 0.1);
+    position: relative;
   }
 
   :global(.calendar-entry .tooltip-text.tooltip-text) {
@@ -109,13 +115,59 @@
       height: 3em;
     }
   }
+
+  .events {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    left: 0px;
+    bottom: 0px;
+    margin: 2px;
+    z-index: -1;
+    display: flex;
+    justify-content: stretch;
+    flex-direction: column;
+    filter: opacity(0.7);
+  }
+
+  .events > * {
+    box-shadow: inset 0 0 8px var(--shadow);
+    width: 100%;
+    height: 100%;
+  }
+
+  .events :first-child {
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+  }
+
+  .events :last-child {
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+  }
+
+  .gigtype-gig {
+    --shadow: var(--accent);
+  }
+
+  .gigtype-gig_enquiry {
+    --shadow: var(--neutral);
+  }
+
+  .gigtype-calendar {
+    --shadow: var(--negative);
+  }
+
+  .gigtype-gig.admins-only {
+    --shadow: var(--blue_gig);
+  }
+
+  .today {
+    color: var(--accent);
+  }
 </style>
 
-<!-- <select bind:value="{$startDay}">
-  {#each Object.keys(dayOffsets) as dayName}
-    <option value="{dayName}">{dayName}</option>
-  {/each}
-</select> -->
+<h3>{displayedMonth.format('MMMM YYYY')}</h3>
 
 <table>
   <tr>
@@ -130,11 +182,16 @@
           class:different-month="{!day.inCurrentMonth}"
           id="{day.id}"
           class="calendar-entry"
-          class:has-gigs="{day.gigs.length > 0}"
+          class:today="{day.moment.isSame(moment(), 'day')}"
         >
           {#if day.gigs.length > 0}
             <TooltipText content="{day.gigs.map(gig => gig.title).join('\n')}">{day.number}</TooltipText>
           {:else}{day.number}{/if}
+          <div class="events">
+            {#each day.gigs as gig}
+              <div class="gigtype-{gig.type.code}"></div>
+            {/each}
+          </div>
         </td>
       {/each}
     </tr>
