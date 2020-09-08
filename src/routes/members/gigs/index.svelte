@@ -66,20 +66,26 @@
 
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {
       let gigs = res_gig.data.cucb_gigs;
+      // Sort the gigs pre render since the database can't sort by computed field
+      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date));
+
       let signup_dict = {};
       let signups = res_signup.data.cucb_gigs;
       for (let gig of signups) {
         signup_dict[gig.id] = gig;
       }
-      // Sort the gigs pre render since the database can't sort by computed field
-      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date));
+
       let currentCalendarMonth = moment().format("YYYY-MM");
 
       return {
         gigs,
         signupGigs: signup_dict,
         userInstruments: res_signup.data.cucb_users_instruments,
-        calendarGigs: { [currentCalendarMonth]: res_gig_2.data.cucb_gigs },
+        calendarGigs: {
+          [currentCalendarMonth]: res_gig_2.data.cucb_gigs.sort(
+            (gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date),
+          ),
+        },
         currentCalendarMonth,
       };
     } else {
@@ -184,6 +190,9 @@
         },
       });
       calendarGigs[newMonth] = res_gig_2.data.cucb_gigs;
+      calendarGigs[newMonth] = calendarGigs[newMonth].sort(
+        (gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date),
+      );
     }
     currentCalendarMonth = newMonth;
   };
@@ -238,7 +247,7 @@
 <svelte:head>
   <title>{makeTitle('Gigs')}</title>
 </svelte:head>
-
+<!-- TODO deal with draft gigs -->
 <div class="heading">
   <div class="information">
     <h1>Gig Diary</h1>
