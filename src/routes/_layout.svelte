@@ -80,9 +80,11 @@
       accentOpen: false,
       logoOpen: false,
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
+      calendarStartDay: fromSessionTheme(session, "calendarStartDay") || "mon",
     };
     settings[`accent_${color}`] = query.accent || fromSessionTheme(session, `accent_${color}`) || undefined;
     settings[`logo_${color}`] = query.logo || fromSessionTheme(session, `logo_${color}`) || undefined;
+    calendarStartDay.set(settings["calendarStartDay"]);
 
     // Read user session or cookie or url param or ...
     return { settings, committee };
@@ -96,12 +98,11 @@
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
-  import { makeTitle } from "../view";
+  import { makeTitle, calendarStartDay } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import { committee as committeeStore } from "../view";
 
-  export let segment;
   export let committee = {};
   export let settings = {};
   settings = Map(settings);

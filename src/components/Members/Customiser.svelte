@@ -3,7 +3,7 @@
   import { HsvPicker } from "svelte-color-picker";
   import { writable } from "svelte/store";
   import { onMount } from "svelte";
-  import { accentCss, logoCss } from "../../view";
+  import { accentCss, calendarStartDay, logoCss } from "../../view";
   import { stores } from "@sapper/app";
   export let settings, showSettings;
   let colors = ["default", "light", "dark"];
@@ -11,10 +11,11 @@
   $: color = settings.get("color");
   $: font = settings.get("font");
   $: accent = settings.get(`accent_${color}`);
-  $: updateProps = [`accent_${color}`, `color`, `spinnyLogo`, `logo_${color}`];
+  $: updateProps = [`accent_${color}`, `color`, `spinnyLogo`, `logo_${color}`, `calendarStartDay`];
   $: logo = settings.get(`logo_${color}`);
   $: updateLocalStorage(settings);
   let selectedTheme = settings.get("color");
+  let selectedCalendarStartDay = settings.get("calendarStartDay");
 
   const setDefaultColors = settings => {
     if (typeof getComputedStyle !== "undefined") {
@@ -46,6 +47,7 @@
     settings.get(`logo_${color}`) && settings.get(`logo_${color}`).length === 6
       ? settings.get(`logo_${color}`)
       : currentLogoColor();
+  $: $calendarStartDay = settings.get("calendarStartDay");
   let updateLocalStorage = _ => {};
 
   let updateSession = () => {};
@@ -191,6 +193,21 @@
         on:change="{() => (settings = settings.update('spinnyLogo', x => !x))}"
       />
     </label>
+    <label>
+      Start calendar week on...
+      <select bind:value="{selectedCalendarStartDay}">
+        <option value="mon">Monday</option>
+        <option value="tue">Tuesday</option>
+        <option value="wed">Wednesday</option>
+        <option value="thu">Thursday</option>
+        <option value="fri">Friday</option>
+        <option value="sat">Saturday</option>
+        <option value="sun">Sunday</option>
+      </select>
+    </label>
+    <button on:click="{event => (settings = settings.set('calendarStartDay', selectedCalendarStartDay))}">
+      Set day
+    </button>
   </Popup>
   {#if settings.get('accentOpen')}
     <Popup on:close="{() => (settings = settings.set('accentOpen', false))}" width="auto">

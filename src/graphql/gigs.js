@@ -7,6 +7,7 @@ const FragmentGigDetails = gql`
       title
     }
     date
+    sort_date
     title
     id
     venue {
@@ -24,6 +25,7 @@ const FragmentGigDetails = gql`
       id: contact_id
       contact {
         name
+        organization
       }
     }
     gig_type {

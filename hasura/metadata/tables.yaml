@@ -1150,6 +1150,14 @@
           table:
             schema: cucb
             name: gigs_lineups
+  computed_fields:
+    - name: sort_date
+      definition:
+        function:
+          schema: cucb
+          name: gig_time_or_arrive_time
+        table_argument: null
+      comment: ""
   insert_permissions:
     - role: equipment
       permission:
@@ -1316,6 +1324,8 @@
           - summary
           - time
           - title
+        computed_fields:
+          - sort_date
         filter:
           _and:
             - admins_only:
@@ -1339,6 +1349,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter: {}
     - role: current_user
       permission:
@@ -1357,6 +1369,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter:
           admins_only:
             _eq: false
@@ -1387,6 +1401,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter: {}
     - role: gig_editor
       permission:
@@ -1415,6 +1431,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter: {}
     - role: music_only
       permission:
@@ -1424,6 +1442,8 @@
           - summary
           - time
           - title
+        computed_fields:
+          - sort_date
         filter:
           _and:
             - admins_only:
@@ -1457,6 +1477,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter: {}
     - role: secretary
       permission:
@@ -1485,6 +1507,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter: {}
     - role: treasurer
       permission:
@@ -1513,6 +1537,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter: {}
     - role: user
       permission:
@@ -1531,6 +1557,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter:
           admins_only:
             _eq: false
@@ -1561,6 +1589,8 @@
           - title
           - type
           - venue_id
+        computed_fields:
+          - sort_date
         filter: {}
   update_permissions:
     - role: equipment

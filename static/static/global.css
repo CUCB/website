@@ -39,15 +39,18 @@ h6 {
   line-height: 1.2;
 }
 
-a {
+a,
+.link {
   color: rgb(7, 92, 1);
   color: var(--accent);
   text-decoration: none;
   border-bottom: 1px solid;
   padding-bottom: 1px;
+  cursor: pointer;
 }
 
-a:hover {
+a:hover,
+.link:hover {
   filter: brightness(150%);
 }
 
@@ -157,4 +160,27 @@ input[type="submit"] {
 button:active,
 input[type="submit"]:active {
   outline: 0;
+}
+
+.tippy-box[data-theme~="cucb"] {
+  color: var(--text_color);
+  background-color: var(--background);
+}
+.tippy-box[data-theme~="cucb"][data-placement^="top"] > .tippy-arrow:before {
+  border-top-color: var(--background);
+}
+.tippy-box[data-theme~="cucb"][data-placement^="bottom"] > .tippy-arrow:before {
+  border-bottom-color: var(--background);
+}
+.tippy-box[data-theme~="cucb"][data-placement^="left"] > .tippy-arrow:before {
+  border-left-color: var(--background);
+}
+.tippy-box[data-theme~="cucb"][data-placement^="right"] > .tippy-arrow:before {
+  border-right-color: var(--background);
+}
+.tippy-box[data-theme~="cucb"] > .tippy-backdrop {
+  background-color: var(--background);
+}
+.tippy-box[data-theme~="cucb"] > .tippy-svg-arrow {
+  fill: var(--background);
 }

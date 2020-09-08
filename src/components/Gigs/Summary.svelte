@@ -7,6 +7,7 @@
   export let gig, signupGig, userInstruments;
   export let linkHeading = false;
   let arriveFinishFormat = "HH:mm";
+  let calendarDatesFormat = "dddd Do MMMM YYYY";
   let showSignup = false;
   let showDetails = !linkHeading;
 
@@ -146,13 +147,25 @@
     --shadow: var(--blue_gig);
   }
 
+  .gigtype-calendar task-list {
+    display: none;
+  }
+
+  .gigtype-kit {
+    --shadow: var(--kit_hire);
+  }
+
+  .gigtype-kit task-list .caller {
+    display: none;
+  }
+
   :global(gig-icons > *) {
     margin: 0 0.3em;
   }
 </style>
 
 {#if !showSignup}
-  {#if gig.allow_signups}
+  {#if signupGig.allow_signups}
     <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
   {/if}
   <gig-summary
@@ -191,7 +204,7 @@
         </a>
       </h3>
     {/if}
-    {#if gig.date}
+    {#if gig.type.code !== 'calendar'}
       <p class="date main-detail">
         {moment(gig.date)
           .tz('Europe/London')
@@ -199,29 +212,37 @@
       </p>
     {/if}
     <gig-timings>
-      {#if gig.arrive_time}
+      {#if gig.date}
+        {#if gig.arrive_time}
+          <p>
+            <b>Arrive time:&nbsp;</b>
+            {@html moment(gig.arrive_time)
+              .tz('Europe/London')
+              .format(arriveFinishFormat)}
+          </p>
+        {/if}
+        {#if gig.time}
+          <p>
+            <b>Start time:&nbsp;</b>
+            {moment(`2020-01-01 ${gig.time}`)
+              .tz('Europe/London')
+              .format('HH:mm')}
+          </p>
+        {/if}
+        {#if gig.finish_time}
+          <p>
+            <b>Finish time:&nbsp;</b>
+            {moment(gig.finish_time)
+              .tz('Europe/London')
+              .format(arriveFinishFormat)}
+          </p>
+        {/if}
+      {:else if gig.arrive_time && gig.finish_time && !moment(gig.arrive_time).isSame(gig.finish_time, 'day')}
         <p>
-          <b>Arrive time:&nbsp;</b>
-          {@html moment(gig.arrive_time)
-            .tz('Europe/London')
-            .format(arriveFinishFormat)}
+          {moment(gig.arrive_time).format(calendarDatesFormat)} &ndash; {moment(gig.finish_time).format(calendarDatesFormat)}
         </p>
-      {/if}
-      {#if gig.time}
-        <p>
-          <b>Start time:&nbsp;</b>
-          {moment(`2020-01-01 ${gig.time}`)
-            .tz('Europe/London')
-            .format('HH:mm')}
-        </p>
-      {/if}
-      {#if gig.finish_time}
-        <p>
-          <b>Finish time:&nbsp;</b>
-          {moment(gig.finish_time)
-            .tz('Europe/London')
-            .format(arriveFinishFormat)}
-        </p>
+      {:else if gig.arrive_time}
+        <p>{moment(gig.arrive_time).format(calendarDatesFormat)}</p>
       {/if}
     </gig-timings>
     <task-list class="main-detail">
@@ -253,12 +274,12 @@
       {/if}
       {#if gig.finance_caller_paid !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_caller_paid}
-          <task-summary style="color:var(--positive)">
+          <task-summary style="color:var(--positive)" class="caller">
             <i class="las la-money-bill-wave"></i>
             Caller paid
           </task-summary>
         {:else}
-          <task-summary style="color:var(--negative)">
+          <task-summary style="color:var(--negative)" class="caller">
             <i class="las la-exclamation"></i>
             Caller not paid
           </task-summary>
@@ -309,7 +330,10 @@
           {#if clients.length === 1}Contact:&nbsp;{:else}Contacts:&nbsp;{/if}
         </b>
         {#each clients as client, i (client.id)}
-          <a href="/members/gigs/contacts/{client.id}">{client.contact.name}</a>
+          <a href="/members/gigs/contacts/{client.id}">
+            {client.contact.name}
+            {#if client.contact.organization}&nbsp;@ {client.contact.organization}{/if}
+          </a>
           {#if i + 1 < clients.length},&nbsp;{/if}
         {/each}
       </p>
