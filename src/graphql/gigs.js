@@ -25,7 +25,6 @@ const FragmentGigDetails = gql`
       id: contact_id
       contact {
         name
-        organization
       }
     }
     gig_type {
@@ -64,6 +63,9 @@ const FragmentGigAdminDetails = gql`
     notes_admin
     contacts {
       client
+      contact {
+        organization
+      }
     }
     admins_only
   }

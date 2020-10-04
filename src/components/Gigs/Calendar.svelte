@@ -1,5 +1,6 @@
 <script>
   import keyMap from "graphql/jsutils/keyMap";
+  import { fade } from "svelte/transition";
   import moment from "moment";
   import { createEventDispatcher, onMount } from "svelte";
   import { writable } from "svelte/store";
@@ -11,6 +12,7 @@
   export let displayedMonth = moment();
   export let startDay = "mon";
   let dispatchEvent = createEventDispatcher();
+  let showKey = false;
   let dayOffsets = {
     mon: 1,
     tue: 2,
@@ -220,6 +222,69 @@
     flex-shrink: 0;
     margin: 0;
   }
+
+  .key.hidden {
+    max-height: 0;
+    opacity: 0;
+    transition: 0.3s all linear;
+    transition-delay: 0.1s;
+    overflow: hidden;
+  }
+
+  .key {
+    max-height: calc(6 * 3em + 4em);
+    opacity: 1;
+    transition: 0.3s all linear;
+  }
+
+  .key ul {
+    padding-left: 0.5em;
+    margin-top: 0;
+  }
+
+  .key.hidden li {
+    opacity: 0;
+  }
+
+  .key li {
+    opacity: 1;
+    transition: 0.3s all linear;
+  }
+
+  .key li {
+    display: flex;
+    align-items: center;
+  }
+
+  .key li::before {
+    display: flex;
+    content: "24";
+    width: 2.5em;
+    height: 2em;
+    border-radius: 3px;
+    box-shadow: inset 0 0 5px var(--shadow);
+    margin: 0.25em 0;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5em;
+  }
+
+  .key-title {
+    margin: 0;
+  }
+
+  button.key-toggle {
+    margin: 0.5em auto;
+    display: block;
+  }
+
+  .key:not(.hidden) li {
+    transition-delay: var(--delay);
+  }
+
+  .key.hidden li {
+    transition-delay: 0;
+  }
 </style>
 
 <div class="title-bar">
@@ -228,7 +293,6 @@
   <button on:click="{() => dispatchEvent('clickNext')}" class="right">Next</button>
 </div>
 <table>
-  <!--TODO blue gigs don't yet work!!-->
   <tr>
     {#each rotate(Object.keys(dayOffsets)) as dayName}
       <th>{dayName}</th>
@@ -260,3 +324,17 @@
     </tr>
   {/each}
 </table>
+<button class="key-toggle" on:click="{() => (showKey = !showKey)}">
+  {#if !showKey}Show key{:else}Hide key{/if}
+</button>
+<div class="key" class:hidden="{!showKey}">
+  <p class="key-title" transition:fade>Key:</p>
+  <ul class="key" transition:fade>
+    <li style="--delay: 0s" class="gigtype-gig">Gig</li>
+    <li style="--delay: 0.1s" class="gigtype-gig admins-only">Hidden gig</li>
+    <li style="--delay: 0.2s" class="gigtype-gig_enquiry">Gig enquiry</li>
+    <li style="--delay: 0.3s" class="gigtype-kit">Kit hire</li>
+    <li style="--delay: 0.4s" class="gigtype-calendar">Calendar date</li>
+    <li style="--delay: 0.5s" class="gigtype-gig_cancelled">Cancelled gig</li>
+  </ul>
+</div>
