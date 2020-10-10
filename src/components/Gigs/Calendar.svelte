@@ -1,18 +1,17 @@
 <script>
-  import keyMap from "graphql/jsutils/keyMap";
   import { fade } from "svelte/transition";
   import moment from "moment";
-  import { createEventDispatcher, onMount } from "svelte";
-  import { writable } from "svelte/store";
-  import tippy from "tippy.js";
-  import AnnotatedIcon from "../AnnotatedIcon.svelte";
+  import { createEventDispatcher } from "svelte";
   import { goto } from "@sapper/app";
   import TooltipText from "../TooltipText.svelte";
+  import { Map, Set } from "immutable";
   export let gigs;
   export let displayedMonth = moment();
   export let startDay = "mon";
   let dispatchEvent = createEventDispatcher();
   let showKey = false;
+
+  $: keyItems = new Set(gigs.map(gig => new Map({ ...gig.type, admins_only: gig.admins_only })));
   let dayOffsets = {
     mon: 1,
     tue: 2,
@@ -228,13 +227,14 @@
     opacity: 0;
     transition: 0.3s all linear;
     transition-delay: 0.1s;
-    overflow: hidden;
   }
 
   .key {
     max-height: calc(6 * 3em + 4em);
     opacity: 1;
     transition: 0.3s all linear;
+    overflow: hidden;
+    margin-bottom: 0em;
   }
 
   .key ul {
@@ -249,9 +249,6 @@
   .key li {
     opacity: 1;
     transition: 0.3s all linear;
-  }
-
-  .key li {
     display: flex;
     align-items: center;
   }
@@ -330,11 +327,10 @@
 <div class="key" class:hidden="{!showKey}">
   <p class="key-title" transition:fade>Key:</p>
   <ul class="key" transition:fade>
-    <li style="--delay: 0s" class="gigtype-gig">Gig</li>
-    <li style="--delay: 0.1s" class="gigtype-gig admins-only">Hidden gig</li>
-    <li style="--delay: 0.2s" class="gigtype-gig_enquiry">Gig enquiry</li>
-    <li style="--delay: 0.3s" class="gigtype-kit">Kit hire</li>
-    <li style="--delay: 0.4s" class="gigtype-calendar">Calendar date</li>
-    <li style="--delay: 0.5s" class="gigtype-gig_cancelled">Cancelled gig</li>
+    {#each keyItems.toJS() as item, n (item.code)}
+      <li style="--delay: {n * 0.1}s" class="gigtype-{item.code}" class:admins-only="{item.admins_only}">
+        {#if item.admins_only && item.code === 'gig'}Hidden Gig{:else}{item.title}{/if}
+      </li>
+    {:else}No gigs visible on calendar{/each}
   </ul>
 </div>

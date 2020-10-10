@@ -91,6 +91,7 @@
   button.cancelled-detail {
     display: block;
     margin: auto;
+    margin-top: 1em;
   }
 
   gig-finance {
@@ -170,7 +171,7 @@
 </style>
 
 {#if !showSignup}
-  {#if signupGig && signupGig.allow_signups}
+  {#if $signupGig && $signupGig.allow_signups}
     <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
   {/if}
   <gig-summary
@@ -363,5 +364,5 @@
   </gig-summary>
 {:else}
   <button class="signup" on:click="{() => (showSignup = !showSignup)}">Show summary</button>
-  <Signup gig="{signupGig}" {userInstruments} showLink="{false}" />
+  <Signup bind:gig="{$signupGig}" {userInstruments} showLink="{false}" />
 {/if}

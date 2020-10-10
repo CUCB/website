@@ -103,7 +103,15 @@
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
   import moment from "moment";
+  import { writable } from "svelte/store";
   export let gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
+
+  $: reloadSignupGigs(gigs);
+  function reloadSignupGigs(gigs) {
+    signupGigs = Object.fromEntries(
+      gigs.map(gig => (gig.id in signupGigs ? [gig.id, writable(mergeDeep(signupGigs[gig.id], gig))] : [])),
+    );
+  }
   let allUpcoming = gigs;
   $: currentCalendarMonthMoment = moment(currentCalendarMonth, "YYYY-MM");
   let { session } = stores();
@@ -298,11 +306,10 @@
   </div>
 </div>
 
-{#each gigs as gig}
-  <Summary
-    {gig}
-    signupGig="{gig.id in signupGigs && mergeDeep(signupGigs[gig.id], gig)}"
-    {userInstruments}
-    linkHeading="{true}"
-  />
+{#each gigs as gig (gig.id)}
+  {#if gig.id in signupGigs}
+    <Summary {gig} signupGig="{signupGigs[gig.id]}" {userInstruments} linkHeading="{true}" />
+  {:else}
+    <Summary {gig} {userInstruments} linkHeading="{true}" />
+  {/if}
 {:else}No gigs to display{/each}

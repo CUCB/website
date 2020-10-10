@@ -181,6 +181,7 @@ export const QuerySingleGig = gql`
     cucb_gigs(where: { admins_only: { _eq: false }, allow_signups: { _eq: true }, id: { _eq: $gig_id } }) {
       date
       title
+      allow_signups
       lineup {
         user_available
         user_only_if_necessary

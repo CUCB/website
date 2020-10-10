@@ -45,7 +45,10 @@
 <script>
   import Summary from "../../../../components/Gigs/Summary.svelte";
   import { makeTitle } from "../../../../view";
+  import { writable } from "svelte/store";
   export let gig, userInstruments, signupGig;
+  let signupGig2 = writable(signupGig);
+  console.log($signupGig2);
 </script>
 
 <svelte:head>
@@ -53,4 +56,4 @@
 </svelte:head>
 
 <h1>Gigs</h1>
-<Summary {gig} {signupGig} {userInstruments} />
+<Summary {gig} signupGig="{signupGig2}" {userInstruments} />
