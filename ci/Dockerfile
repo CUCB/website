@@ -1,4 +1,4 @@
-FROM node:current
+FROM cypress/base:12
 WORKDIR /usr/src/app
 COPY package*.json ./
 COPY node_modules ./node_modules/
@@ -8,4 +8,5 @@ COPY src ./src/
 COPY static ./static/
 COPY *.js ./
 COPY build.env ./.env
+COPY wait-for-it.sh .
 RUN npm run build

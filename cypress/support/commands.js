@@ -32,10 +32,6 @@ Cypress.Commands.add("executeMutation", (mutation, params) =>
 
 Cypress.Commands.add("executeQuery", (mutation, params) => cy.executeMutation(mutation, params).its("data"));
 
-// Open the fetch polyfill, which is required for stubbing responses to work
-// This is required due to https://github.com/cypress-io/cypress/issues/95 not being resolved (yet)
-Cypress.Commands.add("fetchPolyfill", () => cy.readFile("cypress/deps/unfetch.umd.js"));
-
 // Click a link so cypress checks the response status code
 Cypress.Commands.add(
   "clickLink",

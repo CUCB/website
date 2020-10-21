@@ -8,15 +8,6 @@ import {
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
-let polyfill;
-const useFetchPolyfill = {
-  onBeforeLoad(win) {
-    delete win.fetch;
-    win.eval(polyfill);
-    win.fetch = win.unfetch;
-  },
-};
-
 describe("lineup editor", () => {
   before(() => {
     cy.executeMutation(CreateGig, {
@@ -106,10 +97,13 @@ describe("lineup editor", () => {
   });
 });
 
+let positive = null;
+let negative = null;
+let neutral = null;
+
 describe("gig signup", () => {
   before(() => {
-    cy.fetchPolyfill().then(result => (polyfill = result));
-    cy.server();
+    cy.visit("/");
     cy.executeMutation(CreateGig, {
       variables: {
         id: 15274,
@@ -137,29 +131,27 @@ describe("gig signup", () => {
         gigId: 15274,
       },
     });
+    cy.wait(200);
+    cy.cssProperty("--positive").then(positive_ => (positive = positive_));
+    cy.cssProperty("--negative").then(negative_ => (negative = negative_));
+    cy.cssProperty("--neutral").then(neutral_ => (neutral = neutral_));
   });
 
   beforeEach(() => {
     cy.clock(Cypress.moment("2020-07-07 02:00").valueOf());
     cy.login("cypress_user", "abc123");
-    cy.server();
-    Cypress.currentTest.retries(3);
   });
 
   it("allows a user to sign up to a gig", () => {
     cy.visit("/members");
-
     cy.wait(100);
-
-    cy.cssProperty("--positive").then(positive => {
-      cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .should("have.css", "color")
-        .and("not.equal", positive);
-      cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .click()
-        .should("have.css", "color")
-        .and("equal", positive);
-    });
+    cy.get(`[data-test="gig-15274-signup-yes"]`)
+      .should("have.css", "color")
+      .and("not.equal", positive);
+    cy.get(`[data-test="gig-15274-signup-yes"]`)
+      .click()
+      .should("have.css", "color")
+      .and("equal", positive);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -173,15 +165,13 @@ describe("gig signup", () => {
         user_only_if_necessary: false,
       });
 
-    cy.cssProperty("--neutral").then(neutral => {
-      cy.get(`[data-test="gig-15274-signup-maybe"]`)
-        .should("have.css", "color")
-        .and("not.equal", neutral);
-      cy.get(`[data-test="gig-15274-signup-maybe"]`)
-        .click()
-        .should("have.css", "color")
-        .and("equal", neutral);
-    });
+    cy.get(`[data-test="gig-15274-signup-maybe"]`)
+      .should("have.css", "color")
+      .and("not.equal", neutral);
+    cy.get(`[data-test="gig-15274-signup-maybe"]`)
+      .click()
+      .should("have.css", "color")
+      .and("equal", neutral);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -209,15 +199,13 @@ describe("gig signup", () => {
         user_only_if_necessary: true,
       });
 
-    cy.cssProperty("--negative").then(negative => {
-      cy.get(`[data-test="gig-15274-signup-no"]`)
-        .should("have.css", "color")
-        .and("not.equal", negative);
-      cy.get(`[data-test="gig-15274-signup-no"]`)
-        .click()
-        .should("have.css", "color")
-        .and("equal", negative);
-    });
+    cy.get(`[data-test="gig-15274-signup-no"]`)
+      .should("have.css", "color")
+      .and("not.equal", negative);
+    cy.get(`[data-test="gig-15274-signup-no"]`)
+      .click()
+      .should("have.css", "color")
+      .and("equal", negative);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -238,12 +226,14 @@ describe("gig signup", () => {
           userId: 27250,
         },
       });
+      cy.login("cypress_user", "abc123");
+      cy.visit("/members");
     });
 
     it("links to user profile when editing instruments", () => {
-      cy.visit("/members", useFetchPolyfill);
-
-      cy.route("POST", "/v1/graphql", "fixture:gig/signup/yes.json").as("signup");
+      cy.route2("POST", "/v1/graphql", {
+        fixture: "gig/signup/yes.json",
+      }).as("signup");
 
       cy.wait(100);
 
@@ -271,11 +261,15 @@ describe("gig signup", () => {
           instrumentId: 20,
         },
       });
+      cy.login("cypress_user", "abc123");
+      cy.visit("/members");
     });
 
     it("allows adding and editing of instruments", () => {
-      cy.visit("/members", useFetchPolyfill);
-      cy.route("POST", "/v1/graphql").as("graphqlRequest");
+      cy.route2({
+        method: "POST",
+        url: "/v1/graphql",
+      }).as("graphqlRequest");
 
       cy.wait(100);
 
@@ -515,6 +509,10 @@ describe("gig summary", () => {
     it("doesn't show financial information or admin notes", () => {
       cy.contains("deposit").should("not.exist");
       cy.contains("payment").should("not.exist");
+    });
+
+    it("shows a signup button", () => {
+      cy.get("[data-test='show-signup']").should("be.visible");
     });
   });
 

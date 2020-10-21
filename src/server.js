@@ -39,7 +39,7 @@ const server = dev
   ? polka()
       .use("/images/committee", sirv("static/static/images/committee", { dev }))
       .use(sirv("static", { dev }))
-  : polka();
+  : polka().use(sirv("static", { dev }));
 
 server
   .all(`${GRAPHQL_PATH}`, function(req, res) {
