@@ -1,7 +1,7 @@
 {
   "baseUrl": "http://localhost:4000",
   "video": true,
-  "projectId": "5wemfg",
+  "projectId": "u67py9",
   "defaultCommandTimeout": 4000,
   "chromeWebSecurity": false,
   "retries": {

@@ -97,9 +97,13 @@ describe("lineup editor", () => {
   });
 });
 
+let positive = null;
+let negative = null;
+let neutral = null;
+
 describe("gig signup", () => {
   before(() => {
-    cy.server();
+    cy.visit("/");
     cy.executeMutation(CreateGig, {
       variables: {
         id: 15274,
@@ -127,6 +131,10 @@ describe("gig signup", () => {
         gigId: 15274,
       },
     });
+    cy.wait(200);
+    cy.cssProperty("--positive").then(positive_ => (positive = positive_));
+    cy.cssProperty("--negative").then(negative_ => (negative = negative_));
+    cy.cssProperty("--neutral").then(neutral_ => (neutral = neutral_));
   });
 
   beforeEach(() => {
@@ -136,18 +144,14 @@ describe("gig signup", () => {
 
   it("allows a user to sign up to a gig", () => {
     cy.visit("/members");
-
     cy.wait(100);
-
-    cy.cssProperty("--positive").then(positive => {
-      cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .should("have.css", "color")
-        .and("not.equal", positive);
-      cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .click()
-        .should("have.css", "color")
-        .and("equal", positive);
-    });
+    cy.get(`[data-test="gig-15274-signup-yes"]`)
+      .should("have.css", "color")
+      .and("not.equal", positive);
+    cy.get(`[data-test="gig-15274-signup-yes"]`)
+      .click()
+      .should("have.css", "color")
+      .and("equal", positive);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -161,15 +165,13 @@ describe("gig signup", () => {
         user_only_if_necessary: false,
       });
 
-    cy.cssProperty("--neutral").then(neutral => {
-      cy.get(`[data-test="gig-15274-signup-maybe"]`)
-        .should("have.css", "color")
-        .and("not.equal", neutral);
-      cy.get(`[data-test="gig-15274-signup-maybe"]`)
-        .click()
-        .should("have.css", "color")
-        .and("equal", neutral);
-    });
+    cy.get(`[data-test="gig-15274-signup-maybe"]`)
+      .should("have.css", "color")
+      .and("not.equal", neutral);
+    cy.get(`[data-test="gig-15274-signup-maybe"]`)
+      .click()
+      .should("have.css", "color")
+      .and("equal", neutral);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -197,15 +199,13 @@ describe("gig signup", () => {
         user_only_if_necessary: true,
       });
 
-    cy.cssProperty("--negative").then(negative => {
-      cy.get(`[data-test="gig-15274-signup-no"]`)
-        .should("have.css", "color")
-        .and("not.equal", negative);
-      cy.get(`[data-test="gig-15274-signup-no"]`)
-        .click()
-        .should("have.css", "color")
-        .and("equal", negative);
-    });
+    cy.get(`[data-test="gig-15274-signup-no"]`)
+      .should("have.css", "color")
+      .and("not.equal", negative);
+    cy.get(`[data-test="gig-15274-signup-no"]`)
+      .click()
+      .should("have.css", "color")
+      .and("equal", negative);
 
     cy.executeQuery(SignupDetails, {
       variables: {
