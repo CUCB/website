@@ -49,28 +49,13 @@ describe("homepage", () => {
   it("shows dark theme correctly", () => {
     cy.viewport(1280, 1024);
     cy.visit("/?color=dark");
-    cy.wait(2000);
     cy.percySnapshot();
   });
 });
 
-let polyfill;
-const useFetchPolyfill = {
-  onBeforeLoad(win) {
-    delete win.fetch;
-    win.eval(polyfill);
-    win.fetch = win.unfetch;
-  },
-};
-
 describe("book us page", () => {
-  before(() => {
-    cy.fetchPolyfill().then(result => (polyfill = result));
-  });
-
   beforeEach(() => {
-    cy.visit("/book", useFetchPolyfill);
-    Cypress.currentTest.retries(3); // Retry the test if it fails as svelte inputs are a bit flaky
+    cy.visit("/book");
   });
 
   it("has testimonial", () => {
@@ -78,11 +63,19 @@ describe("book us page", () => {
   });
 
   it("allows a user to submit a booking request", () => {
-    cy.server();
-    cy.route("POST", "/contact").as("contact");
-    cy.get("[data-test='booking-name']").type("Testy test");
-    cy.get("[data-test='booking-email']").type("testy@te.st");
-    cy.get("[data-test='booking-message']").type("testy test");
+    cy.route2({
+      method: "POST",
+      url: "/contact",
+    }).as("contact");
+    cy.get("[data-test='booking-name']")
+      .click()
+      .type("Testy test");
+    cy.get("[data-test='booking-email']")
+      .click()
+      .type("testy@te.st");
+    cy.get("[data-test='booking-message']")
+      .click()
+      .type("testy test");
     cy.get("#captcha > iframe").then($element => {
       const $body = $element.contents().find("body");
       cy.wrap($body)
@@ -95,11 +88,19 @@ describe("book us page", () => {
   });
 
   it("prevents a user from submitting the booking form when not captcha'd", () => {
-    cy.server();
-    cy.route("POST", "/contact").as("contact");
-    cy.get("[data-test='booking-name']").type("Testy test");
-    cy.get("[data-test='booking-email']").type("testy@te.st");
-    cy.get("[data-test='booking-message']").type("testy test");
+    cy.route2({
+      method: "POST",
+      url: "/contact",
+    }).as("contact");
+    cy.get("[data-test='booking-name']")
+      .click()
+      .type("Testy test");
+    cy.get("[data-test='booking-email']")
+      .click()
+      .type("testy@te.st");
+    cy.get("[data-test='booking-message']")
+      .click()
+      .type("testy test");
     cy.get("[data-test='booking-send']").click();
     cy.get(".error").contains("captcha");
     cy.cssProperty("--negative").then(color => {

@@ -1,0 +1,26 @@
+name: CUCB-Website-Test
+
+on: push
+
+jobs:
+  cucb-website-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Start server and run tests
+        run: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
+        env:
+          CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-output
+          path: |
+            cypress/videos/**/*.mp4
+            cypress/screenshots/**/*.png

@@ -1,8 +1,6 @@
 import { CreateUser, HASHED_PASSWORDS } from "../database/users";
 
 describe("login page", () => {
-  let polyfill;
-
   before(() => {
     cy.executeMutation(CreateUser, {
       variables: {
@@ -15,17 +13,10 @@ describe("login page", () => {
         lastName: "User",
       },
     });
-    cy.fetchPolyfill().then(result => (polyfill = result));
   });
 
   beforeEach(() => {
-    cy.visit("/auth/login", {
-      onBeforeLoad(win) {
-        delete win.fetch;
-        win.eval(polyfill);
-        win.fetch = win.unfetch;
-      },
-    });
+    cy.visit("/auth/login");
   });
 
   it("greets with sign in", () => {
@@ -38,10 +29,6 @@ describe("login page", () => {
   });
 
   describe("form", () => {
-    beforeEach(
-      () => Cypress.currentTest.retries(3), // Retry the test if it fails as svelte inputs are a bit flaky
-    );
-
     it("accepts a valid username and password", () => {
       cy.get("input[data-test=username]").type("cypress_user");
       cy.get("input[data-test=password]").type("abc123");
@@ -50,8 +37,10 @@ describe("login page", () => {
     });
 
     it("submits on pressing enter", () => {
-      cy.server();
-      cy.route("POST", "/auth/login").as("postLogin");
+      cy.route2({
+        method: "POST",
+        url: "/auth/login",
+      }).as("postLogin");
       cy.get("input[data-test=username]").type("cypress_user");
       cy.get("input[data-test=password]").type("abc123{enter}");
       cy.wait("@postLogin");

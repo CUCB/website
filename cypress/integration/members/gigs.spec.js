@@ -8,15 +8,6 @@ import {
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
-let polyfill;
-const useFetchPolyfill = {
-  onBeforeLoad(win) {
-    delete win.fetch;
-    win.eval(polyfill);
-    win.fetch = win.unfetch;
-  },
-};
-
 describe("lineup editor", () => {
   before(() => {
     cy.executeMutation(CreateGig, {
@@ -108,7 +99,6 @@ describe("lineup editor", () => {
 
 describe("gig signup", () => {
   before(() => {
-    cy.fetchPolyfill().then(result => (polyfill = result));
     cy.server();
     cy.executeMutation(CreateGig, {
       variables: {
@@ -142,8 +132,6 @@ describe("gig signup", () => {
   beforeEach(() => {
     cy.clock(Cypress.moment("2020-07-07 02:00").valueOf());
     cy.login("cypress_user", "abc123");
-    cy.server();
-    Cypress.currentTest.retries(3);
   });
 
   it("allows a user to sign up to a gig", () => {
@@ -238,12 +226,14 @@ describe("gig signup", () => {
           userId: 27250,
         },
       });
+      cy.login("cypress_user", "abc123");
+      cy.visit("/members");
     });
 
     it("links to user profile when editing instruments", () => {
-      cy.visit("/members", useFetchPolyfill);
-
-      cy.route("POST", "/v1/graphql", "fixture:gig/signup/yes.json").as("signup");
+      cy.route2("POST", "/v1/graphql", {
+        fixture: "gig/signup/yes.json",
+      }).as("signup");
 
       cy.wait(100);
 
@@ -271,11 +261,15 @@ describe("gig signup", () => {
           instrumentId: 20,
         },
       });
+      cy.login("cypress_user", "abc123");
+      cy.visit("/members");
     });
 
     it("allows adding and editing of instruments", () => {
-      cy.visit("/members", useFetchPolyfill);
-      cy.route("POST", "/v1/graphql").as("graphqlRequest");
+      cy.route2({
+        method: "POST",
+        url: "/v1/graphql",
+      }).as("graphqlRequest");
 
       cy.wait(100);
 
@@ -515,6 +509,10 @@ describe("gig summary", () => {
     it("doesn't show financial information or admin notes", () => {
       cy.contains("deposit").should("not.exist");
       cy.contains("payment").should("not.exist");
+    });
+
+    it("shows a signup button", () => {
+      cy.get("[data-test='show-signup']").should("be.visible");
     });
   });
 

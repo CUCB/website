@@ -84,7 +84,7 @@
 
 {#if !showSignup}
   {#if gig.allow_signups}
-    <button on:click="{() => (showSignup = !showSignup)}">Show signup</button>
+    <button on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
   {/if}
   <gig-summary>
     <h2>
