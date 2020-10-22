@@ -1,0 +1,29 @@
+name: CUCB-Website-Deploy
+
+on:
+  push:
+    branches:
+      - master
+      - feature/gh-deploy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Login to registry
+        run: docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+      - name: Build and tag image
+        run: |
+          echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
+          docker build -t $CI_REGISTRY/cucb/website/sapper:latest -f deploy/Dockerfile .
+
+      - name: Push image to registry
+        run: docker push $CI_REGISTRY/cucb/website/sapper:latest
+    env:
+      CI_REGISTRY: ${{ secrets.CI_REGISTRY }}
+      CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
+      CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
