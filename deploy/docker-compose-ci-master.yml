@@ -2,5 +2,10 @@ version: "3.6"
 services:
   cypress:
     image: $DEPLOY_REGISTRY/cucb/website:latest
+    volumes:
+      - node_modules:/usr/src/app/node_modules
     command: >
       bash -c "chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run test:ci:prod"
+
+volumes:
+  node_modules:
