@@ -6,6 +6,8 @@ services:
       - app:/usr/src/app
       - ./static:/usr/src/app/static
       - ./wait-for-it.sh:/usr/src/app/wait-for-it.sh
+      - ./cypress.json:/usr/src/app/cypress.json
+      - ./cypress:/usr/src/app/cypress
     command: >
       bash -c "apt-get update && \
                apt-get install --no-install-recommends -y \
