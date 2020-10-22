@@ -1,15 +1,35 @@
-name: CUCB-Website-Test
+name: Build/Test/Deploy
 
 on:
   push:
-    branches:
-      - "*"
-      - "*/*"
-      - "**"
-      - "!feature/gh-deploy"
-      - "master"
+
 jobs:
-  cucb-website-test:
+  build:
+    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/gh-deploy' }}
+    name: Build and push docker image for deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Cache multiple paths
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('package*.json') }}
+
+      - name: Login to registry
+        run: docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+      - name: Build and tag image
+        run: |
+          echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
+          docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
+          docker build -t $CI_REGISTRY/cucb/website:latest -f deploy/Dockerfile .
+
+      - name: Push image to registry
+        run: docker push $CI_REGISTRY/cucb/website:latest
+  test:
     name: Build and test
     runs-on: ubuntu-latest
     steps:
