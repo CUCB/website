@@ -29,6 +29,10 @@ jobs:
 
       - name: Push image to registry
         run: docker push $CI_REGISTRY/cucb/website:latest
+    env:
+      CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
+      CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
+      CI_REGISTRY: ${{ secrets.CI_REGISTRY }}
   test:
     name: Build and test
     runs-on: ubuntu-latest
