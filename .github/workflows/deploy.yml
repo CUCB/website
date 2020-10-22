@@ -8,6 +8,7 @@ on:
 
 jobs:
   build:
+    name: Build and push docker image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
@@ -35,3 +36,23 @@ jobs:
       CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
       CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
   test:
+    name: Test site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to registry
+        run: docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+      - name: Test image
+        run: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml -f deploy/docker-compose-ci-master.yml up --exit-code-from=cypress
+        env:
+          CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
+          PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-output
+          path: |
+            cypress/videos/**/*.mp4
+            cypress/screenshots/**/*.png
