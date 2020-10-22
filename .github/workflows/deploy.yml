@@ -31,13 +31,10 @@ jobs:
 
       - name: Push image to registry
         run: docker push $CI_REGISTRY/cucb/website:latest
-    env:
-      CI_REGISTRY: ${{ secrets.CI_REGISTRY }}
-      CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
-      CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
   test:
     name: Test site
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Login to registry
         run: docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
@@ -56,3 +53,9 @@ jobs:
           path: |
             cypress/videos/**/*.mp4
             cypress/screenshots/**/*.png
+
+env:
+  CI_REGISTRY: ${{ secrets.CI_REGISTRY }}
+  CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}
+  CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
+  DEPLOY_REGISTRY: ${{ secrets.CI_REGISTRY }}
