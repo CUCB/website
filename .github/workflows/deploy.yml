@@ -19,10 +19,10 @@ jobs:
       - name: Build and tag image
         run: |
           echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
-          docker build -t $CI_REGISTRY/cucb/website/sapper:latest -f deploy/Dockerfile .
+          docker build -t $CI_REGISTRY/cucb/website:latest -f deploy/Dockerfile .
 
       - name: Push image to registry
-        run: docker push $CI_REGISTRY/cucb/website/sapper:latest
+        run: docker push $CI_REGISTRY/cucb/website:latest
     env:
       CI_REGISTRY: ${{ secrets.CI_REGISTRY }}
       CI_REGISTRY_PASSWORD: ${{ secrets.CI_REGISTRY_PASSWORD }}

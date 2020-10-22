@@ -33,7 +33,7 @@ services:
       options:
         max-size: "50m"
   sapper:
-    image: $DEPLOY_REGISTRY/cucb/website/sapper:latest
+    image: $DEPLOY_REGISTRY/cucb/website:latest
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
