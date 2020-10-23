@@ -81,13 +81,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: pulumi
     steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.4.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Copy required SSH keys
         run: |
-          '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+          ssh-keyscan $IP >> ~/.ssh/known_hosts
           echo "$DEPLOY_PULL_KEY" > deploy_pull
           scp deploy_pull root@$IP:.ssh/
           scp pulumi/ssh_keys/ci_login.pub root@$IP:.ssh/
