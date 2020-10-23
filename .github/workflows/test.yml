@@ -85,9 +85,9 @@ jobs:
         uses: webfactory/ssh-agent@v0.4.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
       - name: Copy required SSH keys
         run: |
+          '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
           echo "$DEPLOY_PULL_KEY" > deploy_pull
           scp deploy_pull root@$IP:.ssh/
           scp pulumi/ssh_keys/ci_login.pub root@$IP:.ssh/
