@@ -75,6 +75,7 @@ jobs:
           chmod +x ./pulumi/scripts/*.sh
           ./pulumi/scripts/setup.sh
           ./pulumi/scripts/run.sh
+          cd pulumi
           echo "::set-output name=ip::$(pulumi stack output ip)"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
