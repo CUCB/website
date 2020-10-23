@@ -129,7 +129,7 @@ describe("password verification", () => {
       form: true,
     });
     cy.visit("/members"); // Check login actually worked once
-    cy.request("POST", "/auth/logout");
+    cy.visit("/auth/logout");
     cy.request({
       method: "POST",
       url: "/auth/login",
