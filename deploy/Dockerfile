@@ -8,4 +8,6 @@ COPY src ./src/
 COPY static ./static/
 COPY *.js ./
 COPY build.env ./.env
+RUN cat .env
+RUN echo "$PWD"
 RUN npm run build
