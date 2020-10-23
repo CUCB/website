@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 
 # Start the ssh agent (required to clone/pull)
 eval $(ssh-agent -s)
@@ -60,3 +61,5 @@ echo "Starting server"
 cd /var/www && \
 ./deploy/start.sh && \
 docker system prune -f
+
+set +x
