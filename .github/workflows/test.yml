@@ -33,7 +33,6 @@ jobs:
       - name: Push image to registry
         run: docker push $CI_REGISTRY/cucb/website:latest
   test:
-    if: false
     name: Build and test
     runs-on: ubuntu-latest
     steps:

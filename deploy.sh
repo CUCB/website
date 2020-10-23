@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -ex
 
 # Start the ssh agent (required to clone/pull)
 eval $(ssh-agent -s)
@@ -54,7 +54,7 @@ rm -rf docs-old
 
 echo "Pulling latest build from registry"
 docker login -u $DEPLOY_REGISTRY_USER -p $DEPLOY_REGISTRY_PASSWORD $DEPLOY_REGISTRY
-docker pull $DEPLOY_REGISTRY/cucb/website/sapper:latest
+docker pull $DEPLOY_REGISTRY/cucb/website:latest
 
 # Start the server, cleaning out unused docker stuff
 echo "Starting server"
@@ -62,4 +62,4 @@ cd /var/www && \
 ./deploy/start.sh && \
 docker system prune -f
 
-set +x
+set +ex
