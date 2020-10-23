@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -e # Fail script if a command fails
 
 # Start the ssh agent (required to clone/pull)
 eval $(ssh-agent -s)
@@ -62,4 +62,4 @@ cd /var/www && \
 ./deploy/start.sh && \
 docker system prune -f
 
-set +ex
+set +e
