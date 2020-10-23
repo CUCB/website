@@ -10,4 +10,3 @@ cd pulumi
 npm install
 pulumi stack select dev
 pulumi up --yes
-echo "IP=$(pulumi stack output ip)" > pulumi.env

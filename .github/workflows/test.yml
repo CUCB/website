@@ -5,7 +5,8 @@ on:
 
 jobs:
   build:
-    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/gh-deploy' }}
+    #if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/gh-deploy' }}
+    if: false
     name: Build and push docker image for deploy
     runs-on: ubuntu-latest
     steps:
@@ -36,6 +37,7 @@ jobs:
   test:
     name: Build and test
     runs-on: ubuntu-latest
+    if: false
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
@@ -56,6 +58,7 @@ jobs:
             cypress/screenshots/**/*.png
   pulumi:
     name: Create/update infrastructure
+    if: always()
     runs-on: ubuntu-latest
     needs:
       - build
@@ -72,8 +75,7 @@ jobs:
           chmod +x ./pulumi/scripts/*.sh
           ./pulumi/scripts/setup.sh
           ./pulumi/scripts/run.sh
-          source pulumi.env
-          echo "::set-output name=ip::$IP"
+          echo "::set-output name=ip::$(pulumi stack output ip)"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
   deploy:
