@@ -1,8 +1,9 @@
 #!/bin/bash
+set -e # Fail script if a command fails
 
 # Start the ssh agent (required to clone/pull)
 eval $(ssh-agent -s)
-ssh-add <(cat ~/.ssh/gitlab_ci)
+ssh-add <(cat ~/.ssh/deploy_pull)
 
 # Load environment variables passed in from CI container
 source ~/.ssh/environment
@@ -19,10 +20,10 @@ if [ -d /var/www ]; then
     git pull
 else 
     echo -e "-------------\nCloning code\n------------"
-    ssh-keyscan gitlab.com > gitlabKey && \
-    ssh-keygen -lf gitlabKey && \
-    cat gitlabKey >> ~/.ssh/known_hosts && \
-    git clone git@gitlab.com:cucb/website www && \
+    ssh-keyscan github.com > githubKey && \
+    ssh-keygen -lf githubKey && \
+    cat githubKey >> ~/.ssh/known_hosts && \
+    git clone git@github.com:cucb/website www && \
     cd www && \
     git checkout $CI_COMMIT_BRANCH
 fi
@@ -53,10 +54,12 @@ rm -rf docs-old
 
 echo "Pulling latest build from registry"
 docker login -u $DEPLOY_REGISTRY_USER -p $DEPLOY_REGISTRY_PASSWORD $DEPLOY_REGISTRY
-docker pull $DEPLOY_REGISTRY/cucb/website/sapper:latest
+docker pull $DEPLOY_REGISTRY/cucb/website:latest
 
 # Start the server, cleaning out unused docker stuff
 echo "Starting server"
 cd /var/www && \
 ./deploy/start.sh && \
 docker system prune -f
+
+set +e

@@ -9,7 +9,6 @@ export PATH=$PATH:$HOME/.pulumi/bin
 # Login into pulumi. This will require the PULUMI_ACCESS_TOKEN environment variable
 pulumi login
 # update the GitLab Runner's packages
-apt-get update -y
-apt-get install sudo -y
+sudo apt update -y
 # nodejs
-apt-get install -y nodejs npm
+sudo apt install -y nodejs npm
