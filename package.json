@@ -7,7 +7,7 @@
     "build": "sapper build --legacy --ext '.svelte .svx'",
     "export": "sapper export --legacy --ext '.svelte .svx'",
     "start": "node __sapper__/build",
-    "start:ci": "export PORT=4000; node __sapper__/build",
+    "start:ci": "export PORT=4000; export NODE_ENV=test; node __sapper__/build",
     "test:ci:prod": "run-p --race start:ci cy:run:ci",
     "cy:run": "cypress run",
     "cy:run:ci": "wait-for-it localhost:4000 -t 60 -- percy exec -- cypress run --record --key $CYPRESS_KEY",

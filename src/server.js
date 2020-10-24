@@ -13,6 +13,7 @@ dotenv.config();
 
 const { PORT, NODE_ENV } = process.env;
 const dev = NODE_ENV === "development";
+const test = NODE_ENV === "test";
 
 // Fetch these seperately, as rollup will replace them from .env
 // and we want the server to be consistent with the client
@@ -59,7 +60,7 @@ server
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         sameSite: "strict",
-        secure: !dev,
+        secure: !dev && !test,
       },
     }),
     sapper.middleware({
