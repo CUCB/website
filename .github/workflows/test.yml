@@ -4,33 +4,6 @@ on:
   push:
 
 jobs:
-  build:
-    if: ${{ github.ref=='refs/heads/master' }}
-    name: Build and push docker image for deploy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-
-      - name: Cache multiple paths
-        uses: actions/cache@v2
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('package*.json') }}
-
-      - name: Login to registry
-        run: docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-
-      - name: Build and tag image
-        run: |
-          echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
-          docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
-          docker build -t $CI_REGISTRY/cucb/website:latest -f deploy/Dockerfile .
-        env:
-          HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
-
-      - name: Push image to registry
-        run: docker push $CI_REGISTRY/cucb/website:latest
   test:
     name: Build and test
     runs-on: ubuntu-latest
@@ -70,6 +43,35 @@ jobs:
           echo "::set-output name=ip::$(pulumi stack output ip)"
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+  build:
+    if: ${{ github.ref=='refs/heads/master' }}
+    needs: test
+    name: Build and push docker image for deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Cache multiple paths
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-${{ hashFiles('package*.json') }}
+
+      - name: Login to registry
+        run: docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+      - name: Build and tag image
+        run: |
+          echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
+          docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
+          docker build -t $CI_REGISTRY/cucb/website:latest -f deploy/Dockerfile .
+        env:
+          HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
+
+      - name: Push image to registry
+        run: docker push $CI_REGISTRY/cucb/website:latest
 
   pulumi:
     name: Create/update infrastructure
