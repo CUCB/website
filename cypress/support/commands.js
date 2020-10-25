@@ -1,4 +1,5 @@
 import "@percy/cypress";
+import "cypress-pipe";
 
 Cypress.Commands.add("login", (username, password, options) =>
   cy.request({

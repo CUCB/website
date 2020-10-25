@@ -121,7 +121,7 @@ describe("password verification", () => {
     });
   });
 
-  it("correctly verifies correct passwords with 2y prefix", () => {
+  it("accepts correct passwords with 2y prefix", () => {
     cy.request({
       method: "POST",
       url: "/auth/login",

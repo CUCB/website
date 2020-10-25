@@ -45,7 +45,9 @@
   };
 
   const statusFromAvailability = entry =>
-    entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO;
+    (typeof entry.user_available !== "undefined" &&
+      (entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO)) ||
+    undefined;
 
   let status = gig.lineup[0] && statusFromAvailability(gig.lineup[0]);
 
@@ -227,7 +229,7 @@
   }
 </style>
 
-<gig-signup>
+<gig-signup data-test="gig-signup-{gig.id}">
   <h3>
     {#if showLink}
       <a href="/members/gigs/{gig.id}">{gig.title}</a>
@@ -248,10 +250,11 @@
       </a>
     </h4>
   {/if}
-  <status-icons>
+  <status-icons role="radiogroup">
     <AnnotatedIcon
       icon="check"
       color="{status === statuses.YES ? 'var(--positive)' : 'var(--unselected)'}"
+      aria-checked="{status === statuses.YES}"
       on:click="{signup(statuses.YES)}"
       data-test="{`gig-${gig.id}-signup-yes`}"
       style="{status === statuses.YES ? 'font-style: italic' : ''}"
@@ -262,6 +265,7 @@
     <AnnotatedIcon
       icon="question"
       color="{status === statuses.MAYBE ? 'var(--neutral)' : 'var(--unselected)'}"
+      aria-checked="{status === statuses.MAYBE}"
       on:click="{signup(statuses.MAYBE)}"
       data-test="{`gig-${gig.id}-signup-maybe`}"
       style="{status === statuses.MAYBE ? 'font-style: italic' : ''}"
@@ -272,6 +276,7 @@
     <AnnotatedIcon
       icon="times"
       color="{status === statuses.NO ? 'var(--negative)' : 'var(--unselected)'}"
+      aria-checked="{status === statuses.NO}"
       on:click="{signup(statuses.NO)}"
       data-test="{`gig-${gig.id}-signup-no`}"
       style="{status === statuses.NO ? 'font-style: italic' : ''}"

@@ -172,13 +172,16 @@
 
 {#if !showSignup}
   {#if $signupGig && $signupGig.allow_signups}
-    <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
+    <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-signup-{gig.id}">
+      Show signup
+    </button>
   {/if}
   <gig-summary
     class="gigtype-{gig.type.code}"
     class:details-visible="{showDetails}"
     class:permit-fade="{linkHeading}"
     class:admins-only="{gig.admins_only}"
+    data-test="gig-summary-{gig.id}"
   >
     <h2 class="main-detail">
       {#if linkHeading}
@@ -363,6 +366,8 @@
     {/if}
   </gig-summary>
 {:else}
-  <button class="signup" on:click="{() => (showSignup = !showSignup)}">Show summary</button>
+  <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
+    Show summary
+  </button>
   <Signup bind:gig="{$signupGig}" {userInstruments} showLink="{false}" />
 {/if}

@@ -1,5 +1,5 @@
 <script>
-  export let icon, color, style;
+  export let icon, color, style, tabindex;
   let className;
   export { className as class };
 
@@ -46,8 +46,15 @@
 <svelte:head>
   {@html styles}
 </svelte:head>
-<annotated-icon on:click class="{class_} {className}" data-test="{$$props['data-test']}">
-  <i class="las la-{icon}"></i>
+<annotated-icon
+  on:click
+  class="{class_} {className}"
+  style="{`color: ${color};${style}`}"
+  data-test="{$$props['data-test']}"
+  aria-checked="{$$props['aria-checked']}"
+  tabindex="{tabindex}"
+>
+  <i class="{`las la-${icon}`}"></i>
   <p>
     <slot />
   </p>

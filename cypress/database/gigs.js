@@ -97,6 +97,9 @@ export const AddInstrument = `
 
 export const RemoveInstruments = `
   mutation RemoveInstruments($userId: bigint) {
+    delete_cucb_gigs_lineups_instruments(where: { user_id: { _eq: $userId } }) {
+      affected_rows
+    }
     delete_cucb_users_instruments(where: { user_id: { _eq: $userId } }) {
       affected_rows
     }
