@@ -16,4 +16,4 @@ services:
       CYPRESS_KEY: ${CYPRESS_KEY}
       PG_PASSWORD: postgrespassword
     command: >
-      bash -c "cd /usr/src/app; npm install; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run test:ci:prod"
+      bash -c "cd /usr/src/app; npm install; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- bash -c 'if npm run test:ci:ff ; then npm run test:ci:chrome; else npm run test:ci:chrome; exit 1; fi'"
