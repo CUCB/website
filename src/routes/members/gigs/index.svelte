@@ -105,12 +105,20 @@
   import moment from "moment";
   import { writable } from "svelte/store";
   export let gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
-
   $: reloadSignupGigs(gigs);
   function reloadSignupGigs(gigs) {
-    signupGigs = Object.fromEntries(
-      gigs.map(gig => (gig.id in signupGigs ? [gig.id, writable(mergeDeep(signupGigs[gig.id], gig))] : [])),
+    let newlyMerged = gigs.map(gig =>
+      gig.id in signupGigs && typeof signupGigs[gig.id].set === "undefined"
+        ? [
+            gig.id,
+            writable({
+              ...mergeDeep(signupGigs[gig.id], gig),
+              lineup: signupGigs[gig.id].lineup.filter(person => person.user_id),
+            }),
+          ]
+        : [],
     );
+    signupGigs = Object.fromEntries([...Object.entries(signupGigs), ...newlyMerged]);
   }
   let allUpcoming = gigs;
   $: currentCalendarMonthMoment = moment(currentCalendarMonth, "YYYY-MM");
@@ -292,14 +300,18 @@
         {#if displaying === 'allUpcoming'}
           All upcoming gigs (currently shown)
         {:else}
-          <span class="link" on:click="{() => display('allUpcoming')}">All upcoming gigs</span>
+          <span class="link" on:click="{() => display('allUpcoming')}" role="link" data-test="gigview-all-upcoming">
+            All upcoming gigs
+          </span>
         {/if}
       </li>
       <li>
         {#if displaying === 'byMonth'}
           Gigs by month (currently shown)
         {:else}
-          <span class="link" on:click="{() => display('byMonth')}">Gigs by month</span>
+          <span class="link" on:click="{() => display('byMonth')}" role="link" data-test="gigview-by-month">
+            Gigs by month
+          </span>
         {/if}
       </li>
     </ul>

@@ -1,5 +1,5 @@
 <script>
-  export let icon, color, style, tabindex;
+  export let icon, color, style = "", tabindex;
   let className;
   export { className as class };
 

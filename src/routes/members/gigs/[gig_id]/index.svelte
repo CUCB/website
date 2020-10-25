@@ -48,7 +48,6 @@
   import { writable } from "svelte/store";
   export let gig, userInstruments, signupGig;
   let signupGig2 = writable(signupGig);
-  console.log($signupGig2);
 </script>
 
 <svelte:head>

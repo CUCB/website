@@ -285,9 +285,11 @@
 </style>
 
 <div class="title-bar">
-  <button on:click="{() => dispatchEvent('clickPrevious')}" class="left">Prev</button>
+  <button on:click="{() => dispatchEvent('clickPrevious')}" class="left" data-test="gigcalendar-previous-month">
+    Prev
+  </button>
   <h3>{displayedMonth.format('MMMM YYYY')}</h3>
-  <button on:click="{() => dispatchEvent('clickNext')}" class="right">Next</button>
+  <button on:click="{() => dispatchEvent('clickNext')}" class="right" data-test="gigcalendar-next-month">Next</button>
 </div>
 <table>
   <tr>

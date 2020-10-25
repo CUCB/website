@@ -3,8 +3,10 @@
   import Signup from "./Signup.svelte";
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
-  import { linear } from "svelte/easing";
-  export let gig, signupGig, userInstruments;
+  import { writable } from "svelte/store";
+  export let gig,
+    signupGig = writable(undefined),
+    userInstruments;
   export let linkHeading = false;
   let arriveFinishFormat = "HH:mm";
   let calendarDatesFormat = "dddd Do MMMM YYYY";

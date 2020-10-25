@@ -130,6 +130,18 @@
         ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
         : { ...userInstr, chosen: false, approved: false },
     );
+
+    gig = {
+      ...gig,
+      lineup: [
+        {
+          ...gig.lineup[0],
+          user_instruments: userInstruments
+            .filter(instrument => instrument.chosen)
+            .map(instrument => ({ ...instrument, user_instrument_id: instrument.id })),
+        },
+      ],
+    };
   };
 
   const updateNotes = async () => {
