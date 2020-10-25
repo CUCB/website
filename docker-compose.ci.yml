@@ -8,7 +8,7 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
   cypress:
-    image: cypress/base:12
+    image: cypress/browsers:node12.18.3-chrome83-ff77
     volumes:
       - .:/usr/src/app
     environment:

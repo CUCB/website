@@ -1,5 +1,4 @@
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
-import { isListType } from "graphql";
 
 describe("members' home page", () => {
   before(() => {

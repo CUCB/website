@@ -8,6 +8,8 @@ import {
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
+const click = $el => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
+
 describe("lineup editor", () => {
   before(() => {
     cy.executeMutation(CreateGig, {
@@ -92,9 +94,7 @@ describe("lineup editor", () => {
   });
 });
 
-let positive = null;
-let negative = null;
-let neutral = null;
+let colors = {};
 
 describe("gig signup", () => {
   before(() => {
@@ -126,10 +126,9 @@ describe("gig signup", () => {
         gigId: 15274,
       },
     });
-    cy.wait(200);
-    cy.cssProperty("--positive").then(positive_ => (positive = positive_));
-    cy.cssProperty("--negative").then(negative_ => (negative = negative_));
-    cy.cssProperty("--neutral").then(neutral_ => (neutral = neutral_));
+    cy.cssProperty("--positive").then(positive_ => (colors.positive = positive_));
+    cy.cssProperty("--negative").then(negative_ => (colors.negative = negative_));
+    cy.cssProperty("--neutral").then(neutral_ => (colors.neutral = neutral_));
   });
 
   beforeEach(() => {
@@ -139,14 +138,10 @@ describe("gig signup", () => {
 
   it("allows a user to sign up to a gig", () => {
     cy.visit("/members");
-    cy.wait(100);
+    cy.get(`[data-test="gig-15274-signup-yes"]`).should("not.have.color", colors.positive);
     cy.get(`[data-test="gig-15274-signup-yes"]`)
-      .should("have.css", "color")
-      .and("not.equal", positive);
-    cy.get(`[data-test="gig-15274-signup-yes"]`)
-      .click()
-      .should("have.css", "color")
-      .and("equal", positive);
+      .pipe(click)
+      .should("have.color", colors.positive);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -160,13 +155,10 @@ describe("gig signup", () => {
         user_only_if_necessary: false,
       });
 
-    cy.get(`[data-test="gig-15274-signup-maybe"]`)
-      .should("have.css", "color")
-      .and("not.equal", neutral);
+    cy.get(`[data-test="gig-15274-signup-maybe"]`).should("not.have.color", colors.netural);
     cy.get(`[data-test="gig-15274-signup-maybe"]`)
       .click()
-      .should("have.css", "color")
-      .and("equal", neutral);
+      .should("have.color", colors.neutral);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -194,13 +186,10 @@ describe("gig signup", () => {
         user_only_if_necessary: true,
       });
 
-    cy.get(`[data-test="gig-15274-signup-no"]`)
-      .should("have.css", "color")
-      .and("not.equal", negative);
+    cy.get(`[data-test="gig-15274-signup-no"]`).should("not.have.color", colors.negative);
     cy.get(`[data-test="gig-15274-signup-no"]`)
       .click()
-      .should("have.css", "color")
-      .and("equal", negative);
+      .should("have.color", colors.negative);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -230,9 +219,9 @@ describe("gig signup", () => {
         fixture: "gig/signup/yes.json",
       }).as("signup");
 
-      cy.wait(100);
-
-      cy.get(`[data-test="gig-15274-signup-yes"]`).click();
+      cy.get(`[data-test="gig-15274-signup-yes"]`)
+        .pipe(click)
+        .should("have.color", colors.positive);
 
       cy.wait("@signup");
 
@@ -266,8 +255,6 @@ describe("gig signup", () => {
         url: "/v1/graphql",
       }).as("graphqlRequest");
 
-      cy.wait(100);
-
       cy.executeQuery(InstrumentsOnGig, {
         variables: {
           userId: 27250,
@@ -277,7 +264,9 @@ describe("gig signup", () => {
         .its("cucb_gigs_lineups_instruments_aggregate.aggregate.count")
         .should("equal", 0);
 
-      cy.get(`[data-test="gig-15274-signup-yes"]`).click();
+      cy.get(`[data-test="gig-15274-signup-yes"]`)
+        .pipe(click)
+        .should("have.color", colors.positive);
 
       cy.wait("@graphqlRequest");
 
@@ -494,13 +483,10 @@ describe("gig summary", () => {
       cy.contains(`Twizzly Dialy`).should("be.visible");
 
       cy.log("Shows instrument with nickname on hover");
-      cy.get("[data-test='tooltip']").should("not.exist");
       cy.contains(`Eigenharp`).hasTooltip("Cluck cluck");
 
       cy.log("Shows who's leading");
-      cy.get("[data-test='is-leading']").trigger("mouseenter");
-      cy.get("[data-test='tooltip']").contains("Leady is leading");
-      cy.get("[data-test='is-leading']").trigger("mouseleave");
+      cy.get("[data-test='is-leading']").hasTooltip("Leady is leading");
     });
 
     it("doesn't show financial information or admin notes", () => {
@@ -602,7 +588,6 @@ describe("gig diary", () => {
       .minute(15)
       .format(),
   };
-  let colors = {};
 
   before(() => {
     cy.visit("/");
@@ -638,7 +623,6 @@ describe("gig diary", () => {
     });
 
     describe("signups", () => {
-      const click = $el => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
       beforeEach(() => {
         cy.executeMutation(DeleteSignup, { variables: { userId: 27250, gigId: signupGig.id } });
         cy.visit("/members/gigs");

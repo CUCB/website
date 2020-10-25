@@ -62,7 +62,7 @@ describe("book us page", () => {
     cy.get(".testimonial").should("be.visible");
   });
 
-  it("allows a user to submit a booking request", () => {
+  it("allows a user to submit a booking request", { browser: ["chromium", "chrome", "electron"] }, () => {
     cy.route2({
       method: "POST",
       url: "/contact",

@@ -67,18 +67,16 @@ Cypress.Commands.add("cssProperty", name =>
   cy
     .document()
     .its("documentElement")
-    .then(elem => getComputedStyle(elem[0]))
+    .pipe(elem => getComputedStyle(elem[0]))
     .invoke("getPropertyValue", name)
-    .invoke("trim"),
+    .invoke("trim")
+    .should("not.equal", undefined),
 );
 
 Cypress.Commands.add("hasTooltip", { prevSubject: true }, (subject, content) => {
-  cy.wrap(subject)
-    .trigger("mouseenter")
-    .then(subject => {
-      cy.get("[data-test='tooltip']")
-        .contains(content)
-        .should("be.visible");
-      cy.wrap(subject).trigger("mouseleave");
-    });
+  cy.wrap(subject).trigger("mouseleave");
+  cy.wrap(subject).trigger("mouseenter");
+  cy.get("[data-test='tooltip']")
+    .contains(content)
+    .should("be.visible");
 });
