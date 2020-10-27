@@ -589,11 +589,36 @@ describe("gig diary", () => {
       .format(),
   };
 
+  let pastGig = {
+    ...gigForSummary,
+    id: 33274,
+    allowSignups: false,
+    date: Cypress.moment()
+      .add(-2, "month")
+      .format("YYYY-MM-DD"),
+    time: Cypress.moment()
+      .hour(19)
+      .minute(30)
+      .format("HH:MM"),
+    arriveTime: Cypress.moment()
+      .add(-2, "month")
+      .hour(18)
+      .minute(30)
+      .format(),
+    finishTime: Cypress.moment()
+      .add(-2, "month")
+      .hour(22)
+      .minute(0)
+      .format(),
+  };
+
   before(() => {
     cy.visit("/");
     cy.executeMutation(CreateGig, { variables: signupGig });
     cy.executeMutation(CreateGig, { variables: nonSignupGig });
+    cy.executeMutation(CreateGig, { variables: pastGig });
     cy.executeMutation(DeleteSignup, { variables: { gigId: nonSignupGig.id, userId: 27250 } });
+    cy.executeMutation(DeleteSignup, { variables: { gigId: signupGig.id, userId: 27250 } });
     cy.cssProperty("--positive").then(positive => (colors.positive = positive));
     cy.cssProperty("--neutral").then(neutral => (colors.neutral = neutral));
     cy.cssProperty("--negative").then(negative => (colors.negative = negative));
@@ -761,6 +786,31 @@ describe("gig diary", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.neutral);
         cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("No instruments selected");
+      });
+
+      it("can switch between upcoming and past gigs", () => {
+        cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
+        cy.get(`[data-test=gigview-by-month]`)
+          .pipe(click)
+          .should("not.exist");
+        cy.route2({ method: "POST", url: "/v1/graphql" }).as("fetchGigs");
+        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.wait("@fetchGigs");
+        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.wait("@fetchGigs");
+        cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("be.visible");
+        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.wait("@fetchGigs");
+        cy.contains(
+          Cypress.moment()
+            .subtract(3, "months")
+            .format("MMMM YYYY"),
+        ).should("exist");
+        cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
+        cy.get(`[data-test=gigview-all-upcoming]`)
+          .pipe(click)
+          .should("not.exist");
+        cy.get(`[data-test=gig-summary-${signupGig.id}]`).should("be.visible");
       });
     });
   });

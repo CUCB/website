@@ -108,7 +108,7 @@
   $: reloadSignupGigs(gigs);
   function reloadSignupGigs(gigs) {
     let newlyMerged = gigs.map(gig =>
-      gig.id in signupGigs && typeof signupGigs[gig.id].set === "undefined"
+      gig.id in signupGigs && typeof signupGigs[gig.id].subscribe === "undefined"
         ? [
             gig.id,
             writable({
@@ -121,8 +121,9 @@
     signupGigs = Object.fromEntries([...Object.entries(signupGigs), ...newlyMerged]);
   }
   let allUpcoming = gigs;
-  $: currentCalendarMonthMoment = moment(currentCalendarMonth, "YYYY-MM");
   let { session } = stores();
+  let drafts = gigs.filter(gig => gig.type.code === "draft");
+  $: currentCalendarMonthMoment = moment(currentCalendarMonth, "YYYY-MM");
   let displaying = "allUpcoming";
 
   function isObject(item) {
@@ -211,6 +212,7 @@
       );
     }
     currentCalendarMonth = newMonth;
+    gigs = gigs;
   };
   let gotoPreviousCalendarMonth = gotoMonth(-1);
   let gotoNextCalendarMonth = gotoMonth(1);
@@ -263,7 +265,6 @@
 <svelte:head>
   <title>{makeTitle('Gigs')}</title>
 </svelte:head>
-<!-- TODO deal with draft gigs -->
 <div class="heading">
   <div class="information">
     <h1>Gig Diary</h1>
@@ -285,6 +286,14 @@
         <a href="/members/gigs/venues">The people associated with the band</a>
       </li>
     </ul>
+    {#if drafts.length > 0}
+      There are some drafts lying around:
+      {#each drafts as gig, i}
+        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
+        [created {moment(gig.posting_time).format('HH:MM, DD/MM')} by {(gig.user && gig.user.first) || 'someone?'}],
+      {/each}
+      so please don't leave them here forever
+    {/if}
   </div>
   <div class="calendar">
     <Calendar
@@ -319,7 +328,7 @@
 </div>
 
 {#each gigs as gig (gig.id)}
-  {#if gig.id in signupGigs}
+  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== 'undefined'}
     <Summary {gig} signupGig="{signupGigs[gig.id]}" {userInstruments} linkHeading="{true}" />
   {:else}
     <Summary {gig} {userInstruments} linkHeading="{true}" />
