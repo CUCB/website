@@ -26,6 +26,7 @@
 
 <style>
   header {
+    display: flex;
     display: grid;
     grid-template-areas:
       "logo title settingsButton"
@@ -94,11 +95,13 @@
   }
 
   a {
+    color: #222;
     color: var(--text_color);
     border-bottom: none;
   }
 
   a:hover {
+    color: #222;
     color: var(--text_color);
   }
 
@@ -118,6 +121,7 @@
     }
 
     .button-background {
+      background-color: white;
       background-color: var(--background);
       height: 3rem;
       width: 100%;
@@ -136,6 +140,7 @@
       font-size: 1.5rem;
       padding: 2px 0;
       margin: auto;
+      font-family: "Linux Biolinum Regular";
       font-family: var(--title);
     }
 
@@ -148,6 +153,7 @@
       width: 100%;
       grid-area: unset;
       z-index: 5;
+      background-color: rgba(255, 255, 255, 0.9);
       background-color: rgba(var(--background_triple), 0.9);
       margin: 0;
       box-sizing: border-box;
@@ -163,7 +169,7 @@
     <h1 id="title" in:fade>
       <a href="/">Cambridge University Ceilidh Band</a>
     </h1>
-    {#if user.userId}
+    {#if user.userId && window && window.CSS && window.CSS.supports('color', 'var(--primary)')}
       <button
         id="settingsToggle"
         in:fade

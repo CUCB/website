@@ -5,21 +5,24 @@
   font-style: normal;
   font-weight: normal;
   font-display: swap;
-  src: local("Linux Biolinum Regular"), url("/static/fonts/LinBiolinumG_Re.woff2") format("woff2");
+  src: local("Linux Biolinum Regular"), url("/static/fonts/LinBiolinumG_Re.woff2") format("woff2"),
+    url("/static/fonts/LinBiolinumG_Re.woff") format("woff");
 }
 
 @font-face {
   font-family: "Linux Biolinum Italic";
   font-style: normal;
   font-weight: normal;
-  src: local("Linux Biolinum Italic"), url("/static/fonts/LinBiolinumG_It.woff2") format("woff2");
+  src: local("Linux Biolinum Italic"), url("/static/fonts/LinBiolinumG_It.woff2") format("woff2"),
+    url("/static/fonts/LinBiolinumG_It.woff") format("woff");
 }
 
 @font-face {
   font-family: "Linux Biolinum Bold";
   font-style: normal;
   font-weight: normal;
-  src: local("Linux Biolinum Bold"), url("/static/fonts/LinBiolinumG_Bd.woff2") format("woff2");
+  src: local("Linux Biolinum Bold"), url("/static/fonts/LinBiolinumG_Bd.woff2") format("woff2"),
+    url("/static/fonts/LinBiolinumG_Bd.woff") format("woff");
 }
 
 :root {

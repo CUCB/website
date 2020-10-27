@@ -16,3 +16,23 @@
   --accent: rgb(var(--accent_triple));
   --theme_name: light;
 }
+
+.color-positive {
+  color: rgb(7, 92, 1);
+  color: var(--positive);
+}
+
+.color-neutral {
+  color: rgb(174, 85, 6);
+  color: var(--neutral);
+}
+
+.color-negative {
+  color: rgb(255, 0, 0);
+  color: var(--negative);
+}
+
+.color-unselected {
+  color: #696969;
+  color: var(--unselected);
+}

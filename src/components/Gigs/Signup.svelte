@@ -254,6 +254,8 @@
       color="{status === statuses.YES ? 'var(--positive)' : 'var(--unselected)'}"
       on:click="{signup(statuses.YES)}"
       data-test="{`gig-${gig.id}-signup-yes`}"
+      style="{status === statuses.YES ? 'font-style: italic' : ''}"
+      class="{status === statuses.YES ? 'color-positive' : 'color-unselected'}"
     >
       Yes, I'd like to play
     </AnnotatedIcon>
@@ -262,6 +264,8 @@
       color="{status === statuses.MAYBE ? 'var(--neutral)' : 'var(--unselected)'}"
       on:click="{signup(statuses.MAYBE)}"
       data-test="{`gig-${gig.id}-signup-maybe`}"
+      style="{status === statuses.MAYBE ? 'font-style: italic' : ''}"
+      class="{status === statuses.MAYBE ? 'color-neutral' : 'color-unselected'}"
     >
       Only if necessary
     </AnnotatedIcon>
@@ -270,6 +274,8 @@
       color="{status === statuses.NO ? 'var(--negative)' : 'var(--unselected)'}"
       on:click="{signup(statuses.NO)}"
       data-test="{`gig-${gig.id}-signup-no`}"
+      style="{status === statuses.NO ? 'font-style: italic' : ''}"
+      class="{status === statuses.NO ? 'color-negative' : 'color-unselected'}"
     >
       I am unavailable
     </AnnotatedIcon>

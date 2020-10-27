@@ -65,11 +65,19 @@
     }
   };
 
-  const fromCurrentStyle = prop =>
-    typeof getComputedStyle !== "undefined" &&
-    getComputedStyle(document.documentElement)
-      .getPropertyValue(`--${prop}`)
-      .trim();
+  const fromCurrentStyle = prop => {
+    try {
+      return (
+        typeof getComputedStyle !== "undefined" &&
+        getComputedStyle(document.documentElement)
+          .getPropertyValue(`--${prop}`)
+          .trim()
+      );
+    } catch (e) {
+      // Swallow error, probably due to custom properties not being a thing on old devices
+      return "";
+    }
+  };
 
   const rgbStringToHex = triple =>
     triple &&
@@ -147,7 +155,6 @@
     {@html logoCss(logo)}
   {/if}
 </svelte:head>
-
 {#if showSettings}
   <Popup
     on:close="{() => {

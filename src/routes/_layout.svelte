@@ -102,8 +102,8 @@
   import { committee as committeeStore } from "../view";
 
   export let segment;
-  export let committee;
-  export let settings;
+  export let committee = {};
+  export let settings = {};
   settings = Map(settings);
   committeeStore.set(committee);
 
@@ -128,8 +128,6 @@
     client.set(makeClient(fetch, { host: browserDomain }));
     clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
   });
-
-  let updateProps;
 </script>
 
 <style>
@@ -191,7 +189,7 @@
       href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
     />
   {/if}
-  <title>{makeTitle()}</title>
+  <!-- <title>{makeTitle()}</title> -->
 </svelte:head>
 
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />

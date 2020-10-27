@@ -32,6 +32,7 @@
       content: "";
       width: calc(100% - 1em);
       height: 2px;
+      background-color: rgb(7, 92, 1);
       background-color: var(--accent);
       display: block;
       bottom: -1px;
@@ -48,6 +49,7 @@
   a,
   button {
     display: block;
+    color: rgb(7, 92, 1);
     color: var(--accent);
   }
 
@@ -58,6 +60,8 @@
 
   button {
     border: none;
+    font-family: "Linux Biolinum Regular", "Roboto", -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen, Ubuntu,
+      Cantarell, Helvetica Neue, sans-serif;
     font-family: var(--title);
     background: none;
   }
@@ -100,6 +104,7 @@
     }
 
     [aria-current] {
+      background: rgba(7, 92, 1, 0.2);
       background: rgba(var(--accent_triple), 0.2);
     }
 
