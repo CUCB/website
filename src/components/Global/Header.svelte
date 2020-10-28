@@ -27,15 +27,29 @@
 <style>
   header {
     display: flex;
-    display: grid;
-    grid-template-areas:
-      "logo title settingsButton"
-      "nav nav nav";
-    align-items: center;
+    flex-wrap: wrap;
     text-align: center;
-    grid-template-columns: 1fr 4fr minmax(0, 1fr);
+    align-items: center;
     width: 100%;
     box-sizing: border-box;
+  }
+  @supports (display: grid) {
+    header {
+      display: grid;
+      grid-template-areas:
+        "logo title settingsButton"
+        "nav nav nav";
+      grid-template-columns: 1fr 4fr minmax(0, 1fr);
+    }
+    :global(#logo) {
+      max-width: 150px;
+      grid-area: logo;
+    }
+  }
+
+  header.hidden h1,
+  header.hidden #logo-link {
+    visibility: hidden;
   }
 
   @media (max-width: 800px) {
@@ -44,14 +58,17 @@
     }
   }
 
+  #logo-link {
+    flex: 150px 0 3;
+  }
+
   :global(#logo) {
-    max-width: 150px;
     width: 100%;
-    grid-area: logo;
   }
 
   h1 {
     margin: 0 0.5em;
+    flex: 70% 1 1;
   }
 
   #title {
@@ -110,14 +127,21 @@
   }
 
   @media only screen and (max-width: 1200px) {
+    #logo-link {
+      flex-basis: 100px;
+    }
     :global(#logo) {
       max-width: 100px;
     }
   }
 
   @media only screen and (max-width: 600px) {
+    header {
+      flex-wrap: nowrap;
+    }
     h1 {
       margin: 0;
+      flex-basis: 90%;
     }
 
     .button-background {
@@ -161,7 +185,10 @@
   }
 </style>
 
-<header>
+<svelte:head>
+  <noscript>{`<` + `style>.hidden > *{display: none};</` + `style>`}</noscript>
+</svelte:head>
+<header class:hidden="{!animate}">
   <a href="/" id="logo-link">
     <Logo id="logo" enableSpin="{spinnyLogo}" />
   </a>
@@ -189,6 +216,10 @@
       </button>
     {/if}
   {:else}
+    <a href="/" id="logo-link" style="visibility:hidden">
+      <Logo id="logo" enableSpin="{spinnyLogo}" />
+    </a>
+    <h1 id="title" style="visibility:hidden">Cambridge University Ceilidh Band</h1>
     <noscript>
       <h1 id="title" in:fade>
         <a href="/">Cambridge University Ceilidh Band</a>
