@@ -96,7 +96,7 @@
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
-  import { makeTitle, accentCss, logoCss } from "../view";
+  import { makeTitle } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import { committee as committeeStore } from "../view";
@@ -189,7 +189,7 @@
       href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css"
     />
   {/if}
-  <!-- <title>{makeTitle()}</title> -->
+  <title>{makeTitle()}</title>
 </svelte:head>
 
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />

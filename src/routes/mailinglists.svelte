@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { makeTitle } from "../view";
+  import HCaptcha from "../components/Global/HCaptcha.svelte";
   let name = "";
   let email = "";
   let lists = ["soc-cucb", "soc-cucb-chat", "soc-cucb-interested", "soc-cucb-alumni"].map(name => ({
@@ -9,28 +10,16 @@
   }));
   let error;
   let captchaKey = undefined;
-  let captchaVisible = false;
   let submitted = false;
   let success;
-  let dark;
-
-  let enableCaptcha = () => {
-    captchaKey = undefined;
-    captchaVisible = true;
-  };
 
   let onCaptchaVerified = e => {
-    captchaKey = e.key;
+    console.log(e);
+    captchaKey = e.detail.key;
   };
 
-  onMount(async () => {
-    const styles = getComputedStyle(document.documentElement);
-    if (styles.getPropertyValue("--theme_name").trim() === "dark") dark = true;
-    await import("vanilla-hcaptcha");
-    enableCaptcha();
-  });
-
   async function submit() {
+    console.log(captchaKey);
     error = undefined;
     if (!captchaKey) {
       error = "Please complete captcha";
@@ -82,10 +71,6 @@
   .error {
     color: var(--negative);
   }
-
-  h-captcha {
-    margin: 1em auto;
-  }
 </style>
 
 <svelte:head>
@@ -133,20 +118,13 @@
         </label>
       {/each}
     </div>
-    {#if captchaVisible}
-      <h-captcha
-        id="captcha"
-        site-key="{process.env.HCAPTCHA_SITE_KEY}"
-        size="normal"
-        {dark}
-        on:verified="{onCaptchaVerified}"
-      ></h-captcha>
-    {/if}
+    <HCaptcha on:verified="{onCaptchaVerified}" />
     <input type="submit" value="Submit" />
   </form>
 {:else if success}
   Your request to join the list(s) has been sent to the webmaster and you will be added within 48 hours.
-{:else}
+{/if}
+{#if error}
   <span class="error">An error occured.</span>
   &ldquo;
   {@html error}

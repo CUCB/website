@@ -1,5 +1,6 @@
 <script>
-  import { onMount, createEventDispatcher } from "svelte";
+  import { createEventDispatcher } from "svelte";
+  import HCaptcha from "./Global/HCaptcha.svelte";
   let name = "";
   let email = "";
   let bookingEnquiry = false;
@@ -10,28 +11,14 @@
   let occasion = "";
   let error;
   let captchaKey = undefined;
-  let captchaVisible = false;
   let submitted = false;
   let success;
-  let dark;
 
   const dispatch = createEventDispatcher();
 
-  let enableCaptcha = () => {
-    captchaKey = undefined;
-    captchaVisible = true;
-  };
-
   let onCaptchaVerified = e => {
-    captchaKey = e.key;
+    captchaKey = e.detail.key;
   };
-
-  onMount(async () => {
-    const styles = getComputedStyle(document.documentElement);
-    if (styles.getPropertyValue("--theme_name").trim() === "dark") dark = true;
-    await import("vanilla-hcaptcha");
-    enableCaptcha();
-  });
 
   async function submit() {
     error = undefined;
@@ -97,10 +84,6 @@
   .error {
     color: var(--negative);
   }
-
-  h-captcha {
-    margin: 1em auto;
-  }
 </style>
 
 {#if !submitted}
@@ -156,15 +139,7 @@
       <textarea bind:value="{message}" rows="{15}" required data-test="booking-message"></textarea>
     </label>
 
-    {#if captchaVisible}
-      <h-captcha
-        id="captcha"
-        site-key="{process.env.HCAPTCHA_SITE_KEY}"
-        size="normal"
-        {dark}
-        on:verified="{onCaptchaVerified}"
-      ></h-captcha>
-    {/if}
+    <HCaptcha on:verified="{onCaptchaVerified}" />
 
     {#if error}
       <span class="error">{error}</span>
