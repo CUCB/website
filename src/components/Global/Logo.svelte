@@ -51,10 +51,17 @@
     height: 100%;
     width: 100%;
   }
+
   path {
     fill: none;
-    stroke: var(--logo_color);
+    stroke: black;
     stroke-width: 15;
+  }
+
+  @supports (color: var(--logo_color)) {
+    path {
+      stroke: var(--logo_color);
+    }
   }
 </style>
 

@@ -96,14 +96,14 @@
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
-  import { makeTitle, accentCss, logoCss } from "../view";
+  import { makeTitle } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import { committee as committeeStore } from "../view";
 
   export let segment;
-  export let committee;
-  export let settings;
+  export let committee = {};
+  export let settings = {};
   settings = Map(settings);
   committeeStore.set(committee);
 
@@ -128,8 +128,6 @@
     client.set(makeClient(fetch, { host: browserDomain }));
     clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
   });
-
-  let updateProps;
 </script>
 
 <style>

@@ -45,7 +45,7 @@ services:
       - "4000:4000"
       - "10000:10000"
     command: >
-      bash -c "cd /root/site; npm install; chmod a+x ./wait-for-it.sh; npm run dev"
+      bash -c "cd /root/site; npm install; npm run dev"
 volumes:
   db_data:
   node_modules:

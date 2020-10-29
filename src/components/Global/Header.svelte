@@ -26,15 +26,30 @@
 
 <style>
   header {
-    display: grid;
-    grid-template-areas:
-      "logo title settingsButton"
-      "nav nav nav";
-    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
     text-align: center;
-    grid-template-columns: 1fr 4fr minmax(0, 1fr);
+    align-items: center;
     width: 100%;
     box-sizing: border-box;
+  }
+  @supports (display: grid) {
+    header {
+      display: grid;
+      grid-template-areas:
+        "logo title settingsButton"
+        "nav nav nav";
+      grid-template-columns: 1fr 4fr minmax(0, 1fr);
+    }
+    :global(#logo) {
+      max-width: 150px;
+      grid-area: logo;
+    }
+  }
+
+  header.hidden h1,
+  header.hidden #logo-link {
+    visibility: hidden;
   }
 
   @media (max-width: 800px) {
@@ -43,14 +58,17 @@
     }
   }
 
+  #logo-link {
+    flex: 150px 0 3;
+  }
+
   :global(#logo) {
-    max-width: 150px;
     width: 100%;
-    grid-area: logo;
   }
 
   h1 {
     margin: 0 0.5em;
+    flex: 70% 1 1;
   }
 
   #title {
@@ -94,11 +112,13 @@
   }
 
   a {
+    color: #222;
     color: var(--text_color);
     border-bottom: none;
   }
 
   a:hover {
+    color: #222;
     color: var(--text_color);
   }
 
@@ -107,17 +127,25 @@
   }
 
   @media only screen and (max-width: 1200px) {
+    #logo-link {
+      flex-basis: 100px;
+    }
     :global(#logo) {
       max-width: 100px;
     }
   }
 
   @media only screen and (max-width: 600px) {
+    header {
+      flex-wrap: nowrap;
+    }
     h1 {
       margin: 0;
+      flex-basis: 90%;
     }
 
     .button-background {
+      background-color: white;
       background-color: var(--background);
       height: 3rem;
       width: 100%;
@@ -136,6 +164,7 @@
       font-size: 1.5rem;
       padding: 2px 0;
       margin: auto;
+      font-family: "Linux Biolinum Regular";
       font-family: var(--title);
     }
 
@@ -148,6 +177,7 @@
       width: 100%;
       grid-area: unset;
       z-index: 5;
+      background-color: rgba(255, 255, 255, 0.9);
       background-color: rgba(var(--background_triple), 0.9);
       margin: 0;
       box-sizing: border-box;
@@ -155,7 +185,10 @@
   }
 </style>
 
-<header>
+<svelte:head>
+  <noscript>{`<` + `style>.hidden > *{display: none};</` + `style>`}</noscript>
+</svelte:head>
+<header class:hidden="{!animate}">
   <a href="/" id="logo-link">
     <Logo id="logo" enableSpin="{spinnyLogo}" />
   </a>
@@ -163,7 +196,7 @@
     <h1 id="title" in:fade>
       <a href="/">Cambridge University Ceilidh Band</a>
     </h1>
-    {#if user.userId}
+    {#if user.userId && window && window.CSS && window.CSS.supports('color', 'var(--primary)')}
       <button
         id="settingsToggle"
         in:fade
@@ -183,6 +216,10 @@
       </button>
     {/if}
   {:else}
+    <a href="/" id="logo-link" style="visibility:hidden">
+      <Logo id="logo" enableSpin="{spinnyLogo}" />
+    </a>
+    <h1 id="title" style="visibility:hidden">Cambridge University Ceilidh Band</h1>
     <noscript>
       <h1 id="title" in:fade>
         <a href="/">Cambridge University Ceilidh Band</a>
