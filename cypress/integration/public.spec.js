@@ -76,7 +76,7 @@ describe("book us page", () => {
     cy.get("[data-test='booking-message']")
       .click()
       .type("testy test");
-    cy.get("#captcha > iframe").then($element => {
+    cy.get("[data-test=hcaptcha] > iframe").then($element => {
       const $body = $element.contents().find("body");
       cy.wrap($body)
         .find("#checkbox")

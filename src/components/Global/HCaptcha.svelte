@@ -31,4 +31,4 @@
   }
 </style>
 
-<div bind:this="{captchaElement}"></div>
+<div data-test="hcaptcha" bind:this="{captchaElement}"></div>
