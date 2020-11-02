@@ -195,7 +195,7 @@
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
 <div class="layout">
-  <Header {segment} user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.get('spinnyLogo')}" />
+  <Header user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.get('spinnyLogo')}" />
 
   <main>
     <slot />
