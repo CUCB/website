@@ -1,15 +1,17 @@
-<script context="module">
-  import Testimonial from "../components/Testimonial.svelte";
-  import { makeTitle } from "../view.js";
-  import BookingForm from "../components/BookingForm.svelte";
-</script>
-
 <script>
+  import Testimonial from "../components/Testimonial.svelte";
+  import { committee, makeTitle } from "../view.js";
+  import BookingForm from "../components/BookingForm.svelte";
+  import Mailto from "../components/Mailto.svelte";
+
   let bookingFormComplete = false;
 </script>
 
 <svelte:head>
   <title>{makeTitle('Book us')}</title>
+  <noscript>
+    {@html `<style` + `>form{display: none}</` + `style>`}
+  </noscript>
 </svelte:head>
 
 <h1>Book CUCB</h1>
@@ -60,4 +62,11 @@
   </p>
 {/if}
 <!-- TODO should we put a pic in here -->
+<noscript>
+  <p>
+    To make a booking enquiry, please
+    <Mailto person="{$committee.secretary}">email the secretary</Mailto>
+    .
+  </p>
+</noscript>
 <BookingForm on:complete="{() => (bookingFormComplete = true)}" />

@@ -5,7 +5,6 @@
   import { tweened } from "svelte/motion";
   import { sineInOut } from "svelte/easing";
   import { onMount } from "svelte";
-  export let segment;
   export let user;
   export let showSettings = false;
   export let spinnyLogo;
@@ -47,8 +46,7 @@
     }
   }
 
-  header.hidden h1,
-  header.hidden #logo-link {
+  header.hidden > h1 {
     visibility: hidden;
   }
 
@@ -186,7 +184,9 @@
 </style>
 
 <svelte:head>
-  <noscript>{`<` + `style>.hidden > *{display: none};</` + `style>`}</noscript>
+  <noscript>
+    {@html `<` + `style>header > h1{display: none}</` + `style>`}
+  </noscript>
 </svelte:head>
 <header class:hidden="{!animate}">
   <a href="/" id="logo-link">
@@ -216,12 +216,9 @@
       </button>
     {/if}
   {:else}
-    <a href="/" id="logo-link" style="visibility:hidden">
-      <Logo id="logo" enableSpin="{spinnyLogo}" />
-    </a>
-    <h1 id="title" style="visibility:hidden">Cambridge University Ceilidh Band</h1>
+    <h1 id="title">Cambridge University Ceilidh Band</h1>
     <noscript>
-      <h1 id="title" in:fade>
+      <h1 id="title">
         <a href="/">Cambridge University Ceilidh Band</a>
       </h1>
     </noscript>
@@ -229,5 +226,5 @@
   <div class="button-background">
     <button bind:this="{button}" on:click="{toggleNav}" id="navToggle">{navVisible ? 'hide' : 'menu'}</button>
   </div>
-  <Nav {segment} {user} visible="{navVisible}" on:click="{() => (navVisible ? toggleNav() : undefined)}" />
+  <Nav {user} visible="{navVisible}" on:click="{() => (navVisible ? toggleNav() : undefined)}" />
 </header>

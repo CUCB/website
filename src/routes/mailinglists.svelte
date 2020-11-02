@@ -1,7 +1,8 @@
 <script>
   import { onMount } from "svelte";
-  import { makeTitle } from "../view";
+  import { committee, makeTitle } from "../view";
   import HCaptcha from "../components/Global/HCaptcha.svelte";
+  import Mailto from "../components/Mailto.svelte";
   let name = "";
   let email = "";
   let lists = ["soc-cucb", "soc-cucb-chat", "soc-cucb-interested", "soc-cucb-alumni"].map(name => ({
@@ -75,6 +76,9 @@
 
 <svelte:head>
   <title>{makeTitle('Mailing Lists')}</title>
+  <noscript>
+    {@html `<style` + `>.how-to > :not(noscript){display: none}</` + `style>`}
+  </noscript>
 </svelte:head>
 
 <h1>Mailing lists</h1>
@@ -98,35 +102,42 @@
 </ul>
 
 <h2>Join a list</h2>
-{#if !submitted}
-  <p>To join a list, please fill in the form below.</p>
-  <form on:submit|preventDefault="{submit}">
-    <label>
-      Name
-      <input type="text" required bind:value="{name}" />
-    </label>
-    <label>
-      Email
-      <input type="email" required bind:value="{email}" />
-    </label>
-    <p>I want to join:</p>
-    <div class="options">
-      {#each lists as list}
-        <label class="checkbox">
-          <input type="checkbox" bind:checked="{list.selected}" />
-          {list.name}
-        </label>
-      {/each}
-    </div>
-    <HCaptcha on:verified="{onCaptchaVerified}" />
-    <input type="submit" value="Submit" />
-  </form>
-{:else if success}
-  Your request to join the list(s) has been sent to the webmaster and you will be added within 48 hours.
-{/if}
-{#if error}
-  <span class="error">An error occured.</span>
-  &ldquo;
-  {@html error}
-  &rdquo;
-{/if}
+<section class="how-to">
+  {#if !submitted}
+    <p>To join a list, please fill in the form below.</p>
+    <form on:submit|preventDefault="{submit}">
+      <label>
+        Name
+        <input type="text" required bind:value="{name}" />
+      </label>
+      <label>
+        Email
+        <input type="email" required bind:value="{email}" />
+      </label>
+      <p>I want to join:</p>
+      <div class="options">
+        {#each lists as list}
+          <label class="checkbox">
+            <input type="checkbox" bind:checked="{list.selected}" />
+            {list.name}
+          </label>
+        {/each}
+      </div>
+      <HCaptcha on:verified="{onCaptchaVerified}" />
+      <input type="submit" value="Submit" />
+    </form>
+  {:else if success}
+    Your request to join the list(s) has been sent to the webmaster and you will be added within 48 hours.
+  {/if}
+  {#if error}
+    <span class="error">An error occured.</span>
+    &ldquo;
+    {@html error}
+    &rdquo;
+  {/if}
+  <noscript>
+    To join a mailing list
+    <Mailto person="{$committee.webmaster}">email the webmaster</Mailto>
+    with your name, email address and the name(s) of the list(s) you would like to join.
+  </noscript>
+</section>

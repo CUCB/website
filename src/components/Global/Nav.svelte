@@ -1,5 +1,7 @@
 <script>
-  export let segment;
+  import { stores } from "@sapper/app";
+  let { page } = stores();
+  $: segment = $page.path.split("/")[1];
   export let user;
   export let visible;
 
@@ -86,7 +88,7 @@
 </style>
 
 <nav on:click class="{navClass}" aria-hidden="{!visible}">
-  <a aria-current="{segment === undefined ? 'page' : undefined}" href="." rel="prefetch">Home</a>
+  <a aria-current="{!segment ? 'page' : undefined}" href="." rel="prefetch">Home</a>
   <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" rel="prefetch">Book us!</a>
   <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" rel="prefetch">Join us!</a>
   <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee" rel="prefetch">Committee</a>
