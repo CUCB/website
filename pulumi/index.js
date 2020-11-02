@@ -57,6 +57,16 @@ const sshDomain = new cloudflare.Record("ssh-dev-server", {
   proxied: false,
 });
 
+const dkimRecord = new cloudflare.Record("dkim-record", {
+  name: "mail._domainkey",
+  zoneId: "4c380f78cda5910d99c725cb96fceebc",
+  type: "TXT",
+  value:
+    "v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAywzbfSvCqwfIoSBwln0liR43+MFVL4HOgedGtvAiyfhOo1LTpllU0fkoI8IuJPjbEA1P6qWyp7e8gdVGjA4QwiXLEAXedZ+fNukmWODK8tbbR3/pZrFUEw1SIpktI8PX8ECryfNkCzHiU4sXMDZ9SIS2IPI7urBaRNWCvhlppnTHMc+MsFayaLPEVYqFYGDnqXRsIrNFHiI8n870ptEFlZc3VgADb1EG/vu1CRwjZJC0IkGiJI1Y2jp/uRKhWqiNdw0+NfjrzMGCervIgLTu9RhQkUyFvp7lIvYSqM2H90qpfcdy7sBnJMoaXk3uLWDq/Fua0tVY/NiPy0XE/pyuGwIDAQAB",
+  ttl: 3600,
+  proxied: false,
+});
+
 module.exports = {
   ip: domain.value,
 };
