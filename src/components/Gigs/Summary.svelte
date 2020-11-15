@@ -323,12 +323,12 @@
       {/if}
       {#if gig.finance_caller_paid !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_caller_paid}
-          <task-summary class="class-positive caller">
+          <task-summary class="color-positive caller">
             <i class="las la-money-bill-wave"></i>
             Caller paid
           </task-summary>
         {:else}
-          <task-summary class="class-negative caller">
+          <task-summary class="color-negative caller">
             <i class="las la-exclamation"></i>
             Caller not paid
           </task-summary>
