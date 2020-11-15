@@ -60,6 +60,7 @@
         variables: { where: { allow_signups: { _eq: true } } },
       });
     } catch (e) {
+      console.log(e);
       await handleErrors.bind(this)(e, session);
       return;
     }
@@ -161,11 +162,9 @@
 
   $: currentCalendarMonth && display(displaying);
 
-  let gotoMonth = n => async () => {
-    let newMonth = moment(currentCalendarMonth, "YYYY-MM")
-      .add(n, "month")
-      .format("YYYY-MM");
-    if (!(newMonth in calendarGigs)) {
+  let gotoDate = newDate => async () => {
+    console.log(newDate);
+    if (!(newDate in calendarGigs)) {
       let res_gig_2 = await $client.query({
         query: QueryMultiGigDetails($session.hasuraRole),
         variables: {
@@ -173,30 +172,30 @@
             _or: [
               {
                 date: {
-                  _gte: moment(newMonth, "YYYY-MM")
+                  _gte: moment(newDate, "YYYY-MM")
                     .startOf("month")
                     .format(),
-                  _lte: moment(newMonth, "YYYY-MM")
+                  _lte: moment(newDate, "YYYY-MM")
                     .endOf("month")
                     .format(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: moment(newMonth, "YYYY-MM")
+                  _gte: moment(newDate, "YYYY-MM")
                     .startOf("month")
                     .format(),
-                  _lte: moment(newMonth, "YYYY-MM")
+                  _lte: moment(newDate, "YYYY-MM")
                     .endOf("month")
                     .format(),
                 },
               },
               {
                 finish_time: {
-                  _gte: moment(newMonth, "YYYY-MM")
+                  _gte: moment(newDate, "YYYY-MM")
                     .startOf("month")
                     .format(),
-                  _lte: moment(newMonth, "YYYY-MM")
+                  _lte: moment(newDate, "YYYY-MM")
                     .endOf("month")
                     .format(),
                 },
@@ -206,16 +205,40 @@
           order_by: { date: "asc" },
         },
       });
-      calendarGigs[newMonth] = res_gig_2.data.cucb_gigs;
-      calendarGigs[newMonth] = calendarGigs[newMonth].sort(
+      calendarGigs[newDate] = res_gig_2.data.cucb_gigs;
+      calendarGigs[newDate] = calendarGigs[newDate].sort(
         (gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date),
       );
     }
-    currentCalendarMonth = newMonth;
+    currentCalendarMonth = newDate;
     gigs = gigs;
   };
-  let gotoPreviousCalendarMonth = gotoMonth(-1);
-  let gotoNextCalendarMonth = gotoMonth(1);
+  $: gotoPreviousCalendarMonth = gotoDate(
+    moment(currentCalendarMonth, "YYYY-MM")
+      .subtract(1, "month")
+      .format("YYYY-MM"),
+  );
+  $: gotoNextCalendarMonth = gotoDate(
+    moment(currentCalendarMonth, "YYYY-MM")
+      .add(1, "month")
+      .format("YYYY-MM"),
+  );
+  $: changeCalendarDate = async event => {
+    if (event.detail.month !== undefined) {
+      await gotoDate(
+        moment(currentCalendarMonth, "YYYY-MM")
+          .month(event.detail.month)
+          .format("YYYY-MM"),
+      )();
+    }
+    if (event.detail.year !== undefined) {
+      await gotoDate(
+        moment(currentCalendarMonth, "YYYY-MM")
+          .year(event.detail.year)
+          .format("YYYY-MM"),
+      )();
+    }
+  };
 </script>
 
 <style>
@@ -224,6 +247,32 @@
     grid-template-columns: 1fr 21em;
     grid-gap: 1em;
     margin-bottom: 1em;
+  }
+
+  .link:focus,
+  .link > span:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  button.link:hover {
+    filter: none;
+  }
+  button.link {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+    height: auto;
+    width: auto;
+  }
+
+  .link:focus > span {
+    outline: 2px solid;
+    outline-color: var(--text_color);
+    outline-offset: 0.15em;
   }
 
   .calendar {
@@ -302,6 +351,7 @@
       startDay="{$calendarStartDay}"
       on:clickPrevious="{gotoPreviousCalendarMonth}"
       on:clickNext="{gotoNextCalendarMonth}"
+      on:changeDate="{changeCalendarDate}"
     />
     <p>Display:</p>
     <ul>
@@ -309,18 +359,18 @@
         {#if displaying === 'allUpcoming'}
           All upcoming gigs (currently shown)
         {:else}
-          <span class="link" on:click="{() => display('allUpcoming')}" role="link" data-test="gigview-all-upcoming">
-            All upcoming gigs
-          </span>
+          <button class="link" on:click="{() => display('allUpcoming')}" data-test="gigview-all-upcoming">
+            <span tabindex="-1" on:click>All upcoming gigs</span>
+          </button>
         {/if}
       </li>
       <li>
         {#if displaying === 'byMonth'}
           Gigs by month (currently shown)
         {:else}
-          <span class="link" on:click="{() => display('byMonth')}" role="link" data-test="gigview-by-month">
-            Gigs by month
-          </span>
+          <button class="link" on:click="{() => display('byMonth')}" data-test="gigview-by-month">
+            <span tabindex="-1" on:click>Gigs by month</span>
+          </button>
         {/if}
       </li>
     </ul>

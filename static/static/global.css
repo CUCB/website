@@ -49,6 +49,15 @@ a,
   cursor: pointer;
 }
 
+@supports (text-underline-offset: 0.25em) {
+  a,
+  .link {
+    border-bottom: none;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+}
+
 a:hover,
 .link:hover {
   filter: brightness(150%);
@@ -91,6 +100,7 @@ code {
 
 nav a {
   border-bottom: none;
+  text-decoration: none;
 }
 
 form {

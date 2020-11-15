@@ -4,6 +4,7 @@
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
+  import { themeName } from "../../view";
   export let gig,
     signupGig = writable(undefined),
     userInstruments;
@@ -30,23 +31,56 @@
   }
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
+  @function shadow($color) {
+    @return 0px 0px 5px 0px $color;
+  }
   .gigtype-gig_enquiry {
-    --shadow: var(--neutral);
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("neutral"));
+    }
   }
   .gigtype-gig {
-    --shadow: var(--accent);
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("accent"));
+      box-shadow: shadow(var(--accent));
+    }
+  }
+  .gigtype-gig_cancelled {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("formColor"));
+    }
+  }
+
+  .gigtype-calendar {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("negative"));
+    }
+  }
+
+  .gigtype-gig.admins-only {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("blueGig"));
+    }
+  }
+
+  .gigtype-kit {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("kitHire"));
+    }
   }
   gig-summary {
-    --shadow: var(--form_color);
     display: block;
     padding: 1em;
     border-radius: 5px;
-    box-shadow: 0px 0px 5px 0px var(--shadow);
     max-width: calc(100%-10px);
     margin: 0 auto 2em auto;
     box-sizing: border-box;
     word-break: break-word;
+    box-shadow: shadow(var(--shadow));
+    transition: box-shadow 0.25s;
   }
 
   task-list {
@@ -120,7 +154,9 @@
     transition: all 0.3s linear;
   }
   .gigtype-gig_enquiry:hover,
-  .gigtype-gig_cancelled:hover {
+  .gigtype-gig_cancelled:hover,
+  .gigtype-gig_enquiry:focus-within,
+  .gigtype-gig_cancelled:focus-within {
     filter: opacity(1);
     transition: all 0.1s ease-in;
   }
@@ -147,20 +183,8 @@
     display: none;
   }
 
-  .gigtype-calendar {
-    --shadow: var(--negative);
-  }
-
-  .gigtype-gig.admins-only {
-    --shadow: var(--blue_gig);
-  }
-
   .gigtype-calendar task-list {
     display: none;
-  }
-
-  .gigtype-kit {
-    --shadow: var(--kit_hire);
   }
 
   .gigtype-kit task-list .caller {
@@ -179,7 +203,7 @@
     </button>
   {/if}
   <gig-summary
-    class="gigtype-{gig.type.code}"
+    class="gigtype-{gig.type.code} theme-{$themeName}"
     class:details-visible="{showDetails}"
     class:permit-fade="{linkHeading}"
     class:admins-only="{gig.admins_only}"
@@ -187,7 +211,10 @@
   >
     <h2 class="main-detail">
       {#if linkHeading}
-        <a href="/members/gigs/{gig.id}">{gig.title}</a>
+        <span>
+          <a href="/members/gigs/{gig.id}">{gig.title}</a>
+        </span>
+        <!-- span for correct multiline underlining -->
       {:else}{gig.title}{/if}
       <gig-icons>
         {#if gig.food_provided}

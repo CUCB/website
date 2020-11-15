@@ -98,10 +98,9 @@
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
-  import { makeTitle, calendarStartDay } from "../view";
+  import { makeTitle, calendarStartDay, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
-  import { committee as committeeStore } from "../view";
 
   export let committee = {};
   export let settings = {};
@@ -195,7 +194,7 @@
 
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
-<div class="layout">
+<div class="layout theme-{$themeName}">
   <Header user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.get('spinnyLogo')}" />
 
   <main>

@@ -1,13 +1,13 @@
 <script>
   import Popup from "../Popup.svelte";
   import { HsvPicker } from "svelte-color-picker";
-  import { writable } from "svelte/store";
   import { onMount } from "svelte";
-  import { accentCss, calendarStartDay, logoCss } from "../../view";
+  import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
   import { stores } from "@sapper/app";
   export let settings, showSettings;
   let colors = ["default", "light", "dark"];
   let { session } = stores();
+  themeName.set(settings.get("color"));
   $: color = settings.get("color");
   $: font = settings.get("font");
   $: accent = settings.get(`accent_${color}`);

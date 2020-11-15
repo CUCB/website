@@ -182,7 +182,7 @@
     margin-top: 1.5em;
   }
 
-  status-icons :global(annotated-icon) {
+  status-icons :global(.annotated-icon) {
     max-width: 100px;
   }
 
@@ -221,12 +221,18 @@
       align-items: stretch;
     }
 
-    status-icons :global(annotated-icon) {
+    status-icons :global(.annotated-icon) {
       max-width: 100%;
       height: 34px;
+      margin-bottom: 0.75em;
     }
 
-    status-icons :global(annotated-icon i) {
+    status-icons :global(.annotated-icon div) {
+      display: flex;
+      align-items: center;
+    }
+
+    status-icons :global(.annotated-icon i) {
       margin-right: 10px;
     }
   }

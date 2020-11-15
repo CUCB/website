@@ -134,7 +134,7 @@ export const QueryMultiGigDetails = role => {
 
 export const QueryGigSignup = gql`
   query QueryGigSignup {
-    cucb_gigs(where: { admins_only: { _eq: false }, allow_signups: { _eq: true } }) {
+    cucb_gigs(where: { admins_only: { _eq: false }, allow_signups: { _eq: true } }, order_by: { date: asc }) {
       date
       title
       lineup {

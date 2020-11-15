@@ -1,7 +1,10 @@
 <script>
-  export let icon, color, style = "", tabindex;
+  export let icon,
+    color,
+    style = "";
   let className;
   export { className as class };
+  import { themeName } from "../view";
 
   function makeid(length) {
     var result = "";
@@ -14,18 +17,38 @@
   }
 
   let class_ = makeid(10);
-  $: styles = "<" + `style>annotated-icon.${class_} {${color ? `color: ${color};` : ""}${style}}</` + "style>";
+  $: styles = "<" + `style>button.${class_} {${color ? `color: ${color};` : ""}${style}}</` + "style>";
 </script>
 
-<style>
-  annotated-icon {
+<style lang="scss">
+  @import "../sass/themes.scss";
+  .annotated-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: fit-content;
     cursor: pointer;
     text-align: center;
+    border: none;
+    height: auto;
+    padding-left: 0;
+    padding-right: 0;
   }
+
+  .annotated-icon:focus,
+  div:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  .annotated-icon:focus > div {
+    outline: 2px solid;
+    @include themeifyThemeElement($themes) {
+      outline-color: themed("textColor");
+    }
+    outline-offset: 0.5em;
+  }
+
   i {
     font-size: 2em;
   }
@@ -34,7 +57,7 @@
   }
 
   @media only screen and (max-width: 400px) {
-    annotated-icon {
+    .annotated-icon {
       flex-direction: row;
     }
     i {
@@ -46,16 +69,18 @@
 <svelte:head>
   {@html styles}
 </svelte:head>
-<annotated-icon
+<button
   on:click
-  class="{class_} {className}"
+  class="{class_}
+  {className} annotated-icon"
   style="{`color: ${color};${style}`}"
   data-test="{$$props['data-test']}"
   aria-checked="{$$props['aria-checked']}"
-  tabindex="{tabindex}"
 >
-  <i class="{`las la-${icon}`}"></i>
-  <p>
-    <slot />
-  </p>
-</annotated-icon>
+  <div tabindex="-1" class="theme-{$themeName}">
+    <i class="{`las la-${icon}`}"></i>
+    <p>
+      <slot />
+    </p>
+  </div>
+</button>

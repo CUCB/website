@@ -1,5 +1,6 @@
 <script>
   import Mailto from "../Mailto.svelte";
+  import { themeName } from "../../view";
   export let person, aprilFools, showEmail;
   const basePath = `/images/committee/${person.committee.pic_folder}/`;
   const src =
@@ -8,7 +9,9 @@
       : `${basePath}${person.pic}`;
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
   committee-person {
     display: flex;
     flex-direction: column;
@@ -34,7 +37,9 @@
     align-items: center;
     justify-content: center;
     font-style: italic;
-    border: 1px solid var(--text_color);
+    @include themeify($themes) {
+      border: 1px solid themed("textColor");
+    }
   }
   person-details {
     display: flex;
@@ -45,7 +50,7 @@
   }
 </style>
 
-<committee-person>
+<committee-person class="theme-{$themeName}">
   {#if person.pic}
     <img class="image" {src} alt="" width="" />
   {:else}

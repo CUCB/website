@@ -1,12 +1,17 @@
 <script>
   export let src, alt;
+  import { themeName } from "../view";
 </script>
 
-<style>
+<style lang="scss">
+  @import "../sass/themes.scss";
+
   img {
     display: block;
     width: 100%;
-    box-shadow: 0 0 5px var(--form_color);
+    @include themeifyThemeElement($themes) {
+      box-shadow: 0 0 5px themed("formColor");
+    }
   }
 
   .captioned-image {
@@ -25,7 +30,7 @@
 </style>
 
 <div class="captioned-image">
-  <img {src} {alt} />
+  <img {src} {alt} class="theme-{$themeName}" />
   <p>
     <slot />
   </p>

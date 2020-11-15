@@ -5,6 +5,7 @@
 <script>
   import { fade } from "svelte/transition";
   import { createEventDispatcher, onMount, onDestroy } from "svelte";
+  import { themeName } from "../view";
   export let dirty = false;
   export let icons = true;
   export let width = undefined;
@@ -19,7 +20,8 @@
   $: current = index === count - 1;
 </script>
 
-<style>
+<style lang="scss">
+  @import "../sass/themes.scss";
   .icons {
     display: flex;
     position: absolute;
@@ -33,6 +35,7 @@
     z-index: 10;
   }
   popup-box {
+    /* NB background themed in src/sass/themes.scss */
     display: block;
     border-radius: 5px;
     width: 90%;
@@ -41,13 +44,17 @@
     box-shadow: 0px 0px 10px #888888;
     padding: 10px;
     position: relative;
-    background: var(--background);
     z-index: 20;
+    @include themeifyThemeElement($themes) {
+      background: themed("background");
+    }
   }
+
   box-container {
     position: absolute;
     width: 100%;
     height: 100%;
+    max-height: 100vh;
     max-height: calc(100 * var(--vh));
     margin: 0;
     display: flex;
@@ -57,7 +64,12 @@
 </style>
 
 <box-container on:click|self="{() => current && !dirty && dispatch('close')}">
-  <popup-box on:click transition:fade="{{ duration: 250 }}" style="{width ? `width: ${width}` : ``}">
+  <popup-box
+    on:click
+    transition:fade="{{ duration: 250 }}"
+    style="{width ? `width: ${width}` : ``}"
+    class="theme-{$themeName}"
+  >
     {#if icons}
       <div class="icons">
         {#if dirty}

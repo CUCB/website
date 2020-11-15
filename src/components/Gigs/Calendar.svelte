@@ -5,13 +5,23 @@
   import { goto } from "@sapper/app";
   import TooltipText from "../TooltipText.svelte";
   import { Map, Set } from "immutable";
+  import { themeName } from "../../view";
   export let gigs;
   export let displayedMonth = moment();
   export let startDay = "mon";
   let dispatchEvent = createEventDispatcher();
   let showKey = false;
+  let showSelection = false;
 
-  $: keyItems = new Set(gigs.map(gig => new Map({ ...gig.type, admins_only: gig.admins_only })));
+  function generateKeyItems(gigs) {
+    let types = new Set(gigs.filter(gig => gig.type.code !== "gig").map(gig => new Map({ ...gig.type })));
+    let standardOrHiddenGigs = new Set(
+      gigs.filter(gig => gig.type.code === "gig").map(gig => new Map({ ...gig.type, admins_only: gig.admins_only })),
+    );
+    return types.union(standardOrHiddenGigs);
+  }
+
+  $: keyItems = generateKeyItems(gigs);
   let dayOffsets = {
     mon: 1,
     tue: 2,
@@ -86,9 +96,26 @@
       return gig.title;
     }
   };
+
+  function selectableMonths() {
+    return [...Array(12).keys()];
+  }
+
+  function selectableYears() {
+    let start = moment(displayedMonth)
+      .subtract(10, "years")
+      .year();
+    return [...Array(20).keys()].map(x => x + start);
+  }
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
+  @function shadow($color) {
+    @return inset 0 0 8px $color;
+  }
+
   h3 {
     text-align: center;
   }
@@ -153,7 +180,6 @@
   }
 
   .events div {
-    box-shadow: inset 0 0 8px var(--shadow);
     width: 100%;
     height: 100%;
   }
@@ -168,32 +194,65 @@
     border-bottom-right-radius: 3px;
   }
 
-  .gigtype-gig {
-    --shadow: var(--accent);
-  }
-
-  .gigtype-gig_cancelled {
-    --shadow: var(--form_color);
-  }
-
   .gigtype-gig_enquiry {
-    --shadow: var(--neutral);
+    @include themeifyThemeElement($themes) {
+      &.calendar-entry,
+      &.key-entry::before {
+        box-shadow: shadow(themed("neutral"));
+      }
+    }
+  }
+  .gigtype-gig {
+    @include themeifyThemeElement($themes) {
+      &.calendar-entry,
+      &.key-entry::before {
+        box-shadow: shadow(themed("accent"));
+        box-shadow: shadow(var(--accent));
+      }
+    }
+  }
+  .gigtype-gig_cancelled {
+    @include themeifyThemeElement($themes) {
+      &.calendar-entry,
+      &.key-entry::before {
+        box-shadow: shadow(themed("formColor"));
+      }
+    }
   }
 
   .gigtype-calendar {
-    --shadow: var(--negative);
+    @include themeifyThemeElement($themes) {
+      &.calendar-entry,
+      &.key-entry::before {
+        box-shadow: shadow(themed("negative"));
+      }
+    }
   }
 
   .gigtype-gig.admins-only {
-    --shadow: var(--blue_gig);
+    @include themeifyThemeElement($themes) {
+      &.calendar-entry,
+      &.key-entry::before {
+        box-shadow: shadow(themed("blueGig"));
+      }
+    }
   }
 
   .gigtype-kit {
-    --shadow: var(--kit_hire);
+    @include themeifyThemeElement($themes) {
+      &.calendar-entry,
+      &.key-entry::before {
+        box-shadow: shadow(themed("kitHire"));
+      }
+    }
   }
 
   .today {
-    color: var(--accent);
+    @include themeifyThemeElement($themes) {
+      font-weight: bolder;
+      color: themed("accent");
+      color: var(--accent);
+    }
   }
 
   .title-bar {
@@ -204,11 +263,11 @@
     margin: 0.5em 0;
   }
 
-  .title-bar button.left {
+  .title-bar .left {
     margin-right: auto;
   }
 
-  .title-bar button.right {
+  .title-bar .right {
     margin-left: auto;
   }
 
@@ -259,7 +318,6 @@
     width: 2.5em;
     height: 2em;
     border-radius: 3px;
-    box-shadow: inset 0 0 5px var(--shadow);
     margin: 0.25em 0;
     align-items: center;
     justify-content: center;
@@ -289,8 +347,33 @@
     Prev
   </button>
   <h3>{displayedMonth.format('MMMM YYYY')}</h3>
-  <button on:click="{() => dispatchEvent('clickNext')}" class="right" data-test="gigcalendar-next-month">Next</button>
+  <div class="right">
+    <button on:click="{() => (showSelection = !showSelection)}" title="Select month">
+      <i class="las la-calendar"></i>
+    </button>
+    <button on:click="{() => dispatchEvent('clickNext')}" data-test="gigcalendar-next-month">Next</button>
+  </div>
 </div>
+{#if showSelection}
+  <div class="month-selector">
+    <!-- svelte-ignore a11y-no-onchange -->
+    <select on:change="{e => dispatchEvent('changeDate', { month: e.target.value })}">
+      {#each selectableMonths() as month (month)}
+        <option value="{month}" selected="{month === displayedMonth.month()}">
+          {moment()
+            .month(month)
+            .format('MMMM')}
+        </option>
+      {/each}
+    </select>
+    <!-- svelte-ignore a11y-no-onchange -->
+    <select on:change="{e => dispatchEvent('changeDate', { year: e.target.value })}">
+      {#each selectableYears() as year (year)}
+        <option value="{year}" selected="{year === displayedMonth.year()}">{year}</option>
+      {/each}
+    </select>
+  </div>
+{/if}
 <table>
   <tr>
     {#each rotate(Object.keys(dayOffsets)) as dayName}
@@ -303,7 +386,7 @@
         <td
           class:different-month="{!day.inCurrentMonth}"
           id="{day.id}"
-          class="calendar-entry"
+          class="calendar-entry theme-{$themeName}"
           class:today="{day.moment.isSame(moment(), 'day')}"
         >
           {#if day.gigs.length > 0}
@@ -312,7 +395,7 @@
           <div class="events">
             {#each day.gigs as gig}
               <div
-                class="gigtype-{gig.type.code}"
+                class="gigtype-{gig.type.code} theme-{$themeName} calendar-entry"
                 class:admins-only="{gig.admins_only}"
                 on:click="{() => goto(`/members/gigs/${gig.id}`)}"
               ></div>
@@ -329,8 +412,12 @@
 <div class="key" class:hidden="{!showKey}">
   <p class="key-title" transition:fade>Key:</p>
   <ul class="key" transition:fade>
-    {#each keyItems.toJS() as item, n (item.code)}
-      <li style="--delay: {n * 0.1}s" class="gigtype-{item.code}" class:admins-only="{item.admins_only}">
+    {#each keyItems.toJS() as item, n}
+      <li
+        style="--delay: {n * 0.1}s"
+        class="gigtype-{item.code} theme-{$themeName} key-entry"
+        class:admins-only="{item.admins_only}"
+      >
         {#if item.admins_only && item.code === 'gig'}Hidden Gig{:else}{item.title}{/if}
       </li>
     {:else}No gigs visible on calendar{/each}

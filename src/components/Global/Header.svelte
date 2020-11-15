@@ -113,6 +113,7 @@
     color: #222;
     color: var(--text_color);
     border-bottom: none;
+    text-decoration: none;
   }
 
   a:hover {

@@ -3,6 +3,7 @@
   import "tippy.js/dist/tippy.css";
   import { onDestroy, onMount } from "svelte";
   import escapeHtml from "escape-html";
+  import { themeName } from "../view";
   export let content;
 
   function makeid(length) {
@@ -16,15 +17,10 @@
   }
   let id = makeid(30);
   let tooltip = undefined;
-  const fromCurrentStyle = prop =>
-    typeof getComputedStyle !== "undefined" &&
-    getComputedStyle(document.documentElement)
-      .getPropertyValue(`--${prop}`)
-      .trim();
 
   onMount(() => {
     tooltip = tippy(`#tooltip-${id}`, {
-      content: `<div data-test="tooltip">${escapeHtml(content).replace("\n", "<br/>")}</div>`,
+      content: `<div data-test="tooltip">${escapeHtml(content).replace(/\n/g, "<br/>")}</div>`,
       allowHTML: true,
       theme: "cucb",
     });
@@ -35,14 +31,18 @@
   });
 </script>
 
-<style>
+<style lang="scss">
+  @import "../sass/themes.scss";
+
   span {
-    border-bottom: 1px dashed var(--form_color);
+    @include themeifyThemeElement($themes) {
+      border-bottom: 1px dashed themed("formColor");
+    }
     cursor: pointer;
     user-select: none;
   }
 </style>
 
-<span id="{`tooltip-${id}`}" class="tooltip-text">
+<span id="{`tooltip-${id}`}" class="tooltip-text theme-{$themeName}" tabindex="0">
   <slot />
 </span>
