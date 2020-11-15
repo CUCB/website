@@ -22,7 +22,8 @@ h3,
 h4,
 h5,
 h6,
-nav {
+nav,
+th {
   font-family: "Linux Biolinum Regular", "Roboto", -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen, Ubuntu,
     Cantarell, Helvetica Neue, sans-serif;
   font-family: var(--title), var(--text);

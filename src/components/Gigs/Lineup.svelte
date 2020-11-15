@@ -2,16 +2,30 @@
   export let people;
   import TooltipText from "../TooltipText.svelte";
   import InstrumentName from "./InstrumentName.svelte";
+  import { themeName } from "../../view";
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
   gig-lineup {
-    border: 1px solid var(--accent);
+    @include themeifyThemeElement($themes) {
+      border: 1px solid themed("accent");
+      border: 1px solid var(--accent);
+      & .odd {
+        background: rgba(themed("accent"), 0.1);
+        background: rgba(var(--accent_triple), 0.1);
+      }
+    }
     display: grid;
     grid-template-columns: auto auto auto;
     width: fit-content;
     max-width: 100%;
     align-items: stretch;
+
+    & > * {
+      padding: 5px;
+    }
   }
 
   person-name a {
@@ -30,17 +44,9 @@
     justify-content: center;
     align-items: flex-start;
   }
-
-  gig-lineup .odd {
-    background: rgba(var(--accent_triple), 0.1);
-  }
-
-  gig-lineup > * {
-    padding: 5px;
-  }
 </style>
 
-<gig-lineup>
+<gig-lineup class="theme-{$themeName}">
   {#each people as person, i (person.user.id)}
     <person-name class:odd="{i % 2 === 1}">
       <a href="/members/users/{person.user.id}">{person.user.first}&nbsp;{person.user.last}</a>

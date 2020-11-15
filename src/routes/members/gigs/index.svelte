@@ -97,7 +97,7 @@
 </script>
 
 <script>
-  import { makeTitle, calendarStartDay } from "../../../view";
+  import { makeTitle, calendarStartDay, themeName } from "../../../view";
   import { makeClient, handleErrors, client } from "../../../graphql/client";
   import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
   import { stores } from "@sapper/app";
@@ -241,7 +241,8 @@
   };
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../../sass/themes.scss";
   .heading {
     display: grid;
     grid-template-columns: 1fr 21em;
@@ -271,7 +272,9 @@
 
   .link:focus > span {
     outline: 2px solid;
-    outline-color: var(--text_color);
+    @include themeify($themes) {
+      outline-color: themed("textColor");
+    }
     outline-offset: 0.15em;
   }
 
@@ -344,7 +347,7 @@
       so please don't leave them here forever
     {/if}
   </div>
-  <div class="calendar">
+  <div class="calendar theme-{$themeName}">
     <Calendar
       gigs="{calendarGigs[currentCalendarMonth]}"
       displayedMonth="{currentCalendarMonthMoment}"

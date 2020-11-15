@@ -1,8 +1,16 @@
-<style>
+<script>
+  import { themeName } from "../../view";
+</script>
+
+<style lang="scss">
+  @import "../../sass/themes.scss";
   nav {
     display: flex;
     justify-content: center;
-    background: rgba(var(--accent_triple), 0.05);
+    @include themeifyThemeElement($themes) {
+      background: rgba(themed("accent"), 0.05);
+      background: rgba(var(--accent_triple), 0.05);
+    }
     overflow: auto;
     flex-wrap: wrap;
     border-radius: 5px;
@@ -25,7 +33,7 @@
   }
 </style>
 
-<nav class="subnav">
+<nav class="subnav theme-{$themeName}">
   <a href="/members" class="only-mobile">Gig signup</a>
   <a href="/members/gigs">Gig diary</a>
   <a href="/members/music">Music</a>

@@ -1,6 +1,5 @@
 <script>
-  import { onMount } from "svelte";
-  import { committee, makeTitle } from "../view";
+  import { committee, makeTitle, themeName } from "../view";
   import HCaptcha from "../components/Global/HCaptcha.svelte";
   import Mailto from "../components/Mailto.svelte";
   let name = "";
@@ -15,12 +14,10 @@
   let success;
 
   let onCaptchaVerified = e => {
-    console.log(e);
     captchaKey = e.detail.key;
   };
 
   async function submit() {
-    console.log(captchaKey);
     error = undefined;
     if (!captchaKey) {
       error = "Please complete captcha";
@@ -32,13 +29,19 @@
     body.append("lists", JSON.stringify(lists.filter(list => list.selected).map(list => list.name)));
     body.append("captchaKey", captchaKey);
 
-    let res = await fetch("/mailinglists", {
-      method: "POST",
-      body,
-      headers: {
-        "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
-      },
-    });
+    let res;
+    try {
+      res = await fetch("/mailinglists", {
+        method: "POST",
+        body,
+        headers: {
+          "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      return;
+    }
 
     const isSuccessful = status => status >= 200 && status < 300;
 
@@ -52,7 +55,9 @@
   }
 </script>
 
-<style>
+<style lang="scss">
+  @import "../sass/themes.scss";
+
   form {
     width: 100%;
     max-width: 400px;
@@ -70,14 +75,16 @@
   }
 
   .error {
-    color: var(--negative);
+    @include themeifyThemeElement($themes) {
+      color: themed("negative");
+    }
   }
 </style>
 
 <svelte:head>
   <title>{makeTitle('Mailing Lists')}</title>
   <noscript>
-    {@html `<style` + `>.how-to > :not(noscript){display: none}</` + `style>`}
+    {@html `<style` + `>.how-to {display: none}</` + `style>`}
   </noscript>
 </svelte:head>
 
@@ -104,7 +111,11 @@
 <h2>Join a list</h2>
 <section class="how-to">
   {#if !submitted}
-    <p>To join a list, please fill in the form below.</p>
+    <p>
+      To join a list, please fill in the form below, or
+      <Mailto person="{$committee.webmaster}">email the webmaster</Mailto>
+      with your name and the name(s) of the list(s) you would like to sign up to.
+    </p>
     <form on:submit|preventDefault="{submit}">
       <label>
         Name
@@ -130,14 +141,14 @@
     Your request to join the list(s) has been sent to the webmaster and you will be added within 48 hours.
   {/if}
   {#if error}
-    <span class="error">An error occured.</span>
+    <span class="error theme-{$themeName}">An error occured.</span>
     &ldquo;
     {@html error}
     &rdquo;
   {/if}
-  <noscript>
-    To join a mailing list
-    <Mailto person="{$committee.webmaster}">email the webmaster</Mailto>
-    with your name, email address and the name(s) of the list(s) you would like to join.
-  </noscript>
 </section>
+<noscript>
+  To join a mailing list, please
+  <Mailto person="{$committee.webmaster}">email the webmaster</Mailto>
+  with your name, email address and the name(s) of the list(s) you would like to join.
+</noscript>

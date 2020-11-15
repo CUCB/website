@@ -121,7 +121,10 @@
   }
   .different-month {
     filter: opacity(0.3);
-    border-color: rgba(var(--accent_triple), calc(0.1 / 0.3));
+    @include themeify($themes) {
+      border-color: rgba(themed("accent"), calc(0.1 / 0.3));
+      border-color: rgba(var(--accent_triple), calc(0.1 / 0.3));
+    }
   }
 
   table {
@@ -130,11 +133,15 @@
   }
 
   th {
-    background: rgba(var(--accent_triple), 0.1);
-    padding: 0.2em 0em;
+    @include themeify($themes) {
+      background: rgba(themed("accent"), 0.1);
+      background: rgba(var(--accent_triple), 0.1);
+      color: themed("accent");
+      color: var(--accent);
+    }
     font-family: var(--title);
+    padding: 0.2em 0em;
     text-transform: capitalize;
-    color: var(--accent);
   }
 
   th,
@@ -148,7 +155,10 @@
     text-align: center;
     padding: 0.4em 0.2em;
     vertical-align: middle;
-    border: 1px solid rgba(var(--accent_triple), 0.1);
+    @include themeify($themes) {
+      border: 1px solid rgba(themed("accent"), 0.1);
+      border: 1px solid rgba(var(--accent_triple), 0.1);
+    }
     position: relative;
   }
 
@@ -374,7 +384,7 @@
     </select>
   </div>
 {/if}
-<table>
+<table class="theme-{$themeName}">
   <tr>
     {#each rotate(Object.keys(dayOffsets)) as dayName}
       <th>{dayName}</th>

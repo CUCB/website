@@ -13,6 +13,7 @@
   import { stores } from "@sapper/app";
   import InstrumentName from "./InstrumentName.svelte";
   import moment from "moment-timezone";
+  import { themeName } from "../../view";
   export let gig, userInstruments;
   export let showLink = true;
   let edit = false;
@@ -173,7 +174,9 @@
   };
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
   status-icons {
     display: flex;
     justify-content: space-around;
@@ -211,7 +214,9 @@
     padding: 1em;
     margin-bottom: 2em;
     border-radius: 5px;
-    box-shadow: 0px 0px 5px 0px var(--form_color);
+    @include themeifyThemeElement($themes) {
+      box-shadow: 0px 0px 5px 0px themed("formColor");
+    }
   }
 
   @media only screen and (max-width: 400px) {
@@ -238,7 +243,9 @@
   }
 
   .disabled {
-    color: var(--unselected);
+    @include themeify($themes) {
+      color: themed("unselected");
+    }
   }
 
   .none {
@@ -247,7 +254,7 @@
   }
 </style>
 
-<gig-signup data-test="gig-signup-{gig.id}">
+<gig-signup data-test="gig-signup-{gig.id}" class="theme-{$themeName}">
   <h3>
     {#if showLink}
       <a href="/members/gigs/{gig.id}">{gig.title}</a>

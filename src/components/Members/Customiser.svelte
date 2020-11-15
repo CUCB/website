@@ -7,7 +7,7 @@
   export let settings, showSettings;
   let colors = ["default", "light", "dark"];
   let { session } = stores();
-  themeName.set(settings.get("color"));
+  $: themeName.set(settings.get("color"));
   $: color = settings.get("color");
   $: font = settings.get("font");
   $: accent = settings.get(`accent_${color}`);

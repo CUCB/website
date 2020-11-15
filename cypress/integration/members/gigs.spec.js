@@ -774,6 +774,7 @@ describe("gig diary", () => {
         cy.get(`[data-test=gigcalendar-next-month]`)
           .pipe(click)
           .parent()
+          .parent()
           .should(
             "contain",
             Cypress.moment()

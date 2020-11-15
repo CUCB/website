@@ -1,5 +1,6 @@
 <script>
   import { stores } from "@sapper/app";
+  import { themeName } from "../../view";
   let { page } = stores();
   $: segment = $page.path.split("/")[1];
   export let user;
@@ -10,7 +11,8 @@
   $: wasVisible && !visible && (navClass = "hiding") && window.setTimeout(() => (navClass = undefined), 200);
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
   nav {
     display: flex;
   }
@@ -34,8 +36,10 @@
       content: "";
       width: calc(100% - 1em);
       height: 2px;
-      background-color: rgb(7, 92, 1);
-      background-color: var(--accent);
+      @include themeify($themes) {
+        background-color: themed("accent");
+        background-color: var(--accent);
+      }
       display: block;
       bottom: -1px;
     }
@@ -47,10 +51,12 @@
       padding: 0.5em;
     }
   }
-  nav a {
+  a {
     display: block;
-    color: rgb(7, 92, 1);
-    color: var(--accent);
+    @include themeify($themes) {
+      color: themed("accent");
+      color: var(--accent);
+    }
     font-size: 1.2em;
   }
 
@@ -62,6 +68,19 @@
       justify-items: stretch;
       visibility: hidden;
       opacity: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-bottom: 4rem;
+      height: 100%;
+      width: 100%;
+      grid-area: unset;
+      z-index: 5;
+      @include themeifyThemeElement($themes) {
+        background-color: rgba(themed("background"), 0.9);
+      }
+      margin: 0;
+      box-sizing: border-box;
     }
 
     nav a {
@@ -71,8 +90,10 @@
     }
 
     [aria-current] {
-      background: rgba(7, 92, 1, 0.2);
-      background: rgba(var(--accent_triple), 0.2);
+      @include themeify($themes) {
+        background: rgba(themed("accent"), 0.2);
+        background: rgba(var(--accent_triple), 0.2);
+      }
     }
 
     .visible {
@@ -87,7 +108,7 @@
   }
 </style>
 
-<nav on:click class="{navClass}" aria-hidden="{!visible}">
+<nav on:click class="{navClass} theme-{$themeName}" aria-hidden="{!visible}">
   <a aria-current="{!segment ? 'page' : undefined}" href="." rel="prefetch">Home</a>
   <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" rel="prefetch">Book us!</a>
   <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" rel="prefetch">Join us!</a>

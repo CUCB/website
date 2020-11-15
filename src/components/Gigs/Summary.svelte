@@ -79,7 +79,6 @@
     margin: 0 auto 2em auto;
     box-sizing: border-box;
     word-break: break-word;
-    box-shadow: shadow(var(--shadow));
     transition: box-shadow 0.25s;
   }
 
@@ -194,6 +193,18 @@
   :global(gig-icons > *) {
     margin: 0 0.3em;
   }
+
+  .color-positive {
+    @include themeify($themes) {
+      color: themed("positive");
+    }
+  }
+
+  .color-negative {
+    @include themeify($themes) {
+      color: themed("negative");
+    }
+  }
 </style>
 
 {#if !showSignup}
@@ -286,12 +297,12 @@
     <task-list class="main-detail">
       {#if gig.finance_deposit_received !== undefined}
         {#if gig.finance_deposit_received}
-          <task-summary style="color:var(--positive)">
+          <task-summary class="color-positive">
             <i class="las la-money-bill-wave"></i>
             Deposit received
           </task-summary>
         {:else}
-          <task-summary style="color:var(--negative)">
+          <task-summary class="color-negative">
             <i class="las la-exclamation"></i>
             Deposit not received
           </task-summary>
@@ -299,12 +310,12 @@
       {/if}
       {#if gig.finance_payment_received !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_payment_received}
-          <task-summary style="color:var(--positive)">
+          <task-summary class="color-positive">
             <i class="las la-money-bill-wave"></i>
             Payment received
           </task-summary>
         {:else}
-          <task-summary style="color:var(--negative)">
+          <task-summary class="color-negative">
             <i class="las la-exclamation"></i>
             Payment not received
           </task-summary>
@@ -312,12 +323,12 @@
       {/if}
       {#if gig.finance_caller_paid !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_caller_paid}
-          <task-summary style="color:var(--positive)" class="caller">
+          <task-summary class="class-positive caller">
             <i class="las la-money-bill-wave"></i>
             Caller paid
           </task-summary>
         {:else}
-          <task-summary style="color:var(--negative)" class="caller">
+          <task-summary class="class-negative caller">
             <i class="las la-exclamation"></i>
             Caller not paid
           </task-summary>
