@@ -18,7 +18,7 @@
   }
 
   nav a {
-    font-size: 1.3em;
+    font-size: 1.1rem;
     padding: 0.1em 0.6em;
   }
 

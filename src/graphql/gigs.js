@@ -50,6 +50,7 @@ const FragmentGigDetails = gql`
         user_instrument {
           nickname
           instrument {
+            id
             name
           }
         }

@@ -3,6 +3,8 @@
   import TooltipText from "../TooltipText.svelte";
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName } from "../../view";
+  import { sortLineup } from "./_sort";
+  sortLineup(people);
 </script>
 
 <style lang="scss">
@@ -44,12 +46,20 @@
     justify-content: center;
     align-items: flex-start;
   }
+
+  @media only screen and (max-width: 400px) {
+    gig-lineup {
+      font-size: 0.9rem;
+    }
+  }
 </style>
 
 <gig-lineup class="theme-{$themeName}">
   {#each people as person, i (person.user.id)}
     <person-name class:odd="{i % 2 === 1}">
-      <a href="/members/users/{person.user.id}">{person.user.first}&nbsp;{person.user.last}</a>
+      <span>
+        <a href="/members/users/{person.user.id}">{person.user.first}&#32;{person.user.last}</a>
+      </span>
     </person-name>
     <person-instruments class:odd="{i % 2 === 1}">
       {#each person.user_instruments as instrument (instrument.user_instrument_id)}

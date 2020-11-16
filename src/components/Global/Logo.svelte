@@ -40,7 +40,6 @@
 <style lang="scss">
   @import "../../sass/themes.scss";
 
-  @namespace svg "http://www.w3.org/2000/svg";
   #logo2 {
     padding-top: 100%;
     position: relative;
