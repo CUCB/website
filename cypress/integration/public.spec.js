@@ -65,9 +65,7 @@ describe("book us page", () => {
   it("allows a user to submit a booking request", { browser: ["chromium", "chrome", "electron"] }, () => {
     cy.get("[data-test='booking-name']")
       .click()
-      .type("Testy Test")
-      .clear()
-      .type("Testy Test"); // clear + type again fixes some flakiness testing against dev server
+      .type("Testy Test");
     cy.get("[data-test='booking-email']")
       .click()
       .type("testy@te.st");
@@ -104,7 +102,7 @@ describe("book us page", () => {
   });
 
   it("prevents a user from submitting the booking form when not captcha'd", () => {
-    cy.route2({
+    cy.intercept({
       method: "POST",
       url: "/contact",
     }).as("contact");

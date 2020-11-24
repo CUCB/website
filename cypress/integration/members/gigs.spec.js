@@ -215,7 +215,7 @@ describe("gig signup", () => {
     });
 
     it("links to user profile when editing instruments", () => {
-      cy.route2("POST", "/v1/graphql", {
+      cy.intercept("POST", "/v1/graphql", {
         fixture: "gig/signup/yes.json",
       }).as("signup");
 
@@ -250,7 +250,7 @@ describe("gig signup", () => {
     });
 
     it("allows adding and editing of instruments", () => {
-      cy.route2({
+      cy.intercept({
         method: "POST",
         url: "/v1/graphql",
       }).as("graphqlRequest");
@@ -794,7 +794,7 @@ describe("gig diary", () => {
         cy.get(`[data-test=gigview-by-month]`)
           .pipe(click)
           .should("not.exist");
-        cy.route2({ method: "POST", url: "/v1/graphql" }).as("fetchGigs");
+        cy.intercept({ method: "POST", url: "/v1/graphql" }).as("fetchGigs");
         cy.get(`[data-test=gigcalendar-previous-month]`).click();
         cy.wait("@fetchGigs");
         cy.get(`[data-test=gigcalendar-previous-month]`).click();

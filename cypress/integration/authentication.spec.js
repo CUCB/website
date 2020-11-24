@@ -37,7 +37,7 @@ describe("login page", () => {
     });
 
     it("submits on pressing enter", () => {
-      cy.route2({
+      cy.intercept({
         method: "POST",
         url: "/auth/login",
       }).as("postLogin");
