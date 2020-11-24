@@ -63,19 +63,17 @@ describe("book us page", () => {
   });
 
   it("allows a user to submit a booking request", { browser: ["chromium", "chrome", "electron"] }, () => {
-    cy.route2({
-      method: "POST",
-      url: "/contact",
-    }).as("contact");
     cy.get("[data-test='booking-name']")
       .click()
-      .type("Testy test");
+      .type("Testy Test")
+      .clear()
+      .type("Testy Test"); // clear + type again fixes some flakiness testing against dev server
     cy.get("[data-test='booking-email']")
       .click()
       .type("testy@te.st");
     cy.get("[data-test='booking-message']")
       .click()
-      .type("testy test");
+      .type("Some message about booking a ceilidh");
     cy.get("[data-test=hcaptcha] > iframe").then($element => {
       const $body = $element.contents().find("body");
       cy.wrap($body)
@@ -84,7 +82,25 @@ describe("book us page", () => {
       cy.wrap($body).find("#checkbox.checked");
     });
     cy.get("[data-test='booking-send']").click();
-    cy.wait("@contact");
+    cy.contains("Your message has been sent to our secretary");
+    cy.searchEmails(2)
+      .its("items")
+      .then(emails => {
+        let secEmail, clientEmail;
+        if (emails[1]["To"][0]["Mailbox"] === "secretary") {
+          secEmail = emails[1];
+          clientEmail = emails[0];
+        } else {
+          secEmail = emails[0];
+          clientEmail = emails[1];
+        }
+        expect(clientEmail).to.be.sentTo("testy@te.st");
+        expect(clientEmail.body)
+          .to.contain("Dear Testy Test")
+          .and.contain("Some message about booking a ceilidh");
+        expect(secEmail).to.be.sentTo("secretary@cucb.co.uk");
+        expect(secEmail.replyTo).to.contain("Testy Test <testy@te.st>");
+      });
   });
 
   it("prevents a user from submitting the booking form when not captcha'd", () => {
@@ -104,9 +120,7 @@ describe("book us page", () => {
     cy.get("[data-test='booking-send']").click();
     cy.get(".error").contains("captcha");
     cy.cssProperty("--negative").then(color => {
-      cy.get(".error")
-        .should("have.css", "color")
-        .and("eq", color);
+      cy.get(".error").should("have.color", color);
     });
   });
 });

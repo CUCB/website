@@ -48,6 +48,7 @@ export async function post(req, res, next) {
     const client = new SMTPClient({
       host: process.env.EMAIL_POSTFIX_HOST,
       ssl: false,
+      port: process.env.EMAIL_POSTFIX_PORT,
     });
 
     const enquiryInformation =
@@ -81,7 +82,7 @@ export async function post(req, res, next) {
               "reply-to": `CUCB Secretary <${secretary.email}>`,
               to: `${email}`,
               subject: `[Cambridge University Ceilidh Band] Confirmation of Message`,
-              text: `Dear ${name},\n\nThank you for your e-mail. Our secretary will be in touch as soon as possible!\n\nThe Cambridge University Ceilidh Band\n\nFor your reference:\n\n${enquiryInformation}Message:\n\n\n-----------------------\n\n${escapeHtml(
+              text: `Dear ${name},\n\nThank you for your e-mail.\n\n Our secretary will be in touch as soon as possible!\n\nThe Cambridge University Ceilidh Band\n\nFor your reference:\n\n${enquiryInformation}Message:\n\n\n-----------------------\n\n${escapeHtml(
                 message,
               )}\n\n-----------------------\n`,
             },

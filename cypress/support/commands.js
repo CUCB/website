@@ -1,5 +1,6 @@
 import "@percy/cypress";
 import "cypress-pipe";
+import { Email } from "./proxies";
 
 Cypress.Commands.add("login", (username, password, options) =>
   cy.request({
@@ -33,6 +34,11 @@ Cypress.Commands.add("executeMutation", (mutation, params) =>
 
 Cypress.Commands.add("executeQuery", (mutation, params) => cy.executeMutation(mutation, params).its("data"));
 
+Cypress.Commands.add("searchEmails", (limit = 1, start = 0) => {
+  cy.request(`${Cypress.env("MAILHOG_HOST")}/api/v2/messages?limit=${limit}&start=${start}`)
+    .its("body")
+    .then(response => ({ ...response, items: response.items.map(item => Email(item)) }));
+});
 // Click a link so cypress checks the response status code
 Cypress.Commands.add(
   "clickLink",
