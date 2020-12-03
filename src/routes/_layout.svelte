@@ -1,5 +1,6 @@
 <script context="module">
   import { makeClient } from "../graphql/client";
+  import { fallbackPeople } from "./committee.json";
 
   function fromSessionTheme(session, name) {
     if (session && session.theme && session.theme[name]) {
@@ -15,42 +16,6 @@
 
   export async function preload({ query }, session) {
     let committee = {};
-
-    // This could be in /committee.json, but this allows us
-    // to deal with an error there which we should ideally
-    // be prepared for
-    let fallbackPeople = [
-      {
-        name: "The President",
-        casual_name: "The President",
-        email_obfus: "p_r__esid_ent@cu_cb.co.uk",
-        committee_key: {
-          name: "president",
-          __typename: "cucb_committee_keys",
-        },
-        __typename: "cucb_committee_members",
-      },
-      {
-        name: "The Secretary",
-        casual_name: "The Secretary",
-        email_obfus: "se_cre_tar_y@cucb.co.uk",
-        committee_key: {
-          name: "secretary",
-          __typename: "cucb_committee_keys",
-        },
-        __typename: "cucb_committee_members",
-      },
-      {
-        name: "The Webmaster",
-        casual_name: "The Webmaster",
-        email_obfus: "we__bma_ster_@cucb._co.uk",
-        committee_key: {
-          name: "webmaster",
-          __typename: "cucb_committee_keys",
-        },
-        __typename: "cucb_committee_members",
-      },
-    ];
 
     try {
       const res = await this.fetch("/committee.json").then(r => r.json());
@@ -80,11 +45,12 @@
       accentOpen: false,
       logoOpen: false,
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
+      calendarStartDay: fromSessionTheme(session, "calendarStartDay") || "mon",
     };
     settings[`accent_${color}`] = query.accent || fromSessionTheme(session, `accent_${color}`) || undefined;
     settings[`logo_${color}`] = query.logo || fromSessionTheme(session, `logo_${color}`) || undefined;
+    calendarStartDay.set(settings["calendarStartDay"]);
 
-    // Read user session or cookie or url param or ...
     return { settings, committee };
   }
 </script>
@@ -96,12 +62,10 @@
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
-  import { makeTitle } from "../view";
+  import { makeTitle, calendarStartDay, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
-  import { committee as committeeStore } from "../view";
 
-  export let segment;
   export let committee = {};
   export let settings = {};
   settings = Map(settings);
@@ -194,7 +158,7 @@
 
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
-<div class="layout">
+<div class="layout theme-{$themeName}">
   <Header user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.get('spinnyLogo')}" />
 
   <main>

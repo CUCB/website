@@ -3,9 +3,16 @@
   import Signup from "./Signup.svelte";
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
-  export let gig, signupGig, userInstruments;
+  import { writable } from "svelte/store";
+  import { themeName } from "../../view";
+  export let gig,
+    signupGig = writable(undefined),
+    userInstruments;
+  export let linkHeading = false;
   let arriveFinishFormat = "HH:mm";
+  let calendarDatesFormat = "dddd Do MMMM YYYY";
   let showSignup = false;
+  let showDetails = !linkHeading;
 
   $: clients = gig.contacts.filter(c => c.client);
   $: callers = gig.contacts.filter(c => c.calling);
@@ -24,31 +31,78 @@
   }
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
+  @function shadow($color) {
+    @return 0px 0px 5px 0px $color;
+  }
+  .gigtype-gig_enquiry {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("neutral"));
+    }
+  }
+  .gigtype-gig {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("accent"));
+      box-shadow: shadow(var(--accent));
+    }
+  }
+  .gigtype-gig_cancelled {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("formColor"));
+    }
+  }
+
+  .gigtype-calendar {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("negative"));
+    }
+  }
+
+  .gigtype-gig.admins-only {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("blueGig"));
+    }
+  }
+
+  .gigtype-kit {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("kitHire"));
+    }
+  }
   gig-summary {
     display: block;
     padding: 1em;
-    margin-bottom: 1em;
     border-radius: 5px;
-    box-shadow: 0px 0px 5px 0px var(--form_color);
     max-width: calc(100%-10px);
-    margin: auto;
+    margin: 0 auto 2em auto;
     box-sizing: border-box;
     word-break: break-word;
+    transition: box-shadow 0.25s;
   }
 
   task-list {
     display: flex;
     flex-direction: column;
+    margin: 1em 0;
   }
 
   gig-summary > :last-child {
     margin-bottom: 0;
   }
 
+  gig-timings > p {
+    margin: 0.25em 0;
+  }
+
   h2 {
     display: grid;
     grid-template-columns: 1fr auto;
+  }
+
+  h2 a {
+    justify-self: flex-start;
   }
 
   admin-notes,
@@ -63,9 +117,15 @@
     margin: 1em 0;
   }
 
-  button {
+  button.signup {
     float: right;
     margin-right: 1em;
+    margin-top: 1em;
+  }
+
+  button.cancelled-detail {
+    display: block;
+    margin: auto;
     margin-top: 1em;
   }
 
@@ -78,73 +138,171 @@
   }
 
   gig-icons {
-    margin-right: 0.5em;
+    margin-right: -0.3em;
+  }
+
+  .gigtype-gig_enquiry.permit-fade,
+  .gigtype-gig_cancelled.permit-fade {
+    filter: opacity(0.5);
+    transition: all 0.3s linear;
+  }
+
+  .gigtype-gig,
+  .gigtype-kit,
+  .gigtype-calendar {
+    transition: all 0.3s linear;
+  }
+  .gigtype-gig_enquiry:hover,
+  .gigtype-gig_cancelled:hover,
+  .gigtype-gig_enquiry:focus-within,
+  .gigtype-gig_cancelled:focus-within {
+    filter: opacity(1);
+    transition: all 0.1s ease-in;
+  }
+  .gigtype-gig_enquiry h2 {
+    grid-template-columns: auto 1fr auto;
+  }
+  .gigtype-gig_enquiry h2::before {
+    content: "Enquiry:";
+    margin-right: 0.25em;
+    font-style: bold;
+  }
+
+  .gigtype-gig_cancelled h2 {
+    grid-template-columns: auto 1fr auto;
+  }
+  .gigtype-gig_cancelled h2::before {
+    content: "Cancelled:";
+    margin-right: 0.25em;
+    font-style: bold;
+    text-decoration: none;
+  }
+
+  .gigtype-gig_cancelled:not(.details-visible) > :not(.main-detail) {
+    display: none;
+  }
+
+  .gigtype-calendar task-list {
+    display: none;
+  }
+
+  .gigtype-kit task-list .caller {
+    display: none;
+  }
+
+  :global(gig-icons > *) {
+    margin: 0 0.3em;
+  }
+
+  .color-positive {
+    @include themeify($themes) {
+      color: themed("positive");
+    }
+  }
+
+  .color-negative {
+    @include themeify($themes) {
+      color: themed("negative");
+    }
   }
 </style>
 
 {#if !showSignup}
-  {#if gig.allow_signups}
-    <button on:click="{() => (showSignup = !showSignup)}" data-test="show-signup">Show signup</button>
+  {#if $signupGig && $signupGig.allow_signups}
+    <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-signup-{gig.id}">
+      Show signup
+    </button>
   {/if}
-  <gig-summary>
-    <h2>
-      {gig.title}
+  <gig-summary
+    class="gigtype-{gig.type.code} theme-{$themeName}"
+    class:details-visible="{showDetails}"
+    class:permit-fade="{linkHeading}"
+    class:admins-only="{gig.admins_only}"
+    data-test="gig-summary-{gig.id}"
+  >
+    <h2 class="main-detail">
+      {#if linkHeading}
+        <span>
+          <a href="/members/gigs/{gig.id}">{gig.title}</a>
+        </span>
+        <!-- span for correct multiline underlining -->
+      {:else}{gig.title}{/if}
       <gig-icons>
         {#if gig.food_provided}
           <TooltipText content="Food provided">
             <i class="las la-utensils"></i>
           </TooltipText>
         {/if}
+        {#if gig.admins_only}
+          <TooltipText content="Hidden from normal users">
+            <i class="las la-eye-slash"></i>
+          </TooltipText>
+        {/if}
+        {#if gig.type.code === 'calendar'}
+          <TooltipText content="Calendar event">
+            <i class="las la-calendar"></i>
+          </TooltipText>
+        {/if}
       </gig-icons>
     </h2>
     {#if gig.venue}
-      <h3>
+      <h3 class="main-detail">
         <a href="/members/gigs/venue/{gig.venue.id}">
           {gig.venue.name}
           {#if gig.venue.subvenue}&nbsp;| {gig.venue.subvenue}{/if}
         </a>
       </h3>
     {/if}
-    {#if gig.date}
-      <p>
+    {#if gig.type.code !== 'calendar'}
+      <p class="date main-detail">
         {moment(gig.date)
           .tz('Europe/London')
           .format('dddd Do MMMM YYYY')}
       </p>
     {/if}
-    {#if gig.arrive_time}
-      <p>
-        <b>Arrive time:&nbsp;</b>
-        {@html moment(gig.arrive_time)
-          .tz('Europe/London')
-          .format(arriveFinishFormat)}
-      </p>
-    {/if}
-    {#if gig.time}
-      <p>
-        <b>Start time:&nbsp;</b>
-        {moment(`2020-01-01 ${gig.time}`)
-          .tz('Europe/London')
-          .format('HH:mm')}
-      </p>
-    {/if}
-    {#if gig.finish_time}
-      <p>
-        <b>Finish time:&nbsp;</b>
-        {moment(gig.finish_time)
-          .tz('Europe/London')
-          .format(arriveFinishFormat)}
-      </p>
-    {/if}
-    <task-list>
+    <gig-timings>
+      {#if gig.date}
+        {#if gig.arrive_time}
+          <p>
+            <b>Arrive time:&nbsp;</b>
+            {@html moment(gig.arrive_time)
+              .tz('Europe/London')
+              .format(arriveFinishFormat)}
+          </p>
+        {/if}
+        {#if gig.time}
+          <p>
+            <b>Start time:&nbsp;</b>
+            {moment(`2020-01-01 ${gig.time}`)
+              .tz('Europe/London')
+              .format('HH:mm')}
+          </p>
+        {/if}
+        {#if gig.finish_time}
+          <p>
+            <b>Finish time:&nbsp;</b>
+            {moment(gig.finish_time)
+              .tz('Europe/London')
+              .format(arriveFinishFormat)}
+          </p>
+        {/if}
+      {:else if gig.arrive_time && gig.finish_time && !moment(gig.arrive_time).isSame(gig.finish_time, 'day')}
+        <p>
+          {moment(gig.arrive_time).format(calendarDatesFormat)} &ndash; {moment(gig.finish_time).format(calendarDatesFormat)}
+        </p>
+      {:else if gig.arrive_time}
+        <p>{moment(gig.arrive_time).format(calendarDatesFormat)}</p>
+      {/if}
+    </gig-timings>
+    <task-list class="main-detail">
       {#if gig.finance_deposit_received !== undefined}
         {#if gig.finance_deposit_received}
-          <task-summary style="color:var(--positive)">
+          <task-summary class="color-positive">
             <i class="las la-money-bill-wave"></i>
             Deposit received
           </task-summary>
         {:else}
-          <task-summary style="color:var(--negative)">
+          <task-summary class="color-negative">
             <i class="las la-exclamation"></i>
             Deposit not received
           </task-summary>
@@ -152,12 +310,12 @@
       {/if}
       {#if gig.finance_payment_received !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_payment_received}
-          <task-summary style="color:var(--positive)">
+          <task-summary class="color-positive">
             <i class="las la-money-bill-wave"></i>
             Payment received
           </task-summary>
         {:else}
-          <task-summary style="color:var(--negative)">
+          <task-summary class="color-negative">
             <i class="las la-exclamation"></i>
             Payment not received
           </task-summary>
@@ -165,12 +323,12 @@
       {/if}
       {#if gig.finance_caller_paid !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_caller_paid}
-          <task-summary style="color:var(--positive)">
+          <task-summary class="color-positive caller">
             <i class="las la-money-bill-wave"></i>
             Caller paid
           </task-summary>
         {:else}
-          <task-summary style="color:var(--negative)">
+          <task-summary class="color-negative caller">
             <i class="las la-exclamation"></i>
             Caller not paid
           </task-summary>
@@ -181,6 +339,8 @@
       <summary-text>
         {#if gig.advertise}
           <b>Public advert:&nbsp;</b>
+        {:else}
+          <b>Summary:&nbsp;</b>
         {/if}
         <blockquote>
           {@html gig.summary
@@ -201,13 +361,13 @@
       </band-notes>
     {/if}
     {#if gig.notes_admin}
-      <admin-notes>
+      <admin-notes class="main-detail">
         <b>Admin notes:&nbsp;</b>
         {@html gig.notes_admin.trim()}
       </admin-notes>
     {/if}
     {#if gig.finance}
-      <gig-finance>
+      <gig-finance class="main-detail">
         <b>Finance:&nbsp;</b>
         {gig.finance.trim()}
       </gig-finance>
@@ -219,8 +379,11 @@
           {#if clients.length === 1}Contact:&nbsp;{:else}Contacts:&nbsp;{/if}
         </b>
         {#each clients as client, i (client.id)}
-          <a href="/members/gigs/contacts/{client.id}">{client.contact.name}</a>
-          {#if i + 1 < clients.length},{/if}
+          <a href="/members/gigs/contacts/{client.id}">
+            {client.contact.name}
+            {#if client.contact.organization}&nbsp;@ {client.contact.organization}{/if}
+          </a>
+          {#if i + 1 < clients.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
@@ -229,13 +392,22 @@
         <b>Calling:&nbsp;</b>
         {#each callers as caller, i (caller.id)}
           <a href="/members/gigs/contacts/{caller.id}">{caller.contact.name}</a>
-          {#if i + 1 < callers.length},{/if}
+          {#if i + 1 < callers.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
-    <Lineup people="{gig.lineup}" />
+    {#if gig.lineup.length > 0}
+      <Lineup people="{gig.lineup}" />
+    {/if}
+    {#if gig.type.code === 'gig_cancelled' && linkHeading}
+      <button class="cancelled-detail main-detail" on:click="{() => (showDetails = !showDetails)}">
+        {#if !showDetails}Show full details{:else}Hide full details{/if}
+      </button>
+    {/if}
   </gig-summary>
 {:else}
-  <button on:click="{() => (showSignup = !showSignup)}">Show summary</button>
-  <Signup gig="{signupGig}" {userInstruments} showLink="{false}" />
+  <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
+    Show summary
+  </button>
+  <Signup bind:gig="{$signupGig}" {userInstruments} showLink="{false}" />
 {/if}

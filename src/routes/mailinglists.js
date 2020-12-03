@@ -1,6 +1,5 @@
 import { makeClient } from "../graphql/client";
 import { SMTPClient } from "emailjs";
-import escapeHtml from "escape-html";
 import fetch from "node-fetch";
 import gql from "graphql-tag";
 
@@ -48,6 +47,7 @@ export async function post(req, res, next) {
     const client = new SMTPClient({
       host: process.env.EMAIL_POSTFIX_HOST,
       ssl: false,
+      port: process.env.EMAIL_POSTFIX_PORT,
     });
 
     client.send(

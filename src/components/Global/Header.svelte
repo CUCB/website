@@ -5,6 +5,7 @@
   import { tweened } from "svelte/motion";
   import { sineInOut } from "svelte/easing";
   import { onMount } from "svelte";
+  import { themeName } from "../../view";
   export let user;
   export let showSettings = false;
   export let spinnyLogo;
@@ -23,7 +24,9 @@
   });
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
   header {
     display: flex;
     flex-wrap: wrap;
@@ -110,14 +113,14 @@
   }
 
   a {
-    color: #222;
-    color: var(--text_color);
+    @include themeify($themes) {
+      &,
+      &:hover {
+        color: themed("textColor");
+      }
+    }
     border-bottom: none;
-  }
-
-  a:hover {
-    color: #222;
-    color: var(--text_color);
+    text-decoration: none;
   }
 
   a#logo-link:hover {
@@ -143,8 +146,9 @@
     }
 
     .button-background {
-      background-color: white;
-      background-color: var(--background);
+      @include themeify($themes) {
+        background-color: themed("background");
+      }
       height: 3rem;
       width: 100%;
       position: fixed;
@@ -165,21 +169,6 @@
       font-family: "Linux Biolinum Regular";
       font-family: var(--title);
     }
-
-    :global(header nav) {
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding-bottom: 4rem;
-      height: 100%;
-      width: 100%;
-      grid-area: unset;
-      z-index: 5;
-      background-color: rgba(255, 255, 255, 0.9);
-      background-color: rgba(var(--background_triple), 0.9);
-      margin: 0;
-      box-sizing: border-box;
-    }
   }
 </style>
 
@@ -188,7 +177,7 @@
     {@html `<` + `style>header > h1{display: none}</` + `style>`}
   </noscript>
 </svelte:head>
-<header class:hidden="{!animate}">
+<header class:hidden="{!animate}" class="theme-{$themeName}">
   <a href="/" id="logo-link">
     <Logo id="logo" enableSpin="{spinnyLogo}" />
   </a>

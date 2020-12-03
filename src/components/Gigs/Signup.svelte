@@ -13,6 +13,7 @@
   import { stores } from "@sapper/app";
   import InstrumentName from "./InstrumentName.svelte";
   import moment from "moment-timezone";
+  import { themeName } from "../../view";
   export let gig, userInstruments;
   export let showLink = true;
   let edit = false;
@@ -45,7 +46,9 @@
   };
 
   const statusFromAvailability = entry =>
-    entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO;
+    (typeof entry.user_available !== "undefined" &&
+      (entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO)) ||
+    undefined;
 
   let status = gig.lineup[0] && statusFromAvailability(gig.lineup[0]);
 
@@ -128,6 +131,18 @@
         ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
         : { ...userInstr, chosen: false, approved: false },
     );
+
+    gig = {
+      ...gig,
+      lineup: [
+        {
+          ...gig.lineup[0],
+          user_instruments: userInstruments
+            .filter(instrument => instrument.chosen)
+            .map(instrument => ({ ...instrument, user_instrument_id: instrument.id })),
+        },
+      ],
+    };
   };
 
   const updateNotes = async () => {
@@ -159,7 +174,9 @@
   };
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
   status-icons {
     display: flex;
     justify-content: space-around;
@@ -168,7 +185,7 @@
     margin-top: 1.5em;
   }
 
-  status-icons :global(annotated-icon) {
+  status-icons :global(.annotated-icon) {
     max-width: 100px;
   }
 
@@ -195,9 +212,11 @@
   gig-signup {
     display: block;
     padding: 1em;
-    margin-bottom: 1em;
+    margin-bottom: 2em;
     border-radius: 5px;
-    box-shadow: 0px 0px 5px 0px var(--form_color);
+    @include themeifyThemeElement($themes) {
+      box-shadow: 0px 0px 5px 0px themed("formColor");
+    }
   }
 
   @media only screen and (max-width: 400px) {
@@ -207,18 +226,26 @@
       align-items: stretch;
     }
 
-    status-icons :global(annotated-icon) {
+    status-icons :global(.annotated-icon) {
       max-width: 100%;
       height: 34px;
+      margin-bottom: 0.75em;
     }
 
-    status-icons :global(annotated-icon i) {
+    status-icons :global(.annotated-icon div) {
+      display: flex;
+      align-items: center;
+    }
+
+    status-icons :global(.annotated-icon i) {
       margin-right: 10px;
     }
   }
 
   .disabled {
-    color: var(--unselected);
+    @include themeify($themes) {
+      color: themed("unselected");
+    }
   }
 
   .none {
@@ -227,7 +254,7 @@
   }
 </style>
 
-<gig-signup>
+<gig-signup data-test="gig-signup-{gig.id}" class="theme-{$themeName}">
   <h3>
     {#if showLink}
       <a href="/members/gigs/{gig.id}">{gig.title}</a>
@@ -248,10 +275,11 @@
       </a>
     </h4>
   {/if}
-  <status-icons>
+  <status-icons role="radiogroup">
     <AnnotatedIcon
       icon="check"
       color="{status === statuses.YES ? 'var(--positive)' : 'var(--unselected)'}"
+      aria-checked="{status === statuses.YES}"
       on:click="{signup(statuses.YES)}"
       data-test="{`gig-${gig.id}-signup-yes`}"
       style="{status === statuses.YES ? 'font-style: italic' : ''}"
@@ -262,6 +290,7 @@
     <AnnotatedIcon
       icon="question"
       color="{status === statuses.MAYBE ? 'var(--neutral)' : 'var(--unselected)'}"
+      aria-checked="{status === statuses.MAYBE}"
       on:click="{signup(statuses.MAYBE)}"
       data-test="{`gig-${gig.id}-signup-maybe`}"
       style="{status === statuses.MAYBE ? 'font-style: italic' : ''}"
@@ -272,6 +301,7 @@
     <AnnotatedIcon
       icon="times"
       color="{status === statuses.NO ? 'var(--negative)' : 'var(--unselected)'}"
+      aria-checked="{status === statuses.NO}"
       on:click="{signup(statuses.NO)}"
       data-test="{`gig-${gig.id}-signup-no`}"
       style="{status === statuses.NO ? 'font-style: italic' : ''}"

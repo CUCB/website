@@ -14,6 +14,7 @@
     "logo_dark",
     "logo_default",
     "spinnyLogo",
+    "calendarStartDay",
   ];
   const updateSessionTheme = userId => {
     let theme = new URLSearchParams();
@@ -57,7 +58,7 @@
 </script>
 
 <h1>Sign in</h1>
-<form on:submit|preventDefault="{submit}">
+<form method="POST" action="/auth/login" on:submit|preventDefault="{submit}">
   <label>
     Username
     <input type="text" bind:value="{username}" data-test="username" />

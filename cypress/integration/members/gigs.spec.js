@@ -8,6 +8,8 @@ import {
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
+const click = $el => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
+
 describe("lineup editor", () => {
   before(() => {
     cy.executeMutation(CreateGig, {
@@ -45,11 +47,6 @@ describe("lineup editor", () => {
 
   context("authorized as webmaster", () => {
     beforeEach(() => cy.login("cypress", "abc123"));
-
-    //it("has the correct gig title on the page", () => {
-    // cy.visit("/members/gigs/15274/lineup-editor");
-    // cy.contains("h2", "Cypress Demo Gig", { timeout: 200 });
-    //});
 
     it("gives a 404 error when the gig doesn't exist", () => {
       cy.request({
@@ -97,9 +94,7 @@ describe("lineup editor", () => {
   });
 });
 
-let positive = null;
-let negative = null;
-let neutral = null;
+let colors = {};
 
 describe("gig signup", () => {
   before(() => {
@@ -131,10 +126,9 @@ describe("gig signup", () => {
         gigId: 15274,
       },
     });
-    cy.wait(200);
-    cy.cssProperty("--positive").then(positive_ => (positive = positive_));
-    cy.cssProperty("--negative").then(negative_ => (negative = negative_));
-    cy.cssProperty("--neutral").then(neutral_ => (neutral = neutral_));
+    cy.cssProperty("--positive").then(positive_ => (colors.positive = positive_));
+    cy.cssProperty("--negative").then(negative_ => (colors.negative = negative_));
+    cy.cssProperty("--neutral").then(neutral_ => (colors.neutral = neutral_));
   });
 
   beforeEach(() => {
@@ -144,14 +138,10 @@ describe("gig signup", () => {
 
   it("allows a user to sign up to a gig", () => {
     cy.visit("/members");
-    cy.wait(100);
+    cy.get(`[data-test="gig-15274-signup-yes"]`).should("not.have.color", colors.positive);
     cy.get(`[data-test="gig-15274-signup-yes"]`)
-      .should("have.css", "color")
-      .and("not.equal", positive);
-    cy.get(`[data-test="gig-15274-signup-yes"]`)
-      .click()
-      .should("have.css", "color")
-      .and("equal", positive);
+      .pipe(click)
+      .should("have.color", colors.positive);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -165,13 +155,10 @@ describe("gig signup", () => {
         user_only_if_necessary: false,
       });
 
-    cy.get(`[data-test="gig-15274-signup-maybe"]`)
-      .should("have.css", "color")
-      .and("not.equal", neutral);
+    cy.get(`[data-test="gig-15274-signup-maybe"]`).should("not.have.color", colors.netural);
     cy.get(`[data-test="gig-15274-signup-maybe"]`)
       .click()
-      .should("have.css", "color")
-      .and("equal", neutral);
+      .should("have.color", colors.neutral);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -199,13 +186,10 @@ describe("gig signup", () => {
         user_only_if_necessary: true,
       });
 
-    cy.get(`[data-test="gig-15274-signup-no"]`)
-      .should("have.css", "color")
-      .and("not.equal", negative);
+    cy.get(`[data-test="gig-15274-signup-no"]`).should("not.have.color", colors.negative);
     cy.get(`[data-test="gig-15274-signup-no"]`)
       .click()
-      .should("have.css", "color")
-      .and("equal", negative);
+      .should("have.color", colors.negative);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -231,13 +215,13 @@ describe("gig signup", () => {
     });
 
     it("links to user profile when editing instruments", () => {
-      cy.route2("POST", "/v1/graphql", {
+      cy.intercept("POST", "/v1/graphql", {
         fixture: "gig/signup/yes.json",
       }).as("signup");
 
-      cy.wait(100);
-
-      cy.get(`[data-test="gig-15274-signup-yes"]`).click();
+      cy.get(`[data-test="gig-15274-signup-yes"]`)
+        .pipe(click)
+        .should("have.color", colors.positive);
 
       cy.wait("@signup");
 
@@ -266,12 +250,10 @@ describe("gig signup", () => {
     });
 
     it("allows adding and editing of instruments", () => {
-      cy.route2({
+      cy.intercept({
         method: "POST",
         url: "/v1/graphql",
       }).as("graphqlRequest");
-
-      cy.wait(100);
 
       cy.executeQuery(InstrumentsOnGig, {
         variables: {
@@ -282,7 +264,9 @@ describe("gig signup", () => {
         .its("cucb_gigs_lineups_instruments_aggregate.aggregate.count")
         .should("equal", 0);
 
-      cy.get(`[data-test="gig-15274-signup-yes"]`).click();
+      cy.get(`[data-test="gig-15274-signup-yes"]`)
+        .pipe(click)
+        .should("have.color", colors.positive);
 
       cy.wait("@graphqlRequest");
 
@@ -323,148 +307,150 @@ describe("gig signup", () => {
   });
 });
 
-describe("gig summary", () => {
-  let onConflictUser = {
-    constraint: "cucb_users_id_key",
-    update_columns: ["first", "last", "email"],
-  };
+let onConflictUser = {
+  constraint: "cucb_users_id_key",
+  update_columns: ["first", "last", "email"],
+};
 
-  let onConflictUserInstrument = {
-    constraint: "cucb_users_instruments_id_key",
-    update_columns: ["nickname", "instr_id", "deleted"],
-  };
+let onConflictUserInstrument = {
+  constraint: "cucb_users_instruments_id_key",
+  update_columns: ["nickname", "instr_id", "deleted"],
+};
 
-  let onConflictLineupUserInstrument = {
-    constraint: "gigs_lineups_instruments_pkey",
-    update_columns: ["approved"],
-  };
+let onConflictLineupUserInstrument = {
+  constraint: "gigs_lineups_instruments_pkey",
+  update_columns: ["approved"],
+};
 
-  let onConflictVenue = {
-    constraint: "cucb_gig_venues_id_key",
-    update_columns: [
-      "address",
-      "distance_miles",
-      "latitude",
-      "longitude",
-      "map_link",
-      "name",
-      "notes_admin",
-      "notes_band",
-      "postcode",
-      "subvenue",
+let onConflictVenue = {
+  constraint: "cucb_gig_venues_id_key",
+  update_columns: [
+    "address",
+    "distance_miles",
+    "latitude",
+    "longitude",
+    "map_link",
+    "name",
+    "notes_admin",
+    "notes_band",
+    "postcode",
+    "subvenue",
+  ],
+};
+
+let gigForSummary = {
+  id: 74527,
+  title: "Gig of excitement",
+  adminsOnly: false,
+  allowSignups: true,
+  date: "2020-07-25",
+  time: "21:00",
+  arriveTime: "2020-07-25T20:00+01:00",
+  finishTime: "2020-07-25T23:00+01:00",
+  depositReceived: true,
+  paymentReceived: false,
+  venue: {
+    on_conflict: onConflictVenue,
+    data: {
+      address: "3 Trumpington St, Cambridge",
+      postcode: "CB2 1QY",
+      distance_miles: 0,
+      longitude: 0.1182611,
+      latitude: 52.2014254,
+      map_link:
+        "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
+      name: "Emmanuel United Reform Church",
+      notes_band: "Where we (used to) rehearse",
+      subvenue: null,
+      id: 3277452,
+    },
+  },
+  lineup: {
+    on_conflict: {
+      constraint: "gigs_lineups_pkey",
+      update_columns: ["approved", "leader", "money_collector", "driver", "equipment", "user_id"],
+    },
+    data: [
+      {
+        approved: true,
+        leader: true,
+        equipment: false,
+        money_collector: false,
+        driver: false,
+        user: {
+          on_conflict: onConflictUser,
+          data: {
+            id: 374325,
+            username: "leady374325",
+            first: "Leady",
+            last: "Lead",
+            email: "user374325@testi.ng",
+            user_instruments: {
+              on_conflict: onConflictUserInstrument,
+              data: [
+                {
+                  id: 105747,
+                  deleted: false,
+                  instr_id: 20,
+                  nickname: null,
+                },
+                {
+                  id: 576743,
+                  deleted: true,
+                  instr_id: 63,
+                  nickname: "Cluck cluck",
+                },
+              ],
+            },
+          },
+        },
+        user_instruments: {
+          on_conflict: onConflictLineupUserInstrument,
+          data: [
+            {
+              user_instrument_id: 105747,
+              approved: true,
+            },
+            {
+              user_instrument_id: 576743,
+              approved: true,
+            },
+          ],
+        },
+      },
+      {
+        approved: true,
+        leader: false,
+        equipment: true,
+        driver: true,
+        money_collector: true,
+        user: {
+          on_conflict: onConflictUser,
+          data: {
+            id: 567236,
+            username: "User567236",
+            first: "Twizzly",
+            last: "Dialy",
+            email: "user567236@testi.ng",
+            user_instruments: {
+              on_conflict: onConflictUserInstrument,
+              data: [
+                {
+                  deleted: false,
+                  instr_id: 66,
+                  nickname: null,
+                },
+              ],
+            },
+          },
+        },
+      },
     ],
-  };
+  },
+};
 
-  let gig = {
-    id: 74527,
-    title: "Gig of excitement",
-    adminsOnly: false,
-    allowSignups: true,
-    date: "2020-07-25",
-    time: "21:00",
-    arriveTime: "2020-07-25T20:00+01:00",
-    finishTime: "2020-07-25T23:00+01:00",
-    depositReceived: true,
-    paymentReceived: false,
-    venue: {
-      on_conflict: onConflictVenue,
-      data: {
-        address: "3 Trumpington St, Cambridge",
-        postcode: "CB2 1QY",
-        distance_miles: 0,
-        longitude: 0.1182611,
-        latitude: 52.2014254,
-        map_link:
-          "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
-        name: "Emmanuel United Reform Church",
-        notes_band: "Where we (used to) rehearse",
-        subvenue: null,
-        id: 3277452,
-      },
-    },
-    lineup: {
-      on_conflict: {
-        constraint: "gigs_lineups_pkey",
-        update_columns: ["approved", "leader", "money_collector", "driver", "equipment", "user_id"],
-      },
-      data: [
-        {
-          approved: true,
-          leader: true,
-          equipment: false,
-          money_collector: false,
-          driver: false,
-          user: {
-            on_conflict: onConflictUser,
-            data: {
-              id: 374325,
-              username: "leady374325",
-              first: "Leady",
-              last: "Lead",
-              email: "user374325@testi.ng",
-              user_instruments: {
-                on_conflict: onConflictUserInstrument,
-                data: [
-                  {
-                    id: 105747,
-                    deleted: false,
-                    instr_id: 20,
-                    nickname: null,
-                  },
-                  {
-                    id: 576743,
-                    deleted: true,
-                    instr_id: 63,
-                    nickname: "Cluck cluck",
-                  },
-                ],
-              },
-            },
-          },
-          user_instruments: {
-            on_conflict: onConflictLineupUserInstrument,
-            data: [
-              {
-                user_instrument_id: 105747,
-                approved: true,
-              },
-              {
-                user_instrument_id: 576743,
-                approved: true,
-              },
-            ],
-          },
-        },
-        {
-          approved: true,
-          leader: false,
-          equipment: true,
-          driver: true,
-          money_collector: true,
-          user: {
-            on_conflict: onConflictUser,
-            data: {
-              id: 567236,
-              username: "User567236",
-              first: "Twizzly",
-              last: "Dialy",
-              email: "user567236@testi.ng",
-              user_instruments: {
-                on_conflict: onConflictUserInstrument,
-                data: [
-                  {
-                    deleted: false,
-                    instr_id: 66,
-                    nickname: null,
-                  },
-                ],
-              },
-            },
-          },
-        },
-      ],
-    },
-  };
+describe("gig summary", () => {
+  let gig = gigForSummary;
   before(() => {
     cy.executeMutation(CreateGig, { variables: gig });
   });
@@ -497,13 +483,10 @@ describe("gig summary", () => {
       cy.contains(`Twizzly Dialy`).should("be.visible");
 
       cy.log("Shows instrument with nickname on hover");
-      cy.get("[data-test='tooltip']").should("not.exist");
       cy.contains(`Eigenharp`).hasTooltip("Cluck cluck");
 
       cy.log("Shows who's leading");
-      cy.get("[data-test='is-leading']").trigger("mouseenter");
-      cy.get("[data-test='tooltip']").contains("Leady is leading");
-      cy.get("[data-test='is-leading']").trigger("mouseleave");
+      cy.get("[data-test='is-leading']").hasTooltip("Leady is leading");
     });
 
     it("doesn't show financial information or admin notes", () => {
@@ -512,7 +495,27 @@ describe("gig summary", () => {
     });
 
     it("shows a signup button", () => {
-      cy.get("[data-test='show-signup']").should("be.visible");
+      cy.get(`[data-test='show-signup-${gig.id}']`).should("be.visible");
+    });
+  });
+
+  context("logged in as admin before gig", () => {
+    before(() => {
+      cy.clock(Cypress.moment("2020-07-01 02:00").valueOf());
+      cy.login("cypress", "abc123");
+      cy.visit(`/members/gigs/${gig.id}`);
+    });
+
+    it("doesn't show post gig financial details", () => {
+      cy.cssProperty("--positive").then(positive => {
+        cy.cssProperty("--negative").then(negative => {
+          cy.contains("Deposit received")
+            .should("be.visible")
+            .and("have.css", "color", positive);
+          cy.contains("Payment").should("not.exist");
+          cy.contains("Caller").should("not.exist");
+        });
+      });
     });
   });
 
@@ -539,23 +542,276 @@ describe("gig summary", () => {
       });
     });
   });
+});
 
-  context("logged in as admin before gig", () => {
-    before(() => {
-      cy.clock(Cypress.moment("2020-07-12 02:00").valueOf());
-      cy.login("cypress", "abc123");
-      cy.visit(`/members/gigs/${gig.id}`);
+describe("gig diary", () => {
+  let signupGig = {
+    ...gigForSummary,
+    date: Cypress.moment()
+      .add(1, "month")
+      .format("YYYY-MM-DD"),
+    time: Cypress.moment()
+      .hour(19)
+      .minute(30)
+      .format("HH:MM"),
+    arriveTime: Cypress.moment()
+      .add(1, "month")
+      .hour(18)
+      .minute(30)
+      .format(),
+    finishTime: Cypress.moment()
+      .add(1, "month")
+      .hour(22)
+      .minute(0)
+      .format(),
+  };
+
+  let nonSignupGig = {
+    ...gigForSummary,
+    id: 34743274,
+    allowSignups: false,
+    date: Cypress.moment()
+      .add(60, "days")
+      .format("YYYY-MM-DD"),
+    time: Cypress.moment()
+      .hour(19)
+      .minute(0)
+      .format("HH:MM"),
+    arriveTime: Cypress.moment()
+      .add(60, "days")
+      .hour(18)
+      .minute(0)
+      .format(),
+    finishTime: Cypress.moment()
+      .add(60, "days")
+      .hour(21)
+      .minute(15)
+      .format(),
+  };
+
+  let pastGig = {
+    ...gigForSummary,
+    id: 33274,
+    allowSignups: false,
+    date: Cypress.moment()
+      .add(-2, "month")
+      .format("YYYY-MM-DD"),
+    time: Cypress.moment()
+      .hour(19)
+      .minute(30)
+      .format("HH:MM"),
+    arriveTime: Cypress.moment()
+      .add(-2, "month")
+      .hour(18)
+      .minute(30)
+      .format(),
+    finishTime: Cypress.moment()
+      .add(-2, "month")
+      .hour(22)
+      .minute(0)
+      .format(),
+  };
+
+  before(() => {
+    cy.visit("/");
+    cy.executeMutation(CreateGig, { variables: signupGig });
+    cy.executeMutation(CreateGig, { variables: nonSignupGig });
+    cy.executeMutation(CreateGig, { variables: pastGig });
+    cy.executeMutation(DeleteSignup, { variables: { gigId: nonSignupGig.id, userId: 27250 } });
+    cy.executeMutation(DeleteSignup, { variables: { gigId: signupGig.id, userId: 27250 } });
+    cy.cssProperty("--positive").then(positive => (colors.positive = positive));
+    cy.cssProperty("--neutral").then(neutral => (colors.neutral = neutral));
+    cy.cssProperty("--negative").then(negative => (colors.negative = negative));
+    cy.cssProperty("--unselected").then(unselected => (colors.unselected = unselected));
+  });
+
+  context("not logged in", () => {
+    it("isn't accessible", () => {
+      cy.request({ url: `/members/gigs`, failOnStatusCode: false })
+        .its("status")
+        .should("eq", 401);
+    });
+  });
+
+  context("logged in as normal user", () => {
+    beforeEach(() => {
+      cy.clock(Cypress.moment("2020-07-07 02:00").valueOf());
+      cy.login("cypress_user", "abc123");
     });
 
-    it("shows accurate financial status", () => {
-      cy.cssProperty("--positive").then(positive => {
-        cy.cssProperty("--negative").then(negative => {
-          cy.contains("Deposit received")
-            .should("be.visible")
-            .and("have.css", "color", positive);
-          cy.contains("Payment not received").should("not.exist");
-          cy.contains("Caller not paid").should("not.exist");
-        });
+    it("shows upcoming gigs and signup if appropriate", () => {
+      cy.visit(`/members/gigs`);
+      cy.get(`[data-test=gig-summary-${signupGig.id}]`).should("be.visible");
+      cy.get(`[data-test=show-signup-${signupGig.id}]`).should("be.visible");
+      cy.get(`[data-test=gig-summary-${nonSignupGig.id}]`).should("be.visible");
+      cy.get(`[data-test=show-signup-${nonSignupGig.id}]`).should("not.exist");
+    });
+
+    describe("signups", () => {
+      beforeEach(() => {
+        cy.executeMutation(DeleteSignup, { variables: { userId: 27250, gigId: signupGig.id } });
+        cy.visit("/members/gigs");
+      });
+
+      it("allows a user to sign up to a gig and change their signup status", () => {
+        cy.get(`[data-test=show-signup-${signupGig.id}]`)
+          .pipe(click)
+          .should($el => {
+            expect($el).to.not.be.visible;
+          });
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.unselected);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.unselected);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-no]`).should("have.color", colors.unselected);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-edit]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-instrument-20-toggle]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).click();
+        cy.executeQuery(SignupDetails, {
+          variables: {
+            userId: 27250,
+            gigId: signupGig.id,
+          },
+        })
+          .its("cucb_gigs_lineups_by_pk")
+          .should("include", {
+            user_available: true,
+            user_only_if_necessary: false,
+          });
+        cy.log("Successfully signed up to gig");
+
+        cy.get(`[data-test=show-summary-${signupGig.id}]`).click();
+        cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.unselected);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.neutral);
+
+        cy.executeQuery(SignupDetails, {
+          variables: {
+            userId: 27250,
+            gigId: signupGig.id,
+          },
+        })
+          .its("cucb_gigs_lineups_by_pk")
+          .should("include", {
+            user_available: true,
+            user_only_if_necessary: true,
+          })
+          .its("user_instruments")
+          .should("have.length", 1);
+      });
+
+      it("retains signup information on refresh", () => {
+        cy.get(`[data-test=show-signup-${signupGig.id}]`)
+          .pipe(click)
+          .should($el => {
+            expect($el).to.not.be.visible;
+          });
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.unselected);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-edit]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-instrument-20-toggle]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).click();
+
+        cy.visit("/members/gigs");
+        cy.get(`[data-test=show-signup-${signupGig.id}]`)
+          .pipe(click)
+          .should($el => {
+            expect($el).to.not.be.visible;
+          });
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
+        cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
+        cy.get(`[data-test=gig-${signupGig.id}-signup-no]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-no]`).should("have.color", colors.negative);
+
+        cy.visit("/members/gigs");
+        cy.get(`[data-test=show-signup-${signupGig.id}]`)
+          .pipe(click)
+          .should($el => {
+            expect($el).to.not.be.visible;
+          });
+        cy.get(`[data-test=gig-${signupGig.id}-signup-no]`).should("have.color", colors.negative);
+      });
+
+      it("retains signup information when gig is hidden and then redisplayed", () => {
+        cy.get(`[data-test=show-signup-${signupGig.id}]`)
+          .pipe(click)
+          .should($el => {
+            expect($el).to.not.be.visible;
+          });
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.unselected);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
+        cy.get(`[data-test=gig-${signupGig.id}-signup-edit]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-instrument-20-toggle]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).click();
+        cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
+
+        cy.get(`[data-test=gigview-by-month]`).click();
+        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.get(`[data-test=gigcalendar-next-month]`).click();
+        cy.get(`[data-test=gigcalendar-next-month]`).click();
+
+        cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
+        cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
+
+        cy.visit("/members/gigs");
+        cy.get(`[data-test=gigview-by-month]`)
+          .pipe(click)
+          .should("not.exist"); // Click it until link becomes text
+        cy.get(`[data-test=gigcalendar-next-month]`).click();
+        cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
+        cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
+
+        cy.get(`[data-test=gig-${signupGig.id}-signup-edit]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-instrument-20-toggle]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).click();
+
+        cy.get(`[data-test=gigcalendar-next-month]`)
+          .pipe(click)
+          .parent()
+          .parent()
+          .should(
+            "contain",
+            Cypress.moment()
+              .add(2, "months")
+              .format("MMMM"),
+          );
+        cy.get(`[data-test=gigview-all-upcoming]`)
+          .pipe(click)
+          .should("not.exist");
+        cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.neutral);
+        cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("No instruments selected");
+      });
+
+      it("can switch between upcoming and past gigs", () => {
+        cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
+        cy.get(`[data-test=gigview-by-month]`)
+          .pipe(click)
+          .should("not.exist");
+        cy.intercept({ method: "POST", url: "/v1/graphql" }).as("fetchGigs");
+        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.wait("@fetchGigs");
+        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.wait("@fetchGigs");
+        cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("be.visible");
+        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.wait("@fetchGigs");
+        cy.contains(
+          Cypress.moment()
+            .subtract(3, "months")
+            .format("MMMM YYYY"),
+        ).should("exist");
+        cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
+        cy.get(`[data-test=gigview-all-upcoming]`)
+          .pipe(click)
+          .should("not.exist");
+        cy.get(`[data-test=gig-summary-${signupGig.id}]`).should("be.visible");
       });
     });
   });

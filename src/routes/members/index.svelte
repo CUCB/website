@@ -30,4 +30,4 @@
 <h2>Gig signup</h2>
 {#each gigSignups as gig}
   <GigSignup {gig} {userInstruments} />
-{/each}
+{:else}No gigs are open for signups at the moment :(.{/each}

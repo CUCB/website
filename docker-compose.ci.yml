@@ -8,7 +8,7 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
   cypress:
-    image: cypress/base:12
+    image: cypress/browsers:node12.18.3-chrome83-ff77
     volumes:
       - .:/usr/src/app
     environment:
@@ -16,4 +16,4 @@ services:
       CYPRESS_KEY: ${CYPRESS_KEY}
       PG_PASSWORD: postgrespassword
     command: >
-      bash -c "cd /usr/src/app; npm install; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run test:ci:prod"
+      bash -c "cd /usr/src/app; npm install; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run test:ci:chrome"

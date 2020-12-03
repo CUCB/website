@@ -15,6 +15,12 @@
   --accent_triple: 0, 165, 53;
   --accent: rgb(var(--accent_triple));
   --theme_name: dark;
+  --blue_gig: hsla(202.4, 100%, 48.8%, 0.7);
+  --kit_hire: hsl(281.4, 100%, 50.8%);
+}
+
+.tippy-box[data-theme~="cucb"] {
+  box-shadow: 0 0 5px #111;
 }
 
 .color-positive {

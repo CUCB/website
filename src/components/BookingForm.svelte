@@ -1,5 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
+  import { themeName } from "../view";
   import HCaptcha from "./Global/HCaptcha.svelte";
   let name = "";
   let email = "";
@@ -58,7 +59,9 @@
   }
 </script>
 
-<style>
+<style lang="scss">
+  @import "../sass/themes.scss";
+
   label {
     cursor: pointer;
     user-select: none;
@@ -82,7 +85,9 @@
   }
 
   .error {
-    color: var(--negative);
+    @include themeifyThemeElement($themes) {
+      color: themed("negative");
+    }
   }
 </style>
 
@@ -142,7 +147,7 @@
     <HCaptcha on:verified="{onCaptchaVerified}" />
 
     {#if error}
-      <span class="error">{error}</span>
+      <span class="error theme-{$themeName}">{error}</span>
     {/if}
     <input type="submit" value="Send" data-test="booking-send" />
   </form>

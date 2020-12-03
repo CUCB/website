@@ -19,3 +19,5 @@ export const accentCss = color =>
   ((color && hexToRgb(color)) || "") &&
   `<style>:root{--accent: #${color}; --accent_triple: ${colorTriple(color)};}</style>`;
 export const logoCss = logo => ((logo && hexToRgb(logo)) || "") && `<style>:root{--logo_color: #${logo};}</style>`;
+export const calendarStartDay = writable("mon");
+export const themeName = writable("");

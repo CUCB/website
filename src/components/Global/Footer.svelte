@@ -1,19 +1,24 @@
 <script>
   import Mailto from "../Mailto.svelte";
+  import { themeName } from "../../view";
   export let committee;
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
   p {
     text-align: center;
-    color: var(--footer_color);
     font-size: 0.8rem;
+    @include themeifyThemeElement($themes) {
+      color: themed("footerColor");
+    }
   }
 </style>
 
 <footer>
 
-  <p>
+  <p class="theme-{$themeName}">
     This site is maintained by
     <Mailto person="{committee.webmaster}">{committee.webmaster.name}</Mailto>
     , please use this address if you have any comments or queries about the site! Any Ceilidh queries should be directed

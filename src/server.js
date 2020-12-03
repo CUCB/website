@@ -7,12 +7,15 @@ import dotenv from "dotenv";
 import { pool } from "./auth";
 import bodyParser from "body-parser";
 import httpProxy from "http-proxy";
+import { simpleParser } from "mailparser";
+import fetch from "node-fetch";
 
 // Get the environment variables from the .env file
 dotenv.config();
 
 const { PORT, NODE_ENV } = process.env;
 const dev = NODE_ENV === "development";
+const test = NODE_ENV === "test";
 
 // Fetch these seperately, as rollup will replace them from .env
 // and we want the server to be consistent with the client
@@ -35,11 +38,24 @@ if (!process.env.SESSION_SECRET) {
 }
 
 // Host static only on dev server
-const server = dev
-  ? polka()
-      .use("/images/committee", sirv("static/static/images/committee", { dev }))
-      .use(sirv("static", { dev }))
-  : polka().use(sirv("static", { dev }));
+const server =
+  dev || test
+    ? polka()
+        .use("/images/committee", sirv("static/static/images/committee", { dev }))
+        .use(sirv("static", { dev }))
+        .use("/renderemail", async function(req, res) {
+          const id = req.query["id"];
+          try {
+            const email = await fetch(`http://${process.env.EMAIL_POSTFIX_HOST}:8025/api/v1/messages/${id}/download`);
+            res.writeHead(200, { "Content-Type": "text/html" });
+            const parsed = await simpleParser(await email.text());
+            res.end(parsed.html || parsed.textAsHtml);
+          } catch (e) {
+            res.writeHead(404, { "Content-Type": "text/text" });
+            res.end(`Not found. Or some other error: ${e}`);
+          }
+        })
+    : polka().use(sirv("static", { dev }));
 
 server
   .all(`${GRAPHQL_PATH}`, function(req, res) {
@@ -59,6 +75,7 @@ server
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         sameSite: "strict",
+        secure: !dev && !test,
       },
     }),
     sapper.middleware({

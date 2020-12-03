@@ -1,8 +1,16 @@
-<style>
+<script>
+  import { themeName } from "../../view";
+</script>
+
+<style lang="scss">
+  @import "../../sass/themes.scss";
   nav {
     display: flex;
     justify-content: center;
-    background: rgba(var(--accent_triple), 0.05);
+    @include themeifyThemeElement($themes) {
+      background: rgba(themed("accent"), 0.05);
+      background: rgba(var(--accent_triple), 0.05);
+    }
     overflow: auto;
     flex-wrap: wrap;
     border-radius: 5px;
@@ -10,18 +18,23 @@
   }
 
   nav a {
-    padding: 0.15em 0.7em;
+    font-size: 1.1rem;
+    padding: 0.1em 0.6em;
   }
 
-  @media only screen and (max-width: 600px) {
+  @media only screen and (min-width: 601px) {
     nav a {
-      font-size: 1.3em;
-      padding: 0.1em 0.6em;
+      padding: 0.15em 0.7em;
+    }
+
+    .only-mobile {
+      display: none;
     }
   }
 </style>
 
-<nav class="subnav">
+<nav class="subnav theme-{$themeName}">
+  <a href="/members" class="only-mobile">Gig signup</a>
   <a href="/members/gigs">Gig diary</a>
   <a href="/members/music">Music</a>
   <a href="/members/whoswho">Who's who</a>

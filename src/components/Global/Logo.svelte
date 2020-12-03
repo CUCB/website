@@ -4,6 +4,7 @@
   import { tweened } from "svelte/motion";
   import { sineInOut } from "svelte/easing";
   import { stores } from "@sapper/app";
+  import { themeName } from "../../view";
   let rotation = tweened(0, { easing: sineInOut, duration: 250 });
   let { session } = stores();
   export let id;
@@ -36,7 +37,9 @@
   $: triggerRotation = enableSpin ? _triggerRotation : () => {};
 </script>
 
-<style>
+<style lang="scss">
+  @import "../../sass/themes.scss";
+
   #logo2 {
     padding-top: 100%;
     position: relative;
@@ -54,12 +57,9 @@
 
   path {
     fill: none;
-    stroke: black;
     stroke-width: 15;
-  }
-
-  @supports (color: var(--logo_color)) {
-    path {
+    @include themeify($themes) {
+      stroke: themed("textColor");
       stroke: var(--logo_color);
     }
   }
@@ -67,7 +67,7 @@
 
 <svelte:options immutable />
 <div {id}>
-  <div id="logo2">
+  <div id="logo2" class="theme-{$themeName}">
     {#if animate}
       <svg
         xmlns="http://www.w3.org/2000/svg"

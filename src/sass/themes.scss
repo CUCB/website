@@ -1,0 +1,144 @@
+// Based on https://medium.com/@dmitriy.borodiy/easy-color-theming-with-scss-bc38fd5734d1
+
+$themes: (
+  light: (
+    accent: rgb(7, 92, 1),
+    background: rgb(255, 255, 255),
+    codeColor: #555,
+    codeBackground: #f0f0f0,
+    formColor: rgb(119, 119, 119),
+    textColor: #222,
+    footerColor: rgba(33, 33, 33, 0.8),
+    negative: rgb(255, 0, 0),
+    neutral: rgb(174, 85, 6),
+    positive: rgb(7, 92, 1),
+    unselected: #696969,
+    blueGig: hsla(202.6, 100%, 50%, 0.57),
+    kitHire: hsl(281.4, 81.4%, 38%),
+  ),
+  dark: (
+    accent: rgb(0, 165, 53),
+    textColor: #ccc,
+    codeBackground: #555,
+    codeColor: #f0f0f0,
+    background: rgb(34, 34, 34),
+    footerColor: rgba(204, 204, 204, 0.8),
+    formColor: rgb(85, 85, 85),
+    negative: rgb(255, 62, 62),
+    neutral: rgb(255, 165, 0),
+    positive: rgb(0, 165, 53),
+    unselected: #8b8b8b,
+    blueGig: hsla(202.4, 100%, 48.8%, 0.7),
+    kitHire: hsl(281.4, 100%, 50.8%),
+  ),
+);
+
+@mixin themeify($themes: $themes) {
+  @each $theme, $map in $themes {
+    .theme-#{$theme} & {
+      $theme-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($themes, $theme), "#{$key}");
+        $theme-map: map-merge(
+          $theme-map,
+          (
+            $key: $value,
+          )
+        ) !global;
+      }
+
+      @content;
+      $theme-map: null !global;
+    }
+  }
+  .theme-default & {
+    $theme-map: () !global;
+    @each $key, $submap in map-get($themes, light) {
+      $value: map-get(map-get($themes, light), "#{$key}");
+      $theme-map: map-merge(
+        $theme-map,
+        (
+          $key: $value,
+        )
+      ) !global;
+    }
+
+    @content;
+    $theme-map: null !global;
+  }
+  @media (prefers-color-scheme: dark) {
+    .theme-default & {
+      $theme-map: () !global;
+      @each $key, $submap in map-get($themes, dark) {
+        $value: map-get(map-get($themes, dark), "#{$key}");
+        $theme-map: map-merge(
+          $theme-map,
+          (
+            $key: $value,
+          )
+        ) !global;
+      }
+
+      @content;
+      $theme-map: null !global;
+    }
+  }
+}
+
+$theme-map: null;
+
+@mixin themeifyThemeElement($themes: $themes) {
+  @each $theme, $map in $themes {
+    &.theme-#{$theme} {
+      $theme-map: () !global;
+      @each $key, $submap in $map {
+        $value: map-get(map-get($themes, $theme), "#{$key}");
+        $theme-map: map-merge(
+          $theme-map,
+          (
+            $key: $value,
+          )
+        ) !global;
+      }
+
+      @content;
+      $theme-map: null !global;
+    }
+  }
+  &.theme-default {
+    $theme-map: () !global;
+    @each $key, $submap in map-get($themes, light) {
+      $value: map-get(map-get($themes, light), "#{$key}");
+      $theme-map: map-merge(
+        $theme-map,
+        (
+          $key: $value,
+        )
+      ) !global;
+    }
+
+    @content;
+    $theme-map: null !global;
+  }
+  @media (prefers-color-scheme: dark) {
+    &.theme-default {
+      $theme-map: () !global;
+      @each $key, $submap in map-get($themes, dark) {
+        $value: map-get(map-get($themes, dark), "#{$key}");
+        $theme-map: map-merge(
+          $theme-map,
+          (
+            $key: $value,
+          )
+        ) !global;
+      }
+
+      @content;
+      $theme-map: null !global;
+    }
+  }
+}
+
+@function themed($key) {
+  @return map-get($theme-map, $key);
+}
