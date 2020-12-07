@@ -123,6 +123,7 @@ input[type="email"],
 input[type="text"],
 input[type="number"],
 input[type="password"],
+input[type="date"],
 textarea {
   appearance: none;
   height: 34px;
@@ -141,6 +142,7 @@ input[type="email"]:focus,
 input[type="text"]:focus,
 input[type="number"]:focus,
 input[type="password"]:focus,
+input[type="date"]:focus,
 textarea:focus,
 button:focus,
 input[type="submit"]:focus {

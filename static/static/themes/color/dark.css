@@ -42,3 +42,7 @@
   color: #8b8b8b;
   color: var(--unselected);
 }
+
+::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}

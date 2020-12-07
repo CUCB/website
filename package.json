@@ -37,6 +37,7 @@
     "emailjs": "^3.2.1",
     "escape-html": "^1.0.3",
     "express-session": "^1.17.1",
+    "fuse.js": "^6.4.3",
     "graphql": "^0.13.2",
     "graphql-tag": "^2.10.3",
     "graphql-tools": "^6.2.4",

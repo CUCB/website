@@ -1126,10 +1126,13 @@
     schema: cucb
     name: gigs
   object_relationships:
+    - name: editing_user_obj
+      using:
+        foreign_key_constraint_on: editing_user
     - name: gig_type
       using:
         foreign_key_constraint_on: type
-    - name: user
+    - name: posting_user_obj
       using:
         foreign_key_constraint_on: posting_user
     - name: venue

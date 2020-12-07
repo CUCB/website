@@ -107,6 +107,37 @@ export const QueryGigDetails = role => {
   }
 };
 
+const FragmentGigEditDetails = gql`
+  fragment GigEditDetails on cucb_gigs {
+    posting_time
+    posting_user: posting_user_obj {
+      id
+      first
+      last
+    }
+    editing_time
+    editing_user: editing_user_obj {
+      id
+      first
+      last
+    }
+  }
+`;
+
+export const QueryEditGigDetails = gql`
+  query QueryEditGigDetails($gig_id: bigint!) {
+    cucb_gigs_by_pk(id: $gig_id) {
+      ...GigDetails
+      ...GigAdminDetails
+      ...GigEditDetails
+      venue_id
+    }
+  }
+  ${FragmentGigDetails}
+  ${FragmentGigAdminDetails}
+  ${FragmentGigEditDetails}
+`;
+
 export const QueryMultiGigDetails = role => {
   if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
     return gql`
@@ -320,6 +351,24 @@ export const UpdateSignupNotes = gql`
       returning {
         gig_notes
       }
+    }
+  }
+`;
+
+export const QueryVenues = gql`
+  query QueryVenues {
+    cucb_gig_venues(order_by: { name: asc, subvenue: asc }) {
+      id
+      name
+      subvenue
+      map_link
+      distance_miles
+      notes_admin
+      notes_band
+      address
+      postcode
+      latitude
+      longitude
     }
   }
 `;
