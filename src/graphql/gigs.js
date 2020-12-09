@@ -130,7 +130,21 @@ export const QueryEditGigDetails = gql`
       ...GigDetails
       ...GigAdminDetails
       ...GigEditDetails
+      type_id: type
       venue_id
+      venue {
+        id
+        name
+        subvenue
+        map_link
+        distance_miles
+        notes_admin
+        notes_band
+        address
+        postcode
+        latitude
+        longitude
+      }
     }
   }
   ${FragmentGigDetails}
@@ -369,6 +383,102 @@ export const QueryVenues = gql`
       postcode
       latitude
       longitude
+    }
+  }
+`;
+
+export const QueryGigTypes = gql`
+  query QueryGigTypes {
+    cucb_gig_types {
+      id
+      code
+      title
+    }
+  }
+`;
+
+export const UpdateVenue = gql`
+  mutation UpdateVenue(
+    $id: bigint!
+    $name: String!
+    $subvenue: String
+    $map_link: String
+    $distance_miles: bigint
+    $latitude: float8
+    $longitude: float8
+    $address: String
+    $postcode: String
+    $notes_admin: String
+    $notes_band: String
+  ) {
+    update_cucb_gig_venues_by_pk(
+      pk_columns: { id: $id }
+      _set: {
+        name: $name
+        subvenue: $subvenue
+        map_link: $map_link
+        distance_miles: $distance_miles
+        latitude: $latitude
+        longitude: $longitude
+        address: $address
+        postcode: $postcode
+        notes_admin: $notes_admin
+        notes_band: $notes_band
+      }
+    ) {
+      id
+      name
+      subvenue
+      map_link
+      distance_miles
+      latitude
+      longitude
+      address
+      postcode
+      notes_admin
+      notes_band
+    }
+  }
+`;
+
+export const CreateVenue = gql`
+  mutation CreateVenue(
+    $name: String!
+    $subvenue: String
+    $map_link: String
+    $distance_miles: bigint
+    $latitude: float8
+    $longitude: float8
+    $address: String
+    $postcode: String
+    $notes_admin: String
+    $notes_band: String
+  ) {
+    insert_cucb_gig_venues_one(
+      object: {
+        name: $name
+        subvenue: $subvenue
+        map_link: $map_link
+        distance_miles: $distance_miles
+        latitude: $latitude
+        longitude: $longitude
+        address: $address
+        postcode: $postcode
+        notes_admin: $notes_admin
+        notes_band: $notes_band
+      }
+    ) {
+      id
+      name
+      subvenue
+      map_link
+      distance_miles
+      latitude
+      longitude
+      address
+      postcode
+      notes_admin
+      notes_band
     }
   }
 `;

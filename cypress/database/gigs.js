@@ -115,3 +115,27 @@ export const InstrumentsOnGig = `
     }
   }
 `;
+
+export const onConflictVenue = {
+  constraint: "cucb_gig_venues_id_key",
+  update_columns: [
+    "address",
+    "distance_miles",
+    "latitude",
+    "longitude",
+    "map_link",
+    "name",
+    "notes_admin",
+    "notes_band",
+    "postcode",
+    "subvenue",
+  ],
+};
+
+export const CreateVenues = `
+  mutation CreateVenues($venues: [cucb_gig_venues_insert_input!]!, $on_conflict: cucb_gig_venues_on_conflict) {
+    insert_cucb_gig_venues(objects: $venues, on_conflict: $on_conflict) {
+      affected_rows
+    }
+  }
+`;

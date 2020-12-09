@@ -1,4 +1,6 @@
 import {
+  onConflictVenue,
+  CreateVenues,
   CreateGig,
   DeleteSignup,
   SignupDetails,
@@ -320,22 +322,6 @@ let onConflictUserInstrument = {
 let onConflictLineupUserInstrument = {
   constraint: "gigs_lineups_instruments_pkey",
   update_columns: ["approved"],
-};
-
-let onConflictVenue = {
-  constraint: "cucb_gig_venues_id_key",
-  update_columns: [
-    "address",
-    "distance_miles",
-    "latitude",
-    "longitude",
-    "map_link",
-    "name",
-    "notes_admin",
-    "notes_band",
-    "postcode",
-    "subvenue",
-  ],
 };
 
 let gigForSummary = {
@@ -814,5 +800,66 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-summary-${signupGig.id}]`).should("be.visible");
       });
     });
+  });
+});
+
+let venues = [1, 2, 3, 4, 5].map(n => ({
+  address: "3 Trumpington St, Cambridge",
+  postcode: "CB2 1QY",
+  distance_miles: 0,
+  longitude: 0.1182611,
+  latitude: 52.2014254,
+  map_link:
+    "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
+  name: `A really long venue name to search for ${n.toString().repeat(n)}`,
+  notes_band: null,
+  subvenue: null,
+  id: 3277457 * n,
+}));
+
+describe.only("gig editor", () => {
+  before(() => {
+    cy.executeMutation(CreateVenues, { variables: { venues, on_conflict: onConflictVenue } });
+  });
+  beforeEach(() => {
+    cy.login("cypress", "abc123");
+    cy.visit(`/members/gigs/${gigForSummary.id}/edit`);
+  });
+
+  it("detects unsaved changes", () => {
+    cy.get(`[data-test=gig-edit-${gigForSummary.id}-title]`)
+      .click()
+      .type("modified title");
+    cy.contains("unsaved changes").should("be.visible");
+    cy.get(`[data-test=gig-edit-${gigForSummary.id}-title]`)
+      .clear()
+      .type(gigForSummary.title);
+    cy.contains("unsaved changes").should("not.exist");
+  });
+
+  it("allows the user to search venues with the keyboard", () => {
+    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search]`)
+      .click()
+      .type("A really long vneue to search for 333") // Deliberately misspelled to test fuzzy search
+      .type("{downarrow}");
+    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search-result]`)
+      .contains("333")
+      .should("have.focus")
+      .type(" ");
+    cy.get(`[data-test=select-box]`)
+      .contains("333") // Find the correct select box (an <option>)
+      .parent() // Parent of <option> -> <select>
+      .should("have.value", venues[2].id)
+      .should("have.focus");
+    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search]`)
+      .should("be.empty")
+      .click()
+      .type("A really long vneue to search for") // Deliberately misspelled to test fuzzy search
+      .type("{downarrow}{downarrow}");
+    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search-result]`)
+      .should("have.focus")
+      .contains("22")
+      .type("{uparrow}{uparrow}{uparrow}");
+    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search]`).should("have.focus");
   });
 });

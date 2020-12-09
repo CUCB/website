@@ -13,7 +13,7 @@ services:
       options:
         max-size: "50m"
   graphql-engine:
-    image: hasura/graphql-engine:v1.2.2.cli-migrations-v2
+    image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
     volumes:
       - ./hasura/migrations:/hasura-migrations
       - ./hasura/metadata:/hasura-metadata

@@ -75,7 +75,10 @@ server
       cookie: {
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
         sameSite: "strict",
-        secure: !dev && !test,
+        // secure=false because I'm really struggling to get this to work on the server
+        // It's probably something to do with reverse-proxying, and when it's broken no one can log in
+        // Might be worth looking at if relevant when upgrading to SvelteKit
+        secure: false,
       },
     }),
     sapper.middleware({

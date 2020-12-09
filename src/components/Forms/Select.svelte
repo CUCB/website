@@ -1,6 +1,6 @@
 <script>
   import { themeName } from "../../view";
-  export let value, id;
+  export let value, select;
 </script>
 
 <style lang="scss">
@@ -52,7 +52,6 @@
     margin: 0;
     padding: 6px 8px 6px 10px;
     height: 100%;
-    line-height: 14px;
     font-size: 0.9rem;
     text-shadow: 0 1px white;
     color: #62717a;
@@ -155,7 +154,7 @@
 </style>
 
 <div class="dropdown dropdown-{$themeName}">
-  <select {id} class="dropdown-select" on:change on:blur bind:value>
+  <select class="dropdown-select" data-test="select-box" on:change on:blur bind:value bind:this="{select}">
     <slot />
   </select>
 </div>
