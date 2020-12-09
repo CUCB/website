@@ -817,7 +817,7 @@ let venues = [1, 2, 3, 4, 5].map(n => ({
   id: 3277457 * n,
 }));
 
-describe.only("gig editor", () => {
+describe("gig editor", () => {
   before(() => {
     cy.executeMutation(CreateVenues, { variables: { venues, on_conflict: onConflictVenue } });
   });
