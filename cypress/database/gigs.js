@@ -139,3 +139,29 @@ export const CreateVenues = `
     }
   }
 `;
+
+export const CreateContacts = `
+  mutation CreateContacts($contacts: [cucb_contacts_insert_input!]!) {
+    insert_cucb_contacts(objects: $contacts, on_conflict: {
+      constraint: cucb_contacts_id_key,
+      update_columns: [
+        caller
+        email
+        name
+        notes
+        organization
+        user_id
+      ]
+    }) {
+      affected_rows
+    }
+  }
+`;
+
+export const ClearContactsForGig = `
+  mutation ClearContactsForGig($gig_id: bigint!) {
+    delete_cucb_gigs_contacts(where: { gig_id: { _eq: $gig_id } }) {
+      affected_rows
+    }
+  }
+`;

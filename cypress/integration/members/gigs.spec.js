@@ -7,6 +7,8 @@ import {
   AddInstrument,
   RemoveInstruments,
   InstrumentsOnGig,
+  CreateContacts,
+  ClearContactsForGig,
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
@@ -817,6 +819,27 @@ let venues = [1, 2, 3, 4, 5].map(n => ({
   id: 3277457 * n,
 }));
 
+let contacts = [
+  {
+    id: 3274354,
+    user_id: 32747,
+    name: "Cally Call",
+    email: "caller@call.io",
+    organization: null,
+    notes: null,
+    caller: true,
+  },
+  {
+    id: 3274354 * 2,
+    user_id: null,
+    name: "A Client",
+    email: "client@gmail.com",
+    organization: null,
+    notes: null,
+    caller: false,
+  },
+];
+
 describe("gig editor", () => {
   let gig = gigForSummary;
   before(() => {
@@ -831,6 +854,8 @@ describe("gig editor", () => {
         lastName: "Webmaster",
       },
     });
+    cy.executeMutation(CreateContacts, { variables: { contacts } });
+    cy.executeMutation(ClearContactsForGig, { variables: { gig_id: gig.id } });
     cy.executeMutation(CreateVenues, { variables: { venues, on_conflict: onConflictVenue } });
     cy.executeMutation(CreateGig, { variables: { ...gig } });
   });
@@ -928,5 +953,29 @@ describe("gig editor", () => {
     cy.contains("Admin notes").should("be.visible");
     cy.contains("Setting admin notes").should("be.visible");
     cy.contains("Band notes").should("not.exist");
+  });
+
+  it.only("can add clients and callers", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select(contacts[0].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).then(elem => {
+      expect(elem.val()).to.be.null;
+    });
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[0].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).then(elem => {
+      expect(elem.val()).to.be.null;
+    });
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list]`).contains(contacts[0].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-callers-${contacts[0].id}-remove]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).should("not.contain", contacts[0].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list]`).contains(contacts[0].name);
+
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select(contacts[0].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-clients-${contacts[0].id}-remove]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
   });
 });

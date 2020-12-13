@@ -25,6 +25,7 @@ const FragmentGigDetails = gql`
       id: contact_id
       contact {
         name
+        organization
       }
     }
     gig_type {
@@ -535,6 +536,45 @@ export const UpdateGig = gql`
       venue_id
       notes_band
       notes_admin
+    }
+  }
+`;
+
+export const QueryContacts = gql`
+  query QueryContacts {
+    cucb_contacts(order_by: { name: asc, organization: asc }) {
+      id
+      name
+      email
+      organization
+      caller
+    }
+  }
+`;
+
+export const UpsertGigContact = gql`
+  mutation UpsertGigContact($gig_id: bigint, $contact_id: bigint, $calling: Boolean, $client: Boolean) {
+    insert_cucb_gigs_contacts_one(
+      object: { gig_id: $gig_id, contact_id: $contact_id, calling: $calling, client: $client }
+      on_conflict: { constraint: gigs_contacts_pkey, update_columns: [calling, client] }
+    ) {
+      gig_id
+      contact_id
+      calling
+      client
+      contact {
+        name
+        organization
+      }
+    }
+  }
+`;
+
+export const RemoveGigContact = gql`
+  mutation RemoveGigContact($gig_id: bigint!, $contact_id: bigint!) {
+    delete_cucb_gigs_contacts_by_pk(contact_id: $contact_id, gig_id: $gig_id) {
+      contact_id
+      gig_id
     }
   }
 `;

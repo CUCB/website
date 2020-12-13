@@ -23,7 +23,8 @@ h4,
 h5,
 h6,
 nav,
-th {
+th,
+.heading-font {
   font-family: "Linux Biolinum Regular", "Roboto", -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen, Ubuntu,
     Cantarell, Helvetica Neue, sans-serif;
   font-family: var(--title), var(--text);
@@ -196,4 +197,11 @@ input[type="submit"]:active {
 }
 .tippy-box[data-theme~="cucb"] > .tippy-svg-arrow {
   fill: var(--background);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-delay: 0ms !important;
+    animation-duration: 1ms !important;
+  }
 }

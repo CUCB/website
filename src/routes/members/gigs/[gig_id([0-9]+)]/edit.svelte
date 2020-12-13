@@ -1,11 +1,33 @@
 <script context="module">
-  import { QueryEditGigDetails, QueryVenues, QueryGigTypes, UpdateGig } from "../../../../graphql/gigs";
+  import {
+    QueryEditGigDetails,
+    QueryVenues,
+    QueryGigTypes,
+    UpdateGig,
+    QueryContacts,
+    UpsertGigContact,
+    RemoveGigContact,
+  } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
   function sortVenues(venues) {
     venues.sort((a, b) =>
       a.name < b.name ? -1 : a.name > b.name ? 1 : a.subvenue < b.subvenue ? -1 : a.subvenue > b.subvenue ? 1 : 0,
+    );
+  }
+
+  function sortContacts(contacts) {
+    contacts.sort((a, b) =>
+      a.contact.name < b.contact.name
+        ? -1
+        : b.contact.name < a.contact.name
+        ? 1
+        : a.contact.organization < b.contact.organization
+        ? -1
+        : b.contact.organization < a.contact.organization
+        ? 1
+        : 0,
     );
   }
 
@@ -16,8 +38,8 @@
 
     let client = makeClient(this.fetch);
 
-    let res_gig, res_venues, res_gigTypes;
-    let gig, venues, gigTypes;
+    let res_gig, res_venues, res_gigTypes, res_contacts;
+    let gig, venues, gigTypes, allContacts;
     try {
       res_gig = await client.query({
         query: QueryEditGigDetails,
@@ -29,6 +51,9 @@
       res_gigTypes = await client.query({
         query: QueryGigTypes,
       });
+      res_contacts = await client.query({
+        query: QueryContacts,
+      });
     } catch (e) {
       await handleErrors.bind(this)(e, session);
       return;
@@ -38,7 +63,9 @@
       gig = res_gig.data.cucb_gigs_by_pk;
       venues = res_venues.data.cucb_gig_venues;
       gigTypes = res_gigTypes.data.cucb_gig_types;
+      allContacts = res_contacts.data.cucb_contacts;
       sortVenues(venues);
+      sortContacts(gig.contacts);
     } else {
       this.error(404, "Gig not found");
       return;
@@ -49,6 +76,7 @@
       lastSaved: gig,
       venues,
       gigTypes,
+      allContacts,
     };
   }
 </script>
@@ -74,18 +102,26 @@
     notes_admin,
     notes_band,
     summary,
-    contacts;
+    contacts,
+    allContacts;
   import { makeTitle, themeName } from "../../../../view";
   import moment from "moment";
   import Select from "../../../../components/Forms/Select.svelte";
   import VenueEditor from "../../../../components/Gigs/VenueEditor.svelte";
   import Fuse from "fuse.js";
-  import { client } from "../../../../graphql/client";
+  import { client as graphqlClient } from "../../../../graphql/client";
   import { tick } from "svelte";
+  import { tweened } from "svelte/motion"; // TODO move the messages to their own component
+  import { fade } from "svelte/transition";
+
   let venueSearch = "";
   let displayVenueEditor = false;
   let editingSubvenue = false;
-  let searchedVenuesList, searchVenuesField, venueListElement;
+  let recentlySavedOpacity = tweened(0, { duration: 150 });
+  let recentlySavedTimer = () => recentlySavedOpacity.set(0);
+  let searchedVenuesList, searchVenuesField, venueListElement, selectedClient, selectedCaller;
+  $: clients = contacts.filter(contact => contact.client);
+  $: callers = contacts.filter(contact => contact.calling);
 
   $: saved =
     lastSaved.type_id === type_id &&
@@ -150,13 +186,18 @@
   }
 
   function editVenue() {
-    console.log(venue);
-    console.log(Object.keys(venue).length);
     editingSubvenue = Object.keys(venue).length === 1; // Only name set for this
-    console.log(editingSubvenue);
     lastSaved.venue = { ...lastSaved.venue };
     displayVenueEditor = true;
     venueSearch = "";
+  }
+
+  function contactDisplayName(contact) {
+    return contact.name
+      ? contact.organization
+        ? `${contact.name} @ ${contact.organization}`
+        : contact.name
+      : contact.organization;
   }
 
   async function updateVenue(e) {
@@ -186,7 +227,7 @@
 
   async function saveGig(e) {
     try {
-      let res = await $client.mutate({
+      let res = await $graphqlClient.mutate({
         mutation: UpdateGig,
         variables: {
           id,
@@ -204,9 +245,11 @@
         },
       });
       if (res && res.data && res.data.update_cucb_gigs_by_pk) {
-        console.log(lastSaved);
+        window.clearTimeout(recentlySavedTimer);
+        recentlySavedOpacity.set(0, { duration: 50 });
+        window.setTimeout(recentlySavedTimer, 2000);
+        recentlySavedOpacity.set(1);
         lastSaved = { ...res.data.update_cucb_gigs_by_pk };
-        console.log(lastSaved);
       }
     } catch (e) {
       // Oh shit
@@ -220,6 +263,111 @@
       saveGig(e);
     }
   }
+
+  const contactTypes = {
+    CALLER: {},
+    CLIENT: {},
+  };
+
+  async function selectContact(contactType, e) {
+    let contact_id, existingContact;
+    let is_client, is_calling;
+    if (contactType === contactTypes.CLIENT) {
+      contact_id = selectedClient;
+      existingContact = contacts.find(contact => contact.id === contact_id);
+      is_client = true;
+      is_calling = (existingContact || false) && existingContact.calling;
+    } else {
+      contact_id = selectedCaller;
+      existingContact = contacts.find(contact => contact.id === contact_id);
+      is_calling = true;
+      is_client = (existingContact || false) && existingContact.client;
+    }
+    try {
+      let res = await $graphqlClient.mutate({
+        mutation: UpsertGigContact,
+        variables: {
+          gig_id: id,
+          contact_id,
+          client: is_client,
+          calling: is_calling,
+        },
+      });
+      if (res && res.data && res.data.insert_cucb_gigs_contacts_one) {
+        if (existingContact) {
+          existingContact.client = res.data.insert_cucb_gigs_contacts_one.client;
+          existingContact.calling = res.data.insert_cucb_gigs_contacts_one.calling;
+          contacts = contacts;
+        } else {
+          let contactsClone = [...contacts, { ...res.data.insert_cucb_gigs_contacts_one, id: contact_id }];
+          sortContacts(contactsClone);
+          contacts = contactsClone;
+        }
+        contactType === contactTypes.CLIENT ? (selectedClient = undefined) : (selectedCaller = undefined);
+      }
+    } catch (e) {
+      // TODO error handling
+      console.error(e);
+    }
+  }
+
+  let selectClient = e => selectContact(contactTypes.CLIENT, e);
+  let selectCaller = e => selectContact(contactTypes.CALLER, e);
+
+  async function removeContact(contactType, contact_id, e) {
+    let mutation;
+    let existingContact = contacts.find(contact => contact.id === contact_id);
+    if (existingContact.client && existingContact.calling) {
+      let client, calling;
+      // Only removing a role, so update the existing entry
+      if (contactType === contactTypes.CLIENT) {
+        client = false;
+        calling = true;
+      } else {
+        client = true;
+        calling = false;
+      }
+      try {
+        let res = await $graphqlClient.mutate({
+          mutation: UpsertGigContact,
+          variables: {
+            gig_id: id,
+            contact_id,
+            client,
+            calling,
+          },
+        });
+        if (res && res.data && res.data.insert_cucb_gigs_contacts_one) {
+          existingContact.client = res.data.insert_cucb_gigs_contacts_one.client;
+          existingContact.calling = res.data.insert_cucb_gigs_contacts_one.calling;
+          contacts = contacts;
+        }
+      } catch (e) {
+        // TODO error handling
+        console.error(e);
+      }
+    } else {
+      try {
+        await $graphqlClient.mutate({
+          mutation: RemoveGigContact,
+          variables: {
+            gig_id: id,
+            contact_id,
+          },
+        });
+        contacts = contacts.filter(contact => contact.id !== contact_id);
+      } catch (e) {
+        // TODO real error handling
+        console.error(e);
+      }
+    }
+  }
+
+  let removeClient = id => e => removeContact(contactTypes.CLIENT, id, e);
+  let removeCaller = id => e => removeContact(contactTypes.CALLER, id, e);
+
+  async function newClient(e) {}
+  async function newCaller(e) {}
 
   let venueFuse = new Fuse(venues, {
     ignoreLocation: true,
@@ -258,6 +406,22 @@
 
   button {
     width: unset;
+  }
+
+  .temporary-message {
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    top: 3em;
+    padding: 0.25em 0.5em;
+    background: var(--background);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    width: 150px;
+    box-shadow: 0 0 4px var(--form_color);
   }
 </style>
 
@@ -300,7 +464,9 @@
 <h3>
   {#if !displayVenueEditor}Main details{:else}Edit venue{/if}
 </h3>
-
+{#if $recentlySavedOpacity}
+  <div class="temporary-message heading-font" style="opacity:{$recentlySavedOpacity}">Saved</div>
+{/if}
 <form on:submit|preventDefault class="theme-{$themeName}">
   {#if !displayVenueEditor}
     <!-- svelte-ignore a11y-label-has-associated-control -->
@@ -363,7 +529,59 @@
 
 <h3>Client/caller details</h3>
 <form on:submit|preventDefault class="theme-{$themeName}">
-  <label>Clients{#each contacts.filter(contact => contact.client) as client}{client.contact.name}{/each}</label>
+  <h4>Clients</h4>
+  <div data-test="gig-edit-{id}-client-list">
+    {#each clients as contact (contact.id)}
+      <div class="gig-contact" transition:fade>
+        {contactDisplayName(contact.contact)}
+        <button
+          on:click="{removeClient(contact.id)}"
+          data-test="gig-edit-{id}-clients-{contact.id}-remove"
+        >Remove</button>
+        <button on:click="{editContact(contact.id)}">Edit</button>
+      </div>
+    {/each}
+  </div>
+  <!-- svelte-ignore a11y-label-has-associated-control -->
+  <label data-test="gig-edit-{id}-client-select">Add client
+    <Select bind:value="{selectedClient}">
+      <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
+      {#each allContacts as contact}
+        <!-- TODO don't show selected clients in this list -->
+        <option value="{contact.id}">{contactDisplayName(contact)}</option>
+      {/each}
+    </Select></label>
+  <span>
+    <button on:click="{selectClient}" data-test="gig-edit-{id}-client-select-confirm">Select client</button>
+    <button on:click="{newClient}">Create new client</button>
+  </span>
+  <h4>Callers</h4>
+  <div data-test="gig-edit-{id}-caller-list">
+    {#each callers as contact (contact.id)}
+      <div class="gig-contact" transition:fade>
+        {contactDisplayName(contact.contact)}
+        <button
+          on:click="{removeCaller(contact.id)}"
+          data-test="gig-edit-{id}-callers-{contact.id}-remove"
+        >Remove</button>
+        <button on:click="{editContact(contact.id)}">Edit</button>
+      </div>
+    {/each}
+  </div>
+  <!-- svelte-ignore a11y-label-has-associated-control -->
+  <label data-test="gig-edit-{id}-caller-select">Add caller
+    <Select bind:value="{selectedCaller}">
+      <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
+      {#each allContacts.filter(contact => contact.caller) as contact}
+        <!-- TODO don't show selected clients in this list -->
+        <option value="{contact.id}">{contactDisplayName(contact)}</option>
+      {/each}
+    </Select>
+  </label>
+  <span>
+    <button on:click="{selectCaller}" data-test="gig-edit-{id}-caller-select-confirm">Select caller</button>
+    <button on:click="{newCaller}">Create new caller</button>
+  </span>
 </form>
 <h3>Notes</h3>
 <form on:submit|preventDefault class="theme-{$themeName}">
