@@ -818,31 +818,54 @@ let venues = [1, 2, 3, 4, 5].map(n => ({
 }));
 
 describe("gig editor", () => {
+  let gig = gigForSummary;
   before(() => {
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 32747,
+        username: "cypress",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 1,
+        email: "cy@press.io",
+        firstName: "Cypress",
+        lastName: "Webmaster",
+      },
+    });
     cy.executeMutation(CreateVenues, { variables: { venues, on_conflict: onConflictVenue } });
+    cy.executeMutation(CreateGig, { variables: { ...gig } });
   });
   beforeEach(() => {
+    Cypress.on("window:load", function(window) {
+      // Prevent onbeforeunload being registered to stop other tests being affected
+      const original = window.addEventListener;
+      window.addEventListener = function() {
+        if (arguments && arguments[0] === "beforeunload") {
+          return;
+        }
+        return original.apply(this, arguments);
+      };
+    });
     cy.login("cypress", "abc123");
-    cy.visit(`/members/gigs/${gigForSummary.id}/edit`);
+    cy.visit(`/members/gigs/${gig.id}/edit`);
   });
 
   it("detects unsaved changes", () => {
-    cy.get(`[data-test=gig-edit-${gigForSummary.id}-title]`)
+    cy.get(`[data-test=gig-edit-${gig.id}-title]`)
       .click()
       .type("modified title");
     cy.contains("unsaved changes").should("be.visible");
-    cy.get(`[data-test=gig-edit-${gigForSummary.id}-title]`)
+    cy.get(`[data-test=gig-edit-${gig.id}-title]`)
       .clear()
-      .type(gigForSummary.title);
+      .type(gig.title);
     cy.contains("unsaved changes").should("not.exist");
   });
 
   it("allows the user to search venues with the keyboard", () => {
-    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search]`)
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`)
       .click()
-      .type("A really long vneue to search for 333") // Deliberately misspelled to test fuzzy search
+      .type("really long vneue to search for 333", { delay: 0 }) // Deliberately misspelled to test fuzzy search
       .type("{downarrow}");
-    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search-result]`)
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`)
       .contains("333")
       .should("have.focus")
       .type(" ");
@@ -851,15 +874,59 @@ describe("gig editor", () => {
       .parent() // Parent of <option> -> <select>
       .should("have.value", venues[2].id)
       .should("have.focus");
-    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search]`)
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`)
       .should("be.empty")
       .click()
-      .type("A really long vneue to search for") // Deliberately misspelled to test fuzzy search
+      .type("A really long vneue to search for", { delay: 0 }) // Deliberately misspelled to test fuzzy search
       .type("{downarrow}{downarrow}");
-    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search-result]`)
-      .should("have.focus")
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`)
       .contains("22")
+      .should("have.focus")
       .type("{uparrow}{uparrow}{uparrow}");
-    cy.get(`[data-test=gig-edit-${gigForSummary.id}-venue-search]`).should("have.focus");
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`).should("have.focus");
+  });
+
+  it("can update gig details", () => {
+    let newDate = Cypress.moment().add(7, "weeks");
+    cy.get(`[data-test=gig-edit-${gig.id}-title]`)
+      .click()
+      .clear()
+      .type("Replaced title");
+    cy.get(`[data-test=gig-edit-${gig.id}-date]`)
+      .click()
+      .type(newDate.format("YYYY-MM-DD"));
+
+    cy.get(`[data-test=gig-edit-${gig.id}-notes-band]`)
+      .click()
+      .clear()
+      .type("        ")
+      .log("should trim that field");
+
+    cy.contains("unsaved changes").should("be.visible");
+    cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+    cy.contains("unsaved changes").should("not.exist");
+    cy.get(`[data-test=gig-edit-${gig.id}-notes-admin]`)
+      .click()
+      .clear()
+      .type("Setting admin notes");
+    cy.get(`[data-test=gig-edit-${gig.id}-summary]`)
+      .click()
+      .clear()
+      .type("Some sort of summary");
+
+    cy.contains("unsaved changes").should("be.visible");
+    cy.get(`[data-test=gig-edit-${gig.id}-summary]`)
+      .type("{alt}s")
+      .log("can save with alt+s");
+    cy.contains("unsaved changes").should("not.exist");
+    cy.get("h2")
+      .should("contain", "Replaced title")
+      .and("not.contain", gig.title);
+    cy.visit(`/members/gigs/${gig.id}`);
+    cy.contains("Replaced title").should("be.visible");
+    cy.contains("Some sort of summary").should("be.visible");
+    cy.contains("Admin notes").should("be.visible");
+    cy.contains("Setting admin notes").should("be.visible");
+    cy.contains("Band notes").should("not.exist");
   });
 });

@@ -482,3 +482,59 @@ export const CreateVenue = gql`
     }
   }
 `;
+
+export const UpdateGig = gql`
+  mutation UpdateGig(
+    $id: bigint!
+    $title: String
+    $date: date
+    $time: time
+    $type_id: bigint
+    $admins_only: Boolean
+    $advertise: Boolean
+    $allow_signups: Boolean
+    $arrive_time: timestamptz
+    $finish_time: timestamptz
+    $food_provided: Boolean
+    $summary: String
+    $venue_id: bigint
+    $notes_band: String
+    $notes_admin: String
+  ) {
+    update_cucb_gigs_by_pk(
+      _set: {
+        title: $title
+        date: $date
+        time: $time
+        type: $type_id
+        admins_only: $admins_only
+        advertise: $advertise
+        allow_signups: $allow_signups
+        arrive_time: $arrive_time
+        finish_time: $finish_time
+        food_provided: $food_provided
+        summary: $summary
+        venue_id: $venue_id
+        notes_band: $notes_band
+        notes_admin: $notes_admin
+      }
+      pk_columns: { id: $id }
+    ) {
+      title
+      date
+      time
+      type_id: type
+      admins_only
+      advertise
+      allow_signups
+      arrive_time
+      finish_time
+      food_provided
+      summary
+      sort_date
+      venue_id
+      notes_band
+      notes_admin
+    }
+  }
+`;

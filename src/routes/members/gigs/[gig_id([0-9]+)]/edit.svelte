@@ -1,5 +1,5 @@
 <script context="module">
-  import { QueryEditGigDetails, QueryVenues, QueryGigTypes } from "../../../../graphql/gigs";
+  import { QueryEditGigDetails, QueryVenues, QueryGigTypes, UpdateGig } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
@@ -66,12 +66,21 @@
     venue,
     type_id,
     gigTypes,
-    id;
+    id,
+    admins_only,
+    advertise,
+    allow_signups,
+    food_provided,
+    notes_admin,
+    notes_band,
+    summary,
+    contacts;
   import { makeTitle, themeName } from "../../../../view";
   import moment from "moment";
   import Select from "../../../../components/Forms/Select.svelte";
   import VenueEditor from "../../../../components/Gigs/VenueEditor.svelte";
   import Fuse from "fuse.js";
+  import { client } from "../../../../graphql/client";
   import { tick } from "svelte";
   let venueSearch = "";
   let displayVenueEditor = false;
@@ -82,7 +91,10 @@
     lastSaved.type_id === type_id &&
     lastSaved.title === title.trim() &&
     lastSaved.date === date &&
-    lastSaved.venue_id === venue_id;
+    lastSaved.venue_id === venue_id &&
+    lastSaved.summary === (summary && summary.trim()) &&
+    lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
+    lastSaved.notes_band === (notes_band && notes_band.trim());
 
   function unloadIfSaved(e) {
     if (saved) {
@@ -172,6 +184,43 @@
     venueListElement.focus();
   }
 
+  async function saveGig(e) {
+    try {
+      let res = await $client.mutate({
+        mutation: UpdateGig,
+        variables: {
+          id,
+          title: title.trim(),
+          date,
+          venue_id,
+          type_id,
+          advertise,
+          admins_only,
+          allow_signups,
+          food_provided,
+          notes_admin: notes_admin && notes_admin.trim(),
+          notes_band: notes_band && notes_band.trim(),
+          summary: summary && summary.trim(),
+        },
+      });
+      if (res && res.data && res.data.update_cucb_gigs_by_pk) {
+        console.log(lastSaved);
+        lastSaved = { ...res.data.update_cucb_gigs_by_pk };
+        console.log(lastSaved);
+      }
+    } catch (e) {
+      // Oh shit
+      console.error(e);
+    }
+  }
+
+  function keyboardShortcuts(e) {
+    if (e.altKey && e.which === 83) {
+      e.preventDefault();
+      saveGig(e);
+    }
+  }
+
   let venueFuse = new Fuse(venues, {
     ignoreLocation: true,
     threshold: 0.4,
@@ -216,7 +265,7 @@
   <title>{makeTitle(`Edit gig: ${title.trim()}`)}</title>
 </svelte:head>
 
-<svelte:window on:beforeunload="{unloadIfSaved}" />
+<svelte:window on:beforeunload="{unloadIfSaved}" on:keydown="{keyboardShortcuts}" />
 
 <h1>Gig editor</h1>
 <h2>
@@ -313,4 +362,22 @@
 </form>
 
 <h3>Client/caller details</h3>
+<form on:submit|preventDefault class="theme-{$themeName}">
+  <label>Clients{#each contacts.filter(contact => contact.client) as client}{client.contact.name}{/each}</label>
+</form>
 <h3>Notes</h3>
+<form on:submit|preventDefault class="theme-{$themeName}">
+  <label>{#if advertise}Public advert{:else}Summary{/if}<textarea
+      bind:value="{summary}"
+      rows="7"
+      data-test="gig-edit-{id}-summary"
+    ></textarea></label>
+  <label>Band notes<textarea bind:value="{notes_band}" rows="7" data-test="gig-edit-{id}-notes-band"></textarea></label>
+  <label>Admin notes<textarea
+      bind:value="{notes_admin}"
+      rows="7"
+      data-test="gig-edit-{id}-notes-admin"
+    ></textarea></label>
+</form>
+
+<button on:click="{saveGig}" data-test="gig-edit-{id}-save">Save changes</button>
