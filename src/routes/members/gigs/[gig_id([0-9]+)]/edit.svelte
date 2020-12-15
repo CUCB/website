@@ -12,23 +12,29 @@
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
   function sortVenues(venues) {
-    venues.sort((a, b) =>
-      a.name < b.name ? -1 : a.name > b.name ? 1 : a.subvenue < b.subvenue ? -1 : a.subvenue > b.subvenue ? 1 : 0,
-    );
+    venues.sort((a, b) => {
+      a = { name: a.name && a.name.toLowerCase(), subvenue: a.subvenue && a.subvenue.toLowerCase() };
+      b = { name: b.name && a.name.toLowerCase(), subvenue: b.subvenue && b.subvenue.toLowerCase() };
+      a.name < b.name ? -1 : a.name > b.name ? 1 : a.subvenue < b.subvenue ? -1 : a.subvenue > b.subvenue ? 1 : 0;
+    });
   }
 
   function sortContacts(contacts) {
-    contacts.sort((a, b) =>
-      a.contact.name < b.contact.name
+    contacts.sort((a, b) => {
+      a = a.contact ? a.contact : a;
+      b = b.contact ? b.contact : b;
+      a = { name: a.name && a.name.toLowerCase(), organization: a.organization && a.organization.toLowerCase() };
+      b = { name: b.name && b.name.toLowerCase(), organization: b.organization && b.organization.toLowerCase() };
+      return a.name < b.name
         ? -1
-        : b.contact.name < a.contact.name
+        : b.name < a.name
         ? 1
-        : a.contact.organization < b.contact.organization
+        : a.organization < b.organization
         ? -1
-        : b.contact.organization < a.contact.organization
+        : b.organization < a.organization
         ? 1
-        : 0,
-    );
+        : 0;
+    });
   }
 
   export async function preload({ params }, session) {
@@ -108,6 +114,7 @@
   import moment from "moment";
   import Select from "../../../../components/Forms/Select.svelte";
   import VenueEditor from "../../../../components/Gigs/VenueEditor.svelte";
+  import ContactEditor from "../../../../components/Gigs/ContactEditor.svelte";
   import Fuse from "fuse.js";
   import { client as graphqlClient } from "../../../../graphql/client";
   import { tick } from "svelte";
@@ -116,10 +123,19 @@
 
   let venueSearch = "";
   let displayVenueEditor = false;
+  let displayContactEditor = false;
   let editingSubvenue = false;
   let recentlySavedOpacity = tweened(0, { duration: 150 });
   let recentlySavedTimer = () => recentlySavedOpacity.set(0);
-  let searchedVenuesList, searchVenuesField, venueListElement, selectedClient, selectedCaller;
+  let searchedVenuesList,
+    searchVenuesField,
+    venueListElement,
+    clientListElement,
+    callerListElement,
+    selectedClient,
+    selectedCaller,
+    contactToEdit,
+    editContactType;
   $: clients = contacts.filter(contact => contact.client);
   $: callers = contacts.filter(contact => contact.calling);
 
@@ -315,7 +331,6 @@
   let selectCaller = e => selectContact(contactTypes.CALLER, e);
 
   async function removeContact(contactType, contact_id, e) {
-    let mutation;
     let existingContact = contacts.find(contact => contact.id === contact_id);
     if (existingContact.client && existingContact.calling) {
       let client, calling;
@@ -366,8 +381,58 @@
   let removeClient = id => e => removeContact(contactTypes.CLIENT, id, e);
   let removeCaller = id => e => removeContact(contactTypes.CALLER, id, e);
 
-  async function newClient(e) {}
-  async function newCaller(e) {}
+  function editContact(contact_id, contactType) {
+    return e => {
+      editContactType = contactType;
+      contactToEdit = contacts.find(contact => contact.id === contact_id).contact;
+      displayContactEditor = true;
+    };
+  }
+
+  async function updateContact(e) {
+    let updatedContact = e.detail.contact;
+    let currentContact = allContacts.find(contact => contact.id === updatedContact.id);
+    if (currentContact) {
+      currentContact.name = updatedContact.name;
+      currentContact.email = updatedContact.email;
+      currentContact.organization = updatedContact.organization;
+      currentContact.notes = updatedContact.notes;
+      currentContact.caller = updatedContact.caller;
+      let gigContact = contacts.find(contact => contact.id === updatedContact.id);
+      gigContact.contact = { ...updatedContact };
+      sortContacts(allContacts);
+      sortContacts(contacts);
+      contacts = contacts;
+      displayContactEditor = false;
+    } else {
+      allContacts.push(updatedContact);
+      sortContacts(allContacts);
+      displayContactEditor = false;
+      await tick();
+      if (editContactType === contactTypes.CLIENT) {
+        clientListElement.value = updatedContact.id;
+        clientListElement.focus();
+      } else {
+        callerListElement.value = updatedContact.id;
+        callerListElement.focus();
+      }
+    }
+  }
+
+  async function cancelEditContact(e) {
+    displayContactEditor = false;
+  }
+
+  async function newClient(e) {
+    editContactType = contactTypes.CLIENT;
+    contactToEdit = { caller: false };
+    displayContactEditor = true;
+  }
+  async function newCaller(e) {
+    editContactType = contactTypes.CALLER;
+    contactToEdit = { caller: true };
+    displayContactEditor = true;
+  }
 
   let venueFuse = new Fuse(venues, {
     ignoreLocation: true,
@@ -399,9 +464,12 @@
     margin: 0 0.5em;
   }
 
-  form * {
+  form:not(.contacts) * {
     width: 100%;
     box-sizing: border-box;
+  }
+  form.contacts > * {
+    width: 100%;
   }
 
   button {
@@ -422,6 +490,33 @@
     font-size: 1.2rem;
     width: 150px;
     box-shadow: 0 0 4px var(--form_color);
+  }
+
+  .gig-contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding-left: 0.25em;
+  }
+
+  .gig-contact:nth-child(2n) {
+    background: rgba(var(--accent_triple), 0.1);
+  }
+
+  .button-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .button-group button {
+    width: unset;
+    margin: 0.25em 0.25em;
+  }
+
+  hr {
+    margin: 1em 0;
   }
 </style>
 
@@ -515,74 +610,93 @@
       {/each}
     </div>
 
-    <span>
+    <div class="button-group">
       <button on:click="{newVenue}">Create new venue</button>
       &nbsp;
       <button on:click="{newSubvenue}">Create new subvenue</button>
       &nbsp;
       <button on:click="{editVenue}">Edit this venue</button>
-    </span>
+    </div>
   {:else}
     <VenueEditor on:saved="{updateVenue}" on:cancel="{cancelEditVenue}" {...venue} nameEditable="{!editingSubvenue}" />
   {/if}
 </form>
-
+<hr />
 <h3>Client/caller details</h3>
-<form on:submit|preventDefault class="theme-{$themeName}">
+{#if !displayContactEditor}
   <h4>Clients</h4>
-  <div data-test="gig-edit-{id}-client-list">
-    {#each clients as contact (contact.id)}
-      <div class="gig-contact" transition:fade>
-        {contactDisplayName(contact.contact)}
-        <button
-          on:click="{removeClient(contact.id)}"
-          data-test="gig-edit-{id}-clients-{contact.id}-remove"
-        >Remove</button>
-        <button on:click="{editContact(contact.id)}">Edit</button>
-      </div>
-    {/each}
-  </div>
-  <!-- svelte-ignore a11y-label-has-associated-control -->
-  <label data-test="gig-edit-{id}-client-select">Add client
-    <Select bind:value="{selectedClient}">
-      <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
-      {#each allContacts as contact}
-        <!-- TODO don't show selected clients in this list -->
-        <option value="{contact.id}">{contactDisplayName(contact)}</option>
+  <form on:submit|preventDefault class="theme-{$themeName} contacts">
+    <div data-test="gig-edit-{id}-client-list">
+      {#each clients as contact (contact.id)}
+        <div class="gig-contact" transition:fade|local>
+          <span data-test="contact-name">{contactDisplayName(contact.contact)}</span>
+          <div class="button-group">
+            <button
+              on:click="{editContact(contact.id, contactTypes.CLIENT)}"
+              data-test="gig-edit-{id}-clients-{contact.id}-edit"
+            >Edit</button>
+            <button
+              on:click="{removeClient(contact.id)}"
+              data-test="gig-edit-{id}-clients-{contact.id}-remove"
+            >Remove</button>
+          </div>
+        </div>
       {/each}
-    </Select></label>
-  <span>
-    <button on:click="{selectClient}" data-test="gig-edit-{id}-client-select-confirm">Select client</button>
-    <button on:click="{newClient}">Create new client</button>
-  </span>
+    </div>
+    <!-- svelte-ignore a11y-label-has-associated-control -->
+    <label data-test="gig-edit-{id}-client-select">Add client
+      <Select bind:value="{selectedClient}" bind:select="{clientListElement}">
+        <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
+        {#each allContacts as contact}
+          <!-- TODO don't show selected clients in this list -->
+          <option value="{contact.id}">{contactDisplayName(contact)}</option>
+        {/each}
+      </Select></label>
+    <div class="button-group">
+      <button on:click="{selectClient}" data-test="gig-edit-{id}-client-select-confirm">Select client</button>
+      <button on:click="{newClient}">Create new client</button>
+    </div>
+  </form>
   <h4>Callers</h4>
-  <div data-test="gig-edit-{id}-caller-list">
-    {#each callers as contact (contact.id)}
-      <div class="gig-contact" transition:fade>
-        {contactDisplayName(contact.contact)}
-        <button
-          on:click="{removeCaller(contact.id)}"
-          data-test="gig-edit-{id}-callers-{contact.id}-remove"
-        >Remove</button>
-        <button on:click="{editContact(contact.id)}">Edit</button>
-      </div>
-    {/each}
-  </div>
-  <!-- svelte-ignore a11y-label-has-associated-control -->
-  <label data-test="gig-edit-{id}-caller-select">Add caller
-    <Select bind:value="{selectedCaller}">
-      <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
-      {#each allContacts.filter(contact => contact.caller) as contact}
-        <!-- TODO don't show selected clients in this list -->
-        <option value="{contact.id}">{contactDisplayName(contact)}</option>
+  <form on:submit|preventDefault class="theme-{$themeName} contacts">
+    <div data-test="gig-edit-{id}-caller-list">
+      {#each callers as contact (contact.id)}
+        <div class="gig-contact" transition:fade|local>
+          <span data-test="contact-name">{contactDisplayName(contact.contact)}</span>
+          <div class="button-group">
+            <button
+              on:click="{editContact(contact.id, contactTypes.CALLER)}"
+              data-test="gig-edit-{id}-callers-{contact.id}-edit"
+            >Edit</button>
+            <button
+              on:click="{removeCaller(contact.id)}"
+              data-test="gig-edit-{id}-callers-{contact.id}-remove"
+            >Remove</button>
+          </div>
+        </div>
       {/each}
-    </Select>
-  </label>
-  <span>
-    <button on:click="{selectCaller}" data-test="gig-edit-{id}-caller-select-confirm">Select caller</button>
-    <button on:click="{newCaller}">Create new caller</button>
-  </span>
-</form>
+    </div>
+    <!-- svelte-ignore a11y-label-has-associated-control -->
+    <label data-test="gig-edit-{id}-caller-select">Add caller
+      <Select bind:value="{selectedCaller}" bind:select="{callerListElement}">
+        <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
+        {#each allContacts.filter(contact => contact.caller) as contact}
+          <!-- TODO don't show selected clients in this list -->
+          <option value="{contact.id}">{contactDisplayName(contact)}</option>
+        {/each}
+      </Select>
+    </label>
+    <div class="button-group">
+      <button on:click="{selectCaller}" data-test="gig-edit-{id}-caller-select-confirm">Select caller</button>
+      <button on:click="{newCaller}">Create new caller</button>
+    </div>
+  </form>
+{:else}
+  <form on:submit|preventDefault class="theme-{$themeName} contacts">
+    <ContactEditor {...contactToEdit} on:saved="{updateContact}" on:cancel="{cancelEditContact}" />
+  </form>
+{/if}
+<hr />
 <h3>Notes</h3>
 <form on:submit|preventDefault class="theme-{$themeName}">
   <label>{#if advertise}Public advert{:else}Summary{/if}<textarea

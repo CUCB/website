@@ -832,7 +832,25 @@ let contacts = [
   {
     id: 3274354 * 2,
     user_id: null,
-    name: "A Client",
+    name: "A Client1",
+    email: "client@gmail.com",
+    organization: null,
+    notes: null,
+    caller: false,
+  },
+  {
+    id: 3274354 * 3,
+    user_id: null,
+    name: "A Client2",
+    email: "client@gmail.com",
+    organization: null,
+    notes: null,
+    caller: false,
+  },
+  {
+    id: 3274354 * 4,
+    user_id: null,
+    name: "A Client3",
     email: "client@gmail.com",
     organization: null,
     notes: null,
@@ -854,8 +872,6 @@ describe("gig editor", () => {
         lastName: "Webmaster",
       },
     });
-    cy.executeMutation(CreateContacts, { variables: { contacts } });
-    cy.executeMutation(ClearContactsForGig, { variables: { gig_id: gig.id } });
     cy.executeMutation(CreateVenues, { variables: { venues, on_conflict: onConflictVenue } });
     cy.executeMutation(CreateGig, { variables: { ...gig } });
   });
@@ -870,6 +886,8 @@ describe("gig editor", () => {
         return original.apply(this, arguments);
       };
     });
+    cy.executeMutation(CreateContacts, { variables: { contacts } });
+    cy.executeMutation(ClearContactsForGig, { variables: { gig_id: gig.id } });
     cy.login("cypress", "abc123");
     cy.visit(`/members/gigs/${gig.id}/edit`);
   });
@@ -955,7 +973,7 @@ describe("gig editor", () => {
     cy.contains("Band notes").should("not.exist");
   });
 
-  it.only("can add clients and callers", () => {
+  it("can add clients and callers", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select(contacts[0].name);
     cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
@@ -978,4 +996,52 @@ describe("gig editor", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-clients-${contacts[0].id}-remove]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
   });
+
+  it("sorts contacts when adding them to a gig", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[2].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[1].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[3].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
+    // verify the prices in the column are indeed in sorted order
+    const toStrings = cells$ => Cypress._.map(cells$, "textContent");
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list] [data-test=contact-name]`)
+      .then(toStrings)
+      .then(names => {
+        expect(names[0]).to.equal(contacts[1].name);
+        expect(names[1]).to.equal(contacts[2].name);
+        expect(names[2]).to.equal(contacts[3].name);
+      });
+
+    cy.reload();
+
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list] [data-test=contact-name]`)
+      .then(toStrings)
+      .then(names => {
+        expect(names[0]).to.equal(contacts[1].name);
+        expect(names[1]).to.equal(contacts[2].name);
+        expect(names[2]).to.equal(contacts[3].name);
+      });
+  });
+
+  it("can edit existing clients and callers", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[1].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-clients-${contacts[1].id}-edit]`).click();
+    cy.get(`[data-test=contact-editor-organization]`)
+      .click()
+      .clear()
+      .type("Some org");
+    cy.get(`[data-test=contact-editor-name]`)
+      .click()
+      .clear()
+      .type("A ClientN");
+    cy.get(`[data-test=contact-editor-save]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list] [data-test=contact-name]`).contains("A ClientN @ Some org");
+  });
+
+  // TODO test contacts can be created then added to gig
+
+  // TODO add venue editor tests
 });

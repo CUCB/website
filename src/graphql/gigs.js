@@ -25,7 +25,6 @@ const FragmentGigDetails = gql`
       id: contact_id
       contact {
         name
-        organization
       }
     }
     gig_type {
@@ -145,6 +144,14 @@ export const QueryEditGigDetails = gql`
         postcode
         latitude
         longitude
+      }
+      contacts {
+        contact {
+          email
+          notes
+          caller
+          id
+        }
       }
     }
   }
@@ -565,6 +572,10 @@ export const UpsertGigContact = gql`
       contact {
         name
         organization
+        email
+        notes
+        caller
+        user_id
       }
     }
   }
@@ -575,6 +586,44 @@ export const RemoveGigContact = gql`
     delete_cucb_gigs_contacts_by_pk(contact_id: $contact_id, gig_id: $gig_id) {
       contact_id
       gig_id
+    }
+  }
+`;
+
+export const CreateContact = gql`
+  mutation CreateContact($name: String!, $organization: String, $email: String, $caller: Boolean!, $notes: String) {
+    insert_cucb_contacts_one(
+      object: { name: $name, organization: $organization, email: $email, caller: $caller, notes: $notes }
+    ) {
+      id
+      name
+      organization
+      email
+      caller
+      notes
+    }
+  }
+`;
+
+export const UpdateContact = gql`
+  mutation UpdateGigContact(
+    $id: bigint!
+    $name: String!
+    $organization: String
+    $email: String
+    $caller: Boolean!
+    $notes: String
+  ) {
+    update_cucb_contacts_by_pk(
+      _set: { name: $name, organization: $organization, email: $email, caller: $caller, notes: $notes }
+      pk_columns: { id: $id }
+    ) {
+      id
+      name
+      organization
+      email
+      caller
+      notes
     }
   }
 `;
