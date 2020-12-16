@@ -1,10 +1,9 @@
 <script context="module">
-  export async function preload(page, session) {
+  export async function preload(_page, session) {
     let client = makeClient(this.fetch);
     let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
 
     let res_gig, res_signup, res_gig_2;
-    let gig;
     try {
       res_gig = await client.query({
         query: QueryMultiGigDetails(session.hasuraRole),
@@ -60,7 +59,7 @@
         variables: { where: { allow_signups: { _eq: true } } },
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
       await handleErrors.bind(this)(e, session);
       return;
     }
@@ -163,7 +162,6 @@
   $: currentCalendarMonth && display(displaying);
 
   let gotoDate = newDate => async () => {
-    console.log(newDate);
     if (!(newDate in calendarGigs)) {
       let res_gig_2 = await $client.query({
         query: QueryMultiGigDetails($session.hasuraRole),
@@ -323,26 +321,23 @@
 
     <p>This is a listing of all our gigs. Some things you may be interested in are:</p>
     <ul>
-      <li>
-        <a href="/members/gigs/help">How to use the gig diary</a>
-      </li>
+      <li><a href="/members/gigs/help">How to use the gig diary</a></li>
       <li>
         Specifically,&nbsp;
         <a href="/members/gigs/help#calendar-feeds">how to set-up a calendar feed</a>
         which automatically updates with the gigs you are on the lineup for
       </li>
-      <li>
-        <a href="/members/gigs/venues">The venues we've played at</a>
-      </li>
-      <li>
-        <a href="/members/gigs/venues">The people associated with the band</a>
-      </li>
+      <li><a href="/members/gigs/venues">The venues we've played at</a></li>
+      <li><a href="/members/gigs/venues">The people associated with the band</a></li>
     </ul>
     {#if drafts.length > 0}
       There are some drafts lying around:
-      {#each drafts as gig, i}
+      {#each drafts as gig}
         <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
-        [created {moment(gig.posting_time).format('HH:MM, DD/MM')} by {(gig.user && gig.user.first) || 'someone?'}],
+        [created
+        {moment(gig.posting_time).format('HH:MM, DD/MM')}
+        by
+        {(gig.user && gig.user.first) || 'someone?'}],
       {/each}
       so please don't leave them here forever
     {/if}
@@ -382,8 +377,8 @@
 
 {#each gigs as gig (gig.id)}
   {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== 'undefined'}
-    <Summary {gig} signupGig="{signupGigs[gig.id]}" {userInstruments} linkHeading="{true}" />
+    <Summary gig="{gig}" signupGig="{signupGigs[gig.id]}" userInstruments="{userInstruments}" linkHeading="{true}" />
   {:else}
-    <Summary {gig} {userInstruments} linkHeading="{true}" />
+    <Summary gig="{gig}" userInstruments="{userInstruments}" linkHeading="{true}" />
   {/if}
 {:else}No gigs to display{/each}

@@ -95,5 +95,5 @@ server
     }),
   )
   .listen(PORT, err => {
-    if (err) console.log("error", err);
+    if (err) console.error("error", err);
   });

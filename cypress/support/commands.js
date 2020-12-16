@@ -86,3 +86,10 @@ Cypress.Commands.add("hasTooltip", { prevSubject: true }, (subject, content) => 
     .contains(content)
     .should("be.visible");
 });
+
+Cypress.Commands.add("paste", { prevSubject: true }, (subject, content) => {
+  cy.wrap(subject)
+    .focus()
+    .invoke("val", content)
+    .trigger("input");
+});

@@ -103,23 +103,43 @@
 </style>
 
 <form on:submit|preventDefault="{saveVenue}">
-  <label> Name <input type="text" bind:value="{name}" disabled="{!nameEditable}" required /> </label>
-  <label> Subvenue <input type="text" bind:value="{subvenue}" /> </label>
-  <label> Map link <input type="text" bind:value="{map_link}" /> </label>
-  <label> Distance (miles) <input type="number" bind:value="{distance_miles}" min="0" max="100" /> </label>
-  <label> Band notes <input type="text" bind:value="{notes_band}" /> </label>
-  <label> Admin notes <input type="text" bind:value="{notes_admin}" /> </label>
-  <label> Address <input type="text" bind:value="{address}" /> </label>
-  <label> Postcode <input type="text" bind:value="{postcode}" /> </label>
+  <label>
+    Name
+    <input type="text" bind:value="{name}" disabled="{!nameEditable}" required data-test="venue-editor-name" />
+  </label>
+  <label> Subvenue <input type="text" bind:value="{subvenue}" data-test="venue-editor-subvenue" /> </label>
+  <label> Map link <input type="text" bind:value="{map_link}" data-test="venue-editor-map-link" /> </label>
+  <label>
+    Distance (miles)
+    <input type="number" bind:value="{distance_miles}" min="0" max="100" data-test="venue-editor-distance" />
+  </label>
+  <label> Band notes <input type="text" bind:value="{notes_band}" data-test="venue-editor-notes-band" /> </label>
+  <label> Admin notes <input type="text" bind:value="{notes_admin}" data-test="venue-editor-notes-admin" /> </label>
+  <label> Address <input type="text" bind:value="{address}" data-test="venue-editor-address" /> </label>
+  <label> Postcode <input type="text" bind:value="{postcode}" data-test="venue-editor-postcode" /> </label>
   <label>
     Latitude
     {#if latitude === latLngFromLink[0]}(inferred from map link){/if}
-    <input type="number" step="0.00000001" min="-90" max="90" bind:value="{latitude}" />
+    <input
+      type="number"
+      step="0.00000001"
+      min="-90"
+      max="90"
+      bind:value="{latitude}"
+      data-test="venue-editor-latitude"
+    />
   </label>
   <label>
     Longitude
     {#if longitude === latLngFromLink[1]}(inferred from map link){/if}
-    <input type="number" step="0.00000001" min="-180" max="180" bind:value="{longitude}" />
+    <input
+      type="number"
+      step="0.00000001"
+      min="-180"
+      max="180"
+      bind:value="{longitude}"
+      data-test="venue-editor-longitude"
+    />
   </label>
   <div class="buttons">
     <input type="submit" value="Save venue" /><button on:click="{() => dispatch('cancel')}">Cancel</button>

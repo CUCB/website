@@ -216,7 +216,7 @@
       : contact.organization;
   }
 
-  async function updateVenue(e) {
+  async function updateVenue(_) {
     if (venue.id !== undefined) {
       venue = e.detail.venue;
       sortVenues(venues);
@@ -234,14 +234,14 @@
     venueListElement.focus();
   }
 
-  async function cancelEditVenue(e) {
+  async function cancelEditVenue(_) {
     venue = lastSaved.venue;
     displayVenueEditor = false;
     await tick();
     venueListElement.focus();
   }
 
-  async function saveGig(e) {
+  async function saveGig(_) {
     try {
       let res = await $graphqlClient.mutate({
         mutation: UpdateGig,
@@ -269,6 +269,7 @@
       }
     } catch (e) {
       // Oh shit
+      // TODO handle this better
       console.error(e);
     }
   }
@@ -285,7 +286,7 @@
     CLIENT: {},
   };
 
-  async function selectContact(contactType, e) {
+  async function selectContact(contactType, _) {
     let contact_id, existingContact;
     let is_client, is_calling;
     if (contactType === contactTypes.CLIENT) {
@@ -330,7 +331,7 @@
   let selectClient = e => selectContact(contactTypes.CLIENT, e);
   let selectCaller = e => selectContact(contactTypes.CALLER, e);
 
-  async function removeContact(contactType, contact_id, e) {
+  async function removeContact(contactType, contact_id, _) {
     let existingContact = contacts.find(contact => contact.id === contact_id);
     if (existingContact.client && existingContact.calling) {
       let client, calling;
@@ -382,9 +383,9 @@
   let removeCaller = id => e => removeContact(contactTypes.CALLER, id, e);
 
   function editContact(contact_id, contactType) {
-    return e => {
+    return _ => {
       editContactType = contactType;
-      contactToEdit = contacts.find(contact => contact.id === contact_id).contact;
+      contactToEdit = { ...contacts.find(contact => contact.id === contact_id).contact, id: contact_id };
       displayContactEditor = true;
     };
   }
@@ -410,29 +411,33 @@
       displayContactEditor = false;
       await tick();
       if (editContactType === contactTypes.CLIENT) {
-        clientListElement.value = updatedContact.id;
+        selectedClient = updatedContact.id;
         clientListElement.focus();
       } else {
-        callerListElement.value = updatedContact.id;
+        selectedCaller = updatedContact.id;
         callerListElement.focus();
       }
     }
   }
 
-  async function cancelEditContact(e) {
+  async function cancelEditContact(_) {
     displayContactEditor = false;
   }
 
-  async function newClient(e) {
+  async function newClient(_) {
     editContactType = contactTypes.CLIENT;
     contactToEdit = { caller: false };
     displayContactEditor = true;
   }
-  async function newCaller(e) {
+
+  async function newCaller(_) {
     editContactType = contactTypes.CALLER;
     contactToEdit = { caller: true };
     displayContactEditor = true;
   }
+
+  // TODO edit selected caller/client??
+  // TODO search for clients/callers
 
   let venueFuse = new Fuse(venues, {
     ignoreLocation: true,
@@ -611,7 +616,7 @@
     </div>
 
     <div class="button-group">
-      <button on:click="{newVenue}">Create new venue</button>
+      <button on:click="{newVenue}" data-test="gig-edit-{id}-create-venue">Create new venue</button>
       &nbsp;
       <button on:click="{newSubvenue}">Create new subvenue</button>
       &nbsp;
@@ -625,7 +630,7 @@
 <h3>Client/caller details</h3>
 {#if !displayContactEditor}
   <h4>Clients</h4>
-  <form on:submit|preventDefault class="theme-{$themeName} contacts">
+  <form on:submit|preventDefault class="theme-{$themeName} contacts" data-test="client-form">
     <div data-test="gig-edit-{id}-client-list">
       {#each clients as contact (contact.id)}
         <div class="gig-contact" transition:fade|local>
@@ -654,11 +659,11 @@
       </Select></label>
     <div class="button-group">
       <button on:click="{selectClient}" data-test="gig-edit-{id}-client-select-confirm">Select client</button>
-      <button on:click="{newClient}">Create new client</button>
+      <button on:click="{newClient}" data-test="gig-edit-{id}-client-new">Create new client</button>
     </div>
   </form>
   <h4>Callers</h4>
-  <form on:submit|preventDefault class="theme-{$themeName} contacts">
+  <form on:submit|preventDefault class="theme-{$themeName} contacts" data-test="caller-form">
     <div data-test="gig-edit-{id}-caller-list">
       {#each callers as contact (contact.id)}
         <div class="gig-contact" transition:fade|local>
@@ -679,7 +684,7 @@
     <!-- svelte-ignore a11y-label-has-associated-control -->
     <label data-test="gig-edit-{id}-caller-select">Add caller
       <Select bind:value="{selectedCaller}" bind:select="{callerListElement}">
-        <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
+        <option selected="selected" disabled value="{undefined}">--- SELECT A CALLER ---</option>
         {#each allContacts.filter(contact => contact.caller) as contact}
           <!-- TODO don't show selected clients in this list -->
           <option value="{contact.id}">{contactDisplayName(contact)}</option>
@@ -687,8 +692,8 @@
       </Select>
     </label>
     <div class="button-group">
-      <button on:click="{selectCaller}" data-test="gig-edit-{id}-caller-select-confirm">Select caller</button>
-      <button on:click="{newCaller}">Create new caller</button>
+      <button on:click|preventDefault="{selectCaller}" data-test="gig-edit-{id}-caller-select-confirm">Select caller</button>
+      <button on:click|preventDefault="{newCaller}" data-test="gig-edit-{id}-caller-new">Create new caller</button>
     </div>
   </form>
 {:else}

@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher } from "svelte";
   import { makeClient } from "../../graphql/client";
-  import { CreateContact, UpdateContact, UpdateVenue } from "../../graphql/gigs";
+  import { CreateContact, UpdateContact } from "../../graphql/gigs";
   export let id, name, organization, email, caller, notes;
 
   const dispatch = createEventDispatcher();
@@ -52,6 +52,7 @@
   input[type="submit"],
   button {
     width: unset;
+    margin: 0.25em;
   }
   .buttons {
     display: flex;

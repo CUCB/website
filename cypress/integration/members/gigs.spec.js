@@ -9,6 +9,7 @@ import {
   InstrumentsOnGig,
   CreateContacts,
   ClearContactsForGig,
+  DeleteContacts,
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
@@ -886,8 +887,10 @@ describe("gig editor", () => {
         return original.apply(this, arguments);
       };
     });
-    cy.executeMutation(CreateContacts, { variables: { contacts } });
     cy.executeMutation(ClearContactsForGig, { variables: { gig_id: gig.id } });
+    cy.executeMutation(DeleteContacts, { variables: { where: { name: { _like: "A Client%" } } } });
+    cy.executeMutation(DeleteContacts, { variables: { where: { name: { _like: "A Caller%" } } } });
+    cy.executeMutation(CreateContacts, { variables: { contacts } });
     cy.login("cypress", "abc123");
     cy.visit(`/members/gigs/${gig.id}/edit`);
   });
@@ -1038,10 +1041,52 @@ describe("gig editor", () => {
       .clear()
       .type("A ClientN");
     cy.get(`[data-test=contact-editor-save]`).click();
-    cy.get(`[data-test=gig-edit-${gig.id}-client-list] [data-test=contact-name]`).contains("A ClientN @ Some org");
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list]`).contains("A ClientN @ Some org");
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select]`)
+      .contains("A Client1")
+      .should("not.exist");
+    cy.reload();
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list]`).contains("A ClientN @ Some org");
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select]`)
+      .contains("A Client1")
+      .should("not.exist");
   });
 
-  // TODO test contacts can be created then added to gig
+  it("can create new contacts and add them to gigs", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`, { log: false }).select(
+      contacts[1].name,
+      { log: false },
+    ); // Wait for buttons to have event handlers sorted
+    cy.log("Waited for page to be ready");
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-new]`).click();
+    cy.get(`[data-test=contact-editor-caller]`).should("be.checked");
+    cy.get(`[data-test=contact-editor-name]`).type("A Caller");
+    cy.get(`[data-test=contact-editor-email]`).type("a.caller@ceili.dh");
+    cy.get(`[data-test=contact-editor-save]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`)
+      .find(":selected")
+      .contains("A Caller");
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains("A Caller");
+    cy.reload();
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains("A Caller");
+  });
 
   // TODO add venue editor tests
+  it("can create a new venue", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`, { log: false }).select(
+      contacts[1].name,
+      { log: false },
+    ); // Wait for buttons to have event handlers sorted
+    cy.log("Waited for page to be ready");
+    cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
+    cy.get(`[data-test=venue-editor-name]`)
+      .click()
+      .type("Mog on the Tyne");
+    cy.get(`[data-test=venue-editor-map-link]`).paste(
+      "https://www.google.com/maps/place/Mog+on+the+Tyne/@54.9706584,-1.6163193,0.25z",
+    );
+    cy.get(`[data-test=venue-editor-latitude]`).should("have.value", "54.9706584");
+    cy.get(`[data-test=venue-editor-longitude]`).should("have.value", "-1.6163193");
+  });
 });

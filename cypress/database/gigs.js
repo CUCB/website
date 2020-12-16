@@ -165,3 +165,11 @@ export const ClearContactsForGig = `
     }
   }
 `;
+
+export const DeleteContacts = `
+  mutation DeleteContacts($where: cucb_contacts_bool_exp!) {
+    delete_cucb_contacts(where: $where) {
+      affected_rows
+    }
+  }
+`;
