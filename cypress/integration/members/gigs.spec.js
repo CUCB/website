@@ -1000,7 +1000,7 @@ describe("gig editor", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
   });
 
-  it.only("sorts contacts when adding them to a gig", () => {
+  it("sorts contacts when adding them to a gig", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[2].name);
     cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[1].name);
