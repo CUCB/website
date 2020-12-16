@@ -1000,14 +1000,17 @@ describe("gig editor", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
   });
 
-  it("sorts contacts when adding them to a gig", () => {
+  it.only("sorts contacts when adding them to a gig", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[2].name);
     cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[1].name);
     cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[3].name);
     cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
-    // verify the prices in the column are indeed in sorted order
+    cy.get(`[data-test=gig-edit-${gig.id}-client-list]`)
+      .contains(contacts[3].name)
+      .log("Wait for the last name to appear");
+    // verify the names are indeed in sorted order
     const toStrings = cells$ => Cypress._.map(cells$, "textContent");
     cy.get(`[data-test=gig-edit-${gig.id}-client-list] [data-test=contact-name]`)
       .then(toStrings)
