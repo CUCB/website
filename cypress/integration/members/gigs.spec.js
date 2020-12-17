@@ -3,6 +3,7 @@ import {
   CreateVenues,
   CreateGig,
   DeleteSignup,
+  DeleteVenues,
   SignupDetails,
   AddInstrument,
   RemoveInstruments,
@@ -873,8 +874,6 @@ describe("gig editor", () => {
         lastName: "Webmaster",
       },
     });
-    cy.executeMutation(CreateVenues, { variables: { venues, on_conflict: onConflictVenue } });
-    cy.executeMutation(CreateGig, { variables: { ...gig } });
   });
   beforeEach(() => {
     Cypress.on("window:load", function(window) {
@@ -890,7 +889,10 @@ describe("gig editor", () => {
     cy.executeMutation(ClearContactsForGig, { variables: { gig_id: gig.id } });
     cy.executeMutation(DeleteContacts, { variables: { where: { name: { _like: "A Client%" } } } });
     cy.executeMutation(DeleteContacts, { variables: { where: { name: { _like: "A Caller%" } } } });
+    cy.executeMutation(CreateGig, { variables: { ...gig } });
+    cy.executeMutation(DeleteVenues, { variables: { where: { name: { _like: "%og on%" } } } });
     cy.executeMutation(CreateContacts, { variables: { contacts } });
+    cy.executeMutation(CreateVenues, { variables: { venues, on_conflict: onConflictVenue } });
     cy.login("cypress", "abc123");
     cy.visit(`/members/gigs/${gig.id}/edit`);
   });
@@ -1075,7 +1077,6 @@ describe("gig editor", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains("A Caller");
   });
 
-  // TODO add venue editor tests
   it("can create a new venue", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`, { log: false }).select(
       contacts[1].name,
@@ -1091,5 +1092,82 @@ describe("gig editor", () => {
     );
     cy.get(`[data-test=venue-editor-latitude]`).should("have.value", "54.9706584");
     cy.get(`[data-test=venue-editor-longitude]`).should("have.value", "-1.6163193");
+    cy.get(`[data-test=venue-editor-notes-band]`)
+      .click()
+      .type("Notey notey note");
+    cy.get(`[data-test=venue-editor-save]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
+      .should("have.focus")
+      .find(":selected")
+      .contains("Mog on the Tyne");
+
+    cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
+    cy.get(`[data-test=venue-editor-name]`)
+      .click()
+      .type("Cog on the Line");
+    cy.get(`[data-test=venue-editor-save]`).click();
+
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
+      .find(":contains('og on')")
+      .then(elements => {
+        let venues = Cypress.$.map(elements, e => e.innerHTML);
+        expect(venues).to.have.length(2).and.be.ascending;
+      });
+
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`).select("Mog on the Tyne");
+    cy.get(`[data-test=gig-edit-${gig.id}-edit-venue]`).click();
+    cy.get(`[data-test=venue-editor-name]`).should("have.value", "Mog on the Tyne");
+    cy.get(`[data-test=venue-editor-notes-band]`).should("have.value", "Notey notey note");
+    cy.get(`[data-test=venue-editor-subvenue]`).type("Prrrrs");
+    cy.get(`[data-test=venue-editor-cancel]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
+      .should("have.focus")
+      .find(":selected")
+      .should("contain", "Mog on the Tyne")
+      .and("not.contain", "Prrr");
+    cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+    cy.reload();
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
+      .find(":selected")
+      .should("contain", "Mog on the Tyne")
+      .and("not.contain", "Prrr");
+  });
+
+  it("can search for a newly created venue", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`, { log: false }).select(
+      contacts[1].name,
+      { log: false },
+    ); // Wait for buttons to have event handlers sorted
+    cy.log("Waited for page to be ready");
+    cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
+    cy.get(`[data-test=venue-editor-name]`)
+      .click()
+      .type("Sog on the Pine");
+    cy.get(`[data-test=venue-editor-subvenue]`)
+      .click()
+      .type("A subvenue");
+    cy.get(`[data-test=venue-editor-save]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`).select(venues[2].name);
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`)
+      .click()
+      .type("Sog on the");
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`)
+      .contains("Sog on the Pine")
+      .click();
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
+      .find(":selected")
+      .contains("Sog on the Pine")
+      .contains("A subvenue");
+    cy.get(`[data-test=gig-edit-${gig.id}-edit-venue]`).click();
+    cy.get(`[data-test=venue-editor-subvenue]`)
+      .click()
+      .clear()
+      .type("A different subvenue");
+    cy.get(`[data-test=venue-editor-save]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+    cy.visit(`/members/gigs/${gig.id}`);
+    cy.get("*")
+      .should("contain", "Sog on the Pine")
+      .and("contain", "A different subvenue");
   });
 });

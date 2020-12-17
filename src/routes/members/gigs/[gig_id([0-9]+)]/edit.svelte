@@ -12,11 +12,9 @@
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
   function sortVenues(venues) {
-    venues.sort((a, b) => {
-      a = { name: a.name && a.name.toLowerCase(), subvenue: a.subvenue && a.subvenue.toLowerCase() };
-      b = { name: b.name && a.name.toLowerCase(), subvenue: b.subvenue && b.subvenue.toLowerCase() };
-      a.name < b.name ? -1 : a.name > b.name ? 1 : a.subvenue < b.subvenue ? -1 : a.subvenue > b.subvenue ? 1 : 0;
-    });
+    return venues.sort(
+      (a, b) => (a.name || "").localeCompare(b.name || "") || (a.subvenue || "").localeCompare(b.subvenue || ""),
+    );
   }
 
   function sortContacts(contacts) {
@@ -97,7 +95,6 @@
     lastSaved,
     venues,
     venue_id,
-    venue,
     type_id,
     gigTypes,
     id,
@@ -120,7 +117,11 @@
   import { tick } from "svelte";
   import { tweened } from "svelte/motion"; // TODO move the messages to their own component
   import { fade } from "svelte/transition";
+  import { stores } from "@sapper/app";
 
+  const { session } = stores();
+
+  let venue;
   let venueSearch = "";
   let displayVenueEditor = false;
   let displayContactEditor = false;
@@ -147,6 +148,8 @@
     lastSaved.summary === (summary && summary.trim()) &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
     lastSaved.notes_band === (notes_band && notes_band.trim());
+
+  $: venue = venues.find(venue => venue.id === venue_id);
 
   function unloadIfSaved(e) {
     if (saved) {
@@ -197,13 +200,12 @@
   }
 
   function newSubvenue() {
-    venue = { name: venue.name };
+    venue = { name: venues.find(venue => venue.id === venue_id).name };
     editVenue();
   }
 
   function editVenue() {
     editingSubvenue = Object.keys(venue).length === 1; // Only name set for this
-    lastSaved.venue = { ...lastSaved.venue };
     displayVenueEditor = true;
     venueSearch = "";
   }
@@ -216,32 +218,25 @@
       : contact.organization;
   }
 
-  async function updateVenue(_) {
-    if (venue.id !== undefined) {
-      venue = e.detail.venue;
-      sortVenues(venues);
-      venueFuse.remove(doc => doc.id === venue.id);
-    } else {
-      venue = e.detail.venue;
-      venue_id = venue.id;
-      venues.push(venue);
-      sortVenues(venues);
-    }
-    venueFuse.add(venue);
+  async function updateVenue(e) {
+    venue = e.detail.venue;
+    venue_id = venue.id;
+    venues = [...venues.filter(elem => elem.id !== venue.id), venue];
+    sortVenues(venues);
+    venues = venues;
     lastSaved.venue = venue;
     displayVenueEditor = false;
     await tick();
     venueListElement.focus();
   }
 
-  async function cancelEditVenue(_) {
-    venue = lastSaved.venue;
+  async function cancelEditVenue() {
     displayVenueEditor = false;
     await tick();
     venueListElement.focus();
   }
 
-  async function saveGig(_) {
+  async function saveGig() {
     try {
       let res = await $graphqlClient.mutate({
         mutation: UpdateGig,
@@ -267,6 +262,8 @@
         recentlySavedOpacity.set(1);
         lastSaved = { ...res.data.update_cucb_gigs_by_pk };
       }
+      editing_user = { id: $session.userId, first: $session.firstName, last: $session.lastName };
+      editing_time = moment().format();
     } catch (e) {
       // Oh shit
       // TODO handle this better
@@ -439,13 +436,22 @@
   // TODO edit selected caller/client??
   // TODO search for clients/callers
 
-  let venueFuse = new Fuse(venues, {
+  $: venueFuse = new Fuse(venues, {
     ignoreLocation: true,
-    threshold: 0.4,
+    threshold: 0.35,
     keys: ["name", "subvenue", "notes_admin", "notes_band", "address", "postcode"],
   });
-
   $: searchedVenues = venueSearch.length < 3 ? [] : venueFuse.search(venueSearch).map(searchRes => searchRes.item);
+  $: clientFuse = new Fuse(clients, {
+    ignoreLocation: true,
+    threshold: 0.35,
+    keys: ["name", "organization"],
+  });
+  $: callerFuse = new Fuse(callers, {
+    ignoreLocation: true,
+    threshold: 0.35,
+    keys: ["name", "organization"],
+  });
 </script>
 
 <style lang="scss">
@@ -547,7 +553,7 @@
     {/if}.
   {/if}
   {#if posting_time}
-    It was created on
+    It was created at
     {moment(posting_time).format('HH:mm DD/MM/YY')}
     {#if posting_user}
       &nbsp;by user
@@ -581,7 +587,7 @@
     <label> Title <input type="text" bind:value="{title}" data-test="gig-edit-{id}-title" /> </label>
     <label> Date <input type="date" bind:value="{date}" data-test="gig-edit-{id}-date" /> </label>
     <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label>
+    <label data-test="gig-edit-{id}-venue-select">
       Venue
       <Select bind:value="{venue_id}" bind:select="{venueListElement}">
         {#each venues as venue}
@@ -618,9 +624,9 @@
     <div class="button-group">
       <button on:click="{newVenue}" data-test="gig-edit-{id}-create-venue">Create new venue</button>
       &nbsp;
-      <button on:click="{newSubvenue}">Create new subvenue</button>
+      <button on:click="{newSubvenue}" data-test="gig-edit-{id}-create-subvenue">Create new subvenue</button>
       &nbsp;
-      <button on:click="{editVenue}">Edit this venue</button>
+      <button on:click="{editVenue}" data-test="gig-edit-{id}-edit-venue">Edit this venue</button>
     </div>
   {:else}
     <VenueEditor on:saved="{updateVenue}" on:cancel="{cancelEditVenue}" {...venue} nameEditable="{!editingSubvenue}" />
@@ -717,4 +723,4 @@
     ></textarea></label>
 </form>
 
-<button on:click="{saveGig}" data-test="gig-edit-{id}-save">Save changes</button>
+<div class="button-group"><button on:click="{saveGig}" data-test="gig-edit-{id}-save">Save changes</button></div>

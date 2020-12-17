@@ -173,3 +173,11 @@ export const DeleteContacts = `
     }
   }
 `;
+
+export const DeleteVenues = `
+  mutation DeleteVenues($where: cucb_gig_venues_bool_exp!) {
+    delete_cucb_gig_venues(where: $where) {
+      affected_rows
+    }
+  }
+`;

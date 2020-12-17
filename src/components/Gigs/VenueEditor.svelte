@@ -92,6 +92,7 @@
   input[type="submit"],
   button {
     width: unset;
+    margin: 0.25;
   }
   .buttons {
     display: flex;
@@ -102,7 +103,7 @@
   }
 </style>
 
-<form on:submit|preventDefault="{saveVenue}">
+<form on:submit|preventDefault>
   <label>
     Name
     <input type="text" bind:value="{name}" disabled="{!nameEditable}" required data-test="venue-editor-name" />
@@ -142,6 +143,9 @@
     />
   </label>
   <div class="buttons">
-    <input type="submit" value="Save venue" /><button on:click="{() => dispatch('cancel')}">Cancel</button>
+    <input type="submit" value="Save venue" data-test="venue-editor-save" on:click="{saveVenue}" /><button
+      on:click="{() => dispatch('cancel')}"
+      data-test="venue-editor-cancel"
+    >Cancel</button>
   </div>
 </form>

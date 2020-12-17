@@ -15,6 +15,9 @@
 
 import "./commands";
 import tinycolor from "../deps/tinycolor";
+import chaiSorted from "chai-sorted";
+
+chai.use(chaiSorted);
 
 const equalColor = (_chai, utils) => {
   function assertEqualColor(options) {
