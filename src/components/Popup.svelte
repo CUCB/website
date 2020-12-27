@@ -61,11 +61,18 @@
     justify-content: center;
     align-items: center;
   }
+
+  click-target {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+  }
 </style>
 
+<click-target on:click|self={() => current && !dirty && dispatch('close')}></click-target>
 <box-container on:click|self="{() => current && !dirty && dispatch('close')}">
   <popup-box
-    on:click
+    on:click|stopPropagation
     transition:fade="{{ duration: 250 }}"
     style="{width ? `width: ${width}` : ``}"
     class="theme-{$themeName}"

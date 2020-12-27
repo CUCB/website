@@ -5,6 +5,7 @@
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
   import { themeName } from "../../view";
+  import { stores } from "@sapper/app";
   export let gig,
     signupGig = writable(undefined),
     userInstruments;
@@ -13,19 +14,14 @@
   let calendarDatesFormat = "dddd Do MMMM YYYY";
   let showSignup = false;
   let showDetails = !linkHeading;
+  let { session } = stores();
+  moment.tz.setDefault("Europe/London");
 
-  $: clients = gig.contacts.filter(c => c.client);
-  $: callers = gig.contacts.filter(c => c.calling);
+  $: clients = gig.contacts.filter((c) => c.client);
+  $: callers = gig.contacts.filter((c) => c.calling);
 
   if (gig.arrive_time && gig.finish_time) {
-    if (
-      moment(gig.arrive_time)
-        .tz("Europe/London")
-        .day() !==
-      moment(gig.finish_time)
-        .tz("Europe/London")
-        .day()
-    ) {
+    if (moment(gig.arrive_time).day() !== moment(gig.finish_time).day()) {
       arriveFinishFormat = "HH:mm (ddd Do MMM)";
     }
   }
@@ -222,29 +218,22 @@
   >
     <h2 class="main-detail">
       {#if linkHeading}
-        <span>
-          <a href="/members/gigs/{gig.id}">{gig.title}</a>
-        </span>
+        <span> <a href="/members/gigs/{gig.id}">{gig.title}</a> </span>
         <!-- span for correct multiline underlining -->
       {:else}{gig.title}{/if}
       <gig-icons>
         {#if gig.food_provided}
-          <TooltipText content="Food provided">
-            <i class="las la-utensils"></i>
-          </TooltipText>
+          <TooltipText content="Food provided"><i class="las la-utensils"></i></TooltipText>
         {/if}
         {#if gig.admins_only}
-          <TooltipText content="Hidden from normal users">
-            <i class="las la-eye-slash"></i>
-          </TooltipText>
+          <TooltipText content="Hidden from normal users"><i class="las la-eye-slash"></i></TooltipText>
         {/if}
         {#if gig.type.code === 'calendar'}
-          <TooltipText content="Calendar event">
-            <i class="las la-calendar"></i>
-          </TooltipText>
+          <TooltipText content="Calendar event"><i class="las la-calendar"></i></TooltipText>
         {/if}
       </gig-icons>
     </h2>
+    {#if gig.admin_notes !== undefined}<a href="/members/gigs/{gig.id}/edit">Edit gig</a>{/if}
     {#if gig.venue}
       <h3 class="main-detail">
         <a href="/members/gigs/venue/{gig.venue.id}">
@@ -253,42 +242,31 @@
         </a>
       </h3>
     {/if}
+    {#if ['webmaster', 'president', 'secretary', 'treasurer'].indexOf($session.hasuraRole) > -1}
+      <a href="/members/gigs/{gig.id}/edit">Edit gig</a>
+    {/if}
     {#if gig.type.code !== 'calendar'}
-      <p class="date main-detail">
-        {moment(gig.date)
-          .tz('Europe/London')
-          .format('dddd Do MMMM YYYY')}
-      </p>
+      <p class="date main-detail">{moment(gig.date).format('dddd Do MMMM YYYY')}</p>
     {/if}
     <gig-timings>
       {#if gig.date}
         {#if gig.arrive_time}
           <p>
             <b>Arrive time:&nbsp;</b>
-            {@html moment(gig.arrive_time)
-              .tz('Europe/London')
-              .format(arriveFinishFormat)}
+            {@html moment(gig.arrive_time).format(arriveFinishFormat)}
           </p>
         {/if}
         {#if gig.time}
-          <p>
-            <b>Start time:&nbsp;</b>
-            {moment(`2020-01-01 ${gig.time}`)
-              .tz('Europe/London')
-              .format('HH:mm')}
-          </p>
+          <p><b>Start time:&nbsp;</b> {moment(`2020-01-01 ${gig.time}`).format('HH:mm')}</p>
         {/if}
         {#if gig.finish_time}
-          <p>
-            <b>Finish time:&nbsp;</b>
-            {moment(gig.finish_time)
-              .tz('Europe/London')
-              .format(arriveFinishFormat)}
-          </p>
+          <p><b>Finish time:&nbsp;</b> {moment(gig.finish_time).format(arriveFinishFormat)}</p>
         {/if}
       {:else if gig.arrive_time && gig.finish_time && !moment(gig.arrive_time).isSame(gig.finish_time, 'day')}
         <p>
-          {moment(gig.arrive_time).format(calendarDatesFormat)} &ndash; {moment(gig.finish_time).format(calendarDatesFormat)}
+          {moment(gig.arrive_time).format(calendarDatesFormat)}
+          &ndash;
+          {moment(gig.finish_time).format(calendarDatesFormat)}
         </p>
       {:else if gig.arrive_time}
         <p>{moment(gig.arrive_time).format(calendarDatesFormat)}</p>
@@ -297,57 +275,35 @@
     <task-list class="main-detail">
       {#if gig.finance_deposit_received !== undefined}
         {#if gig.finance_deposit_received}
-          <task-summary class="color-positive">
-            <i class="las la-money-bill-wave"></i>
-            Deposit received
-          </task-summary>
+          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Deposit received</task-summary>
         {:else}
-          <task-summary class="color-negative">
-            <i class="las la-exclamation"></i>
-            Deposit not received
-          </task-summary>
+          <task-summary class="color-negative"><i class="las la-exclamation"></i> Deposit not received</task-summary>
         {/if}
       {/if}
       {#if gig.finance_payment_received !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_payment_received}
-          <task-summary class="color-positive">
-            <i class="las la-money-bill-wave"></i>
-            Payment received
-          </task-summary>
+          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Payment received</task-summary>
         {:else}
-          <task-summary class="color-negative">
-            <i class="las la-exclamation"></i>
-            Payment not received
-          </task-summary>
+          <task-summary class="color-negative"><i class="las la-exclamation"></i> Payment not received</task-summary>
         {/if}
       {/if}
       {#if gig.finance_caller_paid !== undefined && moment(gig.date).isBefore(moment())}
         {#if gig.finance_caller_paid}
-          <task-summary class="color-positive caller">
-            <i class="las la-money-bill-wave"></i>
-            Caller paid
-          </task-summary>
+          <task-summary class="color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</task-summary>
         {:else}
-          <task-summary class="color-negative caller">
-            <i class="las la-exclamation"></i>
-            Caller not paid
-          </task-summary>
+          <task-summary class="color-negative caller"><i class="las la-exclamation"></i> Caller not paid</task-summary>
         {/if}
       {/if}
     </task-list>
     {#if gig.summary}
       <summary-text>
-        {#if gig.advertise}
-          <b>Public advert:&nbsp;</b>
-        {:else}
-          <b>Summary:&nbsp;</b>
-        {/if}
+        {#if gig.advertise}<b>Public advert:&nbsp;</b>{:else}<b>Summary:&nbsp;</b>{/if}
         <blockquote>
           {@html gig.summary
             .split('\n')
-            .map(p => p.trim())
-            .filter(p => p.length)
-            .map(p => `<p>${p}</p>`)
+            .map((p) => p.trim())
+            .filter((p) => p.length)
+            .map((p) => `<p>${p}</p>`)
             .join('')}
         </blockquote>
       </summary-text>
@@ -367,10 +323,7 @@
       </admin-notes>
     {/if}
     {#if gig.finance}
-      <gig-finance class="main-detail">
-        <b>Finance:&nbsp;</b>
-        {gig.finance.trim()}
-      </gig-finance>
+      <gig-finance class="main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</gig-finance>
     {/if}
     {#if gig.gig_type === 'gig_enquiry'}Quote date: {gig.quote_date}{/if}
     {#if clients.length > 0}
@@ -409,5 +362,5 @@
   <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
     Show summary
   </button>
-  <Signup bind:gig="{$signupGig}" {userInstruments} showLink="{false}" />
+  <Signup bind:gig="{$signupGig}" userInstruments="{userInstruments}" showLink="{false}" />
 {/if}

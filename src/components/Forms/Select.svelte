@@ -66,10 +66,6 @@
     z-index: 3;
     width: 100%;
     outline: 0;
-    // color: #394349;
-    // outline: 2px solid #49aff2;
-    // outline: 2px solid -webkit-focus-ring-color;
-    // outline-offset: -2px;
   }
   .dropdown:focus-within {
     border-color: var(--accent);
