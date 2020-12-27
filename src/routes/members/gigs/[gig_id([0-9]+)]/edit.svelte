@@ -852,6 +852,7 @@
         max="{date || finish_time_date}"
         pattern="\d{4}-\d{2}-\d{2}"
         placeholder="YYYY-MM-DD"
+        data-test="gig-edit-{id}-arrive-time-date"
       />
       <input
         type="time"
@@ -860,6 +861,7 @@
         use:checkValid="{{ validityErrors: { rangeOverflow: 'Arrive time should be before start time and finish time' }, bothPresent: { id: 'arrive_time', error: 'Arrive time needs both date and time' } }}"
         on:blur="{fillArriveDate}"
         max="{arrive_time_date === date && time ? time : arrive_time_date === finish_time_date ? finish_time_time : undefined}"
+        data-test="gig-edit-{id}-arrive-time-time"
       />
     </label>
     <div class="button-group">
@@ -874,6 +876,7 @@
         min="{arrive_time_date === date ? arrive_time_time : undefined}"
         max="{finish_time_date === date ? finish_time_time : undefined}"
         use:checkValid="{{ validityErrors: { rangeOverflow: 'Start time should not be before arrive time', rangeUnderflow: 'Start time should not be after finish time' } }}"
+        data-test="gig-edit-{id}-time"
       />
     </label>
     <label>
@@ -884,6 +887,7 @@
         bind:this="{fields.finish_time_date}"
         min="{date || arrive_time_date}"
         use:checkValid="{{ validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' }, bothPresent: { id: 'finish_time' } }}"
+        data-test="gig-edit-{id}-finish-time-date"
       />
       <input
         type="time"
@@ -891,6 +895,7 @@
         bind:this="{fields.finish_time_time}"
         use:checkValid="{{ validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' }, bothPresent: { id: 'finish_time' } }}"
         min="{finish_time_date === date && time ? time : finish_time_date === arrive_time_date ? arrive_time_time : undefined}"
+        data-test="gig-edit-{id}-finish-time-time"
       />
     </label>
     <div class="button-group">

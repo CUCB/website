@@ -934,13 +934,19 @@ describe("gig editor", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`).should("have.focus");
   });
 
-  it("can update gig details", () => {
+  it.only("can update gig details", () => {
     let newDate = Cypress.moment().add(7, "weeks");
     cy.get(`[data-test=gig-edit-${gig.id}-title]`)
       .click()
       .clear()
       .type("Replaced title");
     cy.get(`[data-test=gig-edit-${gig.id}-date]`)
+      .click()
+      .type(newDate.format("YYYY-MM-DD"));
+    cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`)
+      .click()
+      .type(newDate.format("YYYY-MM-DD"));
+    cy.get(`[data-test=gig-edit-${gig.id}-finish-time-date]`)
       .click()
       .type(newDate.format("YYYY-MM-DD"));
 
