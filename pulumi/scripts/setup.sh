@@ -11,4 +11,4 @@ pulumi login
 # update the GitLab Runner's packages
 sudo apt update -y
 # nodejs
-sudo apt install -y nodejs npm
+sudo apt install -y nodejs-dev node-gyp libssl1.0-dev npm

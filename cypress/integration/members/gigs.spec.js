@@ -1176,4 +1176,10 @@ describe("gig editor", () => {
       .should("contain", "Sog on the Pine")
       .and("contain", "A different subvenue");
   });
+
+  // TODO check dates for validation
+
+  // TODO check dates for warnings
+
+  // TODO check validation errors are as intended (e.g. when date changes, finish date should have a custom error message if invalid)
 });
