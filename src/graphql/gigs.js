@@ -130,6 +130,7 @@ export const QueryEditGigDetails = gql`
       ...GigDetails
       ...GigAdminDetails
       ...GigEditDetails
+      ...GigFinancials
       type_id: type
       venue_id
       venue {
@@ -158,6 +159,7 @@ export const QueryEditGigDetails = gql`
   ${FragmentGigDetails}
   ${FragmentGigAdminDetails}
   ${FragmentGigEditDetails}
+  ${FragmentGigFinancials}
 `;
 
 export const QueryMultiGigDetails = role => {
@@ -508,6 +510,11 @@ export const UpdateGig = gql`
     $venue_id: bigint
     $notes_band: String
     $notes_admin: String
+    $finance: String
+    $finance_caller_paid: Boolean
+    $finance_payment_received: Boolean
+    $finance_deposit_received: Boolean
+    $quote_date: date
   ) {
     update_cucb_gigs_by_pk(
       _set: {
@@ -525,6 +532,11 @@ export const UpdateGig = gql`
         venue_id: $venue_id
         notes_band: $notes_band
         notes_admin: $notes_admin
+        quote_date: $quote_date
+        finance: $finance
+        finance_deposit_received: $finance_deposit_received
+        finance_payment_received: $finance_payment_received
+        finance_caller_paid: $finance_caller_paid
       }
       pk_columns: { id: $id }
     ) {
@@ -543,9 +555,14 @@ export const UpdateGig = gql`
       venue_id
       notes_band
       notes_admin
+      finance
+      finance_deposit_received
+      finance_payment_received
+      finance_caller_paid
+      quote_date
     }
   }
-`;
+`
 
 export const QueryContacts = gql`
   query QueryContacts {

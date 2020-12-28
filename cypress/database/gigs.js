@@ -17,6 +17,7 @@ export const CreateGig = `
       $finishTime: timestamptz
       $depositReceived: Boolean
       $paymentReceived: Boolean
+      $callerPaid: Boolean
     ) {
     insert_cucb_gigs(
       objects: [{
@@ -36,6 +37,7 @@ export const CreateGig = `
         finish_time: $finishTime
         finance_deposit_received: $depositReceived
         finance_payment_received: $paymentReceived
+        finance_caller_paid: $callerPaid
         finance: $finance
       }],
       on_conflict: {
@@ -55,6 +57,7 @@ export const CreateGig = `
           finish_time
           finance_deposit_received
           finance_payment_received
+          finance_caller_paid
           finance
         ]
       }) {

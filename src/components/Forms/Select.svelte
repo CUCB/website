@@ -1,6 +1,6 @@
 <script>
   import { themeName } from "../../view";
-  export let value, select;
+  export let value, select, disabled;
 </script>
 
 <style lang="scss">
@@ -147,10 +147,14 @@
       text-shadow: 0 1px rgba(0, 0, 0, 0.4);
     }
   }
+
+  *:disabled {
+    filter: opacity(0.5);
+  }
 </style>
 
-<div class="dropdown dropdown-{$themeName}">
-  <select class="dropdown-select" data-test="select-box" on:change on:blur bind:value bind:this="{select}">
+<div class="dropdown dropdown-{$themeName}" {disabled}>
+  <select class="dropdown-select" data-test="select-box" on:change on:blur bind:value bind:this="{select}" {disabled}>
     <slot />
   </select>
 </div>

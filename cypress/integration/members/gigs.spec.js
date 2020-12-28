@@ -14,7 +14,7 @@ import {
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
-const click = $el => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
+const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
 
 describe("lineup editor", () => {
   before(() => {
@@ -132,9 +132,9 @@ describe("gig signup", () => {
         gigId: 15274,
       },
     });
-    cy.cssProperty("--positive").then(positive_ => (colors.positive = positive_));
-    cy.cssProperty("--negative").then(negative_ => (colors.negative = negative_));
-    cy.cssProperty("--neutral").then(neutral_ => (colors.neutral = neutral_));
+    cy.cssProperty("--positive").then((positive_) => (colors.positive = positive_));
+    cy.cssProperty("--negative").then((negative_) => (colors.negative = negative_));
+    cy.cssProperty("--neutral").then((neutral_) => (colors.neutral = neutral_));
   });
 
   beforeEach(() => {
@@ -145,9 +145,7 @@ describe("gig signup", () => {
   it("allows a user to sign up to a gig", () => {
     cy.visit("/members");
     cy.get(`[data-test="gig-15274-signup-yes"]`).should("not.have.color", colors.positive);
-    cy.get(`[data-test="gig-15274-signup-yes"]`)
-      .pipe(click)
-      .should("have.color", colors.positive);
+    cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -162,9 +160,7 @@ describe("gig signup", () => {
       });
 
     cy.get(`[data-test="gig-15274-signup-maybe"]`).should("not.have.color", colors.netural);
-    cy.get(`[data-test="gig-15274-signup-maybe"]`)
-      .click()
-      .should("have.color", colors.neutral);
+    cy.get(`[data-test="gig-15274-signup-maybe"]`).click().should("have.color", colors.neutral);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -173,7 +169,7 @@ describe("gig signup", () => {
       },
     })
       .its("cucb_gigs_lineups_by_pk")
-      .then(res => {
+      .then((res) => {
         cy.log("Checking user available");
         expect(res.user_available).to.equal(true);
         cy.log("Checking user if necessary");
@@ -193,9 +189,7 @@ describe("gig signup", () => {
       });
 
     cy.get(`[data-test="gig-15274-signup-no"]`).should("not.have.color", colors.negative);
-    cy.get(`[data-test="gig-15274-signup-no"]`)
-      .click()
-      .should("have.color", colors.negative);
+    cy.get(`[data-test="gig-15274-signup-no"]`).click().should("have.color", colors.negative);
 
     cy.executeQuery(SignupDetails, {
       variables: {
@@ -225,9 +219,7 @@ describe("gig signup", () => {
         fixture: "gig/signup/yes.json",
       }).as("signup");
 
-      cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .pipe(click)
-        .should("have.color", colors.positive);
+      cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
 
       cy.wait("@signup");
 
@@ -270,9 +262,7 @@ describe("gig signup", () => {
         .its("cucb_gigs_lineups_instruments_aggregate.aggregate.count")
         .should("equal", 0);
 
-      cy.get(`[data-test="gig-15274-signup-yes"]`)
-        .pipe(click)
-        .should("have.color", colors.positive);
+      cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
 
       cy.wait("@graphqlRequest");
 
@@ -284,13 +274,9 @@ describe("gig signup", () => {
 
       cy.wait("@graphqlRequest");
 
-      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`)
-        .contains("Trombone")
-        .should("exist");
+      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Trombone").should("exist");
 
-      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`)
-        .contains("Wind Synth")
-        .should("not.exist");
+      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Wind Synth").should("not.exist");
 
       cy.get(`[data-test="gig-15274-signup-edit"]`).click();
 
@@ -302,13 +288,9 @@ describe("gig signup", () => {
 
       cy.wait("@graphqlRequest");
 
-      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`)
-        .contains("Trombone")
-        .should("not.exist");
+      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Trombone").should("not.exist");
 
-      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`)
-        .contains("Wind Synth")
-        .should("exist");
+      cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Wind Synth").should("exist");
     });
   });
 });
@@ -339,6 +321,7 @@ let gigForSummary = {
   finishTime: "2020-07-25T23:00+01:00",
   depositReceived: true,
   paymentReceived: false,
+  callerPaid: false,
   venue: {
     on_conflict: onConflictVenue,
     data: {
@@ -497,11 +480,9 @@ describe("gig summary", () => {
     });
 
     it("doesn't show post gig financial details", () => {
-      cy.cssProperty("--positive").then(positive => {
-        cy.cssProperty("--negative").then(negative => {
-          cy.contains("Deposit received")
-            .should("be.visible")
-            .and("have.css", "color", positive);
+      cy.cssProperty("--positive").then((positive) => {
+        cy.cssProperty("--negative").then((negative) => {
+          cy.contains("Deposit received").should("be.visible").and("have.css", "color", positive);
           cy.contains("Payment").should("not.exist");
           cy.contains("Caller").should("not.exist");
         });
@@ -517,17 +498,11 @@ describe("gig summary", () => {
     });
 
     it("shows accurate financial status", () => {
-      cy.cssProperty("--positive").then(positive => {
-        cy.cssProperty("--negative").then(negative => {
-          cy.contains("Deposit received")
-            .should("be.visible")
-            .and("have.css", "color", positive);
-          cy.contains("Payment not received")
-            .should("be.visible")
-            .and("have.css", "color", negative);
-          cy.contains("Caller not paid")
-            .should("be.visible")
-            .and("have.css", "color", negative);
+      cy.cssProperty("--positive").then((positive) => {
+        cy.cssProperty("--negative").then((negative) => {
+          cy.contains("Deposit received").should("be.visible").and("have.css", "color", positive);
+          cy.contains("Payment not received").should("be.visible").and("have.css", "color", negative);
+          cy.contains("Caller not paid").should("be.visible").and("have.css", "color", negative);
         });
       });
     });
@@ -537,69 +512,30 @@ describe("gig summary", () => {
 describe("gig diary", () => {
   let signupGig = {
     ...gigForSummary,
-    date: Cypress.moment()
-      .add(1, "month")
-      .format("YYYY-MM-DD"),
-    time: Cypress.moment()
-      .hour(19)
-      .minute(30)
-      .format("HH:MM"),
-    arriveTime: Cypress.moment()
-      .add(1, "month")
-      .hour(18)
-      .minute(30)
-      .format(),
-    finishTime: Cypress.moment()
-      .add(1, "month")
-      .hour(22)
-      .minute(0)
-      .format(),
+    date: Cypress.moment().add(1, "month").format("YYYY-MM-DD"),
+    time: Cypress.moment().hour(19).minute(30).format("HH:MM"),
+    arriveTime: Cypress.moment().add(1, "month").hour(18).minute(30).format(),
+    finishTime: Cypress.moment().add(1, "month").hour(22).minute(0).format(),
   };
 
   let nonSignupGig = {
     ...gigForSummary,
     id: 34743274,
     allowSignups: false,
-    date: Cypress.moment()
-      .add(60, "days")
-      .format("YYYY-MM-DD"),
-    time: Cypress.moment()
-      .hour(19)
-      .minute(0)
-      .format("HH:MM"),
-    arriveTime: Cypress.moment()
-      .add(60, "days")
-      .hour(18)
-      .minute(0)
-      .format(),
-    finishTime: Cypress.moment()
-      .add(60, "days")
-      .hour(21)
-      .minute(15)
-      .format(),
+    date: Cypress.moment().add(60, "days").format("YYYY-MM-DD"),
+    time: Cypress.moment().hour(19).minute(0).format("HH:MM"),
+    arriveTime: Cypress.moment().add(60, "days").hour(18).minute(0).format(),
+    finishTime: Cypress.moment().add(60, "days").hour(21).minute(15).format(),
   };
 
   let pastGig = {
     ...gigForSummary,
     id: 33274,
     allowSignups: false,
-    date: Cypress.moment()
-      .add(-2, "month")
-      .format("YYYY-MM-DD"),
-    time: Cypress.moment()
-      .hour(19)
-      .minute(30)
-      .format("HH:MM"),
-    arriveTime: Cypress.moment()
-      .add(-2, "month")
-      .hour(18)
-      .minute(30)
-      .format(),
-    finishTime: Cypress.moment()
-      .add(-2, "month")
-      .hour(22)
-      .minute(0)
-      .format(),
+    date: Cypress.moment().add(-2, "month").format("YYYY-MM-DD"),
+    time: Cypress.moment().hour(19).minute(30).format("HH:MM"),
+    arriveTime: Cypress.moment().add(-2, "month").hour(18).minute(30).format(),
+    finishTime: Cypress.moment().add(-2, "month").hour(22).minute(0).format(),
   };
 
   before(() => {
@@ -609,17 +545,15 @@ describe("gig diary", () => {
     cy.executeMutation(CreateGig, { variables: pastGig });
     cy.executeMutation(DeleteSignup, { variables: { gigId: nonSignupGig.id, userId: 27250 } });
     cy.executeMutation(DeleteSignup, { variables: { gigId: signupGig.id, userId: 27250 } });
-    cy.cssProperty("--positive").then(positive => (colors.positive = positive));
-    cy.cssProperty("--neutral").then(neutral => (colors.neutral = neutral));
-    cy.cssProperty("--negative").then(negative => (colors.negative = negative));
-    cy.cssProperty("--unselected").then(unselected => (colors.unselected = unselected));
+    cy.cssProperty("--positive").then((positive) => (colors.positive = positive));
+    cy.cssProperty("--neutral").then((neutral) => (colors.neutral = neutral));
+    cy.cssProperty("--negative").then((negative) => (colors.negative = negative));
+    cy.cssProperty("--unselected").then((unselected) => (colors.unselected = unselected));
   });
 
   context("not logged in", () => {
     it("isn't accessible", () => {
-      cy.request({ url: `/members/gigs`, failOnStatusCode: false })
-        .its("status")
-        .should("eq", 401);
+      cy.request({ url: `/members/gigs`, failOnStatusCode: false }).its("status").should("eq", 401);
     });
   });
 
@@ -646,7 +580,7 @@ describe("gig diary", () => {
       it("allows a user to sign up to a gig and change their signup status", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
           .pipe(click)
-          .should($el => {
+          .should(($el) => {
             expect($el).to.not.be.visible;
           });
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.unselected);
@@ -694,7 +628,7 @@ describe("gig diary", () => {
       it("retains signup information on refresh", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
           .pipe(click)
-          .should($el => {
+          .should(($el) => {
             expect($el).to.not.be.visible;
           });
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.unselected);
@@ -707,7 +641,7 @@ describe("gig diary", () => {
         cy.visit("/members/gigs");
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
           .pipe(click)
-          .should($el => {
+          .should(($el) => {
             expect($el).to.not.be.visible;
           });
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
@@ -718,7 +652,7 @@ describe("gig diary", () => {
         cy.visit("/members/gigs");
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
           .pipe(click)
-          .should($el => {
+          .should(($el) => {
             expect($el).to.not.be.visible;
           });
         cy.get(`[data-test=gig-${signupGig.id}-signup-no]`).should("have.color", colors.negative);
@@ -727,7 +661,7 @@ describe("gig diary", () => {
       it("retains signup information when gig is hidden and then redisplayed", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
           .pipe(click)
-          .should($el => {
+          .should(($el) => {
             expect($el).to.not.be.visible;
           });
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.unselected);
@@ -748,9 +682,7 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
 
         cy.visit("/members/gigs");
-        cy.get(`[data-test=gigview-by-month]`)
-          .pipe(click)
-          .should("not.exist"); // Click it until link becomes text
+        cy.get(`[data-test=gigview-by-month]`).pipe(click).should("not.exist"); // Click it until link becomes text
         cy.get(`[data-test=gigcalendar-next-month]`).click();
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
@@ -765,15 +697,8 @@ describe("gig diary", () => {
           .pipe(click)
           .parent()
           .parent()
-          .should(
-            "contain",
-            Cypress.moment()
-              .add(2, "months")
-              .format("MMMM"),
-          );
-        cy.get(`[data-test=gigview-all-upcoming]`)
-          .pipe(click)
-          .should("not.exist");
+          .should("contain", Cypress.moment().add(2, "months").format("MMMM"));
+        cy.get(`[data-test=gigview-all-upcoming]`).pipe(click).should("not.exist");
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.neutral);
         cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("No instruments selected");
@@ -781,9 +706,7 @@ describe("gig diary", () => {
 
       it("can switch between upcoming and past gigs", () => {
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
-        cy.get(`[data-test=gigview-by-month]`)
-          .pipe(click)
-          .should("not.exist");
+        cy.get(`[data-test=gigview-by-month]`).pipe(click).should("not.exist");
         cy.intercept({ method: "POST", url: "/v1/graphql" }).as("fetchGigs");
         cy.get(`[data-test=gigcalendar-previous-month]`).click();
         cy.wait("@fetchGigs");
@@ -792,22 +715,16 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("be.visible");
         cy.get(`[data-test=gigcalendar-previous-month]`).click();
         cy.wait("@fetchGigs");
-        cy.contains(
-          Cypress.moment()
-            .subtract(3, "months")
-            .format("MMMM YYYY"),
-        ).should("exist");
+        cy.contains(Cypress.moment().subtract(3, "months").format("MMMM YYYY")).should("exist");
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
-        cy.get(`[data-test=gigview-all-upcoming]`)
-          .pipe(click)
-          .should("not.exist");
+        cy.get(`[data-test=gigview-all-upcoming]`).pipe(click).should("not.exist");
         cy.get(`[data-test=gig-summary-${signupGig.id}]`).should("be.visible");
       });
     });
   });
 });
 
-let venues = [1, 2, 3, 4, 5].map(n => ({
+let venues = [1, 2, 3, 4, 5].map((n) => ({
   address: "3 Trumpington St, Cambridge",
   postcode: "CB2 1QY",
   distance_miles: 0,
@@ -876,10 +793,10 @@ describe("gig editor", () => {
     });
   });
   beforeEach(() => {
-    Cypress.on("window:load", function(window) {
+    Cypress.on("window:load", function (window) {
       // Prevent onbeforeunload being registered to stop other tests being affected
       const original = window.addEventListener;
-      window.addEventListener = function() {
+      window.addEventListener = function () {
         if (arguments && arguments[0] === "beforeunload") {
           return;
         }
@@ -898,13 +815,9 @@ describe("gig editor", () => {
   });
 
   it("detects unsaved changes", () => {
-    cy.get(`[data-test=gig-edit-${gig.id}-title]`)
-      .click()
-      .type("modified title");
+    cy.get(`[data-test=gig-edit-${gig.id}-title]`).click().type("modified title");
     cy.contains("unsaved changes").should("be.visible");
-    cy.get(`[data-test=gig-edit-${gig.id}-title]`)
-      .clear()
-      .type(gig.title);
+    cy.get(`[data-test=gig-edit-${gig.id}-title]`).clear().type(gig.title);
     cy.contains("unsaved changes").should("not.exist");
   });
 
@@ -913,10 +826,7 @@ describe("gig editor", () => {
       .click()
       .type("really long vneue to search for 333", { delay: 0 }) // Deliberately misspelled to test fuzzy search
       .type("{downarrow}");
-    cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`)
-      .contains("333")
-      .should("have.focus")
-      .type(" ");
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`).contains("333").should("have.focus").type(" ");
     cy.get(`[data-test=select-box]`)
       .contains("333") // Find the correct select box (an <option>)
       .parent() // Parent of <option> -> <select>
@@ -934,66 +844,54 @@ describe("gig editor", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`).should("have.focus");
   });
 
-  it.only("can update gig details", () => {
+  it("can update gig details", () => {
     let newDate = Cypress.moment().add(7, "weeks");
     cy.get(`[data-test=gig-edit-${gig.id}-title]`)
       .click()
       .clear()
-      .type("Replaced title");
-    cy.get(`[data-test=gig-edit-${gig.id}-date]`)
-      .click()
-      .type(newDate.format("YYYY-MM-DD"));
-    cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`)
-      .click()
-      .type(newDate.format("YYYY-MM-DD"));
-    cy.get(`[data-test=gig-edit-${gig.id}-finish-time-date]`)
-      .click()
-      .type(newDate.format("YYYY-MM-DD"));
-
-    cy.get(`[data-test=gig-edit-${gig.id}-notes-band]`)
-      .click()
+      .type("Replaced title")
       .clear()
-      .type("        ")
-      .log("should trim that field");
+      .type("Replaced title");
+    cy.get(`[data-test=gig-edit-${gig.id}-date]`).click().type(newDate.format("YYYY-MM-DD"));
+    cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`).click().type(newDate.format("YYYY-MM-DD"));
+    cy.get(`[data-test=gig-edit-${gig.id}-finish-time-date]`).click().type(newDate.format("YYYY-MM-DD"));
+
+    cy.get(`[data-test=gig-edit-${gig.id}-notes-band]`).click().clear().type("        ").log("should trim that field");
+    cy.get(`[data-test=gig-edit-${gig.id}-advertise]`).check();
+    cy.get(`[data-test=gig-edit-${gig.id}-finance-deposit]`).uncheck();
+    cy.get(`[data-test=gig-edit-${gig.id}-finance]`).click().type("Deposit: some amount");
 
     cy.contains("unsaved changes").should("be.visible");
     cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
     cy.contains("unsaved changes").should("not.exist");
-    cy.get(`[data-test=gig-edit-${gig.id}-notes-admin]`)
-      .click()
-      .clear()
-      .type("Setting admin notes");
-    cy.get(`[data-test=gig-edit-${gig.id}-summary]`)
-      .click()
-      .clear()
-      .type("Some sort of summary");
+    cy.get(`[data-test=gig-edit-${gig.id}-notes-admin]`).click().clear().type("Setting admin notes");
+    cy.get(`[data-test=gig-edit-${gig.id}-summary]`).click().clear().type("Some sort of summary");
 
     cy.contains("unsaved changes").should("be.visible");
-    cy.get(`[data-test=gig-edit-${gig.id}-summary]`)
-      .type("{alt}s")
-      .log("can save with alt+s");
+    cy.get(`[data-test=gig-edit-${gig.id}-summary]`).type("{alt}s").log("can save with alt+s");
     cy.contains("unsaved changes").should("not.exist");
-    cy.get("h2")
-      .should("contain", "Replaced title")
-      .and("not.contain", gig.title);
+    cy.get("h2").should("contain", "Replaced title").and("not.contain", gig.title);
     cy.visit(`/members/gigs/${gig.id}`);
     cy.contains("Replaced title").should("be.visible");
     cy.contains("Some sort of summary").should("be.visible");
     cy.contains("Admin notes").should("be.visible");
     cy.contains("Setting admin notes").should("be.visible");
     cy.contains("Band notes").should("not.exist");
+    cy.contains("Deposit not received").should("be.visible");
+    cy.contains("Public advert").should("be.visible");
+    cy.contains("Deposit: some amount").should("be.visible");
   });
 
   it("can add clients and callers", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select(contacts[0].name);
     cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
-    cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).then(elem => {
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).then((elem) => {
       expect(elem.val()).to.be.null;
     });
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[0].name);
     cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
-    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).then(elem => {
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).then((elem) => {
       expect(elem.val()).to.be.null;
     });
     cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
@@ -1019,10 +917,10 @@ describe("gig editor", () => {
       .contains(contacts[3].name)
       .log("Wait for the last name to appear");
     // verify the names are indeed in sorted order
-    const toStrings = cells$ => Cypress._.map(cells$, "textContent");
+    const toStrings = (cells$) => Cypress._.map(cells$, "textContent");
     cy.get(`[data-test=gig-edit-${gig.id}-client-list] [data-test=contact-name]`)
       .then(toStrings)
-      .then(names => {
+      .then((names) => {
         expect(names[0]).to.equal(contacts[1].name);
         expect(names[1]).to.equal(contacts[2].name);
         expect(names[2]).to.equal(contacts[3].name);
@@ -1032,7 +930,7 @@ describe("gig editor", () => {
 
     cy.get(`[data-test=gig-edit-${gig.id}-client-list] [data-test=contact-name]`)
       .then(toStrings)
-      .then(names => {
+      .then((names) => {
         expect(names[0]).to.equal(contacts[1].name);
         expect(names[1]).to.equal(contacts[2].name);
         expect(names[2]).to.equal(contacts[3].name);
@@ -1043,24 +941,14 @@ describe("gig editor", () => {
     cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`).select(contacts[1].name);
     cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-clients-${contacts[1].id}-edit]`).click();
-    cy.get(`[data-test=contact-editor-organization]`)
-      .click()
-      .clear()
-      .type("Some org");
-    cy.get(`[data-test=contact-editor-name]`)
-      .click()
-      .clear()
-      .type("A ClientN");
+    cy.get(`[data-test=contact-editor-organization]`).click().clear().type("Some org");
+    cy.get(`[data-test=contact-editor-name]`).click().clear().type("A ClientN");
     cy.get(`[data-test=contact-editor-save]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-client-list]`).contains("A ClientN @ Some org");
-    cy.get(`[data-test=gig-edit-${gig.id}-client-select]`)
-      .contains("A Client1")
-      .should("not.exist");
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select]`).contains("A Client1").should("not.exist");
     cy.reload();
     cy.get(`[data-test=gig-edit-${gig.id}-client-list]`).contains("A ClientN @ Some org");
-    cy.get(`[data-test=gig-edit-${gig.id}-client-select]`)
-      .contains("A Client1")
-      .should("not.exist");
+    cy.get(`[data-test=gig-edit-${gig.id}-client-select]`).contains("A Client1").should("not.exist");
   });
 
   it("can create new contacts and add them to gigs", () => {
@@ -1090,17 +978,13 @@ describe("gig editor", () => {
     ); // Wait for buttons to have event handlers sorted
     cy.log("Waited for page to be ready");
     cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
-    cy.get(`[data-test=venue-editor-name]`)
-      .click()
-      .type("Mog on the Tyne");
+    cy.get(`[data-test=venue-editor-name]`).click().type("Mog on the Tyne");
     cy.get(`[data-test=venue-editor-map-link]`).paste(
       "https://www.google.com/maps/place/Mog+on+the+Tyne/@54.9706584,-1.6163193,0.25z",
     );
     cy.get(`[data-test=venue-editor-latitude]`).should("have.value", "54.9706584");
     cy.get(`[data-test=venue-editor-longitude]`).should("have.value", "-1.6163193");
-    cy.get(`[data-test=venue-editor-notes-band]`)
-      .click()
-      .type("Notey notey note");
+    cy.get(`[data-test=venue-editor-notes-band]`).click().type("Notey notey note");
     cy.get(`[data-test=venue-editor-save]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
       .should("have.focus")
@@ -1108,15 +992,13 @@ describe("gig editor", () => {
       .contains("Mog on the Tyne");
 
     cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
-    cy.get(`[data-test=venue-editor-name]`)
-      .click()
-      .type("Cog on the Line");
+    cy.get(`[data-test=venue-editor-name]`).click().type("Cog on the Line");
     cy.get(`[data-test=venue-editor-save]`).click();
 
     cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
       .find(":contains('og on')")
-      .then(elements => {
-        let venues = Cypress.$.map(elements, e => e.innerHTML);
+      .then((elements) => {
+        let venues = Cypress.$.map(elements, (e) => e.innerHTML);
         expect(venues).to.have.length(2).and.be.ascending;
       });
 
@@ -1146,40 +1028,111 @@ describe("gig editor", () => {
     ); // Wait for buttons to have event handlers sorted
     cy.log("Waited for page to be ready");
     cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
-    cy.get(`[data-test=venue-editor-name]`)
-      .click()
-      .type("Sog on the Pine");
-    cy.get(`[data-test=venue-editor-subvenue]`)
-      .click()
-      .type("A subvenue");
+    cy.get(`[data-test=venue-editor-name]`).click().type("Sog on the Pine");
+    cy.get(`[data-test=venue-editor-subvenue]`).click().type("A subvenue");
     cy.get(`[data-test=venue-editor-save]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`).select(venues[2].name);
-    cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`)
-      .click()
-      .type("Sog on the");
-    cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`)
-      .contains("Sog on the Pine")
-      .click();
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`).click().type("Sog on the");
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`).contains("Sog on the Pine").click();
     cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
       .find(":selected")
       .contains("Sog on the Pine")
       .contains("A subvenue");
     cy.get(`[data-test=gig-edit-${gig.id}-edit-venue]`).click();
-    cy.get(`[data-test=venue-editor-subvenue]`)
-      .click()
-      .clear()
-      .type("A different subvenue");
+    cy.get(`[data-test=venue-editor-subvenue]`).click().clear().type("A different subvenue");
     cy.get(`[data-test=venue-editor-save]`).click();
     cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
     cy.visit(`/members/gigs/${gig.id}`);
-    cy.get("*")
-      .should("contain", "Sog on the Pine")
-      .and("contain", "A different subvenue");
+    cy.get("*").should("contain", "Sog on the Pine").and("contain", "A different subvenue");
   });
 
-  // TODO check dates for validation
+  it("rejects invalid dates with custom error messages", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-time]`).click().type("19:13");
+    cy.get(`[data-test=gig-edit-${gig.id}-time]`).click().type("20:26");
+    cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).click().type("18:00");
+    cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+    cy.contains("unsaved changes").should("be.visible");
+    cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).then(($input) => {
+      cy.log("Check field for custom error");
+      expect($input[0].validationMessage).to.match(/[Ff]inish time/);
+      expect($input[0].validationMessage).to.match(/[Ar]ive time/);
+    });
+    cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).click().type("22:00");
+    cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+    cy.contains("unsaved changes").should("not.exist");
+    cy.get(`[data-test=gig-edit-${gig.id}-time]`).click().type("00:00");
+    cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-time]`).then(($input) => {
+      cy.log("Check field for custom error");
+      expect($input[0].validationMessage).to.match(/[Ff]inish time/);
+      expect($input[0].validationMessage).to.match(/[Ss]tart time/);
+    });
+    cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-time]`).then(($input) => {
+      cy.log("Check field for custom error");
+      expect($input[0].validationMessage).to.match(/[Ar]ive time/);
+    });
+    cy.visit(`/members/gigs/${gig.id}`);
+    cy.contains("Arrive time: 19:13").should("be.visible");
+    cy.contains("Start time: 20:26").should("be.visible");
+    cy.contains("Finish time: 22:00").should("be.visible");
+  });
 
-  // TODO check dates for warnings
+  it("warns when arrive time coincides with start time", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-time]`).click().type("19:00");
+    cy.get(`[data-test=gig-edit-${gig.id}-time]`).click().type("19:00");
+    cy.get(`[data-test=gig-edit-${gig.id}-timing-warnings]`)
+      .children()
+      .should("have.length", 1)
+      .invoke("html")
+      .should("match", /[Aa]rrive time/)
+      .and("match", /[Ss]tart time/);
+  });
 
-  // TODO check validation errors are as intended (e.g. when date changes, finish date should have a custom error message if invalid)
+  it("warns when gig is unusually long", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).click().type("10:00");
+    cy.get(`[data-test=gig-edit-${gig.id}-infer-finish-date]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-timing-warnings]`)
+      .children()
+      .should("have.length", 1)
+      .and("contain", "longer than 6 hours");
+  });
+
+  it("can preview a gig summary", () => {
+    cy.get(`[data-test=gig-edit-${gig.id}-show-preview]`).pipe(click).should("not.exist");
+    cy.get(`[data-test=gig-summary-${gig.id}]`)
+      .should("contain", gig.title)
+      .and("contain", Cypress.moment(gig.arriveTime).format("HH:mm"))
+      .and("contain", gig.time)
+      .and("contain", "Deposit received")
+      .and("contain", "Caller not paid")
+      .and("contain", gig.venue.data.name)
+      .and("not.contain", "Edit gig");
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select("Cally Call");
+    cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`).select(
+      "A really long venue name to search for 1",
+    );
+
+    cy.get(`[data-test=gig-summary-${gig.id}]`)
+      .should("contain", gig.title)
+      .and("contain", Cypress.moment(gig.arriveTime).format("HH:mm"))
+      .and("contain", gig.time)
+      .and("contain", "Deposit received")
+      .and("contain", "Caller not paid")
+      .and("contain", "A really long venue name to search for 1");
+
+    cy.get(`[data-test=gig-edit-${gig.id}-hide-preview]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-finance-payment]`).click();
+    cy.get(`[data-test=gig-edit-${gig.id}-finance-caller]`).check();
+    cy.get(`[data-test=gig-edit-${gig.id}-advertise]`).check();
+    cy.get(`[data-test=gig-edit-${gig.id}-summary]`).click().type("Some public advert");
+    cy.get(`[data-test=gig-edit-${gig.id}-show-preview]`).click();
+    cy.get(`[data-test=gig-summary-${gig.id}]`)
+      .should("contain", "Payment received")
+      .and("contain", "Caller paid")
+      .and("contain", "Public advert")
+      .and("contain", "Some public advert");
+  });
+  
+  // TODO check adjusts visible fields based on gig type
 });
