@@ -17,6 +17,9 @@ import "./commands";
 import tinycolor from "../deps/tinycolor";
 import chaiSorted from "chai-sorted";
 
+Cypress.moment = require("moment-timezone");
+Cypress.moment.tz.setDefault("Europe/London");
+
 chai.use(chaiSorted);
 
 const equalColor = (_chai, utils) => {
