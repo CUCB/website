@@ -1,15 +1,18 @@
 <script>
   import { createEventDispatcher } from "svelte";
 
-  export let placeholder, fuse, toDisplayName, toId;
-  let searchField, searchText, resultsList;
+  export let placeholder, fuse, toDisplayName, toId, disabled;
+  let searchField,
+    searchText = "",
+    resultsList;
+  export const clearSearch = () => (searchText = "");
   const dispatch = createEventDispatcher();
 
-  $: searchResults = searchText.length >= 3 && fuse.search(searchText);
+  $: searchResults = (searchText.length >= 3 && fuse.search(searchText)) || [];
 
   function first(e) {
     if (e.which === 40) {
-      searchedVenuesList.childNodes[0].focus();
+      resultsList.childNodes[0] && resultsList.childNodes[0].focus();
     }
   }
 
@@ -21,8 +24,8 @@
     } else if (e.which === 38) {
       // arrow up
       e.preventDefault();
-      if (e.target === searchedVenuesList.childNodes[0]) {
-        searchVenuesField.focus();
+      if (e.target === resultsList.childNodes[0]) {
+        searchField.focus();
       } else {
         document.activeElement.previousSibling.focus();
       }
@@ -41,6 +44,13 @@
   }
 </script>
 
+<style>
+  * {
+    width: 100%;
+    box-sizing: border-box;
+  }
+</style>
+
 <input
   type="text"
   placeholder="{placeholder}"
@@ -48,9 +58,10 @@
   bind:value="{searchText}"
   on:keydown="{first}"
   bind:this="{searchField}"
+  disabled="{disabled}"
 />
-<div bind:this="{resultsList}">
-  {#each searchResults as result}
+<div bind:this="{resultsList}" data-test="{$$props['data-test'] && `${$$props['data-test']}-search-results`}">
+  {#each searchResults.map((result) => result.item) as result}
     <div
       class="link"
       data-test="{$$props['data-test'] && `${$$props['data-test']}-search-result`}"

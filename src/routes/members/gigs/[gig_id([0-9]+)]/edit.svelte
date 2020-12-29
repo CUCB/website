@@ -124,30 +124,27 @@
   import Fuse from "fuse.js";
   import { client as graphqlClient } from "../../../../graphql/client";
   import { tick } from "svelte";
-  import { tweened } from "svelte/motion"; // TODO move the messages to their own component
+  import { tweened } from "svelte/motion"; // TODO move the messages to their own component (#34)
   import { fade } from "svelte/transition";
   import { stores } from "@sapper/app";
+  import SearchBox from "../../../../components/SearchBox.svelte";
 
   const { session } = stores();
 
   let venue;
-  let venueSearch = "";
   let displayVenueEditor = false;
   let displayContactEditor = false;
   let editingSubvenue = false;
   let recentlySavedOpacity = tweened(0, { duration: 150 });
   let recentlySavedTimer = () => recentlySavedOpacity.set(0);
-  let searchedVenuesList,
-    searchVenuesField,
-    venueListElement,
+  let venueListElement,
     clientListElement,
     callerListElement,
     selectedClient,
     selectedCaller,
     contactToEdit,
     editContactType,
-    clientSearch,
-    callerSearch;
+    clearVenueSearch;
   let previewSummary = false;
   moment.tz.setDefault("Europe/London");
   time = time && moment(`1970-01-01T${time}`).format("HH:mm"); // Remove seconds from time if they are present
@@ -178,6 +175,10 @@
     (finish_time_time && finish_time_date && moment(`${finish_time_date}T${finish_time_time}`).format()) || null;
   $: clients = contacts.filter((contact) => contact.client);
   $: callers = contacts.filter((contact) => contact.calling);
+  $: clientSet = new Set(clients.map((c) => c.id));
+  $: callerSet = new Set(callers.map((c) => c.id));
+  $: potentialClients = allContacts.filter((contact) => !clientSet.has(contact.id));
+  $: potentialCallers = allContacts.filter((contact) => contact.caller && !callerSet.has(contact.id));
 
   $: saved =
     lastSaved.type_id === type_id &&
@@ -239,7 +240,7 @@
       }
       validityFields[options.bothPresent.id].push(node);
     }
-    const changeHandler = (e) => {
+    const changeHandler = () => {
       for (let key of Object.keys(options.validityErrors)) {
         if (node.validity[key]) {
           node.setCustomValidity(options.validityErrors[key]);
@@ -286,38 +287,19 @@
     }
   }
 
-  function firstVenue(e) {
-    if (e.which === 40) {
-      searchedVenuesList.childNodes[0].focus();
-    }
+  function selectVenueSearch(e) {
+    venue_id = e.detail.id;
+    venueListElement.focus();
   }
 
-  function nextVenue(e) {
-    if (e.which === 40) {
-      // arrow down
-      e.preventDefault();
-      document.activeElement.nextSibling.focus();
-    } else if (e.which === 38) {
-      // arrow up
-      e.preventDefault();
-      if (e.target === searchedVenuesList.childNodes[0]) {
-        searchVenuesField.focus();
-      } else {
-        document.activeElement.previousSibling.focus();
-      }
-    } else if (e.which === 32) {
-      // spacebar
-      e.preventDefault();
-      document.activeElement.click();
-    }
+  function selectClientSearch(e) {
+    selectedClient = e.detail.id;
+    clientListElement.focus();
   }
 
-  function selectVenue(selectedVenueId) {
-    return () => {
-      venue_id = selectedVenueId;
-      venueSearch = "";
-      venueListElement.focus();
-    };
+  function selectCallerSearch(e) {
+    selectedCaller = e.detail.id;
+    callerListElement.focus();
   }
 
   function newVenue() {
@@ -332,8 +314,8 @@
 
   function editVenue() {
     editingSubvenue = venue && Object.keys(venue).length === 1; // Only name set for this
+    clearVenueSearch();
     displayVenueEditor = true;
-    venueSearch = "";
   }
 
   function contactDisplayName(contact) {
@@ -342,6 +324,10 @@
         ? `${contact.name} @ ${contact.organization}`
         : contact.name
       : contact.organization;
+  }
+
+  function venueDisplayName(venue) {
+    return venue.subvenue ? `${venue.name} | ${venue.subvenue}` : venue.name;
   }
 
   async function updateVenue(e) {
@@ -540,12 +526,14 @@
       let gigContact = contacts.find((contact) => contact.id === updatedContact.id);
       gigContact.contact = { ...updatedContact };
       sortContacts(allContacts);
+      allContacts = allContacts;
       sortContacts(contacts);
       contacts = contacts;
       displayContactEditor = false;
     } else {
       allContacts.push(updatedContact);
       sortContacts(allContacts);
+      allContacts = allContacts;
       displayContactEditor = false;
       await tick();
       if (editContactType === contactTypes.CLIENT) {
@@ -602,26 +590,21 @@
     fields.finish_time_time.dispatchEvent(new Event("change"));
   }
 
-  // TODO search for clients/callers
-
   $: venueFuse = new Fuse(venues, {
     ignoreLocation: true,
     threshold: 0.35,
     keys: ["name", "subvenue", "notes_admin", "notes_band", "address", "postcode"],
   });
-  $: searchedVenues = venueSearch.length < 3 ? [] : venueFuse.search(venueSearch).map((searchRes) => searchRes.item);
-  $: clientFuse = new Fuse(clients, {
-    ignoreLocation: true,
+  $: clientFuse = new Fuse(potentialClients, {
+    ignoreLocation: false,
     threshold: 0.35,
-    keys: ["name", "organization"],
+    keys: ["name", "organization", "email"],
   });
-  //   $: searchedClients = clientSearch.length < 3 ? [] : clientFuse.search(clientSearch).map(searchRes => searchRes.item);
-  $: callerFuse = new Fuse(callers, {
-    ignoreLocation: true,
+  $: callerFuse = new Fuse(potentialCallers, {
+    ignoreLocation: false,
     threshold: 0.35,
-    keys: ["name", "organization"],
+    keys: ["name", "organization", "email"],
   });
-  //   $: searchedCallers = callerSearch.length < 3 ? [] : callerFuse.search(callerSearch).map(searchRes => searchRes.item);
 </script>
 
 <style lang="scss">
@@ -633,10 +616,6 @@
   label {
     font-size: 0.9rem;
     padding: 0;
-  }
-  #searched-venues {
-    display: flex;
-    flex-direction: column;
   }
 
   form {
@@ -736,10 +715,14 @@
 <a href="/members/gigs/{id}" rel="{!saved ? 'external' : undefined}">View gig summary</a><br /><br />
 
 {#if previewSummary}
-  <button class="gig-preview" on:click="{() => (previewSummary = false)}" data-test="gig-edit-{id}-hide-preview">Hide gig preview</button>
+  <button class="gig-preview" on:click="{() => (previewSummary = false)}" data-test="gig-edit-{id}-hide-preview">Hide
+    gig preview</button>
   <Summary gig="{summaryGig}" displayLinks="{false}" />
   <!-- TODO show public advert when that's implemented (#35) -->
-{:else}<button class="gig-preview" on:click="{() => (previewSummary = true)}" data-test="gig-edit-{id}-show-preview">Show gig preview</button>{/if}
+{:else}
+  <button class="gig-preview" on:click="{() => (previewSummary = true)}" data-test="gig-edit-{id}-show-preview">Show gig
+    preview</button>
+{/if}
 
 <p>
   {#if editing_time}
@@ -774,7 +757,7 @@
 <form on:submit|preventDefault class="theme-{$themeName}">
   {#if !displayVenueEditor}
     <!-- svelte-ignore a11y-label-has-associated-control -->
-    <label>
+    <label data-test="gig-edit-{id}-type">
       Event type
       <Select bind:value="{type_id}">
         {#each gigTypes as gigType}
@@ -814,29 +797,16 @@
         {/each}
       </Select>
     </label>
-    <input
-      type="text"
+    <SearchBox
       placeholder="Search venues"
-      bind:value="{venueSearch}"
-      on:keydown="{firstVenue}"
-      bind:this="{searchVenuesField}"
-      data-test="gig-edit-{id}-venue-search"
+      toId="{(venue) => venue.id}"
+      toDisplayName="{venueDisplayName}"
+      fuse="{venueFuse}"
+      on:select="{selectVenueSearch}"
+      bind:clearSearch="{clearVenueSearch}"
+      data-test="gig-edit-{id}-venue"
       disabled="{cancelled}"
     />
-    <div id="searched-venues" bind:this="{searchedVenuesList}">
-      {#each searchedVenues as venue}
-        <div
-          class="link"
-          data-test="gig-edit-{id}-venue-search-result"
-          on:click="{selectVenue(venue.id)}"
-          on:keydown="{nextVenue}"
-          tabindex="0"
-        >
-          {venue.name}
-          {#if venue.subvenue}&nbsp;| {venue.subvenue}{/if}
-        </div>
-      {/each}
-    </div>
 
     <div class="button-group">
       <button on:click="{newVenue}" data-test="gig-edit-{id}-create-venue" disabled="{cancelled}">Create new venue</button>
@@ -879,58 +849,79 @@
       <label data-test="gig-edit-{id}-client-select">Add client
         <Select bind:value="{selectedClient}" bind:select="{clientListElement}" disabled="{cancelled}">
           <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
-          {#each allContacts as contact}
-            <!-- TODO don't show selected clients in this list -->
+          {#each potentialClients as contact}
             <option value="{contact.id}">{contactDisplayName(contact)}</option>
           {/each}
         </Select></label>
+      <SearchBox
+        placeholder="Search clients"
+        fuse="{clientFuse}"
+        toId="{(client) => client.id}"
+        toDisplayName="{contactDisplayName}"
+        on:select="{selectClientSearch}"
+        data-test="gig-edit-{id}-client"
+        disabled="{cancelled}"
+      />
       <div class="button-group">
         <button on:click="{selectClient}" data-test="gig-edit-{id}-client-select-confirm" disabled="{cancelled}">Select
           client</button>
         <button on:click="{newClient}" data-test="gig-edit-{id}-client-new" disabled="{cancelled}">Create new client</button>
       </div>
     </form>
-    <h4>Callers</h4>
-    <form on:submit|preventDefault class="theme-{$themeName} contacts" data-test="caller-form">
-      <div data-test="gig-edit-{id}-caller-list">
-        {#each callers as contact (contact.id)}
-          <div class="gig-contact" transition:fade|local>
-            <span data-test="contact-name">{contactDisplayName(contact.contact)}</span>
-            <div class="button-group">
-              <button
-                on:click="{editContact(contact.id, contactTypes.CALLER)}"
-                data-test="gig-edit-{id}-callers-{contact.id}-edit"
-                disabled="{cancelled}"
-              >Edit</button>
-              <button
-                on:click="{removeCaller(contact.id)}"
-                data-test="gig-edit-{id}-callers-{contact.id}-remove"
-                disabled="{cancelled}"
-              >Remove</button>
+    {#if typeCode !== 'kit'}
+      <h4>Callers</h4>
+      <form on:submit|preventDefault class="theme-{$themeName} contacts" data-test="caller-form">
+        <div data-test="gig-edit-{id}-caller-list">
+          {#each callers as contact (contact.id)}
+            <div class="gig-contact" transition:fade|local>
+              <span data-test="contact-name">{contactDisplayName(contact.contact)}</span>
+              <div class="button-group">
+                <button
+                  on:click="{editContact(contact.id, contactTypes.CALLER)}"
+                  data-test="gig-edit-{id}-callers-{contact.id}-edit"
+                  disabled="{cancelled}"
+                >Edit</button>
+                <button
+                  on:click="{removeCaller(contact.id)}"
+                  data-test="gig-edit-{id}-callers-{contact.id}-remove"
+                  disabled="{cancelled}"
+                >Remove</button>
+              </div>
             </div>
-          </div>
-        {/each}
-      </div>
-      <!-- svelte-ignore a11y-label-has-associated-control -->
-      <label data-test="gig-edit-{id}-caller-select">Add caller
-        <Select bind:value="{selectedCaller}" bind:select="{callerListElement}" disabled="{cancelled}">
-          <option selected="selected" disabled value="{undefined}">--- SELECT A CALLER ---</option>
-          {#each allContacts.filter((contact) => contact.caller) as contact}
-            <!-- TODO don't show selected clients in this list -->
-            <option value="{contact.id}">{contactDisplayName(contact)}</option>
           {/each}
-        </Select>
-      </label>
-      <div class="button-group">
-        <button
-          on:click|preventDefault="{selectCaller}"
-          data-test="gig-edit-{id}-caller-select-confirm"
+        </div>
+        <!-- svelte-ignore a11y-label-has-associated-control -->
+        <label data-test="gig-edit-{id}-caller-select">Add caller
+          <Select bind:value="{selectedCaller}" bind:select="{callerListElement}" disabled="{cancelled}">
+            <option selected="selected" disabled value="{undefined}">--- SELECT A CALLER ---</option>
+            {#each potentialCallers as contact}
+              <option value="{contact.id}">{contactDisplayName(contact)}</option>
+            {/each}
+          </Select>
+        </label>
+        <SearchBox
+          placeholder="Search callers"
+          fuse="{callerFuse}"
+          toId="{(client) => client.id}"
+          toDisplayName="{contactDisplayName}"
+          on:select="{selectCallerSearch}"
+          data-test="gig-edit-{id}-caller"
           disabled="{cancelled}"
-        >Select caller</button>
-        <button on:click|preventDefault="{newCaller}" data-test="gig-edit-{id}-caller-new" disabled="{cancelled}">Create
-          new caller</button>
-      </div>
-    </form>
+        />
+        <div class="button-group">
+          <button
+            on:click|preventDefault="{selectCaller}"
+            data-test="gig-edit-{id}-caller-select-confirm"
+            disabled="{cancelled}"
+          >Select caller</button>
+          <button
+            on:click|preventDefault="{newCaller}"
+            data-test="gig-edit-{id}-caller-new"
+            disabled="{cancelled}"
+          >Create new caller</button>
+        </div>
+      </form>
+    {/if}
   {:else}
     <form on:submit|preventDefault class="theme-{$themeName} contacts">
       <ContactEditor {...contactToEdit} on:saved="{updateContact}" on:cancel="{cancelEditContact}" />
@@ -1009,25 +1000,35 @@
       />
     </label>
     <div class="button-group">
-      <button on:click="{(e) => fillFinishDate({ ...e, force: true })}" disabled="{cancelled}" data-test="gig-edit-{id}-infer-finish-date">Infer finish date</button>
+      <button
+        on:click="{(e) => fillFinishDate({ ...e, force: true })}"
+        disabled="{cancelled}"
+        data-test="gig-edit-{id}-infer-finish-date"
+      >Infer finish date</button>
     </div>
   </form>
   <hr />
 {/if}
-<h3>Options</h3>
-<form on:submit|preventDefault class="theme-{$themeName}">
-  <label>Admins only: <input type="checkbox" bind:checked="{admins_only}" /> (Whether to hide from normal users)</label>
-  <label>Advertise publicly:
-    <input type="checkbox" bind:checked="{advertise}" data-test="gig-edit-{id}-advertise" />
-    (Whether to allow users to express an interest in playing)</label>
-  <label>Allow signups:
-    <input type="checkbox" bind:checked="{allow_signups}" />
-    (Whether to allow users to express an interest in playing)</label>
-  <label>Food provided:
-    <input type="checkbox" bind:checked="{food_provided}" />
-    (Whether food is provided at the gig. Will request dietary requirements when people sign up.)</label>
-</form>
-<hr />
+{#if typeCode !== 'kit'}
+  <h3>Options</h3>
+  <form on:submit|preventDefault class="theme-{$themeName}">
+    <label>Admins only:
+      <input type="checkbox" bind:checked="{admins_only}" data-test="gig-edit-{id}-admins-only" />
+      (Whether to hide from normal users)</label>
+    {#if typeCode !== 'calendar'}
+      <label>Advertise publicly:
+        <input type="checkbox" bind:checked="{advertise}" data-test="gig-edit-{id}-advertise" />
+        (Whether to allow users to express an interest in playing)</label>
+      <label>Allow signups:
+        <input type="checkbox" bind:checked="{allow_signups}" data-test="gig-edit-{id}-allow-signups" />
+        (Whether to allow users to express an interest in playing)</label>
+      <label>Food provided:
+        <input type="checkbox" bind:checked="{food_provided}" />
+        (Whether food is provided at the gig. Will request dietary requirements when people sign up.)</label>
+    {/if}
+  </form>
+  <hr />
+{/if}
 <h3>Notes</h3>
 <form on:submit|preventDefault class="theme-{$themeName}">
   <label>{#if advertise}Public advert{:else}Summary{/if}<textarea
@@ -1035,35 +1036,43 @@
       rows="7"
       data-test="gig-edit-{id}-summary"
     ></textarea></label>
-  <label>Band notes<textarea bind:value="{notes_band}" rows="7" data-test="gig-edit-{id}-notes-band"></textarea></label>
+  {#if typeCode !== 'kit'}
+    <label>Band notes<textarea
+        bind:value="{notes_band}"
+        rows="7"
+        data-test="gig-edit-{id}-notes-band"
+      ></textarea></label>
+  {/if}
   <label>Admin notes<textarea
       bind:value="{notes_admin}"
       rows="7"
       data-test="gig-edit-{id}-notes-admin"
     ></textarea></label>
 </form>
-{#if typeCode !== "calendar"}
-<hr />
-<h3>Financial details</h3>
-<form on:submit|preventDefault class="theme-{$themeName}">
-  <label>Quote date<input type="date" bind:value="{quote_date}" /></label>
-  <label>Finance notes<textarea bind:value="{finance}" rows="7" data-test="gig-edit-{id}-finance"></textarea></label>
-  <label>Deposit received:<input
-      type="checkbox"
-      bind:checked="{finance_deposit_received}"
-      data-test="gig-edit-{id}-finance-deposit"
-    /></label>
-  <label>Payment received:<input
-      type="checkbox"
-      bind:checked="{finance_payment_received}"
-      data-test="gig-edit-{id}-finance-payment"
-    /></label>
-  <label>Caller paid:<input
-      type="checkbox"
-      bind:checked="{finance_caller_paid}"
-      data-test="gig-edit-{id}-finance-caller"
-    /></label>
-</form>
+{#if typeCode !== 'calendar'}
+  <hr />
+  <h3>Financial details</h3>
+  <form on:submit|preventDefault class="theme-{$themeName}">
+    <label>Quote date<input type="date" bind:value="{quote_date}" /></label>
+    <label>Finance notes<textarea bind:value="{finance}" rows="7" data-test="gig-edit-{id}-finance"></textarea></label>
+    <label>Deposit received:<input
+        type="checkbox"
+        bind:checked="{finance_deposit_received}"
+        data-test="gig-edit-{id}-finance-deposit"
+      /></label>
+    <label>Payment received:<input
+        type="checkbox"
+        bind:checked="{finance_payment_received}"
+        data-test="gig-edit-{id}-finance-payment"
+      /></label>
+    {#if typeCode !== 'kit'}
+      <label>Caller paid:<input
+          type="checkbox"
+          bind:checked="{finance_caller_paid}"
+          data-test="gig-edit-{id}-finance-caller"
+        /></label>
+    {/if}
+  </form>
 {/if}
 
 <div class="button-group"><button on:click="{saveGig}" data-test="gig-edit-{id}-save">Save changes</button></div>
