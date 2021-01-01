@@ -12,11 +12,17 @@
   import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
   import { stores } from "@sapper/app";
   import InstrumentName from "./InstrumentName.svelte";
-  import moment from "moment-timezone";
   import { themeName } from "../../view";
+  import dayjs from "dayjs";
+  import utc from "dayjs/plugin/utc";
+  import timezone from "dayjs/plugin/timezone";
   export let gig, userInstruments;
   export let showLink = true;
   let edit = false;
+
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  dayjs.tz.setDefault("Europe/London");
 
   let selectedInstruments =
     gig.lineup.length > 0
@@ -261,7 +267,7 @@
     {:else}{gig.title}{/if}
     {#if gig.date}
       <small>
-        &nbsp;on {moment(gig.date)
+        &nbsp;on {dayjs(gig.date)
           .tz('Europe/London')
           .format('dddd Do MMMM YYYY')}
       </small>

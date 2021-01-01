@@ -17,7 +17,7 @@
 <script>
   import { makeTitle } from "../../view";
   import Person from "../../components/Committee/Person.svelte";
-  import moment from "moment";
+  import dayjs from "dayjs";
   export let committees, aprilFools;
 </script>
 
@@ -57,7 +57,7 @@ For contact details for the current committee
 {#each committees as committee}
   <hr />
   <cucb-committee>
-    <h3>{moment(committee.started).year()}/{(moment(committee.started).year() + 1).toString().slice(-2)}</h3>
+    <h3>{dayjs(committee.started).year()}/{(dayjs(committee.started).year() + 1).toString().slice(-2)}</h3>
     <committee-members>
       {#if aprilFools}
         {#each committee.committee_members as person}

@@ -16,9 +16,14 @@
 import "./commands";
 import tinycolor from "../deps/tinycolor";
 import chaiSorted from "chai-sorted";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 
-Cypress.moment = require("moment-timezone");
-Cypress.moment.tz.setDefault("Europe/London");
+Cypress.dayjs = dayjs;
+Cypress.dayjs.extend(utc);
+Cypress.dayjs.extend(timezone);
+Cypress.dayjs.tz.setDefault("Europe/London");
 
 chai.use(chaiSorted);
 

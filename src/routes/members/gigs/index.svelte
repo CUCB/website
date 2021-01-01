@@ -21,30 +21,30 @@
             _or: [
               {
                 date: {
-                  _gte: moment()
+                  _gte: dayjs()
                     .startOf("month")
                     .format(),
-                  _lte: moment()
+                  _lte: dayjs()
                     .endOf("month")
                     .format(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: moment()
+                  _gte: dayjs()
                     .startOf("month")
                     .format(),
-                  _lte: moment()
+                  _lte: dayjs()
                     .endOf("month")
                     .format(),
                 },
               },
               {
                 finish_time: {
-                  _gte: moment()
+                  _gte: dayjs()
                     .startOf("month")
                     .format(),
-                  _lte: moment()
+                  _lte: dayjs()
                     .endOf("month")
                     .format(),
                 },
@@ -59,7 +59,6 @@
         variables: { where: { allow_signups: { _eq: true } } },
       });
     } catch (e) {
-      console.error(e);
       await handleErrors.bind(this)(e, session);
       return;
     }
@@ -75,7 +74,7 @@
         signup_dict[gig.id] = gig;
       }
 
-      let currentCalendarMonth = moment().format("YYYY-MM");
+      let currentCalendarMonth = dayjs().format("YYYY-MM");
 
       return {
         gigs,
@@ -102,7 +101,7 @@
   import { stores } from "@sapper/app";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
-  import moment from "moment";
+  import dayjs from "dayjs";
   import { writable } from "svelte/store";
   export let gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
   $: reloadSignupGigs(gigs);
@@ -123,7 +122,7 @@
   let allUpcoming = gigs;
   let { session } = stores();
   let drafts = gigs.filter(gig => gig.type.code === "draft");
-  $: currentCalendarMonthMoment = moment(currentCalendarMonth, "YYYY-MM");
+  $: currentCalendarMonthDayjs = dayjs(currentCalendarMonth, "YYYY-MM");
   let displaying = "allUpcoming";
 
   function isObject(item) {
@@ -170,30 +169,30 @@
             _or: [
               {
                 date: {
-                  _gte: moment(newDate, "YYYY-MM")
+                  _gte: dayjs(newDate, "YYYY-MM")
                     .startOf("month")
                     .format(),
-                  _lte: moment(newDate, "YYYY-MM")
+                  _lte: dayjs(newDate, "YYYY-MM")
                     .endOf("month")
                     .format(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: moment(newDate, "YYYY-MM")
+                  _gte: dayjs(newDate, "YYYY-MM")
                     .startOf("month")
                     .format(),
-                  _lte: moment(newDate, "YYYY-MM")
+                  _lte: dayjs(newDate, "YYYY-MM")
                     .endOf("month")
                     .format(),
                 },
               },
               {
                 finish_time: {
-                  _gte: moment(newDate, "YYYY-MM")
+                  _gte: dayjs(newDate, "YYYY-MM")
                     .startOf("month")
                     .format(),
-                  _lte: moment(newDate, "YYYY-MM")
+                  _lte: dayjs(newDate, "YYYY-MM")
                     .endOf("month")
                     .format(),
                 },
@@ -212,26 +211,26 @@
     gigs = gigs;
   };
   $: gotoPreviousCalendarMonth = gotoDate(
-    moment(currentCalendarMonth, "YYYY-MM")
+    dayjs(currentCalendarMonth, "YYYY-MM")
       .subtract(1, "month")
       .format("YYYY-MM"),
   );
   $: gotoNextCalendarMonth = gotoDate(
-    moment(currentCalendarMonth, "YYYY-MM")
+    dayjs(currentCalendarMonth, "YYYY-MM")
       .add(1, "month")
       .format("YYYY-MM"),
   );
   $: changeCalendarDate = async event => {
     if (event.detail.month !== undefined) {
       await gotoDate(
-        moment(currentCalendarMonth, "YYYY-MM")
+        dayjs(currentCalendarMonth, "YYYY-MM")
           .month(event.detail.month)
           .format("YYYY-MM"),
       )();
     }
     if (event.detail.year !== undefined) {
       await gotoDate(
-        moment(currentCalendarMonth, "YYYY-MM")
+        dayjs(currentCalendarMonth, "YYYY-MM")
           .year(event.detail.year)
           .format("YYYY-MM"),
       )();
@@ -335,7 +334,7 @@
       {#each drafts as gig}
         <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
         [created
-        {moment(gig.posting_time).format('HH:MM, DD/MM')}
+        {dayjs(gig.posting_time).format('HH:MM, DD/MM')}
         by
         {(gig.user && gig.user.first) || 'someone?'}],
       {/each}
@@ -345,7 +344,7 @@
   <div class="calendar theme-{$themeName}">
     <Calendar
       gigs="{calendarGigs[currentCalendarMonth]}"
-      displayedMonth="{currentCalendarMonthMoment}"
+      displayedMonth="{currentCalendarMonthDayjs}"
       startDay="{$calendarStartDay}"
       on:clickPrevious="{gotoPreviousCalendarMonth}"
       on:clickNext="{gotoNextCalendarMonth}"

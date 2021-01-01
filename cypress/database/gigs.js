@@ -135,17 +135,86 @@ export const onConflictVenue = {
   ],
 };
 
-export const CreateVenues = `
-  mutation CreateVenues($venues: [cucb_gig_venues_insert_input!]!, $on_conflict: cucb_gig_venues_on_conflict) {
-    insert_cucb_gig_venues(objects: $venues, on_conflict: $on_conflict) {
+// A massive mutation for the gig editor tests
+export const SetResetGig = `
+  mutation SetResetGig(
+      $id: bigint
+      $title: String!
+      $type: bigint! = 1
+      $adminsOnly: Boolean
+      $allowSignups: Boolean = false
+      $lineup: cucb_gigs_lineups_arr_rel_insert_input
+      $date: date
+      $time: time
+      $summary: String
+      $notesAdmin: String
+      $notesBand: String
+      $venue: cucb_gig_venues_obj_rel_insert_input
+      $finance: String
+      $arriveTime: timestamptz
+      $finishTime: timestamptz
+      $depositReceived: Boolean
+      $paymentReceived: Boolean
+      $callerPaid: Boolean,
+      $where_delete_venues: cucb_gig_venues_bool_exp!,
+      $where_delete_contacts: cucb_contacts_bool_exp!
+      $create_contacts: [cucb_contacts_insert_input!]!,
+      $create_venues: [cucb_gig_venues_insert_input!]!
+  ) {
+    delete_cucb_gigs_contacts(where: { gig_id: { _eq: $id } }) {
       affected_rows
     }
-  }
-`;
-
-export const CreateContacts = `
-  mutation CreateContacts($contacts: [cucb_contacts_insert_input!]!) {
-    insert_cucb_contacts(objects: $contacts, on_conflict: {
+    delete_cucb_contacts(where: $where_delete_contacts) {
+      affected_rows
+    }
+    insert_cucb_gigs(
+      objects: [{
+        id: $id
+        title: $title
+        type: $type
+        admins_only: $adminsOnly
+        allow_signups: $allowSignups
+        lineup: $lineup
+        date: $date
+        time: $time
+        summary: $summary
+        notes_admin: $notesAdmin
+        notes_band: $notesBand
+        venue: $venue
+        arrive_time: $arriveTime
+        finish_time: $finishTime
+        finance_deposit_received: $depositReceived
+        finance_payment_received: $paymentReceived
+        finance_caller_paid: $callerPaid
+        finance: $finance
+      }],
+      on_conflict: {
+        constraint: cucb_gigs_id_key,
+        update_columns: [
+          title
+          type
+          allow_signups
+          admins_only
+          date
+          time
+          summary
+          notes_admin
+          notes_band
+          venue_id
+          arrive_time
+          finish_time
+          finance_deposit_received
+          finance_payment_received
+          finance_caller_paid
+          finance
+        ]
+      }) {
+      affected_rows
+    }
+    delete_cucb_gig_venues(where: $where_delete_venues) {
+      affected_rows
+    }
+    insert_cucb_contacts(objects: $create_contacts, on_conflict: {
       constraint: cucb_contacts_id_key,
       update_columns: [
         caller
@@ -158,29 +227,22 @@ export const CreateContacts = `
     }) {
       affected_rows
     }
-  }
-`;
-
-export const ClearContactsForGig = `
-  mutation ClearContactsForGig($gig_id: bigint!) {
-    delete_cucb_gigs_contacts(where: { gig_id: { _eq: $gig_id } }) {
+    insert_cucb_gig_venues(objects: $create_venues, on_conflict: {
+      constraint: cucb_gig_venues_id_key,
+      update_columns: [
+        address,
+        distance_miles,
+        latitude,
+        longitude,
+        map_link,
+        name,
+        notes_admin,
+        notes_band,
+        postcode,
+        subvenue,
+      ],
+    }) {
       affected_rows
     }
   }
-`;
-
-export const DeleteContacts = `
-  mutation DeleteContacts($where: cucb_contacts_bool_exp!) {
-    delete_cucb_contacts(where: $where) {
-      affected_rows
-    }
-  }
-`;
-
-export const DeleteVenues = `
-  mutation DeleteVenues($where: cucb_gig_venues_bool_exp!) {
-    delete_cucb_gig_venues(where: $where) {
-      affected_rows
-    }
-  }
-`;
+`

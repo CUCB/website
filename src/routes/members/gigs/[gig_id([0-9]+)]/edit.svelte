@@ -116,7 +116,6 @@
     finance_caller_paid,
     quote_date;
   import { makeTitle, themeName } from "../../../../view";
-  import moment from "moment-timezone";
   import Select from "../../../../components/Forms/Select.svelte";
   import VenueEditor from "../../../../components/Gigs/VenueEditor.svelte";
   import ContactEditor from "../../../../components/Gigs/ContactEditor.svelte";
@@ -128,6 +127,17 @@
   import { fade } from "svelte/transition";
   import { stores } from "@sapper/app";
   import SearchBox from "../../../../components/SearchBox.svelte";
+  import dayjs from "dayjs";
+  import utc from "dayjs/plugin/utc";
+  import timezone from "dayjs/plugin/timezone";
+  import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+  import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+  dayjs.extend(isSameOrAfter);
+  dayjs.extend(isSameOrBefore);
+  dayjs.tz.setDefault("Europe/London");
 
   const { session } = stores();
 
@@ -146,33 +156,27 @@
     editContactType,
     clearVenueSearch;
   let previewSummary = false;
-  moment.tz.setDefault("Europe/London");
-  time = time && moment(`1970-01-01T${time}`).format("HH:mm"); // Remove seconds from time if they are present
-  let arrive_time_date = (arrive_time && moment(arrive_time).format("YYYY-MM-DD")) || null;
-  let arrive_time_time = (arrive_time && moment(arrive_time).format("HH:mm")) || null;
-  let finish_time_date = (finish_time && moment(finish_time).format("YYYY-MM-DD")) || null;
-  let finish_time_time = (finish_time && moment(finish_time).format("HH:mm")) || null;
-  let fields = {
-    arrive_time_date: {},
-    arrive_time_time: {},
-    finish_time_date: {},
-    finish_time_time: {},
-  };
+  time = time && dayjs(`1970-01-01T${time}`).format("HH:mm"); // Remove seconds from time if they are present
+  let arrive_time_date = (arrive_time && dayjs(arrive_time).format("YYYY-MM-DD")) || null;
+  let arrive_time_time = (arrive_time && dayjs(arrive_time).format("HH:mm")) || null;
+  let finish_time_date = (finish_time && dayjs(finish_time).format("YYYY-MM-DD")) || null;
+  let finish_time_time = (finish_time && dayjs(finish_time).format("HH:mm")) || null;
+  let fields = {};
   $: timingWarnings = [
     arrive_time &&
       finish_time &&
-      moment(arrive_time).isBefore(moment(finish_time).subtract(6, "hours")) &&
+      dayjs(arrive_time).isBefore(dayjs(finish_time).subtract(6, "hours")) &&
       "Gig is longer than 6 hours. Have you accidentally put a time in the morning rather than the evening?",
     arrive_time &&
       arrive_time_time === time &&
-      moment(date).isSame(moment(arrive_time_date)) &&
+      dayjs(date).isSame(dayjs(arrive_time_date)) &&
       "Arrive time is the same as start time.",
   ].filter((x) => x);
 
   $: arrive_time =
-    (arrive_time_time && arrive_time_date && moment(`${arrive_time_date}T${arrive_time_time}`).format()) || null;
+    (arrive_time_time && arrive_time_date && dayjs(`${arrive_time_date}T${arrive_time_time}`).format()) || null;
   $: finish_time =
-    (finish_time_time && finish_time_date && moment(`${finish_time_date}T${finish_time_time}`).format()) || null;
+    (finish_time_time && finish_time_date && dayjs(`${finish_time_date}T${finish_time_time}`).format()) || null;
   $: clients = contacts.filter((contact) => contact.client);
   $: callers = contacts.filter((contact) => contact.calling);
   $: clientSet = new Set(clients.map((c) => c.id));
@@ -188,9 +192,9 @@
     lastSaved.summary === (summary && summary.trim()) &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
     lastSaved.notes_band === (notes_band && notes_band.trim()) &&
-    ((!lastSaved.arrive_time && !arrive_time) || moment(lastSaved.arrive_time).isSame(arrive_time)) &&
-    ((!lastSaved.finish_time && !finish_time) || moment(lastSaved.finish_time).isSame(finish_time)) &&
-    ((!lastSaved.time && !time) || moment(`1970-01-01T${lastSaved.time}`).isSame(moment(`1970-01-01T${time}`))) &&
+    ((!lastSaved.arrive_time && !arrive_time) || dayjs(lastSaved.arrive_time).isSame(arrive_time)) &&
+    ((!lastSaved.finish_time && !finish_time) || dayjs(lastSaved.finish_time).isSame(finish_time)) &&
+    ((!lastSaved.time && !time) || dayjs(`1970-01-01T${lastSaved.time}`).isSame(dayjs(`1970-01-01T${time}`))) &&
     lastSaved.admins_only === admins_only &&
     lastSaved.advertise === advertise &&
     lastSaved.allow_signups === allow_signups &&
@@ -387,10 +391,9 @@
         window.setTimeout(recentlySavedTimer, 2000);
         recentlySavedOpacity.set(1);
         lastSaved = { ...res.data.update_cucb_gigs_by_pk };
-        console.log(lastSaved);
       }
       editing_user = { id: $session.userId, first: $session.firstName, last: $session.lastName };
-      editing_time = moment().format();
+      editing_time = dayjs().format();
     } catch (e) {
       // Oh shit
       // TODO handle this better
@@ -566,10 +569,10 @@
     if (arrive_time_date && !e.force) return;
     if (!arrive_time_time) return;
     // TODO could consider finish_time_time as a fallback for time
-    if (!time || moment(`1970-01-01T${arrive_time_time}`).isSameOrBefore(`1970-01-01T${time}`)) {
+    if (!time || dayjs(`1970-01-01T${arrive_time_time}`).isSameOrBefore(`1970-01-01T${time}`)) {
       arrive_time_date = date;
     } else {
-      arrive_time_date = moment(date).subtract(1, "day").format("YYYY-MM-DD");
+      arrive_time_date = dayjs(date).subtract(1, "day").format("YYYY-MM-DD");
     }
     await tick();
     fields.arrive_time_date.dispatchEvent(new Event("change"));
@@ -580,10 +583,10 @@
     if (finish_time_date && !e.force) return;
     if (!finish_time_time) return;
     // TODO could consider arrive_time_time as a fallback for time
-    if (!time || moment(`1970-01-01T${finish_time_time}`).isSameOrAfter(`1970-01-01T${time}`)) {
+    if (!time || dayjs(`1970-01-01T${finish_time_time}`).isSameOrAfter(`1970-01-01T${time}`)) {
       finish_time_date = date;
     } else {
-      finish_time_date = moment(date).add(1, "day").format("YYYY-MM-DD");
+      finish_time_date = dayjs(date).add(1, "day").format("YYYY-MM-DD");
     }
     await tick();
     fields.finish_time_date.dispatchEvent(new Event("change"));
@@ -727,7 +730,7 @@
 <p>
   {#if editing_time}
     This gig was last edited at
-    {moment(editing_time).format('HH:mm DD/MM/YY')}
+    {dayjs(editing_time).format('HH:mm DD/MM/YY')}
     {#if editing_user}
       &nbsp;by user
       <a href="/members/users/{editing_user.id}">{editing_user.first}&#32;{editing_user.last}</a>
@@ -735,7 +738,7 @@
   {/if}
   {#if posting_time}
     It was created at
-    {moment(posting_time).format('HH:mm DD/MM/YY')}
+    {dayjs(posting_time).format('HH:mm DD/MM/YY')}
     {#if posting_user}
       &nbsp;by user
       <a href="/members/users/{posting_user.id}">{posting_user.first}&#32;{posting_user.last}</a>

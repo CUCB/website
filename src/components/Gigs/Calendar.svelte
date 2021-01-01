@@ -1,13 +1,23 @@
 <script>
   import { fade } from "svelte/transition";
-  import moment from "moment";
   import { createEventDispatcher } from "svelte";
   import { goto } from "@sapper/app";
   import TooltipText from "../TooltipText.svelte";
   import { Map, Set } from "immutable";
   import { themeName } from "../../view";
+  import dayjs from "dayjs";
+  import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+  import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+  import updateLocale from "dayjs/plugin/updateLocale";
+  import isoWeek from "dayjs/plugin/isoWeek";
+
+  dayjs.extend(isSameOrBefore);
+  dayjs.extend(isSameOrAfter);
+  dayjs.extend(updateLocale);
+  dayjs.extend(isoWeek);
+
   export let gigs;
-  export let displayedMonth = moment();
+  export let displayedMonth = dayjs();
   export let startDay = "mon";
   let dispatchEvent = createEventDispatcher();
   let showKey = false;
@@ -31,48 +41,49 @@
     sat: 6,
     sun: 0,
   };
-  $: locale = moment.locale();
+  $: locale = dayjs.locale();
   $: dayOffset = dayOffsets[startDay || "mon"];
-  $: moment.updateLocale(locale, {
-    week: {
-      dow: dayOffset,
-      doy: 4,
-    },
-  }) && displayedMonth.locale(locale);
+  $: localeUpdated = dayjs.updateLocale(locale, {
+    // See https://day.js.org/docs/en/customization/customization for possible options here
+    yearStart: 4,
+    weekStart: dayOffset,
+  }) && dayjs.locale(locale);
+
 
   $: rotate = array => [...array.slice(dayOffset - 1), ...array.slice(0, dayOffset - 1)];
 
-  $: dayOfWeek = date => (moment(date).isoWeekday() - 1 + dayOffset) % 7;
+  $: dayOfWeek = date => (dayjs(date).isoWeekday() - 1 + dayOffset) % 7;
 
   function daysInMonth(month) {
-    let currentDate = moment(month)
+    let currentDate = dayjs(month)
       .startOf("month")
       .startOf("week");
-    let currentWeek = [...Array(7).keys()].map(offset => moment(currentDate).add(offset, "days"));
+    let currentWeek = [...Array(7).keys()].map(offset => dayjs(currentDate).add(offset, "days"));
     let result = [currentWeek];
     currentDate = currentDate.add(1, "week");
-    for (; currentDate.month() === moment(month).month(); currentDate = currentDate.add(1, "week")) {
-      currentWeek = [...Array(7).keys()].map(offset => moment(currentDate).add(offset, "days"));
+    for (; currentDate.month() === dayjs(month).month(); currentDate = currentDate.add(1, "week")) {
+      currentWeek = [...Array(7).keys()].map(offset => dayjs(currentDate).add(offset, "days"));
       result.push(currentWeek);
     }
     return result;
   }
   $: weeks =
     startDay &&
+    localeUpdated &&
     daysInMonth(displayedMonth).map(week =>
       week.map(date => ({
         inCurrentMonth: date.month() === displayedMonth.month(),
         dayOfWeek: dayOfWeek(date),
         number: date.date(),
         tooltip: date.format(),
-        moment: date,
+        dayjs: date,
         id: `calendar_date_${date.format("YYYYMMDD")}`,
         gigs: gigs.filter(
           gig =>
-            moment(gig.date, "YYYY-MM-DD").isSame(date, "day") ||
+            dayjs(gig.date, "YYYY-MM-DD").isSame(date, "day") ||
             ((gig.type === "calendar" || gig.date === null) &&
-              moment(gig.arrive_time).isSameOrBefore(date, "day") &&
-              moment(gig.finish_time).isSameOrAfter(date, "day")),
+              dayjs(gig.arrive_time).isSameOrBefore(date, "day") &&
+              dayjs(gig.finish_time).isSameOrAfter(date, "day")),
         ),
       })),
     );
@@ -102,7 +113,7 @@
   }
 
   function selectableYears() {
-    let start = moment(displayedMonth)
+    let start = displayedMonth
       .subtract(10, "years")
       .year();
     return [...Array(20).keys()].map(x => x + start);
@@ -370,7 +381,7 @@
     <select on:change="{e => dispatchEvent('changeDate', { month: e.target.value })}">
       {#each selectableMonths() as month (month)}
         <option value="{month}" selected="{month === displayedMonth.month()}">
-          {moment()
+          {dayjs()
             .month(month)
             .format('MMMM')}
         </option>
@@ -397,7 +408,7 @@
           class:different-month="{!day.inCurrentMonth}"
           id="{day.id}"
           class="calendar-entry theme-{$themeName}"
-          class:today="{day.moment.isSame(moment(), 'day')}"
+          class:today="{day.dayjs.isSame(dayjs(), 'day')}"
         >
           {#if day.gigs.length > 0}
             <TooltipText content="{day.gigs.map(prefixGigType).join('\n')}">{day.number}</TooltipText>
