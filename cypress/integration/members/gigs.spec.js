@@ -804,31 +804,8 @@ describe("gig editor", () => {
     });
   });
 
-  beforeEach(() => {
-    Cypress.on("window:load", function (window) {
-      // Prevent onbeforeunload being registered to stop other tests being affected
-      const original = window.addEventListener;
-      window.addEventListener = function () {
-        if (arguments && arguments[0] === "beforeunload") {
-          return;
-        }
-        return original.apply(this, arguments);
-      };
-    });
-  });
-
   context("saving changes", () => {
     beforeEach(() => {
-      Cypress.on("window:load", function (window) {
-        // Prevent onbeforeunload being registered to stop other tests being affected
-        const original = window.addEventListener;
-        window.addEventListener = function () {
-          if (arguments && arguments[0] === "beforeunload") {
-            return;
-          }
-          return original.apply(this, arguments);
-        };
-      });
       cy.executeMutation(SetResetGig, {
         variables: {
           ...gig,
@@ -1241,6 +1218,10 @@ describe("gig editor", () => {
         .and("contain", "Caller paid")
         .and("contain", "Public advert")
         .and("contain", "Some public advert");
+
+      cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
+      cy.get(`[data-test=venue-editor-cancel]`).click();
+      cy.get(`[data-test=gig-summary-${gig.id}]`).should("contain", "A really long venue name to search for 1");
     });
 
     it("hides unneeded fields for calendar dates", () => {

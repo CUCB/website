@@ -279,7 +279,7 @@
   };
 
   function unloadIfSaved(e) {
-    if (saved) {
+    if (saved || window.Cypress) {
       delete e["returnValue"];
     } else {
       e.preventDefault();
@@ -343,6 +343,7 @@
   }
 
   async function cancelEditVenue() {
+    venue = venues.find((venue) => venue.id === venue_id);
     displayVenueEditor = false;
     await tick();
     venueListElement.focus();
