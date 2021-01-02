@@ -128,6 +128,7 @@
   import { stores } from "@sapper/app";
   import SearchBox from "../../../../components/SearchBox.svelte";
   import { DateTime, Settings } from "luxon";
+  import AnnotatedIcon from "../../../../components/AnnotatedIcon.svelte";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   const { session } = stores();
@@ -170,9 +171,11 @@
   ].filter((x) => x);
 
   $: arrive_time =
-    (arrive_time_time && arrive_time_date && DateTime.fromISO(`${arrive_time_date}T${arrive_time_time}`).toISO()) || null;
+    (arrive_time_time && arrive_time_date && DateTime.fromISO(`${arrive_time_date}T${arrive_time_time}`).toISO()) ||
+    null;
   $: finish_time =
-    (finish_time_time && finish_time_date && DateTime.fromISO(`${finish_time_date}T${finish_time_time}`).toISO()) || null;
+    (finish_time_time && finish_time_date && DateTime.fromISO(`${finish_time_date}T${finish_time_time}`).toISO()) ||
+    null;
   $: clients = contacts.filter((contact) => contact.client);
   $: callers = contacts.filter((contact) => contact.calling);
   $: clientSet = new Set(clients.map((c) => c.id));
@@ -188,13 +191,18 @@
     lastSaved.summary === (summary && summary.trim()) &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
     lastSaved.notes_band === (notes_band && notes_band.trim()) &&
-    ((!lastSaved.arrive_time && !arrive_time) || DateTime.fromISO(lastSaved.arrive_time).equals(DateTime.fromISO(arrive_time))) &&
-    ((!lastSaved.finish_time && !finish_time) || DateTime.fromISO(lastSaved.finish_time).equals(DateTime.fromISO(finish_time))) &&
-    ((!lastSaved.time && !time) || DateTime.fromISO(`1970-01-01T${lastSaved.time}`).equals(DateTime.fromISO(`1970-01-01T${time}`))) &&
+    ((!lastSaved.arrive_time && !arrive_time) ||
+      DateTime.fromISO(lastSaved.arrive_time).equals(DateTime.fromISO(arrive_time))) &&
+    ((!lastSaved.finish_time && !finish_time) ||
+      DateTime.fromISO(lastSaved.finish_time).equals(DateTime.fromISO(finish_time))) &&
+    ((!lastSaved.time && !time) ||
+      DateTime.fromISO(`1970-01-01T${lastSaved.time}`).equals(DateTime.fromISO(`1970-01-01T${time}`))) &&
     lastSaved.admins_only === admins_only &&
     lastSaved.advertise === advertise &&
     lastSaved.allow_signups === allow_signups &&
     lastSaved.food_provided === food_provided &&
+    ((!lastSaved.quote_date && !quote_date) ||
+      DateTime.fromISO(lastSaved.quote_date).hasSame(DateTime.fromISO(quote_date), "day")) &&
     lastSaved.finance == (finance && finance.trim()) &&
     lastSaved.finance_deposit_received == finance_deposit_received &&
     lastSaved.finance_payment_received == finance_payment_received &&
@@ -376,6 +384,7 @@
           arrive_time,
           finish_time,
           time: time || null,
+          quote_date,
           finance: finance && finance.trim(),
           finance_deposit_received,
           finance_payment_received,
@@ -698,6 +707,29 @@
   button.gig-preview {
     margin-bottom: 0.75em;
   }
+
+  .warnings {
+    padding: 0;
+    * {
+      margin: 0.5em 0;
+      box-sizing: border-box;
+      @include themeify($themes) {
+        background: themed("warningBackground");
+        color: themed("warningColor");
+        border: 1px solid themed("warningBorderColor");
+      }
+      list-style-type: none;
+      padding: 0.15em 0.25em;
+    }
+  }
+
+  label.checkbox {
+    display: block;
+
+    input {
+      width: auto;
+    }
+  }
 </style>
 
 <svelte:head>
@@ -727,7 +759,7 @@
 <p>
   {#if editing_time}
     This gig was last edited at
-    {DateTime.fromISO(editing_time).toFormat("HH:mm dd/LL/yyyy")}
+    {DateTime.fromISO(editing_time).toFormat('HH:mm dd/LL/yyyy')}
     {#if editing_user}
       &nbsp;by user
       <a href="/members/users/{editing_user.id}">{editing_user.first}&#32;{editing_user.last}</a>
@@ -1012,18 +1044,18 @@
 {#if typeCode !== 'kit'}
   <h3>Options</h3>
   <form on:submit|preventDefault class="theme-{$themeName}">
-    <label>Admins only:
-      <input type="checkbox" bind:checked="{admins_only}" data-test="gig-edit-{id}-admins-only" />
+    <label class="checkbox">Admins only:
+      <input type="checkbox" bind:checked="{admins_only}" data-test="gig-edit-{id}-admins-only" /><br />
       (Whether to hide from normal users)</label>
     {#if typeCode !== 'calendar'}
-      <label>Advertise publicly:
-        <input type="checkbox" bind:checked="{advertise}" data-test="gig-edit-{id}-advertise" />
+      <label class="checkbox">Advertise publicly:
+        <input type="checkbox" bind:checked="{advertise}" data-test="gig-edit-{id}-advertise" /><br />
         (Whether to allow users to express an interest in playing)</label>
-      <label>Allow signups:
-        <input type="checkbox" bind:checked="{allow_signups}" data-test="gig-edit-{id}-allow-signups" />
+      <label class="checkbox">Allow signups:
+        <input type="checkbox" bind:checked="{allow_signups}" data-test="gig-edit-{id}-allow-signups" /><br />
         (Whether to allow users to express an interest in playing)</label>
-      <label>Food provided:
-        <input type="checkbox" bind:checked="{food_provided}" />
+      <label class="checkbox">Food provided:
+        <input type="checkbox" bind:checked="{food_provided}" /><br />
         (Whether food is provided at the gig. Will request dietary requirements when people sign up.)</label>
     {/if}
   </form>
@@ -1035,7 +1067,9 @@
       bind:value="{summary}"
       rows="7"
       data-test="gig-edit-{id}-summary"
-    ></textarea></label>
+    ></textarea>
+    <p><i>Note:</i> HTML is allowed here, though paragraphing is managed automatically based on new lines.</p>
+  </label>
   {#if typeCode !== 'kit'}
     <label>Band notes<textarea
         bind:value="{notes_band}"
@@ -1053,24 +1087,32 @@
   <hr />
   <h3>Financial details</h3>
   <form on:submit|preventDefault class="theme-{$themeName}">
-    <label>Quote date<input type="date" bind:value="{quote_date}" /></label>
+    <label>Quote date<input
+        type="date"
+        bind:this={fields.quote_date}
+        use:checkValid="{{ validityErrors: { rangeOverflow: 'Quote date cannot be set to the future.' } }}"
+        bind:value="{quote_date}"
+        max="{DateTime.local().toFormat('yyyy-LL-dd')}"
+      /></label>
     <label>Finance notes<textarea bind:value="{finance}" rows="7" data-test="gig-edit-{id}-finance"></textarea></label>
-    <label>Deposit received:<input
+    <label class="checkbox">Deposit received:<input
         type="checkbox"
         bind:checked="{finance_deposit_received}"
         data-test="gig-edit-{id}-finance-deposit"
       /></label>
-    <label>Payment received:<input
-        type="checkbox"
-        bind:checked="{finance_payment_received}"
-        data-test="gig-edit-{id}-finance-payment"
-      /></label>
-    {#if typeCode !== 'kit'}
-      <label>Caller paid:<input
+    {#if typeCode !== 'gig_enquiry'}
+      <label class="checkbox">Payment received:<input
           type="checkbox"
-          bind:checked="{finance_caller_paid}"
-          data-test="gig-edit-{id}-finance-caller"
+          bind:checked="{finance_payment_received}"
+          data-test="gig-edit-{id}-finance-payment"
         /></label>
+      {#if typeCode !== 'kit'}
+        <label class="checkbox">Caller paid:<input
+            type="checkbox"
+            bind:checked="{finance_caller_paid}"
+            data-test="gig-edit-{id}-finance-caller"
+          /></label>
+      {/if}
     {/if}
   </form>
 {/if}

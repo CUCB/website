@@ -8,44 +8,26 @@
   import { DateTime, Settings } from "luxon";
   Settings.defaultZoneName = "Europe/London";
 
-    const suffix = n => {
-        switch (new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)) {
-          case "one":
-            return "st";
-          case "two":
-            return "nd";
-          case "few":
-            return "rd";
-          case "other":
-            return "th"
-        }
-    } 
+  const suffix = (n) =>
+    ({ one: "st", two: "nd", few: "rd", other: "th" }[new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)]);
 
   export let gig,
     signupGig = writable(undefined),
-    userInstruments,
+    userInstruments = undefined,
     displayLinks = true;
   export let linkHeading = false;
-  let formatArriveFinish = (date) => date.toFormat("HH:mm");
   let showSignup = false;
   let showDetails = !linkHeading;
   let { session } = stores();
-  const formatCalendarDate = (date) =>
-    date.toFormat("cccc d") +
-    suffix(date.day) +
-    date.toFormat(" LLLL yyyy");
-
+  const formatCalendarDate = (date) => date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
+  const formatTimeOnly = (date) => date.toFormat("HH:mm");
+  const formatTimeWithDate = (date) => date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");
+  const midnight = { hours: 0, minutes: 0, seconds: 0 };
+  $: arrive_time = gig.arrive_time && DateTime.fromISO(gig.arrive_time);
+  $: finish_time = gig.finish_time && DateTime.fromISO(gig.finish_time);
+  $: date = gig.date && DateTime.fromISO(gig.date);
   $: clients = gig.contacts.filter((c) => c.client);
   $: callers = gig.contacts.filter((c) => c.calling);
-
-  if (gig.arrive_time && gig.finish_time) {
-    if (DateTime.fromISO(gig.arrive_time).day !== DateTime.fromISO(gig.finish_time).day) {
-      formatArriveFinish = (date) =>
-        date.toFormat("HH:mm (cccc d") +
-        suffix(date.day) +
-        date.toFormat(") LLL");
-    }
-  }
 </script>
 
 <style lang="scss">
@@ -273,16 +255,31 @@
         {#if gig.arrive_time}
           <p>
             <b>Arrive time:&nbsp;</b>
-            {@html formatArriveFinish(DateTime.fromISO(gig.arrive_time))}
+            {#if date && arrive_time.hasSame(date, 'day')}
+              {@html formatTimeOnly(arrive_time)}
+            {:else if !date && finish_time && arrive_time.hasSame(finish_time, 'day')}
+              {@html formatTimeOnly(arrive_time)}
+            {:else}
+              {@html formatTimeWithDate(arrive_time)}
+            {/if}
           </p>
         {/if}
         {#if gig.time}
           <p><b>Start time:&nbsp;</b> {DateTime.fromISO(`2020-01-01T${gig.time}`).toFormat('HH:mm')}</p>
         {/if}
-        {#if gig.finish_time}
-          <p><b>Finish time:&nbsp;</b> {formatArriveFinish(DateTime.fromISO(gig.finish_time))}</p>
+        {#if finish_time}
+          <p>
+            <b>Finish time:&nbsp;</b>
+            {#if date && finish_time.set(midnight).equals(date)}
+              {@html formatTimeOnly(finish_time)}
+            {:else if !date && arrive_time && finish_time.set(midnight).equals(arrive_time.set(midnight))}
+              {@html formatTimeOnly(finish_time)}
+            {:else}
+              {@html formatTimeWithDate(finish_time)}
+            {/if}
+          </p>
         {/if}
-      {:else if gig.arrive_time && gig.finish_time && !DateTime.fromISO(gig.arrive_time).hasSame(gig.finish_time, 'day')}
+      {:else if arrive_time && finish_time && !arrive_time.set(midnight).equals(finish_time.set(midnight))}
         <p>
           {formatCalendarDate(DateTime.fromISO(gig.arrive_time))}
           &ndash;
@@ -293,21 +290,21 @@
       {/if}
     </gig-timings>
     <task-list class="main-detail">
-      {#if gig.finance_deposit_received !== undefined}
+      {#if gig.finance_deposit_received !== undefined && gig.finance_deposit_received !== null}
         {#if gig.finance_deposit_received}
           <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Deposit received</task-summary>
         {:else}
           <task-summary class="color-negative"><i class="las la-exclamation"></i> Deposit not received</task-summary>
         {/if}
       {/if}
-      {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local()}
+      {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
         {#if gig.finance_payment_received}
           <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Payment received</task-summary>
         {:else}
           <task-summary class="color-negative"><i class="las la-exclamation"></i> Payment not received</task-summary>
         {/if}
       {/if}
-      {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local()}
+      {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
         {#if gig.finance_caller_paid}
           <task-summary class="color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</task-summary>
         {:else}

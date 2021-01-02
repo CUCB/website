@@ -18,6 +18,7 @@
   export let showLink = true;
   let edit = false;
   Settings.defaultZoneName = "Europe/London";
+  $: date = gig.date && DateTime.fromISO(gig.date);
 
   let selectedInstruments =
     gig.lineup.length > 0
@@ -174,16 +175,8 @@
     tippy(".disabled", { content: "This instrument is selected as part of a lineup, you can't remove it." });
   };
 
-  const suffix = (date) => {
-    let day = DateTime.fromISO(date).day;
-    return day % 10 === 1 && day !== 11
-      ? "st"
-      : day % 10 === 2 && day !== 12
-      ? "nd"
-      : day % 10 === 3 && day !== 13
-      ? "rd"
-      : "th";
-  };
+  const suffix = (n) =>
+    ({ one: "st", two: "nd", few: "rd", other: "th" }[new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)]);
 </script>
 
 <style lang="scss">
@@ -269,10 +262,10 @@
 <gig-signup data-test="gig-signup-{gig.id}" class="theme-{$themeName}">
   <h3>
     {#if showLink}<a href="/members/gigs/{gig.id}">{gig.title}</a>{:else}{gig.title}{/if}
-    {#if gig.date}
+    {#if date}
       <small>
         &nbsp;on
-        {DateTime.fromISO(gig.date).toFormat('cccc d') + suffix(gig.date) + DateTime.fromISO(gig.date).toFormat(' LLLL yyyy')}
+        {date.toFormat('cccc d') + suffix(date.day) + date.toFormat(' LLLL yyyy')}
       </small>
     {/if}
   </h3>

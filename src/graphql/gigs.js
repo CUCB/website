@@ -78,6 +78,7 @@ const FragmentGigFinancials = gql`
     finance_deposit_received
     finance_payment_received
     finance_caller_paid
+    quote_date
   }
 `;
 
