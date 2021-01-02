@@ -6,7 +6,7 @@ import {
   AddInstrument,
   RemoveInstruments,
   InstrumentsOnGig,
-  SetResetGig
+  SetResetGig,
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
@@ -134,7 +134,7 @@ describe("gig signup", () => {
   });
 
   beforeEach(() => {
-    cy.clock(Cypress.dayjs("2020-07-07 02:00").valueOf());
+    cy.clock(Cypress.DateTime.fromISO("2020-07-07T02:00").valueOf());
     cy.login("cypress_user", "abc123");
   });
 
@@ -434,7 +434,7 @@ describe("gig summary", () => {
 
   context("logged in as normal user", () => {
     before(() => {
-      cy.clock(Cypress.dayjs("2020-07-07 02:00").valueOf());
+      cy.clock(Cypress.DateTime.fromISO("2020-07-07T02:00").valueOf());
       cy.login("cypress_user", "abc123");
       cy.visit(`/members/gigs/${gig.id}`);
     });
@@ -474,7 +474,7 @@ describe("gig summary", () => {
 
   context("logged in as admin before gig", () => {
     beforeEach(() => {
-      cy.clock(Cypress.dayjs("2020-07-01 02:00").valueOf());
+      cy.clock(Cypress.DateTime.fromISO("2020-07-01T02:00").valueOf());
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}`);
     });
@@ -503,7 +503,7 @@ describe("gig summary", () => {
 
   context("logged in as admin after gig", () => {
     before(() => {
-      cy.clock(Cypress.dayjs("2020-07-30 02:00").valueOf());
+      cy.clock(Cypress.DateTime.fromISO("2020-07-30T02:00").valueOf());
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}`);
     });
@@ -523,30 +523,30 @@ describe("gig summary", () => {
 describe("gig diary", () => {
   let signupGig = {
     ...gigForSummary,
-    date: Cypress.dayjs().add(1, "month").format("YYYY-MM-DD"),
-    time: Cypress.dayjs().hour(19).minute(30).format("HH:MM"),
-    arriveTime: Cypress.dayjs().add(1, "month").hour(18).minute(30).format(),
-    finishTime: Cypress.dayjs().add(1, "month").hour(22).minute(0).format(),
+    date: Cypress.DateTime.local().plus({ months: 1 }).toFormat("yyyy-LL-dd"),
+    time: Cypress.DateTime.local().set({ hour: 19, minute: 30 }).toFormat("HH:mm"),
+    arriveTime: Cypress.DateTime.local().plus({ months: 1 }).set({ hour: 18, minute: 30 }).toISO(),
+    finishTime: Cypress.DateTime.local().plus({ months: 1 }).set({ hour: 22, minute: 0 }).toISO(),
   };
 
   let nonSignupGig = {
     ...gigForSummary,
     id: 34743274,
     allowSignups: false,
-    date: Cypress.dayjs().add(60, "days").format("YYYY-MM-DD"),
-    time: Cypress.dayjs().hour(19).minute(0).format("HH:MM"),
-    arriveTime: Cypress.dayjs().add(60, "days").hour(18).minute(0).format(),
-    finishTime: Cypress.dayjs().add(60, "days").hour(21).minute(15).format(),
+    date: Cypress.DateTime.local().plus({ days: 60 }).toFormat("yyyy-LL-dd"),
+    time: Cypress.DateTime.local().set({ hour: 19, minute: 0 }).toFormat("HH:mm"),
+    arriveTime: Cypress.DateTime.local().plus({ days: 60 }).set({ hour: 18, minute: 0 }).toISO(),
+    finishTime: Cypress.DateTime.local().plus({ days: 60 }).set({ hour: 21, minute: 15 }).toISO(),
   };
 
   let pastGig = {
     ...gigForSummary,
     id: 33274,
     allowSignups: false,
-    date: Cypress.dayjs().add(-2, "month").format("YYYY-MM-DD"),
-    time: Cypress.dayjs().hour(19).minute(30).format("HH:MM"),
-    arriveTime: Cypress.dayjs().add(-2, "month").hour(18).minute(30).format(),
-    finishTime: Cypress.dayjs().add(-2, "month").hour(22).minute(0).format(),
+    date: Cypress.DateTime.local().plus({ months: -2 }).toFormat("yyyy-LL-dd"),
+    time: Cypress.DateTime.local().set({ hour: 19, minute: 30 }).toFormat("HH:mm"),
+    arriveTime: Cypress.DateTime.local().plus({ months: -2 }).set({ hour: 18, minute: 30 }).toISO(),
+    finishTime: Cypress.DateTime.local().plus({ months: -2 }).set({ hour: 22, minute: 0 }).toISO(),
   };
 
   before(() => {
@@ -570,7 +570,7 @@ describe("gig diary", () => {
 
   context("logged in as normal user", () => {
     beforeEach(() => {
-      cy.clock(Cypress.dayjs("2020-07-07 02:00").valueOf());
+      cy.clock(Cypress.DateTime.fromISO("2020-07-07 02:00").valueOf());
       cy.login("cypress_user", "abc123");
     });
 
@@ -708,7 +708,7 @@ describe("gig diary", () => {
           .pipe(click)
           .parent()
           .parent()
-          .should("contain", Cypress.dayjs().add(2, "months").format("MMMM"));
+          .should("contain", Cypress.DateTime.local().plus({ months: 2 }).toFormat("LLLL"));
         cy.get(`[data-test=gigview-all-upcoming]`).pipe(click).should("not.exist");
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.neutral);
@@ -726,7 +726,7 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("be.visible");
         cy.get(`[data-test=gigcalendar-previous-month]`).click();
         cy.wait("@fetchGigs");
-        cy.contains(Cypress.dayjs().subtract(3, "months").format("MMMM YYYY")).should("exist");
+        cy.contains(Cypress.DateTime.local().minus({ months: 3 }).toFormat("LLLL yyyy")).should("exist");
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
         cy.get(`[data-test=gigview-all-upcoming]`).pipe(click).should("not.exist");
         cy.get(`[data-test=gig-summary-${signupGig.id}]`).should("be.visible");
@@ -817,18 +817,26 @@ describe("gig editor", () => {
     });
   });
 
-
-
   context("saving changes", () => {
     beforeEach(() => {
-      cy.executeMutation(SetResetGig, {
-          variables: {
-              ...gig,
-              where_delete_contacts: { _or: [{name: { _like: "A Client%" }}, {name: { _like: "A Caller%" }}]},
-              where_delete_venues: { name: { _like: "%og on%" }},
-              create_contacts: contacts,
-              create_venues: venues,
+      Cypress.on("window:load", function (window) {
+        // Prevent onbeforeunload being registered to stop other tests being affected
+        const original = window.addEventListener;
+        window.addEventListener = function () {
+          if (arguments && arguments[0] === "beforeunload") {
+            return;
           }
+          return original.apply(this, arguments);
+        };
+      });
+      cy.executeMutation(SetResetGig, {
+        variables: {
+          ...gig,
+          where_delete_contacts: { _or: [{ name: { _like: "A Client%" } }, { name: { _like: "A Caller%" } }] },
+          where_delete_venues: { name: { _like: "%og on%" } },
+          create_contacts: contacts,
+          create_venues: venues,
+        },
       });
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}/edit`);
@@ -863,16 +871,20 @@ describe("gig editor", () => {
     });
 
     it("can update gig details", () => {
-      let newDate = Cypress.dayjs().add(7, "weeks");
+      let newDate = Cypress.DateTime.local().plus({ weeks: 7 });
       cy.get(`[data-test=gig-edit-${gig.id}-title]`)
         .click()
         .clear()
         .type("Replaced title", { delay: 0 })
         .clear()
         .type("Replaced title", { delay: 0 });
-      cy.get(`[data-test=gig-edit-${gig.id}-date]`).click().type(newDate.format("YYYY-MM-DD"), { delay: 0 });
-      cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`).click().type(newDate.format("YYYY-MM-DD"), { delay: 0 });
-      cy.get(`[data-test=gig-edit-${gig.id}-finish-time-date]`).click().type(newDate.format("YYYY-MM-DD"), { delay: 0 });
+      cy.get(`[data-test=gig-edit-${gig.id}-date]`).click().type(newDate.toFormat("yyyy-LL-dd"), { delay: 0 });
+      cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`)
+        .click()
+        .type(newDate.toFormat("yyyy-LL-dd"), { delay: 0 });
+      cy.get(`[data-test=gig-edit-${gig.id}-finish-time-date]`)
+        .click()
+        .type(newDate.toFormat("yyyy-LL-dd"), { delay: 0 });
 
       cy.get(`[data-test=gig-edit-${gig.id}-notes-band]`)
         .click()
@@ -1121,7 +1133,7 @@ describe("gig editor", () => {
     });
 
     it("can search for clients and add them to a gig", () => {
-      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().type(contacts[1].name, { delay: 0});
+      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().type(contacts[1].name, { delay: 0 });
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains(contacts[1].name).click();
       cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`)
         .find(":selected")
@@ -1130,12 +1142,12 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-client-select-confirm]`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).invoke("val").should("be.empty");
       cy.get(`[data-test=gig-edit-${gig.id}-client-list]`).contains(contacts[1].name).should("be.visible");
-      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().type(contacts[1].name, { delay: 0});
+      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().type(contacts[1].name, { delay: 0 });
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains(contacts[1].name).should("not.exist");
     });
 
     it("can search for callers and add them to a gig", () => {
-      cy.get(`[data-test=gig-edit-${gig.id}-caller-search]`).click().type(contacts[0].name, { delay: 0});
+      cy.get(`[data-test=gig-edit-${gig.id}-caller-search]`).click().type(contacts[0].name, { delay: 0 });
       cy.get(`[data-test=gig-edit-${gig.id}-caller-search-results]`).contains(contacts[0].name).click();
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`)
         .find(":selected")
@@ -1144,7 +1156,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-caller-search]`).invoke("val").should("be.empty");
       cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name).should("be.visible");
-      cy.get(`[data-test=gig-edit-${gig.id}-caller-search]`).click().type(contacts[0].name, { delay: 0});
+      cy.get(`[data-test=gig-edit-${gig.id}-caller-search]`).click().type(contacts[0].name, { delay: 0 });
       cy.get(`[data-test=gig-edit-${gig.id}-caller-search-results]`).contains(contacts[0].name).should("not.exist");
     });
 
@@ -1152,16 +1164,16 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select(contacts[0].name);
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-callers-${contacts[0].id}-edit]`).click();
-      cy.get(`[data-test=contact-editor-name]`).click().clear().type("New Name", { delay: 0});
-      cy.get(`[data-test=contact-editor-email]`).click().clear().type("someone@gmail.com", { delay: 0});
+      cy.get(`[data-test=contact-editor-name]`).click().clear().type("New Name", { delay: 0 });
+      cy.get(`[data-test=contact-editor-email]`).click().clear().type("someone@gmail.com", { delay: 0 });
       cy.get(`[data-test=contact-editor-save]`).click();
       cy.get(`[data-test=contact-name]`).contains("New Name").should("be.visible");
       cy.get(`[data-test=gig-edit-${gig.id}-client-select] [data-test=select-box]`)
         .contains("New Name")
         .should("exist");
-      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().type("someone@gmail.com", { delay: 0});
+      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().type("someone@gmail.com", { delay: 0 });
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains("New Name").should("be.visible");
-      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().clear().type(contacts[0].name, { delay: 0});
+      cy.get(`[data-test=gig-edit-${gig.id}-client-search]`).click().clear().type(contacts[0].name, { delay: 0 });
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains("New Name").should("not.exist");
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains(contacts[0].name).should("not.exist");
     });
@@ -1170,13 +1182,13 @@ describe("gig editor", () => {
   context("not saving changes", () => {
     before(() => {
       cy.executeMutation(SetResetGig, {
-          variables: {
-              ...gig,
-              where_delete_contacts: { _or: [{name: { _like: "A Client%" }}, {name: { _like: "A Caller%" }}]},
-              where_delete_venues: { name: { _like: "%og on%" }},
-              create_contacts: contacts,
-              create_venues: venues,
-          }
+        variables: {
+          ...gig,
+          where_delete_contacts: { _or: [{ name: { _like: "A Client%" } }, { name: { _like: "A Caller%" } }] },
+          where_delete_venues: { name: { _like: "%og on%" } },
+          create_contacts: contacts,
+          create_venues: venues,
+        },
       });
     });
 
@@ -1198,7 +1210,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-show-preview]`).pipe(click).should("not.exist");
       cy.get(`[data-test=gig-summary-${gig.id}]`)
         .should("contain", gig.title)
-        .and("contain", Cypress.dayjs(gig.arriveTime).format("HH:mm"))
+        .and("contain", Cypress.DateTime.fromISO(gig.arriveTime).toFormat("HH:mm"))
         .and("contain", gig.time)
         .and("contain", "Deposit received")
         .and("contain", "Caller not paid")
@@ -1212,7 +1224,7 @@ describe("gig editor", () => {
 
       cy.get(`[data-test=gig-summary-${gig.id}]`)
         .should("contain", gig.title)
-        .and("contain", Cypress.dayjs(gig.arriveTime).format("HH:mm"))
+        .and("contain", Cypress.DateTime.fromISO(gig.arriveTime).toFormat("HH:mm"))
         .and("contain", gig.time)
         .and("contain", "Deposit received")
         .and("contain", "Caller not paid")
@@ -1222,7 +1234,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-finance-payment]`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-finance-caller]`).check();
       cy.get(`[data-test=gig-edit-${gig.id}-advertise]`).check();
-      cy.get(`[data-test=gig-edit-${gig.id}-summary]`).click().type("Some public advert", { delay: 0});
+      cy.get(`[data-test=gig-edit-${gig.id}-summary]`).click().type("Some public advert", { delay: 0 });
       cy.get(`[data-test=gig-edit-${gig.id}-show-preview]`).click();
       cy.get(`[data-test=gig-summary-${gig.id}]`)
         .should("contain", "Payment received")

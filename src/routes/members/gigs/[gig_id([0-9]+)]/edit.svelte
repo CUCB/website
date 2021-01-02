@@ -127,17 +127,8 @@
   import { fade } from "svelte/transition";
   import { stores } from "@sapper/app";
   import SearchBox from "../../../../components/SearchBox.svelte";
-  import dayjs from "dayjs";
-  import utc from "dayjs/plugin/utc";
-  import timezone from "dayjs/plugin/timezone";
-  import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-  import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-
-  dayjs.extend(utc);
-  dayjs.extend(timezone);
-  dayjs.extend(isSameOrAfter);
-  dayjs.extend(isSameOrBefore);
-  dayjs.tz.setDefault("Europe/London");
+  import { DateTime, Settings } from "luxon";
+  Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   const { session } = stores();
 
@@ -156,27 +147,32 @@
     editContactType,
     clearVenueSearch;
   let previewSummary = false;
-  time = time && dayjs(`1970-01-01T${time}`).format("HH:mm"); // Remove seconds from time if they are present
-  let arrive_time_date = (arrive_time && dayjs(arrive_time).format("YYYY-MM-DD")) || null;
-  let arrive_time_time = (arrive_time && dayjs(arrive_time).format("HH:mm")) || null;
-  let finish_time_date = (finish_time && dayjs(finish_time).format("YYYY-MM-DD")) || null;
-  let finish_time_time = (finish_time && dayjs(finish_time).format("HH:mm")) || null;
+  time = time && DateTime.fromISO(`1970-01-01T${time}`).toFormat("HH:mm"); // Remove seconds from time if they are present
+  let arrive_time_date = (arrive_time && DateTime.fromISO(arrive_time).toFormat("yyyy-LL-dd")) || null;
+  let arrive_time_time = (arrive_time && DateTime.fromISO(arrive_time).toFormat("HH:mm")) || null;
+  let finish_time_date = (finish_time && DateTime.fromISO(finish_time).toFormat("yyyy-LL-dd")) || null;
+  let finish_time_time = (finish_time && DateTime.fromISO(finish_time).toFormat("HH:mm")) || null;
   let fields = {};
   $: timingWarnings = [
     arrive_time &&
+      date &&
+      time &&
+      DateTime.fromISO(arrive_time) <= DateTime.fromISO(`${date}T${time}`).minus({ hours: 3 }) &&
+      "Arrive time is 3 hours or more before the start time. Have you accidentally put a time in the morning rather than the evening?",
+    arrive_time &&
       finish_time &&
-      dayjs(arrive_time).isBefore(dayjs(finish_time).subtract(6, "hours")) &&
+      DateTime.fromISO(arrive_time) < DateTime.fromISO(finish_time).minus({ hours: 6 }) &&
       "Gig is longer than 6 hours. Have you accidentally put a time in the morning rather than the evening?",
     arrive_time &&
       arrive_time_time === time &&
-      dayjs(date).isSame(dayjs(arrive_time_date)) &&
+      DateTime.fromISO(date).equals(DateTime.fromISO(arrive_time_date)) &&
       "Arrive time is the same as start time.",
   ].filter((x) => x);
 
   $: arrive_time =
-    (arrive_time_time && arrive_time_date && dayjs(`${arrive_time_date}T${arrive_time_time}`).format()) || null;
+    (arrive_time_time && arrive_time_date && DateTime.fromISO(`${arrive_time_date}T${arrive_time_time}`).toISO()) || null;
   $: finish_time =
-    (finish_time_time && finish_time_date && dayjs(`${finish_time_date}T${finish_time_time}`).format()) || null;
+    (finish_time_time && finish_time_date && DateTime.fromISO(`${finish_time_date}T${finish_time_time}`).toISO()) || null;
   $: clients = contacts.filter((contact) => contact.client);
   $: callers = contacts.filter((contact) => contact.calling);
   $: clientSet = new Set(clients.map((c) => c.id));
@@ -192,9 +188,9 @@
     lastSaved.summary === (summary && summary.trim()) &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
     lastSaved.notes_band === (notes_band && notes_band.trim()) &&
-    ((!lastSaved.arrive_time && !arrive_time) || dayjs(lastSaved.arrive_time).isSame(arrive_time)) &&
-    ((!lastSaved.finish_time && !finish_time) || dayjs(lastSaved.finish_time).isSame(finish_time)) &&
-    ((!lastSaved.time && !time) || dayjs(`1970-01-01T${lastSaved.time}`).isSame(dayjs(`1970-01-01T${time}`))) &&
+    ((!lastSaved.arrive_time && !arrive_time) || DateTime.fromISO(lastSaved.arrive_time).equals(DateTime.fromISO(arrive_time))) &&
+    ((!lastSaved.finish_time && !finish_time) || DateTime.fromISO(lastSaved.finish_time).equals(DateTime.fromISO(finish_time))) &&
+    ((!lastSaved.time && !time) || DateTime.fromISO(`1970-01-01T${lastSaved.time}`).equals(DateTime.fromISO(`1970-01-01T${time}`))) &&
     lastSaved.admins_only === admins_only &&
     lastSaved.advertise === advertise &&
     lastSaved.allow_signups === allow_signups &&
@@ -393,7 +389,7 @@
         lastSaved = { ...res.data.update_cucb_gigs_by_pk };
       }
       editing_user = { id: $session.userId, first: $session.firstName, last: $session.lastName };
-      editing_time = dayjs().format();
+      editing_time = DateTime.local().toISO();
     } catch (e) {
       // Oh shit
       // TODO handle this better
@@ -569,10 +565,10 @@
     if (arrive_time_date && !e.force) return;
     if (!arrive_time_time) return;
     // TODO could consider finish_time_time as a fallback for time
-    if (!time || dayjs(`1970-01-01T${arrive_time_time}`).isSameOrBefore(`1970-01-01T${time}`)) {
+    if (!time || DateTime.fromISO(`1970-01-01T${arrive_time_time}`) <= DateTime.fromISO(`1970-01-01T${time}`)) {
       arrive_time_date = date;
     } else {
-      arrive_time_date = dayjs(date).subtract(1, "day").format("YYYY-MM-DD");
+      arrive_time_date = DateTime.fromISO(date).minus({ days: 1 }).toFormat("yyyy-LL-dd");
     }
     await tick();
     fields.arrive_time_date.dispatchEvent(new Event("change"));
@@ -583,10 +579,10 @@
     if (finish_time_date && !e.force) return;
     if (!finish_time_time) return;
     // TODO could consider arrive_time_time as a fallback for time
-    if (!time || dayjs(`1970-01-01T${finish_time_time}`).isSameOrAfter(`1970-01-01T${time}`)) {
+    if (!time || DateTime.fromISO(`1970-01-01T${finish_time_time}`) >= DateTime.fromISO(`1970-01-01T${time}`)) {
       finish_time_date = date;
     } else {
-      finish_time_date = dayjs(date).add(1, "day").format("YYYY-MM-DD");
+      finish_time_date = DateTime.fromISO(date).plus({ days: 1 }).toFormat("yyyy-LL-dd");
     }
     await tick();
     fields.finish_time_date.dispatchEvent(new Event("change"));
@@ -730,7 +726,7 @@
 <p>
   {#if editing_time}
     This gig was last edited at
-    {dayjs(editing_time).format('HH:mm DD/MM/YY')}
+    {DateTime.fromISO(editing_time).toFormat("HH:mm dd/LL/yyyy")}
     {#if editing_user}
       &nbsp;by user
       <a href="/members/users/{editing_user.id}">{editing_user.first}&#32;{editing_user.last}</a>
@@ -738,7 +734,7 @@
   {/if}
   {#if posting_time}
     It was created at
-    {dayjs(posting_time).format('HH:mm DD/MM/YY')}
+    {DateTime.fromISO(posting_time).toFormat('HH:mm dd/LL/yyyy')}
     {#if posting_user}
       &nbsp;by user
       <a href="/members/users/{posting_user.id}">{posting_user.first}&#32;{posting_user.last}</a>

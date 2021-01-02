@@ -5,33 +5,45 @@
   import { writable } from "svelte/store";
   import { themeName } from "../../view";
   import { stores } from "@sapper/app";
-  import dayjs from "dayjs";
-  import utc from "dayjs/plugin/utc";
-  import timezone from "dayjs/plugin/timezone";
-  import advancedFormat from "dayjs/plugin/advancedFormat";
+  import { DateTime, Settings } from "luxon";
+  Settings.defaultZoneName = "Europe/London";
 
-  dayjs.extend(utc);
-  dayjs.extend(timezone);
-  dayjs.extend(advancedFormat);
-  dayjs.tz.setDefault("Europe/London");
+    const suffix = n => {
+        switch (new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)) {
+          case "one":
+            return "st";
+          case "two":
+            return "nd";
+          case "few":
+            return "rd";
+          case "other":
+            return "th"
+        }
+    } 
 
   export let gig,
     signupGig = writable(undefined),
     userInstruments,
     displayLinks = true;
   export let linkHeading = false;
-  let arriveFinishFormat = "HH:mm";
-  let calendarDatesFormat = "dddd Do MMMM YYYY";
+  let formatArriveFinish = (date) => date.toFormat("HH:mm");
   let showSignup = false;
   let showDetails = !linkHeading;
   let { session } = stores();
+  const formatCalendarDate = (date) =>
+    date.toFormat("cccc d") +
+    suffix(date.day) +
+    date.toFormat(" LLLL yyyy");
 
   $: clients = gig.contacts.filter((c) => c.client);
   $: callers = gig.contacts.filter((c) => c.calling);
 
   if (gig.arrive_time && gig.finish_time) {
-    if (dayjs(gig.arrive_time).day() !== dayjs(gig.finish_time).day()) {
-      arriveFinishFormat = "HH:mm (ddd Do MMM)";
+    if (DateTime.fromISO(gig.arrive_time).day !== DateTime.fromISO(gig.finish_time).day) {
+      formatArriveFinish = (date) =>
+        date.toFormat("HH:mm (cccc d") +
+        suffix(date.day) +
+        date.toFormat(") LLL");
     }
   }
 </script>
@@ -254,30 +266,30 @@
       <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
     {/if}
     {#if gig.type.code !== 'calendar'}
-      <p class="date main-detail">{dayjs(gig.date).format('dddd Do MMMM YYYY')}</p>
+      <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
     {/if}
     <gig-timings>
       {#if gig.date}
         {#if gig.arrive_time}
           <p>
             <b>Arrive time:&nbsp;</b>
-            {@html dayjs(gig.arrive_time).format(arriveFinishFormat)}
+            {@html formatArriveFinish(DateTime.fromISO(gig.arrive_time))}
           </p>
         {/if}
         {#if gig.time}
-          <p><b>Start time:&nbsp;</b> {dayjs(`2020-01-01 ${gig.time}`).format('HH:mm')}</p>
+          <p><b>Start time:&nbsp;</b> {DateTime.fromISO(`2020-01-01T${gig.time}`).toFormat('HH:mm')}</p>
         {/if}
         {#if gig.finish_time}
-          <p><b>Finish time:&nbsp;</b> {dayjs(gig.finish_time).format(arriveFinishFormat)}</p>
+          <p><b>Finish time:&nbsp;</b> {formatArriveFinish(DateTime.fromISO(gig.finish_time))}</p>
         {/if}
-      {:else if gig.arrive_time && gig.finish_time && !dayjs(gig.arrive_time).isSame(gig.finish_time, 'day')}
+      {:else if gig.arrive_time && gig.finish_time && !DateTime.fromISO(gig.arrive_time).hasSame(gig.finish_time, 'day')}
         <p>
-          {dayjs(gig.arrive_time).format(calendarDatesFormat)}
+          {formatCalendarDate(DateTime.fromISO(gig.arrive_time))}
           &ndash;
-          {dayjs(gig.finish_time).format(calendarDatesFormat)}
+          {formatCalendarDate(DateTime.fromISO(gig.finish_time))}
         </p>
       {:else if gig.arrive_time}
-        <p>{dayjs(gig.arrive_time).format(calendarDatesFormat)}</p>
+        <p>{formatCalendarDate(DateTime.fromISO(gig.arrive_time))}</p>
       {/if}
     </gig-timings>
     <task-list class="main-detail">
@@ -288,14 +300,14 @@
           <task-summary class="color-negative"><i class="las la-exclamation"></i> Deposit not received</task-summary>
         {/if}
       {/if}
-      {#if gig.finance_payment_received !== undefined && dayjs(gig.date).isBefore(dayjs())}
+      {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local()}
         {#if gig.finance_payment_received}
           <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Payment received</task-summary>
         {:else}
           <task-summary class="color-negative"><i class="las la-exclamation"></i> Payment not received</task-summary>
         {/if}
       {/if}
-      {#if gig.finance_caller_paid !== undefined && dayjs(gig.date).isBefore(dayjs())}
+      {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local()}
         {#if gig.finance_caller_paid}
           <task-summary class="color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</task-summary>
         {:else}

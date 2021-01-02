@@ -5,28 +5,23 @@
   import TooltipText from "../TooltipText.svelte";
   import { Map, Set } from "immutable";
   import { themeName } from "../../view";
-  import dayjs from "dayjs";
-  import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-  import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-  import updateLocale from "dayjs/plugin/updateLocale";
-  import isoWeek from "dayjs/plugin/isoWeek";
-
-  dayjs.extend(isSameOrBefore);
-  dayjs.extend(isSameOrAfter);
-  dayjs.extend(updateLocale);
-  dayjs.extend(isoWeek);
+  import { DateTime, Settings } from "luxon";
+  Settings.defaultZoneName = "Europe/London";
+  Settings.defaultLocale = "en-gb";
 
   export let gigs;
-  export let displayedMonth = dayjs();
+  export let displayedMonth = DateTime.local();
   export let startDay = "mon";
   let dispatchEvent = createEventDispatcher();
   let showKey = false;
   let showSelection = false;
 
   function generateKeyItems(gigs) {
-    let types = new Set(gigs.filter(gig => gig.type.code !== "gig").map(gig => new Map({ ...gig.type })));
+    let types = new Set(gigs.filter((gig) => gig.type.code !== "gig").map((gig) => new Map({ ...gig.type })));
     let standardOrHiddenGigs = new Set(
-      gigs.filter(gig => gig.type.code === "gig").map(gig => new Map({ ...gig.type, admins_only: gig.admins_only })),
+      gigs
+        .filter((gig) => gig.type.code === "gig")
+        .map((gig) => new Map({ ...gig.type, admins_only: gig.admins_only })),
     );
     return types.union(standardOrHiddenGigs);
   }
@@ -41,54 +36,57 @@
     sat: 6,
     sun: 0,
   };
-  $: locale = dayjs.locale();
+  //   $: locale = DateTime.locale();
   $: dayOffset = dayOffsets[startDay || "mon"];
-  $: localeUpdated = dayjs.updateLocale(locale, {
-    // See https://day.js.org/docs/en/customization/customization for possible options here
-    yearStart: 4,
-    weekStart: dayOffset,
-  }) && dayjs.locale(locale);
+  $: startOfWeek = function (date) {
+    const day = date.weekday % 7; // convert to 0=sunday .. 6=saturday
+    const dayAdjust = day >= dayOffset ? -day + dayOffset : -day + dayOffset - 7;
+    return date.plus({ days: dayAdjust });
+  };
+  //   $: localeUpdated =
+  //     Settings.updateLocale(locale, {
+  //       // See https://day.js.org/docs/en/customization/customization for possible options here
+  //       yearStart: 4,
+  //       weekStart: dayOffset,
+  //     }) && DateTime.locale(locale);
 
+  $: rotate = (array) => [...array.slice(dayOffset - 1), ...array.slice(0, dayOffset - 1)];
 
-  $: rotate = array => [...array.slice(dayOffset - 1), ...array.slice(0, dayOffset - 1)];
-
-  $: dayOfWeek = date => (dayjs(date).isoWeekday() - 1 + dayOffset) % 7;
+  $: dayOfWeek = (date) => (DateTime.fromISO(date).weekday - 1 + dayOffset) % 7;
 
   function daysInMonth(month) {
-    let currentDate = dayjs(month)
-      .startOf("month")
-      .startOf("week");
-    let currentWeek = [...Array(7).keys()].map(offset => dayjs(currentDate).add(offset, "days"));
+    let currentDate = startOfWeek(DateTime.fromISO(month).startOf("month"));
+    let currentWeek = [...Array(7).keys()].map((offset) => currentDate.plus({ days: offset }));
     let result = [currentWeek];
-    currentDate = currentDate.add(1, "week");
-    for (; currentDate.month() === dayjs(month).month(); currentDate = currentDate.add(1, "week")) {
-      currentWeek = [...Array(7).keys()].map(offset => dayjs(currentDate).add(offset, "days"));
+    currentDate = currentDate.plus({ weeks: 1 });
+    for (; currentDate.month === DateTime.fromISO(month).month; currentDate = currentDate.plus({ weeks: 1 })) {
+      currentWeek = [...Array(7).keys()].map((offset) => currentDate.plus({ days: offset }));
       result.push(currentWeek);
     }
     return result;
   }
   $: weeks =
     startDay &&
-    localeUpdated &&
-    daysInMonth(displayedMonth).map(week =>
-      week.map(date => ({
-        inCurrentMonth: date.month() === displayedMonth.month(),
+    dayOffset &&
+    daysInMonth(displayedMonth).map((week) =>
+      week.map((date) => ({
+        inCurrentMonth: date.month === displayedMonth.month,
         dayOfWeek: dayOfWeek(date),
-        number: date.date(),
-        tooltip: date.format(),
-        dayjs: date,
-        id: `calendar_date_${date.format("YYYYMMDD")}`,
+        number: date.day,
+        tooltip: date.toISO(),
+        luxonDate: date,
+        id: `calendar_date_${date.toFormat("yyyyLLdd")}`,
         gigs: gigs.filter(
-          gig =>
-            dayjs(gig.date, "YYYY-MM-DD").isSame(date, "day") ||
+          (gig) => 
+            (gig.date && DateTime.fromFormat(gig.date, "yyyy-LL-dd").hasSame(date, "day") ||
             ((gig.type === "calendar" || gig.date === null) &&
-              dayjs(gig.arrive_time).isSameOrBefore(date, "day") &&
-              dayjs(gig.finish_time).isSameOrAfter(date, "day")),
+              DateTime.fromISO(gig.arrive_time).startOf("day") <= DateTime.fromISO(date).startOf("day") &&
+              DateTime.fromISO(gig.finish_time).startOf("day") >= DateTime.fromISO(date).startOf("day"))),
         ),
       })),
     );
 
-  let prefixGigType = gig => {
+  let prefixGigType = (gig) => {
     if (gig.type.code === "gig_cancelled") {
       return `Cancelled: ${gig.title}`;
     } else if (gig.type.code === "gig_enquiry") {
@@ -113,10 +111,8 @@
   }
 
   function selectableYears() {
-    let start = displayedMonth
-      .subtract(10, "years")
-      .year();
-    return [...Array(20).keys()].map(x => x + start);
+    let start = displayedMonth.minus({ years: 10 }).year;
+    return [...Array(20).keys()].map((x) => x + start);
   }
 </script>
 
@@ -367,7 +363,7 @@
   <button on:click="{() => dispatchEvent('clickPrevious')}" class="left" data-test="gigcalendar-previous-month">
     Prev
   </button>
-  <h3>{displayedMonth.format('MMMM YYYY')}</h3>
+  <h3>{displayedMonth.toFormat('LLLL yyyy')}</h3>
   <div class="right">
     <button on:click="{() => (showSelection = !showSelection)}" title="Select month">
       <i class="las la-calendar"></i>
@@ -378,19 +374,17 @@
 {#if showSelection}
   <div class="month-selector">
     <!-- svelte-ignore a11y-no-onchange -->
-    <select on:change="{e => dispatchEvent('changeDate', { month: e.target.value })}">
+    <select on:change="{(e) => dispatchEvent('changeDate', { month: e.target.value })}">
       {#each selectableMonths() as month (month)}
-        <option value="{month}" selected="{month === displayedMonth.month()}">
-          {dayjs()
-            .month(month)
-            .format('MMMM')}
+        <option value="{month}" selected="{month === displayedMonth.month}">
+          {DateTime.local().set({ month }).toFormat('LLLL')}
         </option>
       {/each}
     </select>
     <!-- svelte-ignore a11y-no-onchange -->
-    <select on:change="{e => dispatchEvent('changeDate', { year: e.target.value })}">
+    <select on:change="{(e) => dispatchEvent('changeDate', { year: e.target.value })}">
       {#each selectableYears() as year (year)}
-        <option value="{year}" selected="{year === displayedMonth.year()}">{year}</option>
+        <option value="{year}" selected="{year === displayedMonth.year}">{year}</option>
       {/each}
     </select>
   </div>
@@ -408,7 +402,7 @@
           class:different-month="{!day.inCurrentMonth}"
           id="{day.id}"
           class="calendar-entry theme-{$themeName}"
-          class:today="{day.dayjs.isSame(dayjs(), 'day')}"
+          class:today="{DateTime.local().hasSame(day.luxonDate, 'day')}"
         >
           {#if day.gigs.length > 0}
             <TooltipText content="{day.gigs.map(prefixGigType).join('\n')}">{day.number}</TooltipText>

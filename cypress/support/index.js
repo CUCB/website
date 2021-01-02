@@ -16,14 +16,10 @@
 import "./commands";
 import tinycolor from "../deps/tinycolor";
 import chaiSorted from "chai-sorted";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
+import { DateTime, Settings } from "luxon";
 
-Cypress.dayjs = dayjs;
-Cypress.dayjs.extend(utc);
-Cypress.dayjs.extend(timezone);
-Cypress.dayjs.tz.setDefault("Europe/London");
+Settings.defaultZoneName = "Europe/London";
+Cypress.DateTime = DateTime;
 
 chai.use(chaiSorted);
 
@@ -61,7 +57,7 @@ chai.use(emailFrom);
 
 const emailTo = (_chai, utils) => {
   function assertEmailTo(expected) {
-    let recipients = this._obj.To.map(recipient => `${recipient.Mailbox}@${recipient.Domain}`);
+    let recipients = this._obj.To.map((recipient) => `${recipient.Mailbox}@${recipient.Domain}`);
     this.assert(
       recipients.indexOf(expected) > -1,
       `expected #{this} to be sent to "${expected}". actual recipients are "${recipients}".`,

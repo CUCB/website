@@ -1,5 +1,6 @@
 <script context="module">
   export async function preload(_page, session) {
+    Settings.defaultZoneName = "Europe/London";
     let client = makeClient(this.fetch);
     let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
 
@@ -21,32 +22,32 @@
             _or: [
               {
                 date: {
-                  _gte: dayjs()
+                  _gte: DateTime.local()
                     .startOf("month")
-                    .format(),
-                  _lte: dayjs()
+                    .toISO(),
+                  _lte: DateTime.local()
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: dayjs()
+                  _gte: DateTime.local()
                     .startOf("month")
-                    .format(),
-                  _lte: dayjs()
+                    .toISO(),
+                  _lte: DateTime.local()
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 finish_time: {
-                  _gte: dayjs()
+                  _gte: DateTime.local()
                     .startOf("month")
-                    .format(),
-                  _lte: dayjs()
+                    .toISO(),
+                  _lte: DateTime.local()
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
             ],
@@ -74,7 +75,7 @@
         signup_dict[gig.id] = gig;
       }
 
-      let currentCalendarMonth = dayjs().format("YYYY-MM");
+      let currentCalendarMonth = DateTime.local().toFormat("yyyy-LL");
 
       return {
         gigs,
@@ -101,9 +102,11 @@
   import { stores } from "@sapper/app";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
-  import dayjs from "dayjs";
+  import { DateTime, Settings } from "luxon";
   import { writable } from "svelte/store";
   export let gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
+  Settings.defaultZoneName = "Europe/London";
+
   $: reloadSignupGigs(gigs);
   function reloadSignupGigs(gigs) {
     let newlyMerged = gigs.map(gig =>
@@ -122,7 +125,7 @@
   let allUpcoming = gigs;
   let { session } = stores();
   let drafts = gigs.filter(gig => gig.type.code === "draft");
-  $: currentCalendarMonthDayjs = dayjs(currentCalendarMonth, "YYYY-MM");
+  $: currentCalendarMonthLuxon = DateTime.fromFormat(currentCalendarMonth, "yyyy-LL");
   let displaying = "allUpcoming";
 
   function isObject(item) {
@@ -169,32 +172,32 @@
             _or: [
               {
                 date: {
-                  _gte: dayjs(newDate, "YYYY-MM")
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .startOf("month")
-                    .format(),
-                  _lte: dayjs(newDate, "YYYY-MM")
+                    .toISO(),
+                  _lte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: dayjs(newDate, "YYYY-MM")
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .startOf("month")
-                    .format(),
-                  _lte: dayjs(newDate, "YYYY-MM")
+                    .toISO(),
+                _lte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 finish_time: {
-                  _gte: dayjs(newDate, "YYYY-MM")
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .startOf("month")
-                    .format(),
-                  _lte: dayjs(newDate, "YYYY-MM")
+                    .toISO(),
+                  _lte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
             ],
@@ -211,28 +214,28 @@
     gigs = gigs;
   };
   $: gotoPreviousCalendarMonth = gotoDate(
-    dayjs(currentCalendarMonth, "YYYY-MM")
-      .subtract(1, "month")
-      .format("YYYY-MM"),
+    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+      .minus({ months: 1 })
+      .toFormat("yyyy-LL"),
   );
   $: gotoNextCalendarMonth = gotoDate(
-    dayjs(currentCalendarMonth, "YYYY-MM")
-      .add(1, "month")
-      .format("YYYY-MM"),
+    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+      .plus({ months: 1 })
+      .toFormat("yyyy-LL"),
   );
   $: changeCalendarDate = async event => {
     if (event.detail.month !== undefined) {
       await gotoDate(
-        dayjs(currentCalendarMonth, "YYYY-MM")
-          .month(event.detail.month)
-          .format("YYYY-MM"),
+        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+          .set({ month: event.detail.month })
+          .toFormat("yyyy-LL"),
       )();
     }
     if (event.detail.year !== undefined) {
       await gotoDate(
-        dayjs(currentCalendarMonth, "YYYY-MM")
-          .year(event.detail.year)
-          .format("YYYY-MM"),
+        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+          .set({ year: event.detail.year })
+          .toFormat("yyyy-LL"),
       )();
     }
   };
@@ -334,7 +337,7 @@
       {#each drafts as gig}
         <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
         [created
-        {dayjs(gig.posting_time).format('HH:MM, DD/MM')}
+        {DateTime.fromISO(gig.posting_time).toFormat('HH:mm, dd/LL')}
         by
         {(gig.user && gig.user.first) || 'someone?'}],
       {/each}
@@ -344,7 +347,7 @@
   <div class="calendar theme-{$themeName}">
     <Calendar
       gigs="{calendarGigs[currentCalendarMonth]}"
-      displayedMonth="{currentCalendarMonthDayjs}"
+      displayedMonth="{currentCalendarMonthLuxon}"
       startDay="{$calendarStartDay}"
       on:clickPrevious="{gotoPreviousCalendarMonth}"
       on:clickNext="{gotoNextCalendarMonth}"
