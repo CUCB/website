@@ -1154,6 +1154,32 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains("New Name").should("not.exist");
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains(contacts[0].name).should("not.exist");
     });
+
+    it.only("clears unwanted fields when saving calendar events", () => {
+      cy.get(`[data-test=gig-edit-${gig.id}-food-provided]`).check().uncheck().check();
+      cy.get(`[data-test=gig-edit-${gig.id}-allow-signups]`).check();
+      cy.get(`[data-test=gig-edit-${gig.id}-advertise]`).check();
+      cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+      cy.get(`[href='/members/gigs/${gig.id}']`).click();
+      cy.url().should("not.contain", "edit");
+      cy.contains("Arrive time").should("be.visible");
+      cy.contains("Start time").should("be.visible");
+      cy.contains("Finish time").should("be.visible");
+      cy.get(`[data-test=show-signup-${gig.id}]`).should("be.visible")
+      cy.get(`[data-test=icon-food-provided]`).should("be.visible");
+      cy.get(`[href='/members/gigs/${gig.id}/edit']`).click();
+      cy.get(`[data-test=gig-edit-${gig.id}-type] [data-test=select-box]`).select("Calendar Dates");
+      cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`).type("2021-01-01");
+      cy.get(`[data-test=gig-edit-${gig.id}-finish-time-date]`).type("2021-01-03");
+      cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+      cy.get(`[href='/members/gigs/${gig.id}']`).click();
+      cy.url().should("not.contain", "edit");
+      cy.contains("Arrive time").should("not.exist");
+      cy.contains("Start time").should("not.exist");
+      cy.contains("Finish time").should("not.exist");
+      cy.get(`[data-test=show-signup-${gig.id}]`).should("not.exist")
+      cy.get(`[data-test=icon-food-provided]`).should("not.exist");
+    });
   });
 
   context("not saving changes", () => {

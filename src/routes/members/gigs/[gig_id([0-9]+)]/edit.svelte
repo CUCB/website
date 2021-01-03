@@ -128,7 +128,6 @@
   import { stores } from "@sapper/app";
   import SearchBox from "../../../../components/SearchBox.svelte";
   import { DateTime, Settings } from "luxon";
-  import AnnotatedIcon from "../../../../components/AnnotatedIcon.svelte";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   const { session } = stores();
@@ -186,7 +185,7 @@
   $: saved =
     lastSaved.type_id === type_id &&
     lastSaved.title === title.trim() &&
-    lastSaved.date === date &&
+    lastSaved.date === ((typeCode !== "calendar" && date) || null) &&
     lastSaved.venue_id === venue_id &&
     lastSaved.summary === (summary && summary.trim()) &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
@@ -215,19 +214,19 @@
   $: summaryGig = {
     id,
     title: title.trim(),
-    date,
+    date: (typeCode !== "calendar" && date) || null,
     venue_id,
     type_id,
     type: gigTypes.find((type) => type_id === type.id),
     advertise,
     admins_only,
-    allow_signups,
-    food_provided,
+    allow_signups: typeCode !== "calendar" && allow_signups,
+    food_provided: typeCode !== "calendar" && food_provided,
     notes_admin: notes_admin && notes_admin.trim(),
     notes_band: notes_band && notes_band.trim(),
     summary: summary && summary.trim(),
-    arrive_time,
-    finish_time,
+    arrive_time: typeCode === "calendar" ? DateTime.fromISO(arrive_time_date) : arrive_time,
+    finish_time: typeCode === "calendar" ? DateTime.fromISO(finish_time_date) : finish_time,
     time: time || null,
     contacts,
     lineup: [],
@@ -371,18 +370,18 @@
         variables: {
           id,
           title: title.trim(),
-          date,
+          date: (typeCode !== "calendar" && date) || null,
           venue_id,
           type_id,
           advertise,
           admins_only,
-          allow_signups,
-          food_provided,
+          allow_signups: typeCode !== "calendar" && allow_signups,
+          food_provided: typeCode !== "calendar" && food_provided,
           notes_admin: notes_admin && notes_admin.trim(),
           notes_band: notes_band && notes_band.trim(),
           summary: summary && summary.trim(),
-          arrive_time,
-          finish_time,
+          arrive_time: typeCode === "calendar" ? DateTime.fromISO(arrive_time_date) : arrive_time,
+          finish_time: typeCode === "calendar" ? DateTime.fromISO(finish_time_date) : finish_time,
           time: time || null,
           quote_date,
           finance: finance && finance.trim(),
@@ -804,16 +803,30 @@
     {#if typeCode === 'calendar'}
       <label>
         Start date
-        <input type="date" bind:value="{arrive_time_date}" data-test="gig-edit-{id}-arrive-time-date" />
+        <input
+          type="date"
+          bind:this="{fields.start_date}"
+          use:checkValid="{{ validityErrors: { rangeOverflow: 'Start date should be the same as or before the end date.' } }}"
+          bind:value="{arrive_time_date}"
+          data-test="gig-edit-{id}-arrive-time-date"
+          max={finish_time_date}
+        />
       </label>
       <label>
         End date
-        <input type="date" bind:value="{finish_time_date}" data-test="gig-edit-{id}-finish-time-date" />
+        <input
+          type="date"
+          bind:this="{fields.end_date}"
+          use:checkValid="{{ validityErrors: { rangeOverflow: 'End date should be the same as or after the start date.' } }}"
+          bind:value="{finish_time_date}"
+          data-test="gig-edit-{id}-finish-time-date"
+          min={arrive_time_date}
+        />
       </label>
     {:else}
       <label>
         Date
-        <input type="date" bind:value="{date}" data-test="gig-edit-{id}-date" disabled="{cancelled}" />
+        <input type="date" bind:value="{date}" data-test="gig-edit-{id}-date" disabled="{cancelled}" required={!cancelled} />
       </label>
     {/if}
     <!-- svelte-ignore a11y-label-has-associated-control -->
@@ -1055,7 +1068,7 @@
         <input type="checkbox" bind:checked="{allow_signups}" data-test="gig-edit-{id}-allow-signups" /><br />
         (Whether to allow users to express an interest in playing)</label>
       <label class="checkbox">Food provided:
-        <input type="checkbox" bind:checked="{food_provided}" /><br />
+        <input type="checkbox" bind:checked="{food_provided}" data-test="gig-edit-{id}-food-provided" /><br />
         (Whether food is provided at the gig. Will request dietary requirements when people sign up.)</label>
     {/if}
   </form>
@@ -1089,7 +1102,7 @@
   <form on:submit|preventDefault class="theme-{$themeName}">
     <label>Quote date<input
         type="date"
-        bind:this={fields.quote_date}
+        bind:this="{fields.quote_date}"
         use:checkValid="{{ validityErrors: { rangeOverflow: 'Quote date cannot be set to the future.' } }}"
         bind:value="{quote_date}"
         max="{DateTime.local().toFormat('yyyy-LL-dd')}"

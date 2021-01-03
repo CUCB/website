@@ -226,13 +226,13 @@
       {:else}{gig.title}{/if}
       <gig-icons>
         {#if gig.food_provided}
-          <TooltipText content="Food provided"><i class="las la-utensils"></i></TooltipText>
+          <TooltipText content="Food provided"><i class="las la-utensils" data-test="icon-food-provided"></i></TooltipText>
         {/if}
         {#if gig.admins_only}
-          <TooltipText content="Hidden from normal users"><i class="las la-eye-slash"></i></TooltipText>
+          <TooltipText content="Hidden from normal users"><i class="las la-eye-slash" data-test="icon-admins-only"></i></TooltipText>
         {/if}
         {#if gig.type.code === 'calendar'}
-          <TooltipText content="Calendar event"><i class="las la-calendar"></i></TooltipText>
+          <TooltipText content="Calendar event"><i class="las la-calendar" data-test="icon-calendar-event"></i></TooltipText>
         {/if}
       </gig-icons>
     </h2>
