@@ -158,7 +158,7 @@
     {#if error}
       <span class="error theme-{$themeName}">{error}</span>
     {/if}
-    <input type="submit" value="Send" data-test="booking-send" on:click={() => attemptedSubmit = true} />
+    <input type="submit" value="Send" data-test="booking-send" />
   </form>
 {:else if success}
   <p>Thank you, {name}&nbsp;({email})!</p>
