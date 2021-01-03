@@ -1155,7 +1155,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-client-search-results]`).contains(contacts[0].name).should("not.exist");
     });
 
-    it.only("clears unwanted fields when saving calendar events", () => {
+    it("clears unwanted fields when saving calendar events", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-food-provided]`).check().uncheck().check();
       cy.get(`[data-test=gig-edit-${gig.id}-allow-signups]`).check();
       cy.get(`[data-test=gig-edit-${gig.id}-advertise]`).check();
