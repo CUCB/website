@@ -1169,6 +1169,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=icon-food-provided]`).should("be.visible");
       cy.get(`[href='/members/gigs/${gig.id}/edit']`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-type] [data-test=select-box]`).select("Calendar Dates");
+      cy.get(`[data-test=gig-edit-${gig.id}-date]`).should("not.exist");
       cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`).type("2021-01-01");
       cy.get(`[data-test=gig-edit-${gig.id}-finish-time-date]`).type("2021-01-03");
       cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
