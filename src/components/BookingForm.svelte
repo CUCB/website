@@ -2,6 +2,7 @@
   import { createEventDispatcher } from "svelte";
   import { themeName } from "../view";
   import HCaptcha from "./Global/HCaptcha.svelte";
+  import Select from "./Forms/Select.svelte";
   let name = "";
   let email = "";
   let bookingEnquiry = false;
@@ -89,6 +90,13 @@
       color: themed("negative");
     }
   }
+
+  input:invalid, textarea:invalid {
+    box-shadow: none;
+    &:focus {
+      box-shadow: 0px 0px 4px 1px var(--accent);
+    }
+  }
 </style>
 
 {#if !submitted}
@@ -111,9 +119,10 @@
         have details yet, but please do provide what information you can. Similarly, include any further details in the
         message.
       </p>
+      <!-- svelte-ignore a11y-label-has-associated-control-->
       <label>
         Occasion/Event
-        <select required bind:value="{occasion}" data-test="booking-occasion">
+        <Select required bind:value="{occasion}" data-test="booking-occasion">
           <option value="" disabled selected>Select one</option>
           <option value="Fundraiser">Fundraiser</option>
           <option value="Wedding">Wedding</option>
@@ -122,7 +131,7 @@
           <option value="College JCR/MCR event">College JCR/MCR event</option>
           <option value="College ball or similar event">College ball or similar event</option>
           <option value="Other">Other (please give details below)</option>
-        </select>
+        </Select>
       </label>
 
       <label>
@@ -149,7 +158,7 @@
     {#if error}
       <span class="error theme-{$themeName}">{error}</span>
     {/if}
-    <input type="submit" value="Send" data-test="booking-send" />
+    <input type="submit" value="Send" data-test="booking-send" on:click={() => attemptedSubmit = true} />
   </form>
 {:else if success}
   <p>Thank you, {name}&nbsp;({email})!</p>
