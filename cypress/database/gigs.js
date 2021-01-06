@@ -245,4 +245,22 @@ export const SetResetGig = `
       affected_rows
     }
   }
-`
+`;
+
+export const UpdateGigType = `
+    mutation UpdateGigType($gigId: bigint!, $typeId: bigint!) {
+        update_cucb_gigs(_set: { type: $typeId }, where: { id: {_eq: $gigId } }) {
+            affected_rows
+        }    
+    }
+`;
+
+export const AllGigTypes = `
+    query AllGigTypes {
+        cucb_gig_types {
+            id
+            code
+            title
+        }
+    }
+`;

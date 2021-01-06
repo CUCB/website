@@ -645,3 +645,14 @@ export const UpdateContact = gql`
     }
   }
 `;
+
+export const QueryGigType = gql`
+  query QueryGigType($id: bigint!) {
+    cucb_gigs_by_pk(id: $id) {
+      type: gig_type {
+        id
+        code
+      }
+    }
+  }
+`
