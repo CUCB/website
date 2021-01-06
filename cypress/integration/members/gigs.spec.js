@@ -38,6 +38,17 @@ describe("gig signup", () => {
         lastName: "User",
       },
     });
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 32747,
+        username: "cypress",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 1,
+        email: "cy@press.io",
+        firstName: "Cypress",
+        lastName: "Webmaster",
+      },
+    });
     cy.executeMutation(DeleteSignup, {
       variables: {
         userId: 27250,
@@ -337,6 +348,17 @@ let gigForSummary = {
 describe("gig summary", () => {
   let gig = gigForSummary;
   before(() => {
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 32747,
+        username: "cypress",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 1,
+        email: "cy@press.io",
+        firstName: "Cypress",
+        lastName: "Webmaster",
+      },
+    });
     cy.executeMutation(CreateGig, { variables: gig });
   });
 
