@@ -1,6 +1,6 @@
 import { AllGigTypes, UpdateGigType } from "../../database/gigs";
 import { AllInstrumentNames, OnConflictLineupInstruments, OnConflictUserInstruments } from "../../database/instruments";
-import { CreateGig } from "../../database/gigs";
+import { CreateGig, ClearLineupForGig } from "../../database/gigs";
 import {
   CreateUser,
   HASHED_PASSWORDS,
@@ -8,14 +8,18 @@ import {
   OnConflictUserPrefs,
   AllAttributes,
   CreateLineup,
+  DeleteUsers,
 } from "../../database/users";
+
+const click = ($el) => $el.click();
 
 describe("lineup editor", () => {
   let signups = [
+    // Names from http://tabbycats.club/
     {
       user: { first: "Huggable", last: "Treasurechest", gig_notes: "Can only lead on fiddle", user_prefs: ["leader"] },
       user_available: true,
-      user_instruments: ["Fiddle", "Mandolin"],
+      user_instruments: [["Fiddle", "Stringy"], "Mandolin"],
       user_notes: "Fiddle if possible, please",
     },
     {
@@ -24,9 +28,23 @@ describe("lineup editor", () => {
       user_instruments: ["Bodhran"],
       user_notes: "",
     },
+    {
+      user: { first: "Poofy", last: "Bubby", gig_notes: "", user_prefs: ["soundtech", "driver", "car"] },
+      user_available: true,
+      user_only_if_necessary: true,
+      user_instruments: ["Guitar", "Whistle(s)"],
+      user_notes: "",
+    },
+    {
+      user: { first: "Sneaky", last: "Burglar", gig_notes: "", user_prefs: [] },
+      user_available: false,
+      user_only_if_necessary: false,
+      user_instruments: [],
+      user_notes: "",
+    },
   ];
 
-  let signupsToInsert, availablePeople;
+  let signupsToInsert;
   beforeEach(() => {
     cy.executeMutation(CreateGig, {
       variables: {
@@ -37,6 +55,7 @@ describe("lineup editor", () => {
         allowSignups: false,
       },
     });
+    cy.executeMutation(ClearLineupForGig, { variables: { id: 15274 } });
     cy.executeQuery(AllAttributes)
       .its("cucb_user_pref_types")
       .then((attributeList) => {
@@ -59,13 +78,18 @@ describe("lineup editor", () => {
               if (
                 person.user_instruments &&
                 person.user_instruments.length > 0 &&
-                typeof person.user_instruments[0] === "string"
+                (typeof person.user_instruments[0] === "string" ||
+                  (typeof person.user_instruments[0] === "object" && person.user_instruments[0].hasOwnProperty(0)))
               ) {
-                person.user_instruments = person.user_instruments.map((name) => ({
-                  id: userInstrumentIdBase * ++userInstrumentCount,
-                  instr_id: instrumentIds.get(name),
-                  name,
-                }));
+                person.user_instruments = person.user_instruments.map((name) => {
+                  let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+                  return {
+                    id: userInstrumentIdBase * ++userInstrumentCount,
+                    instr_id: instrumentIds.get(fields.name),
+                    ...fields,
+                  };
+                });
+                cy.log(person.user_instruments);
               }
               let userPrefs = person.user.user_prefs.map((name) => ({
                 pref_id: attributeIds.get(name),
@@ -104,8 +128,10 @@ describe("lineup editor", () => {
                 approved: null,
               });
             }
+            cy.executeMutation(DeleteUsers, {
+              variables: { ids: signupsToInsert.map((signup) => signup.user.data.id) },
+            });
             cy.executeMutation(CreateLineup, { variables: { entries: signupsToInsert } });
-            availablePeople = signups.filter((signup) => signup.user_available && !signup.user_only_if_necessary);
           });
       });
     cy.executeMutation(CreateUser, {
@@ -166,16 +192,20 @@ describe("lineup editor", () => {
         cy.login("cypress", "abc123");
         cy.visit("/members/gigs/15274/edit-lineup");
       });
+
       it("lists the people and instruments who have signed up to the gig", () => {
-        for (let person of availablePeople) {
-          cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${person.user.id}]`).then((row) => {
-            cy.wrap(row).contains(`${person.user.first} ${person.user.last}`);
+        for (let person of signups) {
+          let listSelector = person.approved
+            ? "lineup-editor-approved"
+            : person.user_available
+            ? "lineup-editor-applicants"
+            : "lineup-editor-nope";
+          cy.get(`[data-test=${listSelector}] [data-test=member-${person.user.id}]`).then(($row) => {
             if (person.user.user_prefs.includes("leader")) {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`)
                 .should("be.visible")
                 .click()
                 .hasTooltip(`${person.user.first} can lead`);
-              cy.wrap(row).click("topLeft");
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`).should(
                 "not.exist",
@@ -186,7 +216,6 @@ describe("lineup editor", () => {
                 .should("be.visible")
                 .click()
                 .hasTooltip(`${person.user.first} can tech`);
-              cy.wrap(row).click("topLeft");
             } else {
               cy.get(
                 `[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`,
@@ -197,7 +226,6 @@ describe("lineup editor", () => {
                 .should("be.visible")
                 .click()
                 .hasTooltip(`${person.user.first} can drive`);
-              cy.wrap(row).click("topLeft");
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-driver]`).should(
                 "not.exist",
@@ -208,14 +236,97 @@ describe("lineup editor", () => {
                 .should("be.visible")
                 .click()
                 .hasTooltip(`${person.user.first} has a car`);
-              cy.wrap(row).click("topLeft");
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`).should(
                 "not.exist",
               );
             }
+            cy.wrap($row).within(() => {
+              for (let instrument of person.user_instruments) {
+                cy.contains(instrument.name)
+                  .should("be.visible")
+                  .parentsUntil("[data-test=instrument-row]")
+                  .within(() => {
+                    cy.get("[data-test=instrument-maybe]").should("have.attr", "aria-selected").and("eq", "true");
+                  });
+              }
+            });
           });
         }
+      });
+
+      it("can approve/discard people", () => {
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`)
+          .pipe(click)
+          .should(($el) => expect($el).to.not.exist);
+        cy.get(`[data-test=lineup-editor-approved] [data-test=member-${signups[0].user.id}]`).should("be.visible");
+        cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[0].user.id}]`).should("not.exist");
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`)
+          .pipe(click)
+          .should(($el) => expect($el).to.not.exist);
+        cy.get(`[data-test=lineup-editor-approved] [data-test=member-${signups[1].user.id}]`).should("be.visible");
+        cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[1].user.id}]`).should("not.exist");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-unapprove]`)
+          .pipe(click)
+          .should(($el) => expect($el).to.not.exist);
+        cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[0].user.id}]`).should("be.visible");
+        cy.get(`[data-test=lineup-editor-approved] [data-test=member-${signups[0].user.id}]`).should("not.exist");
+        cy.get(`[data-test=member-${signups[2].user.id}] [data-test=person-discard]`)
+          .pipe(click)
+          .should(($el) => expect($el).to.not.exist);
+        cy.get(`[data-test=lineup-editor-nope] [data-test=member-${signups[2].user.id}]`).should("be.visible");
+        cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[2].user.id}]`).should("not.exist");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-discard]`)
+          .pipe(click)
+          .should(($el) => expect($el).to.not.exist);
+        cy.get(`[data-test=lineup-editor-nope] [data-test=member-${signups[0].user.id}]`).should("be.visible");
+        cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[0].user.id}]`).should("not.exist");
+      });
+
+      it("shows people in the correct sections", () => {
+        cy.get(`[data-test=signup-yes]`).should("contain", `${signups[0].user.first} ${signups[0].user.last}`);
+        cy.get(`[data-test=signup-maybe]`).should("contain", `${signups[2].user.first} ${signups[2].user.last}`);
+        cy.get(`[data-test=signup-nope]`).should("contain", `${signups[3].user.first} ${signups[3].user.last}`);
+        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-discard]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=people-discarded] [data-test=member-${signups[3].user.id}]`).should("be.visible");
+        cy.get(`[data-test=signup-nope] [data-test=member-${signups[3].user.id}]`).should("not.exist");
+      });
+
+      it("can select and discard instruments", () => {
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [data-test=instrument-yes]`).pipe(click).should("have.attr", "aria-selected");
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [data-test=instrument-no]`).pipe(click).should("have.attr", "aria-selected");
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [data-test=instrument-maybe]`).pipe(click).should("have.attr", "aria-selected");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-discard]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-selected=true]`).should("have.attr", "data-test", "instrument-maybe")
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [aria-selected=true]`).should("have.attr", "data-test", "instrument-yes")
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=instrument-${signups[1].user_instruments[0].id}] [data-test=instrument-yes]`).pipe(click).should("have.attr", "aria-selected");
+        cy.reload();
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-selected=true]`).should("have.attr", "data-test", "instrument-maybe")
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [aria-selected=true]`).should("have.attr", "data-test", "instrument-yes")
+        cy.get(`[data-test=instrument-${signups[1].user_instruments[0].id}] [aria-selected=true]`).should("have.attr", "data-test", "instrument-yes")
+      });
+
+      it("can assign roles to members of the lineup", () => {
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-leader]`).click().should("have.attr", "aria-checked", "true");
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).click();
+        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-approve]`).click();
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-equipment]`).click().should("have.attr", "aria-checked", "true");
+        cy.get(`[data-test=member-${signups[3].user.id}]`).within(() => {
+            cy.get(`[data-test=toggle-money_collector_notified]`).should("not.exist");
+
+            cy.get(`[data-test=toggle-money_collector]`).click().should("have.attr", "aria-checked", "true");
+            cy.get(`[data-test=toggle-money_collector_notified]`).click().should("have.attr", "aria-checked", "true");
+            cy.get(`[data-test=toggle-money_collector]`).should("be.disabled")
+        });
+        cy.reload();
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-leader]`).should("have.attr", "aria-checked", "true");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-equipment]`).should("have.attr", "aria-checked", "false");
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-equipment]`).should("have.attr", "aria-checked", "true");
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-money_collector]`).should("have.attr", "aria-checked", "false");
+        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=toggle-money_collector]`).should("have.attr", "aria-checked", "true");
+        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=toggle-money_collector_notified]`).should("have.attr", "aria-checked", "true");
       });
     });
   });

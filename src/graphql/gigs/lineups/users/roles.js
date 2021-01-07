@@ -1,5 +1,15 @@
 import gql from "graphql-tag";
 
+export const LineupRoles = gql`
+  fragment LineupRoles on cucb_gigs_lineups {
+    leader
+    equipment
+    money_collector
+    driver
+    money_collector_notified
+  }
+`;
+
 const UpdateLineupUserRole = gql`
   mutation UpdateLineupUserRole(
     $gig_id: bigint!
@@ -11,20 +21,11 @@ const UpdateLineupUserRole = gql`
       _set: $set_role
     ) {
       returning {
-        leader
-        money_collector
-        equipment
+        ...LineupRoles
       }
     }
   }
-`;
-
-export const LineupRoles = gql`
-  fragment LineupRoles on cucb_gigs_lineups {
-    leader
-    equipment
-    money_collector
-  }
+  ${LineupRoles}
 `;
 
 export const setRole = async (

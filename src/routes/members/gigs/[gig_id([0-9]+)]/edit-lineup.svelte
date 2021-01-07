@@ -58,27 +58,79 @@
   import Editor from "../../../../components/Lineup/Editor/Editor.svelte";
   import { setInstrumentApproved } from "../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../graphql/gigs/lineups/users/roles";
+  import { setApproved } from "../../../../graphql/gigs/lineups";
   import { client } from "../../../../graphql/client";
+  import { Map } from "immutable";
   export let people;
   export let gigId;
+  let peopleStore = new Map(people);
+  let errors = [];
 
-  let updaters = { setInstrumentApproved, setRole };
-  $: available = Object.fromEntries(Object.entries(people).filter(([k, v]) => v.user_available && v.approved === null));
-  $: approved = Object.fromEntries(Object.entries(people).filter(([k, v]) => v.approved));
-  $: nope = Object.fromEntries(Object.entries(people).filter(([k, v]) => v.approved === false || (v.approved === null && v.user_available === false)));
+  const wrap = (fn) => (userId) => async (...args) => {
+    let res = await fn({ client: $client, people: peopleStore, errors, gigId, userId }, ...args);
+
+    peopleStore = res.people;
+    errors = res.errors;
+  };
+
+  let updaters = {
+    setInstrumentApproved: wrap(setInstrumentApproved),
+    setRole: wrap(setRole),
+    setApproved: wrap(setApproved),
+  };
+  $: available = Object.fromEntries(
+    Object.entries(peopleStore.toObject()).filter(
+      ([k, v]) => v.user_available && !v.user_only_if_necessary && v.approved === null,
+    ),
+  );
+  $: if_necessary = Object.fromEntries(
+    Object.entries(peopleStore.toObject()).filter(([k, v]) => v.user_only_if_necessary && v.approved === null),
+  );
+  $: approved = Object.fromEntries(Object.entries(peopleStore.toObject()).filter(([k, v]) => v.approved));
+  $: unapproved = Object.fromEntries(Object.entries(peopleStore.toObject()).filter(([k, v]) => v.approved === false));
+  $: nope = Object.fromEntries(
+    Object.entries(peopleStore.toObject()).filter(([k, v]) => v.approved === null && v.user_available === false),
+  );
 </script>
 
 Gig id:
 {gigId}
-<h2>Approved lineup</h2>
-<div data-test="lineup-editor-approved">
-  <Editor people="{approved}" gigId="{gigId}" client="{$client}" updaters="{updaters}" />
-</div>
-<h2>Applicants/maybes</h2>
-<div data-test="lineup-editor-applicants">
-  <Editor people="{available}" gigId="{gigId}" client="{$client}" updaters="{updaters}" />
-</div>
-<h2>Unavailable/discarded</h2>
-<div data-test="lineup-editor-nope">
-  <Editor people="{nope}" gigId="{gigId}" client="{$client}" updaters="{updaters}" />
-</div>
+{#if Object.entries(approved).length}
+  <h2>Approved lineup</h2>
+  <div data-test="lineup-editor-approved">
+    <Editor people="{approved}" updaters="{updaters}" />
+  </div>
+{/if}
+{#if Object.entries(available).length + Object.entries(if_necessary).length}
+  <h2>Applicants/maybes</h2>
+  <div data-test="lineup-editor-applicants">
+    {#if Object.entries(available).length}
+      <div data-test="signup-yes">
+        <Editor people="{available}" updaters="{updaters}" />
+      </div>
+    {/if}
+    {#if Object.entries(if_necessary).length}
+      <h3>Only if necessary</h3>
+      <div data-test="signup-maybe">
+        <Editor people="{if_necessary}" updaters="{updaters}" />
+      </div>
+    {/if}
+  </div>
+{/if}
+{#if Object.entries(nope).length + Object.entries(unapproved).length}
+  <h2>Unavailable/discarded</h2>
+  <div data-test="lineup-editor-nope">
+    {#if Object.entries(unapproved).length}
+      <h3>Discarded applicants</h3>
+      <div data-test="people-discarded">
+        <Editor people="{unapproved}" updaters="{updaters}" />
+      </div>
+    {/if}
+    {#if Object.entries(nope).length}
+      <h3>Unavailable</h3>
+      <div data-test="signup-nope">
+        <Editor people="{nope}" updaters="{updaters}" />
+      </div>
+    {/if}
+  </div>
+{/if}

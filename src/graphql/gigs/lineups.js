@@ -39,3 +39,33 @@ export const QueryGigLineup = gql`
   }
   ${FragmentGigLineup}
 `;
+
+const UpdateLineupUserApproved = gql`
+    mutation UpdateLineupUserApproved($userId: bigint!, $gigId: bigint!, $approved: Boolean) {
+        update_cucb_gigs_lineups_by_pk(pk_columns: { user_id: $userId, gig_id: $gigId }, _set: { approved: $approved }) {
+            approved
+        }
+    }
+`;
+
+export const setApproved = async (
+  { client, gigId, userId, errors, people },
+  approved,
+) => {
+  const graphql_res = await client.mutate({
+    mutation: UpdateLineupUserApproved,
+    variables: { approved, userId, gigId },
+  });
+
+  if (graphql_res.data.update_cucb_gigs_lineups_by_pk) {
+    return {
+      people: people.setIn(
+        [userId, "approved"],
+        graphql_res.data.update_cucb_gigs_lineups_by_pk.approved,
+      ),
+      errors,
+    };
+  } else {
+    return { people, errors: errors.push(graphql_res.message) };
+  }
+};

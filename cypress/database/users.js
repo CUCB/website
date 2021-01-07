@@ -49,6 +49,20 @@ export const AllAttributes = `
   }
 `;
 
+export const DeleteUsers = `
+    mutation DeleteUsers($ids: [bigint!]!) {
+        delete_cucb_users_instruments(where: {user_id: {_in: $ids}}) {
+            affected_rows
+        }
+        delete_cucb_user_prefs(where: {user_id: {_in: $ids}}) {
+            affected_rows
+        }
+        delete_cucb_users(where: {id: {_in: $ids}}) {
+            affected_rows
+        }
+    }
+`;
+
 export const CreateLineup = `
   mutation CreateLineup($entries: [cucb_gigs_lineups_insert_input!]!) {
     insert_cucb_gigs_lineups(

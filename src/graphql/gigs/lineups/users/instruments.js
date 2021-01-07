@@ -4,7 +4,7 @@ const UpdateInstrumentApproved = gql`
   mutation UpdateInstrumentApproved(
     $gig_id: bigint!
     $user_instrument_id: bigint!
-    $set_approved: Boolean!
+    $set_approved: Boolean
   ) {
     update_cucb_gigs_lineups_instruments(
       where: {

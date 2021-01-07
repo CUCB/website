@@ -264,3 +264,11 @@ export const AllGigTypes = `
         }
     }
 `;
+
+export const ClearLineupForGig = `
+    mutation ClearLineupForGig($id: bigint!) {
+        delete_cucb_gigs_lineups(where: {gig_id: {_eq: $id}}) {
+            affected_rows
+        }
+    }
+`

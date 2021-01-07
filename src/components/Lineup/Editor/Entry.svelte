@@ -7,33 +7,39 @@
   export let updateEntry;
 
   $: roles = {
-    leader: person.leader,
-    equipment: person.equipment,
-    money_collector: person.money_collector,
+    leader: { name: "leader", value: person.leader },
+    equipment: { name: "equip", value: person.equipment },
+    driver: { name: "driver", value: person.driver },
+    money_collector: { name: "money", value: person.money_collector, disabled: person.money_collector_notified },
   };
-
-  const attributeSummary = (attributes) =>
-    (attributes.includes("leader") ? "L" : "") + (attributes.includes("soundtech") ? "T" : "");
+  $: if (person.money_collector) {
+    roles.money_collector_notified = { name: "money notified", value: person.money_collector_notified };
+  } else {
+    delete roles["money_collector_notified"];
+  }
 
   let content;
 
   afterUpdate(() => flash(content));
 </script>
 
-<style>
+<style lang="scss">
   [aria-selected]::before {
     content: "✓";
   }
 
-  ul {
-    list-style-type: none;
+  [aria-checked="false"] {
+    text-decoration: line-through;
+    opacity: 0.5;
+    transition: opacity linear 0.1s;
+    &:hover {
+      opacity: 1;
+    }
   }
 
-  li {
-    user-select: none;
-    cursor: pointer;
+  .name {
+    display: flex;
   }
-
   .icons {
     display: inline-block;
     font-size: 1em;
@@ -42,12 +48,11 @@
 
 <svelte:options immutable />
 <div bind:this="{content}" data-test="member-{person.user.id}">
-  <h3>
+  <div class="name">
     {person.user.first}&#32;{person.user.last}&#32;
     {#if person.user.attributes.length > 0}
-      (
       <div data-test="attribute-icons" class="icons">
-        {#if person.user.attributes.includes('leader')}
+        ({#if person.user.attributes.includes('leader')}
           <TooltipText data-test="icon-leader" content="{person.user.first} can lead">
             <i class="las la-music"></i>
           </TooltipText>
@@ -66,25 +71,52 @@
           <TooltipText data-test="icon-car" content="{person.user.first} has a car">
             <i class="las la-car-side"></i>
           </TooltipText>
-        {/if}
-      </div>)
+        {/if})
+      </div>
     {/if}
-  </h3>
-  <p>[{attributeSummary(person.user.attributes)}]</p>
-  <ul>
+  </div>
+  <div class="instruments">
     {#each Object.entries(person.user_instruments) as [id, instrument]}
-      <li
-        aria-selected="{instrument.approved ? 'true' : undefined}"
-        on:click="{() => updateEntry.instruments.setApproved(id, !instrument.approved)}"
-      >
+      <div data-test="instrument-{id}">
+        <button
+          data-test="instrument-yes"
+          aria-selected="{instrument.approved ? 'true' : undefined}"
+          on:click="{() => updateEntry.instruments.setApproved(id, true)}"
+        >Yes</button>
+        <button
+          data-test="instrument-maybe"
+          aria-selected="{instrument.approved === null ? 'true' : undefined}"
+          on:click="{() => updateEntry.instruments.setApproved(id, null)}"
+        >?</button>
+        <button
+          data-test="instrument-no"
+          aria-selected="{instrument.approved === false ? 'true' : undefined}"
+          on:click="{() => updateEntry.instruments.setApproved(id, false)}"
+        >No</button>
         {instrument.user_instrument.instrument.name}
-      </li>
+      </div>
     {/each}
-  </ul>
+  </div>
+  <div class="actions">
+    {#if person.approved}
+      <button on:click="{() => updateEntry.setApproved(null)}" data-test="person-unapprove">Un-approve</button>
+    {:else if person.approved === null}
+      <button on:click="{() => updateEntry.setApproved(true)}" data-test="person-approve">Approve</button>
+      <button on:click="{() => updateEntry.setApproved(false)}" data-test="person-discard">Discard</button>
+    {:else}
+      <button on:click="{() => updateEntry.setApproved(null)}" data-test="person-undiscard">Un-discard</button>
+    {/if}
+  </div>
 
   <ul>
-    {#each Object.entries(roles) as [role, value]}
-      <li aria-selected="{value ? 'true' : undefined}" on:click="{() => updateEntry.setRole(role, !value)}">{role}</li>
+    {#each Object.entries(roles) as [role, { name, value, disabled }]}
+      <button
+        role="checkbox"
+        disabled="{disabled}"
+        aria-checked="{value ? 'true' : 'false'}"
+        on:click="{() => updateEntry.setRole(role, !value)}"
+        data-test="toggle-{role}"
+      >[{name}]</button>
     {/each}
   </ul>
 </div>
