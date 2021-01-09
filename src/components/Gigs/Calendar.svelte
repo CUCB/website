@@ -36,19 +36,12 @@
     sat: 6,
     sun: 0,
   };
-  //   $: locale = DateTime.locale();
   $: dayOffset = dayOffsets[startDay || "mon"];
   $: startOfWeek = function (date) {
     const day = date.weekday % 7; // convert to 0=sunday .. 6=saturday
     const dayAdjust = day >= dayOffset ? -day + dayOffset : -day + dayOffset - 7;
     return date.plus({ days: dayAdjust });
   };
-  //   $: localeUpdated =
-  //     Settings.updateLocale(locale, {
-  //       // See https://day.js.org/docs/en/customization/customization for possible options here
-  //       yearStart: 4,
-  //       weekStart: dayOffset,
-  //     }) && DateTime.locale(locale);
 
   $: rotate = (array) => [...array.slice(dayOffset - 1), ...array.slice(0, dayOffset - 1)];
 

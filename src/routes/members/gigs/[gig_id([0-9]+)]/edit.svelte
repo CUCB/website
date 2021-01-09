@@ -401,7 +401,7 @@
       editing_time = DateTime.local().toISO();
     } catch (e) {
       // Oh shit
-      // TODO handle this better
+      // TODO handle this better (#43)
       console.error(e);
     }
   }
@@ -455,7 +455,7 @@
         contactType === contactTypes.CLIENT ? (selectedClient = undefined) : (selectedCaller = undefined);
       }
     } catch (e) {
-      // TODO error handling
+      // TODO error handling (#43)
       console.error(e);
     }
   }
@@ -491,7 +491,7 @@
           contacts = contacts;
         }
       } catch (e) {
-        // TODO error handling
+        // TODO error handling (#43)
         console.error(e);
       }
     } else {
@@ -505,7 +505,7 @@
         });
         contacts = contacts.filter((contact) => contact.id !== contact_id);
       } catch (e) {
-        // TODO real error handling
+        // TODO real error handling (#43)
         console.error(e);
       }
     }
@@ -573,7 +573,6 @@
   async function fillArriveDate(e) {
     if (arrive_time_date && !e.force) return;
     if (!arrive_time_time) return;
-    // TODO could consider finish_time_time as a fallback for time
     if (!time || DateTime.fromISO(`1970-01-01T${arrive_time_time}`) <= DateTime.fromISO(`1970-01-01T${time}`)) {
       arrive_time_date = date;
     } else {
@@ -587,7 +586,6 @@
   async function fillFinishDate(e) {
     if (finish_time_date && !e.force) return;
     if (!finish_time_time) return;
-    // TODO could consider arrive_time_time as a fallback for time
     if (!time || DateTime.fromISO(`1970-01-01T${finish_time_time}`) >= DateTime.fromISO(`1970-01-01T${time}`)) {
       finish_time_date = date;
     } else {
@@ -774,11 +772,6 @@
   {/if}
 </p>
 
-<p>
-  Always remember to click 'Save' after changing anything to be safe! You should also be able to use Alt-S or
-  Alt-Shift-S or Ctrl-Alt-S. Pressing enter also often works. (Note that some fields are automatically saved:
-  clients/callers/lineups and specifically changes to venue information but not the venue field itself.)
-</p>
 <h3>
   {#if !displayVenueEditor}Main details{:else}Edit venue{/if}
 </h3>
