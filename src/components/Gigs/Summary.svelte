@@ -3,13 +3,10 @@
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
-  import { themeName } from "../../view";
+  import { themeName, suffix } from "../../view";
   import { stores } from "@sapper/app";
   import { DateTime, Settings } from "luxon";
   Settings.defaultZoneName = "Europe/London";
-
-  const suffix = (n) =>
-    ({ one: "st", two: "nd", few: "rd", other: "th" }[new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)]);
 
   export let gig,
     signupGig = writable(undefined),

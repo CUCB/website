@@ -12,7 +12,7 @@
   import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
   import { stores } from "@sapper/app";
   import InstrumentName from "./InstrumentName.svelte";
-  import { themeName } from "../../view";
+  import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
   export let gig, userInstruments;
   export let showLink = true;
@@ -175,8 +175,6 @@
     tippy(".disabled", { content: "This instrument is selected as part of a lineup, you can't remove it." });
   };
 
-  const suffix = (n) =>
-    ({ one: "st", two: "nd", few: "rd", other: "th" }[new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)]);
 </script>
 
 <style lang="scss">
