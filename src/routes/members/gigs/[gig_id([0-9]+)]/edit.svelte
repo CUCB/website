@@ -320,7 +320,8 @@
   }
 
   function editVenue() {
-    editingSubvenue = venue && Object.keys(venue).length === 1; // Only name set for this
+    // A subvenue only has a name set, so one key
+    editingSubvenue = venue && Object.keys(venue).length === 1; 
     clearVenueSearch();
     displayVenueEditor = true;
   }
