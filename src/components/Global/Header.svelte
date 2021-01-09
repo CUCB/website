@@ -182,9 +182,7 @@
     <Logo id="logo" enableSpin="{spinnyLogo}" />
   </a>
   {#if animate}
-    <h1 id="title" in:fade>
-      <a href="/">Cambridge University Ceilidh Band</a>
-    </h1>
+    <h1 id="title" in:fade><a href="/">Cambridge University Ceilidh Band</a></h1>
     {#if user.userId && window && window.CSS && window.CSS.supports('color', 'var(--primary)')}
       <button
         id="settingsToggle"
@@ -195,6 +193,7 @@
           cog.blur();
         }}"
         aria-label="Settings"
+        tabindex="0"
       >
         <i
           class="las la-cog"
@@ -207,13 +206,11 @@
   {:else}
     <h1 id="title">Cambridge University Ceilidh Band</h1>
     <noscript>
-      <h1 id="title">
-        <a href="/">Cambridge University Ceilidh Band</a>
-      </h1>
+      <h1 id="title"><a href="/">Cambridge University Ceilidh Band</a></h1>
     </noscript>
   {/if}
   <div class="button-background">
     <button bind:this="{button}" on:click="{toggleNav}" id="navToggle">{navVisible ? 'hide' : 'menu'}</button>
   </div>
-  <Nav {user} visible="{navVisible}" on:click="{() => (navVisible ? toggleNav() : undefined)}" />
+  <Nav user="{user}" visible="{navVisible}" on:click="{() => (navVisible ? toggleNav() : undefined)}" />
 </header>

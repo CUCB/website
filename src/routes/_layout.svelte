@@ -76,7 +76,7 @@
   let showSettings;
   let navVisible;
 
-  $: showSettings ? disableBodyScroll() : enableBodyScroll();
+  $: showSettings ? disableBodyScroll() : (typeof window !== "undefined" && enableBodyScroll());
 
   function correctMobileHeight() {
     let vh = window.innerHeight * 0.01;

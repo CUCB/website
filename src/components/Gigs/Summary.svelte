@@ -1,34 +1,30 @@
 <script>
-  import moment from "moment-timezone";
   import Signup from "./Signup.svelte";
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
-  import { themeName } from "../../view";
+  import { themeName, suffix } from "../../view";
+  import { stores } from "@sapper/app";
+  import { DateTime, Settings } from "luxon";
+  Settings.defaultZoneName = "Europe/London";
+
   export let gig,
     signupGig = writable(undefined),
-    userInstruments;
+    userInstruments = undefined,
+    displayLinks = true;
   export let linkHeading = false;
-  let arriveFinishFormat = "HH:mm";
-  let calendarDatesFormat = "dddd Do MMMM YYYY";
   let showSignup = false;
   let showDetails = !linkHeading;
-
-  $: clients = gig.contacts.filter(c => c.client);
-  $: callers = gig.contacts.filter(c => c.calling);
-
-  if (gig.arrive_time && gig.finish_time) {
-    if (
-      moment(gig.arrive_time)
-        .tz("Europe/London")
-        .day() !==
-      moment(gig.finish_time)
-        .tz("Europe/London")
-        .day()
-    ) {
-      arriveFinishFormat = "HH:mm (ddd Do MMM)";
-    }
-  }
+  let { session } = stores();
+  const formatCalendarDate = (date) => date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
+  const formatTimeOnly = (date) => date.toFormat("HH:mm");
+  const formatTimeWithDate = (date) => date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");
+  const midnight = { hours: 0, minutes: 0, seconds: 0 };
+  $: arrive_time = gig.arrive_time && DateTime.fromISO(gig.arrive_time);
+  $: finish_time = gig.finish_time && DateTime.fromISO(gig.finish_time);
+  $: date = gig.date && DateTime.fromISO(gig.date);
+  $: clients = gig.contacts.filter((c) => c.client);
+  $: callers = gig.contacts.filter((c) => c.calling);
 </script>
 
 <style lang="scss">
@@ -222,26 +218,18 @@
   >
     <h2 class="main-detail">
       {#if linkHeading}
-        <span>
-          <a href="/members/gigs/{gig.id}">{gig.title}</a>
-        </span>
+        <span> <a href="/members/gigs/{gig.id}">{gig.title}</a> </span>
         <!-- span for correct multiline underlining -->
       {:else}{gig.title}{/if}
       <gig-icons>
         {#if gig.food_provided}
-          <TooltipText content="Food provided">
-            <i class="las la-utensils"></i>
-          </TooltipText>
+          <TooltipText content="Food provided"><i class="las la-utensils" data-test="icon-food-provided"></i></TooltipText>
         {/if}
         {#if gig.admins_only}
-          <TooltipText content="Hidden from normal users">
-            <i class="las la-eye-slash"></i>
-          </TooltipText>
+          <TooltipText content="Hidden from normal users"><i class="las la-eye-slash" data-test="icon-admins-only"></i></TooltipText>
         {/if}
         {#if gig.type.code === 'calendar'}
-          <TooltipText content="Calendar event">
-            <i class="las la-calendar"></i>
-          </TooltipText>
+          <TooltipText content="Calendar event"><i class="las la-calendar" data-test="icon-calendar-event"></i></TooltipText>
         {/if}
       </gig-icons>
     </h2>
@@ -253,101 +241,83 @@
         </a>
       </h3>
     {/if}
+    {#if displayLinks && ['webmaster', 'president', 'secretary', 'treasurer'].indexOf($session.hasuraRole) > -1}
+      <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
+    {/if}
     {#if gig.type.code !== 'calendar'}
-      <p class="date main-detail">
-        {moment(gig.date)
-          .tz('Europe/London')
-          .format('dddd Do MMMM YYYY')}
-      </p>
+      <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
     {/if}
     <gig-timings>
       {#if gig.date}
         {#if gig.arrive_time}
           <p>
             <b>Arrive time:&nbsp;</b>
-            {@html moment(gig.arrive_time)
-              .tz('Europe/London')
-              .format(arriveFinishFormat)}
+            {#if date && arrive_time.hasSame(date, 'day')}
+              {@html formatTimeOnly(arrive_time)}
+            {:else if !date && finish_time && arrive_time.hasSame(finish_time, 'day')}
+              {@html formatTimeOnly(arrive_time)}
+            {:else}
+              {@html formatTimeWithDate(arrive_time)}
+            {/if}
           </p>
         {/if}
         {#if gig.time}
-          <p>
-            <b>Start time:&nbsp;</b>
-            {moment(`2020-01-01 ${gig.time}`)
-              .tz('Europe/London')
-              .format('HH:mm')}
-          </p>
+          <p><b>Start time:&nbsp;</b> {DateTime.fromISO(`2020-01-01T${gig.time}`).toFormat('HH:mm')}</p>
         {/if}
-        {#if gig.finish_time}
+        {#if finish_time}
           <p>
             <b>Finish time:&nbsp;</b>
-            {moment(gig.finish_time)
-              .tz('Europe/London')
-              .format(arriveFinishFormat)}
+            {#if date && finish_time.set(midnight).equals(date)}
+              {@html formatTimeOnly(finish_time)}
+            {:else if !date && arrive_time && finish_time.set(midnight).equals(arrive_time.set(midnight))}
+              {@html formatTimeOnly(finish_time)}
+            {:else}
+              {@html formatTimeWithDate(finish_time)}
+            {/if}
           </p>
         {/if}
-      {:else if gig.arrive_time && gig.finish_time && !moment(gig.arrive_time).isSame(gig.finish_time, 'day')}
+      {:else if arrive_time && finish_time && !arrive_time.set(midnight).equals(finish_time.set(midnight))}
         <p>
-          {moment(gig.arrive_time).format(calendarDatesFormat)} &ndash; {moment(gig.finish_time).format(calendarDatesFormat)}
+          {formatCalendarDate(DateTime.fromISO(gig.arrive_time))}
+          &ndash;
+          {formatCalendarDate(DateTime.fromISO(gig.finish_time))}
         </p>
       {:else if gig.arrive_time}
-        <p>{moment(gig.arrive_time).format(calendarDatesFormat)}</p>
+        <p>{formatCalendarDate(DateTime.fromISO(gig.arrive_time))}</p>
       {/if}
     </gig-timings>
     <task-list class="main-detail">
-      {#if gig.finance_deposit_received !== undefined}
+      {#if gig.finance_deposit_received !== undefined && gig.finance_deposit_received !== null}
         {#if gig.finance_deposit_received}
-          <task-summary class="color-positive">
-            <i class="las la-money-bill-wave"></i>
-            Deposit received
-          </task-summary>
+          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Deposit received</task-summary>
         {:else}
-          <task-summary class="color-negative">
-            <i class="las la-exclamation"></i>
-            Deposit not received
-          </task-summary>
+          <task-summary class="color-negative"><i class="las la-exclamation"></i> Deposit not received</task-summary>
         {/if}
       {/if}
-      {#if gig.finance_payment_received !== undefined && moment(gig.date).isBefore(moment())}
+      {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
         {#if gig.finance_payment_received}
-          <task-summary class="color-positive">
-            <i class="las la-money-bill-wave"></i>
-            Payment received
-          </task-summary>
+          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Payment received</task-summary>
         {:else}
-          <task-summary class="color-negative">
-            <i class="las la-exclamation"></i>
-            Payment not received
-          </task-summary>
+          <task-summary class="color-negative"><i class="las la-exclamation"></i> Payment not received</task-summary>
         {/if}
       {/if}
-      {#if gig.finance_caller_paid !== undefined && moment(gig.date).isBefore(moment())}
+      {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
         {#if gig.finance_caller_paid}
-          <task-summary class="color-positive caller">
-            <i class="las la-money-bill-wave"></i>
-            Caller paid
-          </task-summary>
+          <task-summary class="color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</task-summary>
         {:else}
-          <task-summary class="color-negative caller">
-            <i class="las la-exclamation"></i>
-            Caller not paid
-          </task-summary>
+          <task-summary class="color-negative caller"><i class="las la-exclamation"></i> Caller not paid</task-summary>
         {/if}
       {/if}
     </task-list>
     {#if gig.summary}
       <summary-text>
-        {#if gig.advertise}
-          <b>Public advert:&nbsp;</b>
-        {:else}
-          <b>Summary:&nbsp;</b>
-        {/if}
+        {#if gig.advertise}<b>Public advert:&nbsp;</b>{:else}<b>Summary:&nbsp;</b>{/if}
         <blockquote>
           {@html gig.summary
             .split('\n')
-            .map(p => p.trim())
-            .filter(p => p.length)
-            .map(p => `<p>${p}</p>`)
+            .map((p) => p.trim())
+            .filter((p) => p.length)
+            .map((p) => `<p>${p}</p>`)
             .join('')}
         </blockquote>
       </summary-text>
@@ -367,10 +337,7 @@
       </admin-notes>
     {/if}
     {#if gig.finance}
-      <gig-finance class="main-detail">
-        <b>Finance:&nbsp;</b>
-        {gig.finance.trim()}
-      </gig-finance>
+      <gig-finance class="main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</gig-finance>
     {/if}
     {#if gig.gig_type === 'gig_enquiry'}Quote date: {gig.quote_date}{/if}
     {#if clients.length > 0}
@@ -382,8 +349,7 @@
           <a href="/members/gigs/contacts/{client.id}">
             {client.contact.name}
             {#if client.contact.organization}&nbsp;@ {client.contact.organization}{/if}
-          </a>
-          {#if i + 1 < clients.length},&nbsp;{/if}
+          </a>{#if i + 1 < clients.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
@@ -391,8 +357,7 @@
       <p>
         <b>Calling:&nbsp;</b>
         {#each callers as caller, i (caller.id)}
-          <a href="/members/gigs/contacts/{caller.id}">{caller.contact.name}</a>
-          {#if i + 1 < callers.length},&nbsp;{/if}
+          <a href="/members/gigs/contacts/{caller.id}">{caller.contact.name}</a>{#if i + 1 < callers.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
@@ -409,5 +374,5 @@
   <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
     Show summary
   </button>
-  <Signup bind:gig="{$signupGig}" {userInstruments} showLink="{false}" />
+  <Signup bind:gig="{$signupGig}" userInstruments="{userInstruments}" showLink="{false}" />
 {/if}

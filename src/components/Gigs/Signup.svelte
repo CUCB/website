@@ -12,21 +12,23 @@
   import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
   import { stores } from "@sapper/app";
   import InstrumentName from "./InstrumentName.svelte";
-  import moment from "moment-timezone";
-  import { themeName } from "../../view";
+  import { themeName, suffix } from "../../view";
+  import { DateTime, Settings } from "luxon";
   export let gig, userInstruments;
   export let showLink = true;
   let edit = false;
+  Settings.defaultZoneName = "Europe/London";
+  $: date = gig.date && DateTime.fromISO(gig.date);
 
   let selectedInstruments =
     gig.lineup.length > 0
       ? Object.assign(
           {},
-          ...gig.lineup[0].user_instruments.map(instrument => ({ [instrument.user_instrument_id]: instrument })),
+          ...gig.lineup[0].user_instruments.map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
         )
       : {};
 
-  userInstruments = userInstruments.map(userInstr =>
+  userInstruments = userInstruments.map((userInstr) =>
     userInstr.id in selectedInstruments
       ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
       : { ...userInstr, chosen: false, approved: false },
@@ -36,7 +38,7 @@
 
   $userNotes || (gig.lineup.length && ($userNotes = gig.lineup[0].user.gig_notes));
   userNotes.subscribe(
-    notes => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
+    (notes) => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
   );
 
   const statuses = {
@@ -45,14 +47,14 @@
     MAYBE: {},
   };
 
-  const statusFromAvailability = entry =>
+  const statusFromAvailability = (entry) =>
     (typeof entry.user_available !== "undefined" &&
       (entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO)) ||
     undefined;
 
   let status = gig.lineup[0] && statusFromAvailability(gig.lineup[0]);
 
-  const signup = newStatus => async () => {
+  const signup = (newStatus) => async () => {
     let user_available = newStatus !== statuses.NO;
     let user_only_if_necessary = newStatus === statuses.MAYBE;
     let res = await $clientCurrentUser.mutate({
@@ -97,9 +99,9 @@
 
   const updateInstruments = async () => {
     let to_add = userInstruments
-      .filter(i => i.chosen && !(i.id in selectedInstruments))
-      .map(i => ({ gig_id: gig.id, user_instrument_id: i.id }));
-    let to_remove = userInstruments.filter(i => !i.chosen).map(i => i.id);
+      .filter((i) => i.chosen && !(i.id in selectedInstruments))
+      .map((i) => ({ gig_id: gig.id, user_instrument_id: i.id }));
+    let to_remove = userInstruments.filter((i) => !i.chosen).map((i) => i.id);
     let res = await $clientCurrentUser.mutate({
       mutation: UpdateSignupInstruments,
       variables: {
@@ -109,24 +111,24 @@
       },
     });
     let inserted = res.data.insert_cucb_gigs_lineups_instruments.returning;
-    let deleted = res.data.delete_cucb_gigs_lineups_instruments.returning.map(instr => instr.user_instrument_id);
+    let deleted = res.data.delete_cucb_gigs_lineups_instruments.returning.map((instr) => instr.user_instrument_id);
 
     // Filter deleted instruments from currently selected
     selectedInstruments = Object.assign(
       {},
       ...Object.values(selectedInstruments)
-        .filter(i => !deleted.includes(i.user_instrument_id))
-        .map(instrument => ({ [instrument.user_instrument_id]: instrument })),
+        .filter((i) => !deleted.includes(i.user_instrument_id))
+        .map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
     );
 
     // Add recently inserted instruments to currently selected
     selectedInstruments = Object.assign(
       selectedInstruments,
-      ...inserted.map(instrument => ({ [instrument.user_instrument_id]: instrument })),
+      ...inserted.map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
     );
 
     // Update userInstruments to display the updated state
-    userInstruments = userInstruments.map(userInstr =>
+    userInstruments = userInstruments.map((userInstr) =>
       userInstr.id in selectedInstruments
         ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
         : { ...userInstr, chosen: false, approved: false },
@@ -138,8 +140,8 @@
         {
           ...gig.lineup[0],
           user_instruments: userInstruments
-            .filter(instrument => instrument.chosen)
-            .map(instrument => ({ ...instrument, user_instrument_id: instrument.id })),
+            .filter((instrument) => instrument.chosen)
+            .map((instrument) => ({ ...instrument, user_instrument_id: instrument.id })),
         },
       ],
     };
@@ -169,9 +171,10 @@
     edit = false;
   };
 
-  const instrumentTooltip = _ => {
+  const instrumentTooltip = (_) => {
     tippy(".disabled", { content: "This instrument is selected as part of a lineup, you can't remove it." });
   };
+
 </script>
 
 <style lang="scss">
@@ -256,14 +259,11 @@
 
 <gig-signup data-test="gig-signup-{gig.id}" class="theme-{$themeName}">
   <h3>
-    {#if showLink}
-      <a href="/members/gigs/{gig.id}">{gig.title}</a>
-    {:else}{gig.title}{/if}
-    {#if gig.date}
+    {#if showLink}<a href="/members/gigs/{gig.id}">{gig.title}</a>{:else}{gig.title}{/if}
+    {#if date}
       <small>
-        &nbsp;on {moment(gig.date)
-          .tz('Europe/London')
-          .format('dddd Do MMMM YYYY')}
+        &nbsp;on
+        {date.toFormat('cccc d') + suffix(date.day) + date.toFormat(' LLLL yyyy')}
       </small>
     {/if}
   </h3>
@@ -334,9 +334,9 @@
       {:else}
         <p>Signed up with:</p>
         <ul data-test="{`gig-${gig.id}-signup-instruments-selected`}">
-          {#each userInstruments.filter(instr => instr.id in selectedInstruments) as userInstrument (userInstrument.id)}
+          {#each userInstruments.filter((instr) => instr.id in selectedInstruments) as userInstrument (userInstrument.id)}
             <li>
-              <InstrumentName {userInstrument} />
+              <InstrumentName userInstrument="{userInstrument}" />
             </li>
           {:else}
             <li class="none">No instruments selected</li>
@@ -346,14 +346,8 @@
     </user-instruments>
     <user-notes>
       {#if edit}
-        <label class="notes">
-          Notes for this gig
-          <textarea bind:value="{gig.lineup[0].user_notes}"></textarea>
-        </label>
-        <label class="notes">
-          General notes
-          <textarea bind:value="{gig.lineup[0].user.gig_notes}"></textarea>
-        </label>
+        <label class="notes"> Notes for this gig <textarea bind:value="{gig.lineup[0].user_notes}"></textarea> </label>
+        <label class="notes"> General notes <textarea bind:value="{gig.lineup[0].user.gig_notes}"></textarea> </label>
         <br />
       {:else if gig.lineup[0].user_notes || $userNotes}
         <p>

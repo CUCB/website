@@ -60,17 +60,6 @@
     }
   };
 
-  const updateSettings = () => {
-    if ($session.userId && updateProps) {
-      for (let color of colors) {
-        let prop = `accent_${color}`;
-        if (!settings.get(prop) && propLocalStorage(prop)) {
-          settings = settings.set(prop, propLocalStorage(prop));
-        }
-      }
-    }
-  };
-
   const fromCurrentStyle = prop => {
     try {
       return (
@@ -184,7 +173,7 @@
         <option value="dark">Dark</option>
       </select>
     </label>
-    <button on:click="{event => (settings = settings.set('color', selectedTheme))}">Set theme</button>
+    <button on:click="{() => (settings = settings.set('color', selectedTheme))}">Set theme</button>
     <label>
       Spinny logo
       <input
@@ -205,7 +194,7 @@
         <option value="sun">Sunday</option>
       </select>
     </label>
-    <button on:click="{event => (settings = settings.set('calendarStartDay', selectedCalendarStartDay))}">
+    <button on:click="{() => (settings = settings.set('calendarStartDay', selectedCalendarStartDay))}">
       Set day
     </button>
   </Popup>

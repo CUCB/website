@@ -78,6 +78,7 @@ const FragmentGigFinancials = gql`
     finance_deposit_received
     finance_payment_received
     finance_caller_paid
+    quote_date
   }
 `;
 
@@ -106,6 +107,61 @@ export const QueryGigDetails = role => {
     `;
   }
 };
+
+const FragmentGigEditDetails = gql`
+  fragment GigEditDetails on cucb_gigs {
+    posting_time
+    posting_user: posting_user_obj {
+      id
+      first
+      last
+    }
+    editing_time
+    editing_user: editing_user_obj {
+      id
+      first
+      last
+    }
+  }
+`;
+
+export const QueryEditGigDetails = gql`
+  query QueryEditGigDetails($gig_id: bigint!) {
+    cucb_gigs_by_pk(id: $gig_id) {
+      ...GigDetails
+      ...GigAdminDetails
+      ...GigEditDetails
+      ...GigFinancials
+      type_id: type
+      venue_id
+      venue {
+        id
+        name
+        subvenue
+        map_link
+        distance_miles
+        notes_admin
+        notes_band
+        address
+        postcode
+        latitude
+        longitude
+      }
+      contacts {
+        contact {
+          email
+          notes
+          caller
+          id
+        }
+      }
+    }
+  }
+  ${FragmentGigDetails}
+  ${FragmentGigAdminDetails}
+  ${FragmentGigEditDetails}
+  ${FragmentGigFinancials}
+`;
 
 export const QueryMultiGigDetails = role => {
   if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
@@ -320,6 +376,272 @@ export const UpdateSignupNotes = gql`
       returning {
         gig_notes
       }
+    }
+  }
+`;
+
+export const QueryVenues = gql`
+  query QueryVenues {
+    cucb_gig_venues(order_by: { name: asc, subvenue: asc }) {
+      id
+      name
+      subvenue
+      map_link
+      distance_miles
+      notes_admin
+      notes_band
+      address
+      postcode
+      latitude
+      longitude
+    }
+  }
+`;
+
+export const QueryGigTypes = gql`
+  query QueryGigTypes {
+    cucb_gig_types {
+      id
+      code
+      title
+    }
+  }
+`;
+
+export const UpdateVenue = gql`
+  mutation UpdateVenue(
+    $id: bigint!
+    $name: String!
+    $subvenue: String
+    $map_link: String
+    $distance_miles: bigint
+    $latitude: float8
+    $longitude: float8
+    $address: String
+    $postcode: String
+    $notes_admin: String
+    $notes_band: String
+  ) {
+    update_cucb_gig_venues_by_pk(
+      pk_columns: { id: $id }
+      _set: {
+        name: $name
+        subvenue: $subvenue
+        map_link: $map_link
+        distance_miles: $distance_miles
+        latitude: $latitude
+        longitude: $longitude
+        address: $address
+        postcode: $postcode
+        notes_admin: $notes_admin
+        notes_band: $notes_band
+      }
+    ) {
+      id
+      name
+      subvenue
+      map_link
+      distance_miles
+      latitude
+      longitude
+      address
+      postcode
+      notes_admin
+      notes_band
+    }
+  }
+`;
+
+export const CreateVenue = gql`
+  mutation CreateVenue(
+    $name: String!
+    $subvenue: String
+    $map_link: String
+    $distance_miles: bigint
+    $latitude: float8
+    $longitude: float8
+    $address: String
+    $postcode: String
+    $notes_admin: String
+    $notes_band: String
+  ) {
+    insert_cucb_gig_venues_one(
+      object: {
+        name: $name
+        subvenue: $subvenue
+        map_link: $map_link
+        distance_miles: $distance_miles
+        latitude: $latitude
+        longitude: $longitude
+        address: $address
+        postcode: $postcode
+        notes_admin: $notes_admin
+        notes_band: $notes_band
+      }
+    ) {
+      id
+      name
+      subvenue
+      map_link
+      distance_miles
+      latitude
+      longitude
+      address
+      postcode
+      notes_admin
+      notes_band
+    }
+  }
+`;
+
+export const UpdateGig = gql`
+  mutation UpdateGig(
+    $id: bigint!
+    $title: String
+    $date: date
+    $time: time
+    $type_id: bigint
+    $admins_only: Boolean
+    $advertise: Boolean
+    $allow_signups: Boolean
+    $arrive_time: timestamptz
+    $finish_time: timestamptz
+    $food_provided: Boolean
+    $summary: String
+    $venue_id: bigint
+    $notes_band: String
+    $notes_admin: String
+    $finance: String
+    $finance_caller_paid: Boolean
+    $finance_payment_received: Boolean
+    $finance_deposit_received: Boolean
+    $quote_date: date
+  ) {
+    update_cucb_gigs_by_pk(
+      _set: {
+        title: $title
+        date: $date
+        time: $time
+        type: $type_id
+        admins_only: $admins_only
+        advertise: $advertise
+        allow_signups: $allow_signups
+        arrive_time: $arrive_time
+        finish_time: $finish_time
+        food_provided: $food_provided
+        summary: $summary
+        venue_id: $venue_id
+        notes_band: $notes_band
+        notes_admin: $notes_admin
+        quote_date: $quote_date
+        finance: $finance
+        finance_deposit_received: $finance_deposit_received
+        finance_payment_received: $finance_payment_received
+        finance_caller_paid: $finance_caller_paid
+      }
+      pk_columns: { id: $id }
+    ) {
+      title
+      date
+      time
+      type_id: type
+      admins_only
+      advertise
+      allow_signups
+      arrive_time
+      finish_time
+      food_provided
+      summary
+      sort_date
+      venue_id
+      notes_band
+      notes_admin
+      finance
+      finance_deposit_received
+      finance_payment_received
+      finance_caller_paid
+      quote_date
+    }
+  }
+`
+
+export const QueryContacts = gql`
+  query QueryContacts {
+    cucb_contacts(order_by: { name: asc, organization: asc }) {
+      id
+      name
+      email
+      organization
+      caller
+    }
+  }
+`;
+
+export const UpsertGigContact = gql`
+  mutation UpsertGigContact($gig_id: bigint, $contact_id: bigint, $calling: Boolean, $client: Boolean) {
+    insert_cucb_gigs_contacts_one(
+      object: { gig_id: $gig_id, contact_id: $contact_id, calling: $calling, client: $client }
+      on_conflict: { constraint: gigs_contacts_pkey, update_columns: [calling, client] }
+    ) {
+      gig_id
+      contact_id
+      calling
+      client
+      contact {
+        name
+        organization
+        email
+        notes
+        caller
+        user_id
+      }
+    }
+  }
+`;
+
+export const RemoveGigContact = gql`
+  mutation RemoveGigContact($gig_id: bigint!, $contact_id: bigint!) {
+    delete_cucb_gigs_contacts_by_pk(contact_id: $contact_id, gig_id: $gig_id) {
+      contact_id
+      gig_id
+    }
+  }
+`;
+
+export const CreateContact = gql`
+  mutation CreateContact($name: String!, $organization: String, $email: String, $caller: Boolean!, $notes: String) {
+    insert_cucb_contacts_one(
+      object: { name: $name, organization: $organization, email: $email, caller: $caller, notes: $notes }
+    ) {
+      id
+      name
+      organization
+      email
+      caller
+      notes
+    }
+  }
+`;
+
+export const UpdateContact = gql`
+  mutation UpdateGigContact(
+    $id: bigint!
+    $name: String!
+    $organization: String
+    $email: String
+    $caller: Boolean!
+    $notes: String
+  ) {
+    update_cucb_contacts_by_pk(
+      _set: { name: $name, organization: $organization, email: $email, caller: $caller, notes: $notes }
+      pk_columns: { id: $id }
+    ) {
+      id
+      name
+      organization
+      email
+      caller
+      notes
     }
   }
 `;

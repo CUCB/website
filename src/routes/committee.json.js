@@ -1,7 +1,7 @@
 import { makeClient } from "../graphql/client";
 import { currentCommittee } from "../graphql/committee";
 import fetch from "node-fetch";
-import moment from "moment";
+import { DateTime } from "luxon";
 
 let cached;
 let retrieved;
@@ -45,7 +45,7 @@ export async function get(req, res, next) {
   const client = await makeClient(fetch, { host });
 
   // Return from cache if recent enough
-  if (!retrieved || moment() - retrieved > 1000 * 3600) {
+  if (!retrieved || DateTime.local().diff(retrieved).hours > 0) {
     try {
       const graphqlRes = await client.query({
         query: currentCommittee,

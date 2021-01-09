@@ -65,7 +65,10 @@ describe("book us page", () => {
   it("allows a user to submit a booking request", { browser: ["chromium", "chrome", "electron"] }, () => {
     cy.get("[data-test='booking-name']")
       .click()
-      .type("Testy Test");
+      .type("Testy Test")
+      .clear()
+      .type("Testy Test")
+      .log("Retyped to prevent svelte loading causing flakiness");
     cy.get("[data-test='booking-email']")
       .click()
       .type("testy@te.st");

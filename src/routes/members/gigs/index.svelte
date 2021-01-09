@@ -1,10 +1,10 @@
 <script context="module">
-  export async function preload(page, session) {
+  export async function preload(_page, session) {
+    Settings.defaultZoneName = "Europe/London";
     let client = makeClient(this.fetch);
     let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
 
     let res_gig, res_signup, res_gig_2;
-    let gig;
     try {
       res_gig = await client.query({
         query: QueryMultiGigDetails(session.hasuraRole),
@@ -22,32 +22,32 @@
             _or: [
               {
                 date: {
-                  _gte: moment()
+                  _gte: DateTime.local()
                     .startOf("month")
-                    .format(),
-                  _lte: moment()
+                    .toISO(),
+                  _lte: DateTime.local()
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: moment()
+                  _gte: DateTime.local()
                     .startOf("month")
-                    .format(),
-                  _lte: moment()
+                    .toISO(),
+                  _lte: DateTime.local()
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 finish_time: {
-                  _gte: moment()
+                  _gte: DateTime.local()
                     .startOf("month")
-                    .format(),
-                  _lte: moment()
+                    .toISO(),
+                  _lte: DateTime.local()
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
             ],
@@ -60,7 +60,6 @@
         variables: { where: { allow_signups: { _eq: true } } },
       });
     } catch (e) {
-      console.log(e);
       await handleErrors.bind(this)(e, session);
       return;
     }
@@ -76,7 +75,7 @@
         signup_dict[gig.id] = gig;
       }
 
-      let currentCalendarMonth = moment().format("YYYY-MM");
+      let currentCalendarMonth = DateTime.local().toFormat("yyyy-LL");
 
       return {
         gigs,
@@ -103,9 +102,11 @@
   import { stores } from "@sapper/app";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
-  import moment from "moment";
+  import { DateTime, Settings } from "luxon";
   import { writable } from "svelte/store";
   export let gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
+  Settings.defaultZoneName = "Europe/London";
+
   $: reloadSignupGigs(gigs);
   function reloadSignupGigs(gigs) {
     let newlyMerged = gigs.map(gig =>
@@ -124,7 +125,7 @@
   let allUpcoming = gigs;
   let { session } = stores();
   let drafts = gigs.filter(gig => gig.type.code === "draft");
-  $: currentCalendarMonthMoment = moment(currentCalendarMonth, "YYYY-MM");
+  $: currentCalendarMonthLuxon = DateTime.fromFormat(currentCalendarMonth, "yyyy-LL");
   let displaying = "allUpcoming";
 
   function isObject(item) {
@@ -163,7 +164,6 @@
   $: currentCalendarMonth && display(displaying);
 
   let gotoDate = newDate => async () => {
-    console.log(newDate);
     if (!(newDate in calendarGigs)) {
       let res_gig_2 = await $client.query({
         query: QueryMultiGigDetails($session.hasuraRole),
@@ -172,32 +172,32 @@
             _or: [
               {
                 date: {
-                  _gte: moment(newDate, "YYYY-MM")
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .startOf("month")
-                    .format(),
-                  _lte: moment(newDate, "YYYY-MM")
+                    .toISO(),
+                  _lte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: moment(newDate, "YYYY-MM")
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .startOf("month")
-                    .format(),
-                  _lte: moment(newDate, "YYYY-MM")
+                    .toISO(),
+                _lte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
               {
                 finish_time: {
-                  _gte: moment(newDate, "YYYY-MM")
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .startOf("month")
-                    .format(),
-                  _lte: moment(newDate, "YYYY-MM")
+                    .toISO(),
+                  _lte: DateTime.fromFormat(newDate, "yyyy-LL")
                     .endOf("month")
-                    .format(),
+                    .toISO(),
                 },
               },
             ],
@@ -214,28 +214,28 @@
     gigs = gigs;
   };
   $: gotoPreviousCalendarMonth = gotoDate(
-    moment(currentCalendarMonth, "YYYY-MM")
-      .subtract(1, "month")
-      .format("YYYY-MM"),
+    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+      .minus({ months: 1 })
+      .toFormat("yyyy-LL"),
   );
   $: gotoNextCalendarMonth = gotoDate(
-    moment(currentCalendarMonth, "YYYY-MM")
-      .add(1, "month")
-      .format("YYYY-MM"),
+    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+      .plus({ months: 1 })
+      .toFormat("yyyy-LL"),
   );
   $: changeCalendarDate = async event => {
     if (event.detail.month !== undefined) {
       await gotoDate(
-        moment(currentCalendarMonth, "YYYY-MM")
-          .month(event.detail.month)
-          .format("YYYY-MM"),
+        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+          .set({ month: event.detail.month })
+          .toFormat("yyyy-LL"),
       )();
     }
     if (event.detail.year !== undefined) {
       await gotoDate(
-        moment(currentCalendarMonth, "YYYY-MM")
-          .year(event.detail.year)
-          .format("YYYY-MM"),
+        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
+          .set({ year: event.detail.year })
+          .toFormat("yyyy-LL"),
       )();
     }
   };
@@ -323,26 +323,23 @@
 
     <p>This is a listing of all our gigs. Some things you may be interested in are:</p>
     <ul>
-      <li>
-        <a href="/members/gigs/help">How to use the gig diary</a>
-      </li>
+      <li><a href="/members/gigs/help">How to use the gig diary</a></li>
       <li>
         Specifically,&nbsp;
         <a href="/members/gigs/help#calendar-feeds">how to set-up a calendar feed</a>
         which automatically updates with the gigs you are on the lineup for
       </li>
-      <li>
-        <a href="/members/gigs/venues">The venues we've played at</a>
-      </li>
-      <li>
-        <a href="/members/gigs/venues">The people associated with the band</a>
-      </li>
+      <li><a href="/members/gigs/venues">The venues we've played at</a></li>
+      <li><a href="/members/gigs/venues">The people associated with the band</a></li>
     </ul>
     {#if drafts.length > 0}
       There are some drafts lying around:
-      {#each drafts as gig, i}
+      {#each drafts as gig}
         <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
-        [created {moment(gig.posting_time).format('HH:MM, DD/MM')} by {(gig.user && gig.user.first) || 'someone?'}],
+        [created
+        {DateTime.fromISO(gig.posting_time).toFormat('HH:mm, dd/LL')}
+        by
+        {(gig.user && gig.user.first) || 'someone?'}],
       {/each}
       so please don't leave them here forever
     {/if}
@@ -350,7 +347,7 @@
   <div class="calendar theme-{$themeName}">
     <Calendar
       gigs="{calendarGigs[currentCalendarMonth]}"
-      displayedMonth="{currentCalendarMonthMoment}"
+      displayedMonth="{currentCalendarMonthLuxon}"
       startDay="{$calendarStartDay}"
       on:clickPrevious="{gotoPreviousCalendarMonth}"
       on:clickNext="{gotoNextCalendarMonth}"
@@ -382,8 +379,8 @@
 
 {#each gigs as gig (gig.id)}
   {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== 'undefined'}
-    <Summary {gig} signupGig="{signupGigs[gig.id]}" {userInstruments} linkHeading="{true}" />
+    <Summary gig="{gig}" signupGig="{signupGigs[gig.id]}" userInstruments="{userInstruments}" linkHeading="{true}" />
   {:else}
-    <Summary {gig} {userInstruments} linkHeading="{true}" />
+    <Summary gig="{gig}" userInstruments="{userInstruments}" linkHeading="{true}" />
   {/if}
 {:else}No gigs to display{/each}
