@@ -55,7 +55,7 @@
 </script>
 
 <script>
-  import Editor from "../../../../components/Lineup/Editor/Editor.svelte";
+  import Editor from "../../../../components/Gigs/Lineup/Editor/Editor.svelte";
   import { setInstrumentApproved } from "../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../graphql/gigs/lineups/users/roles";
   import { setApproved } from "../../../../graphql/gigs/lineups";
@@ -80,16 +80,16 @@
   };
   $: available = Object.fromEntries(
     Object.entries(peopleStore.toObject()).filter(
-      ([k, v]) => v.user_available && !v.user_only_if_necessary && v.approved === null,
+      ([_, v]) => v.user_available && !v.user_only_if_necessary && v.approved === null,
     ),
   );
   $: if_necessary = Object.fromEntries(
-    Object.entries(peopleStore.toObject()).filter(([k, v]) => v.user_only_if_necessary && v.approved === null),
+    Object.entries(peopleStore.toObject()).filter(([_, v]) => v.user_only_if_necessary && v.approved === null),
   );
-  $: approved = Object.fromEntries(Object.entries(peopleStore.toObject()).filter(([k, v]) => v.approved));
-  $: unapproved = Object.fromEntries(Object.entries(peopleStore.toObject()).filter(([k, v]) => v.approved === false));
+  $: approved = Object.fromEntries(Object.entries(peopleStore.toObject()).filter(([_, v]) => v.approved));
+  $: unapproved = Object.fromEntries(Object.entries(peopleStore.toObject()).filter(([_, v]) => v.approved === false));
   $: nope = Object.fromEntries(
-    Object.entries(peopleStore.toObject()).filter(([k, v]) => v.approved === null && v.user_available === false),
+    Object.entries(peopleStore.toObject()).filter(([_, v]) => v.approved === null && v.user_available === false),
   );
 </script>
 

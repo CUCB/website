@@ -1,7 +1,8 @@
 <script>
   import { afterUpdate } from "svelte";
   import flash from "./flash.js";
-  import TooltipText from "../../TooltipText.svelte";
+  import TooltipText from "../../../TooltipText.svelte";
+  import InstrumentName from "../../InstrumentName.svelte";
 
   export let person;
   export let updateEntry;
@@ -93,7 +94,7 @@
           aria-selected="{instrument.approved === false ? 'true' : undefined}"
           on:click="{() => updateEntry.instruments.setApproved(id, false)}"
         >No</button>
-        {instrument.user_instrument.instrument.name}
+        <InstrumentName userInstrument="{instrument.user_instrument}" />
       </div>
     {/each}
   </div>

@@ -1,6 +1,6 @@
 <script>
   import Entry from "./Entry.svelte";
-  import { cache } from "../../../state";
+  import { cache } from "../../../../state";
 
   export let people;
   export let updaters;
