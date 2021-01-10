@@ -53,12 +53,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
-      - name: Cache multiple paths
-        uses: actions/cache@v2
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-${{ hashFiles('package*.json') }}
-
       - name: Login to registry
         run: docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
 
@@ -66,12 +60,12 @@ jobs:
         run: |
           echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
           docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
-          docker build -t $CI_REGISTRY/cucb/website:latest -f deploy/Dockerfile .
+          docker build -t $CI_REGISTRY/cucb/website:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
 
       - name: Push image to registry
-        run: docker push $CI_REGISTRY/cucb/website:latest
+        run: docker push $CI_REGISTRY/cucb/website:slim
 
   pulumi:
     name: Create/update infrastructure
