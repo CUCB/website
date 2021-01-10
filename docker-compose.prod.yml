@@ -39,7 +39,7 @@ services:
     volumes:
       - ${BLOCK_STORAGE}/mail/mail.private:/etc/opendkim/domainkeys/mail.private
   sapper:
-    image: $DEPLOY_REGISTRY/cucb/website:latest
+    image: $DEPLOY_REGISTRY/cucb/website:slim
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
@@ -53,9 +53,10 @@ services:
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
       HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
+    volumes:
+      - ./static:/usr/src/app/static
     restart: always
-    command: >
-      bash -c "npm run start"
+    command: "node __sapper__/build"
     logging:
       driver: "json-file"
       options:
