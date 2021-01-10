@@ -1,5 +1,10 @@
 import { AllGigTypes, UpdateGigType } from "../../database/gigs";
-import { AllInstrumentNames, OnConflictLineupInstruments, OnConflictUserInstruments } from "../../database/instruments";
+import {
+  AllInstrumentNames,
+  OnConflictLineupInstruments,
+  OnConflictUserInstruments,
+  DeleteUserInstruments,
+} from "../../database/instruments";
 import { CreateGig, ClearLineupForGig } from "../../database/gigs";
 import {
   CreateUser,
@@ -52,6 +57,7 @@ describe("lineup editor", () => {
 
   let signupsToInsert;
   beforeEach(() => {
+    let melodeonId, clarinetId;
     cy.executeMutation(CreateGig, {
       variables: {
         id: 15274,
@@ -79,6 +85,8 @@ describe("lineup editor", () => {
             for (let instrument of instrumentList) {
               instrumentIds = instrumentIds.set(instrument.name, instrument.id);
             }
+            melodeonId = instrumentIds.get("Melodeon");
+            clarinetId = instrumentIds.get("Clarinet");
             for (let person of signups) {
               person.user.id = userIdBase * ++userCount;
               if (
@@ -110,18 +118,20 @@ describe("lineup editor", () => {
                 pref_id: attributeIds.get(name),
                 value: true,
               }));
-              let signupInstruments = person.user_instruments.map(({ id, instr_id, nickname }) => ({
-                approved: null,
-                user_instrument: {
-                  data: {
-                    id,
-                    instr_id,
-                    user_id: person.user.id,
-                    nickname,
+              let signupInstruments =
+                person.user_instruments &&
+                person.user_instruments.map(({ id, instr_id, nickname }) => ({
+                  approved: null,
+                  user_instrument: {
+                    data: {
+                      id,
+                      instr_id,
+                      user_id: person.user.id,
+                      nickname,
+                    },
+                    on_conflict: OnConflictUserInstruments,
                   },
-                  on_conflict: OnConflictUserInstruments,
-                },
-              }));
+                }));
               let nonSignupInstruments =
                 (person.user.user_instruments && {
                   user_instruments: {
@@ -161,6 +171,31 @@ describe("lineup editor", () => {
               variables: { ids: signupsToInsert.map((signup) => signup.user.data.id) },
             });
             cy.executeMutation(CreateLineup, { variables: { entries: signupsToInsert } });
+            cy.executeMutation(DeleteUserInstruments, { variables: { userId: 27382 } });
+            cy.executeMutation(CreateUser, {
+              variables: {
+                id: 27382,
+                username: "cypress_president",
+                saltedPassword: HASHED_PASSWORDS.abc123,
+                admin: 2,
+                email: "cucb.president@cypress.io",
+                firstName: "Cypress",
+                lastName: "President",
+                userInstruments: {
+                  data: [
+                    {
+                      id: 53257432,
+                      instr_id: melodeonId,
+                    },
+                    {
+                      id: 53257433,
+                      instr_id: clarinetId,
+                    },
+                  ],
+                  on_conflict: OnConflictUserInstruments,
+                },
+              },
+            });
           });
       });
     cy.executeMutation(CreateUser, {
@@ -172,17 +207,6 @@ describe("lineup editor", () => {
         email: "cypress.user@cypress.io",
         firstName: "Cypress",
         lastName: "User",
-      },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27382,
-        username: "cypress_president",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 2,
-        email: "cucb.president@cypress.io",
-        firstName: "Cypress",
-        lastName: "President",
       },
     });
   });
@@ -456,7 +480,7 @@ describe("lineup editor", () => {
         );
       });
 
-      it.only("can add instruments not selected by the user", () => {
+      it("can add instruments not selected by the user", () => {
         for (let person of signups) {
           cy.get(`[data-test=member-${person.user.id}]`).within(() => {
             cy.get(`[data-test=add-instruments]`).pipe(click).should("not.exist");
@@ -490,7 +514,35 @@ describe("lineup editor", () => {
       });
 
       it("can add people who didn't sign up", () => {
-        expect(true).to.be.false;
+        cy.get(`[data-test=add-lineup-person] [data-test=people-search]`).click().type("Cypress").clear().type("Cypress President");
+        cy.get(`[data-test=people-search-results]`).contains("Cypress President").click();
+        cy.get(`[data-test=add-lineup-person] [data-test=select-box] :selected`).should("contain", "Cypress President");
+        cy.get(`[data-test=confirm-add-lineup-person]`).click();
+        cy.get(`[data-test=signup-yes] [data-test=member-27382]`)
+          .should("be.visible")
+          .within(() => {
+            cy.contains("Cypress President").should("be.visible");
+            cy.get(`[data-test^=instrument]`).should("not.exist");
+            cy.get(`[data-test=add-instruments]`).pipe(click).should("not.exist");
+            cy.get(`[data-test=instruments-to-add]`).contains("Melodeon").click();
+            cy.get(`[data-test=instrument-53257432] [data-test=instrument-yes]`).should("be.visible").click();
+            cy.get(`[data-test=person-approve]`).click();
+          });
+        cy.get(`[data-test=lineup-editor-approved] [data-test=member-27382]`)
+          .should("be.visible")
+          .within(() => {
+            cy.get(`[data-test=add-instruments]`).pipe(click).should("not.exist");
+            cy.get(`[data-test=instruments-to-add]`).contains("Melodeon").should("not.exist");
+            cy.get(`[data-test=instruments-to-add]`).contains("Clarinet").click();
+            cy.get(`[data-test=instrument-53257433] [data-test=instrument-yes]`).should("be.visible").click();
+          });
+        cy.reload();
+        cy.get(`[data-test=lineup-editor-approved] [data-test=member-27382]`)
+          .should("be.visible")
+          .within(() => {
+            cy.get(`[data-test=instrument-53257432] [data-test=instrument-yes]`).should("have.attr", "aria-selected", "true");
+            cy.get(`[data-test=instrument-53257433] [data-test=instrument-yes]`).should("have.attr", "aria-selected", "true");
+          });
       });
     });
   });

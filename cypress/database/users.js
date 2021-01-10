@@ -1,5 +1,5 @@
 export const CreateUser = `
-  mutation CreateUser($id: bigint, $username: String!, $email: String!, $saltedPassword: String!, $firstName: String!, $lastName: String!, $admin: Int!) {
+  mutation CreateUser($id: bigint, $username: String!, $email: String!, $saltedPassword: String!, $firstName: String!, $lastName: String!, $admin: Int!, $userInstruments: cucb_users_instruments_arr_rel_insert_input) {
     insert_cucb_users(
       objects: [{
         id: $id,
@@ -8,7 +8,8 @@ export const CreateUser = `
         email: $email,
         salted_password: $saltedPassword,
         first: $firstName,
-        last: $lastName
+        last: $lastName,
+        user_instruments: $userInstruments
       }],
       on_conflict: {
         constraint: cucb_users_id_key,

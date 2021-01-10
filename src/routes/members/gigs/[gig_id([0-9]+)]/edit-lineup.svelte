@@ -1,6 +1,6 @@
 <script context="module">
   import { extractAttributes } from "../../../../graphql/gigs/lineups/users/attributes";
-  import { QueryGigLineup } from "../../../../graphql/gigs/lineups";
+  import { QueryGigLineup, AllUserNames } from "../../../../graphql/gigs/lineups";
   import { QueryGigType } from "../../../../graphql/gigs";
   import { handleErrors, makeClient } from "../../../../graphql/client";
   import { notLoggedIn } from "../../../../client-auth.js";
@@ -12,8 +12,8 @@
 
     let client = makeClient(this.fetch);
 
-    let res;
-    let people;
+    let res, res_allPeople;
+    let people, allPeople;
     try {
       let gigType = await client.query({
         query: QueryGigType,
@@ -24,6 +24,9 @@
           query: QueryGigLineup,
           variables: { gig_id },
         });
+        res_allPeople = await client.query({
+          query: AllUserNames,
+        });
       }
     } catch (e) {
       await handleErrors.bind(this)(e, session);
@@ -32,6 +35,7 @@
 
     if (res && res.data && res.data.cucb_gigs_by_pk) {
       people = res.data.cucb_gigs_by_pk.lineup;
+      allPeople = res_allPeople.data.cucb_users;
     } else {
       this.error(404, "Gig not found");
       return;
@@ -50,27 +54,40 @@
       personLookup[person.user.id] = person;
     }
 
-    return { people: personLookup, gigId: gig_id };
+    return { people: personLookup, gigId: gig_id, allPeople };
   }
 </script>
 
 <script>
+  import Select from "../../../../components/Forms/Select.svelte";
   import Editor from "../../../../components/Gigs/Lineup/Editor/Editor.svelte";
   import { setInstrumentApproved, addInstrument } from "../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../graphql/gigs/lineups/users/roles";
-  import { setApproved, setAdminNotes } from "../../../../graphql/gigs/lineups";
+  import { setApproved, setAdminNotes, addUser as addUserUpdater } from "../../../../graphql/gigs/lineups";
   import { client } from "../../../../graphql/client";
   import { Map } from "immutable";
-  export let people;
-  export let gigId;
+  import Fuse from "fuse.js";
+  import SearchBox from "../../../../components/SearchBox.svelte";
+  export let people, gigId, allPeople, searchText;
   let peopleStore = new Map(people);
   let errors = [];
+  let selectedUser = undefined;
 
   const wrap = (fn) => (userId) => async (...args) => {
     let res = await fn({ client: $client, people: peopleStore, errors, gigId, userId }, ...args);
 
     peopleStore = res.people;
     errors = res.errors;
+  };
+
+  const addUser = async () => {
+    await wrap(addUserUpdater)(null)(selectedUser);
+    selectedUser = undefined;
+  };
+
+  const selectUser = async (e) => {
+    selectedUser = e.detail.id;
+    searchText = "";
   };
 
   let updaters = {
@@ -82,7 +99,7 @@
   };
   $: available = Object.fromEntries(
     Object.entries(peopleStore.toObject()).filter(
-      ([_, v]) => v.user_available && !v.user_only_if_necessary && v.approved === null,
+      ([_, v]) => ((v.user_available && !v.user_only_if_necessary) || v.user_available === null) && v.approved === null,
     ),
   );
   $: if_necessary = Object.fromEntries(
@@ -93,6 +110,14 @@
   $: nope = Object.fromEntries(
     Object.entries(peopleStore.toObject()).filter(([_, v]) => v.approved === null && v.user_available === false),
   );
+  $: selectedUserIds = new Set([...peopleStore.keys()].map((i) => parseInt(i)));
+  $: unselectedUsers = allPeople
+    .filter((user) => !selectedUserIds.has(user.id))
+    .map((person) => ({ ...person, fullName: `${person.first} ${person.last}` }));
+  $: userFuse = new Fuse(unselectedUsers, {
+    threshold: 0.35,
+    keys: ["fullName", "last"],
+  });
 </script>
 
 Gig id:
@@ -105,6 +130,23 @@ Gig id:
 {/if}
 {#if Object.entries(available).length + Object.entries(if_necessary).length}
   <h2>Applicants/maybes</h2>
+  <div data-test="add-lineup-person">
+    <Select bind:value="{selectedUser}">
+      <option value="{undefined}" disabled>---PICK ONE---</option>
+      {#each unselectedUsers as userToAdd}
+        <option value="{userToAdd.id}">{userToAdd.first}&#32;{userToAdd.last}</option>
+      {/each}
+    </Select>
+    <SearchBox
+      toId="{(user) => user.id}"
+      toDisplayName="{(user) => `${user.first} ${user.last}`}"
+      fuse="{userFuse}"
+      data-test="people"
+      on:select="{selectUser}"
+      bind:value="{searchText}"
+    />
+    <button on:click="{addUser}" data-test="confirm-add-lineup-person">Add user</button>
+  </div>
   <div data-test="lineup-editor-applicants">
     {#if Object.entries(available).length}
       <div data-test="signup-yes">

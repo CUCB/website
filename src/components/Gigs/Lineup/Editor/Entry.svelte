@@ -1,6 +1,4 @@
 <script>
-  import { afterUpdate } from "svelte";
-  import flash from "./flash.js";
   import TooltipText from "../../../TooltipText.svelte";
   import InstrumentName from "../../InstrumentName.svelte";
 
@@ -35,53 +33,8 @@
   };
 
   $: selectedInstrumentIds = new Set(Object.keys(person.user_instruments).map(str => parseInt(str)));
-  $: console.log(Object.keys(person.user_instruments));
   $: unselectedInstruments = person.user.user_instruments.filter((i) => !selectedInstrumentIds.has(i.id));
-  $: console.log(unselectedInstruments);
-
-//   afterUpdate(() => flash(content));
 </script>
-
-<style lang="scss">
-  [aria-selected]::before {
-    content: "✓";
-  }
-  [aria-checked] {
-    opacity: 1;
-    transition: opacity linear 0.1s;
-  }
-  [aria-checked="false"] {
-    text-decoration: line-through;
-    opacity: 0.5;
-    &:hover {
-      opacity: 1;
-    }
-  }
-
-  .name {
-    display: flex;
-  }
-  .icons {
-    display: inline-block;
-    font-size: 1em;
-  }
-
-  .notes *::before {
-    font-weight: bold;
-  }
-  .user-gig-notes::before {
-    content: "User notes (this gig): ";
-  }
-  .user-global-notes::before {
-    content: "User notes (all gigs): ";
-  }
-  .admin-notes::before {
-    content: "Admin notes (click to edit): ";
-  }
-  .admin-notes:not(.saved):focus:before {
-    content: "Admin notes (click elsewhere to save): ";
-  }
-</style>
 
 <svelte:options immutable />
 <div bind:this="{content}" data-test="member-{person.user.id}">
@@ -189,3 +142,44 @@
     ></div>
   </div>
 </div>
+
+<style lang="scss">
+  [aria-selected]::before {
+    content: "✓";
+  }
+  [aria-checked] {
+    opacity: 1;
+    transition: opacity linear 0.1s;
+  }
+  [aria-checked="false"] {
+    text-decoration: line-through;
+    opacity: 0.5;
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  .name {
+    display: flex;
+  }
+  .icons {
+    display: inline-block;
+    font-size: 1em;
+  }
+
+  .notes *::before {
+    font-weight: bold;
+  }
+  .user-gig-notes::before {
+    content: "User notes (this gig): ";
+  }
+  .user-global-notes::before {
+    content: "User notes (all gigs): ";
+  }
+  .admin-notes::before {
+    content: "Admin notes (click to edit): ";
+  }
+  .admin-notes:not(.saved):focus:before {
+    content: "Admin notes (click elsewhere to save): ";
+  }
+</style>

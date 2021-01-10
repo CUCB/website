@@ -87,7 +87,6 @@ export const addInstrument = async ({ client, people, errors, gigId, userId }, u
 
   if (graphql_res.data.insert_cucb_gigs_lineups_instruments_one) {
     let instrument = graphql_res.data.insert_cucb_gigs_lineups_instruments_one;
-    console.log(people.getIn([userId, "user_instruments"]));
     return {
       people: people.updateIn([userId, "user_instruments"], (instruments) => ({
         ...instruments,
