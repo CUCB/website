@@ -11,6 +11,8 @@
     },
     setRole: updaters.setRole(userId),
     setApproved: updaters.setApproved(userId),
+    setAdminNotes: updaters.setAdminNotes(userId),
+    addInstrument: updaters.addInstrument(userId),
   }));
 </script>
 

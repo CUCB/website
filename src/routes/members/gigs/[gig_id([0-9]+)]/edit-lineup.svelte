@@ -56,9 +56,9 @@
 
 <script>
   import Editor from "../../../../components/Gigs/Lineup/Editor/Editor.svelte";
-  import { setInstrumentApproved } from "../../../../graphql/gigs/lineups/users/instruments";
+  import { setInstrumentApproved, addInstrument } from "../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../graphql/gigs/lineups/users/roles";
-  import { setApproved } from "../../../../graphql/gigs/lineups";
+  import { setApproved, setAdminNotes } from "../../../../graphql/gigs/lineups";
   import { client } from "../../../../graphql/client";
   import { Map } from "immutable";
   export let people;
@@ -77,6 +77,8 @@
     setInstrumentApproved: wrap(setInstrumentApproved),
     setRole: wrap(setRole),
     setApproved: wrap(setApproved),
+    setAdminNotes: wrap(setAdminNotes),
+    addInstrument: wrap(addInstrument),
   };
   $: available = Object.fromEntries(
     Object.entries(peopleStore.toObject()).filter(

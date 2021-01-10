@@ -1,5 +1,5 @@
 import { AttributePreferences } from "../../graphql/gigs/lineups/users/attributes";
-import { LineupInstruments } from "../../graphql/gigs/lineups/users/instruments";
+import { LineupInstruments, LineupUserInstrument } from "../../graphql/gigs/lineups/users/instruments";
 import { LineupRoles } from "../../graphql/gigs/lineups/users/roles";
 import gql from "graphql-tag";
 
@@ -19,14 +19,21 @@ export const FragmentGigLineup = gql`
         first
         last
         id
+        gig_notes
         ...AttributePreferences
+        user_instruments {
+          ...LineupUserInstrument
+        }
       }
       ...LineupInstruments
       ...LineupAvailability
+      user_notes
+      admin_notes
     }
   }
   ${AttributePreferences}
   ${LineupInstruments}
+  ${LineupUserInstrument}
   ${LineupRoles}
   ${LineupAvailability}
 `;
@@ -69,3 +76,33 @@ export const setApproved = async (
     return { people, errors: errors.push(graphql_res.message) };
   }
 };
+
+const UpdateLineupUserAdminNotes = gql`
+    mutation UpdateLineupUserApproved($userId: bigint!, $gigId: bigint!, $adminNotes: String) {
+        update_cucb_gigs_lineups_by_pk(pk_columns: { user_id: $userId, gig_id: $gigId }, _set: { admin_notes: $adminNotes }) {
+            admin_notes
+        }
+    }
+`;
+
+export const setAdminNotes = async (
+  { client, gigId, userId, errors, people },
+  adminNotes,
+) => {
+  const graphql_res = await client.mutate({
+    mutation: UpdateLineupUserAdminNotes,
+    variables: { adminNotes, userId, gigId },
+  });
+
+  if (graphql_res.data.update_cucb_gigs_lineups_by_pk) {
+    return {
+      people: people.setIn(
+        [userId, "admin_notes"],
+        graphql_res.data.update_cucb_gigs_lineups_by_pk.admin_notes,
+      ),
+      errors,
+    };
+  } else {
+    return { people, errors: errors.push(graphql_res.message) };
+  }
+}

@@ -2280,8 +2280,6 @@
   - role: president
     permission:
       check: {}
-      set:
-        user_id: x-hasura-User-Id
       columns:
       - approved
       - gig_id
@@ -2290,26 +2288,14 @@
   - role: secretary
     permission:
       check: {}
-      set:
-        user_id: x-hasura-User-Id
       columns:
       - approved
       - gig_id
       - user_id
       - user_instrument_id
-  - role: user
-    permission:
-      check: {}
-      set:
-        user_id: x-hasura-User-Id
-      columns:
-      - gig_id
-      - user_instrument_id
   - role: webmaster
     permission:
       check: {}
-      set:
-        user_id: x-hasura-User-Id
       columns:
       - approved
       - gig_id
