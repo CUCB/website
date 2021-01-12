@@ -74,6 +74,20 @@ export const DeleteSignup = `
   }
 `;
 
+export const DeleteGig = `
+  mutation DeleteGig($id: bigint!) {
+    delete_cucb_gigs_lineups_instruments(where: { gig_id: { _eq: $id } }) {
+        affected_rows
+    }
+    delete_cucb_gigs_lineups(where: { gig_id: { _eq: $id } }) {
+        affected_rows
+    }
+    delete_cucb_gigs_by_pk(id: $id) {
+        id
+    }
+  }
+`;
+
 export const SignupDetails = `
   query SignupDetails($gigId: bigint!, $userId: bigint!) {
     cucb_gigs_lineups_by_pk(gig_id: $gigId, user_id: $userId) {

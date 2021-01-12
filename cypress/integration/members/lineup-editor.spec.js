@@ -1,4 +1,4 @@
-import { AllGigTypes, UpdateGigType } from "../../database/gigs";
+import { AllGigTypes, UpdateGigType, DeleteGig } from "../../database/gigs";
 import {
   AllInstrumentNames,
   OnConflictLineupInstruments,
@@ -67,6 +67,7 @@ describe("lineup editor", () => {
         allowSignups: false,
       },
     });
+    cy.executeMutation(DeleteGig, { variables: { id: 15275 } });
     cy.executeMutation(ClearLineupForGig, { variables: { id: 15274 } });
     cy.executeQuery(AllAttributes)
       .its("cucb_user_pref_types")
@@ -258,7 +259,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`)
                 .should("be.visible")
                 .click()
-                .hasTooltip(`${person.user.first} can lead`);
+                .hasMouseTooltip(`${person.user.first} can lead`);
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`).should(
                 "not.exist",
@@ -268,7 +269,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`)
                 .should("be.visible")
                 .click()
-                .hasTooltip(`${person.user.first} can tech`);
+                .hasMouseTooltip(`${person.user.first} can tech`);
             } else {
               cy.get(
                 `[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`,
@@ -288,7 +289,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`)
                 .should("be.visible")
                 .click()
-                .hasTooltip(`${person.user.first} has a car`);
+                .hasMouseTooltip(`${person.user.first} has a car`);
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`).should(
                 "not.exist",
