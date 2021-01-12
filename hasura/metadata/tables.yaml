@@ -2405,7 +2405,7 @@
       - user_instrument_id
       filter: {}
   update_permissions:
-  - role: secretary
+  - role: president
     permission:
       columns:
       - approved

@@ -243,7 +243,6 @@ describe("lineup editor", () => {
 
     context("viewing valid gig", () => {
       beforeEach(() => {
-        cy.login("cypress", "abc123");
         cy.visit("/members/gigs/15274/edit-lineup");
       });
 
