@@ -8,7 +8,7 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
   cypress:
-    image: mhart/alpine-node:12
+    image: node:12
     volumes:
       - .:/usr/src/app
     ports:
