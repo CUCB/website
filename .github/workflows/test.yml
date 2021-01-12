@@ -19,7 +19,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v1
-
       # because of "record" and "parallel" parameters
       # these containers will load balance all found tests among themselves
       - name: Cypress run
@@ -31,6 +30,9 @@ jobs:
           start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
           wait-on: 'http://localhost:4000'
           wait-on-timeout: 240
+          # the entire command will automatically be prefixed with "npm"
+          # and we need the second "npm" to execute "cypress run ..." command line
+          command-prefix: 'percy exec -- npx'
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
@@ -39,29 +41,14 @@ jobs:
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-
-
-
-    # name: Build and test
-    # runs-on: ubuntu-latest
-    # steps:
-    #   - name: Checkout Repo
-    #     uses: actions/checkout@v2
-
-    #   - name: Start server and run tests
-    #     run: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
-    #     env:
-    #       CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
-    #       PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
-
-    #   - name: Upload artifacts
-    #     uses: actions/upload-artifact@v2
-    #     if: always()
-    #     with:
-    #       name: cypress-output
-    #       path: |
-    #         cypress/videos/**/*.mp4
-    #         cypress/screenshots/**/*.png
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        if: always()
+        with:
+          name: cypress-output
+          path: |
+            cypress/videos/**/*.mp4
+            cypress/screenshots/**/*.png
 
   pulumi-preview:
     if: ${{ github.ref!='refs/heads/master' }}
