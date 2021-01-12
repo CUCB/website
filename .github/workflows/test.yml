@@ -29,13 +29,17 @@ jobs:
           parallel: true
           group: 'Actions example'
           start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
+          wait-on: 'http://localhost:4000'
+          wait-on-timeout: 240
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_KEY }}
           # Recommended: pass the GitHub token lets this action correctly
           # determine the unique run id necessary to re-run the checks
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
+
 
 
     # name: Build and test
