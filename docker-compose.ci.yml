@@ -8,9 +8,12 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
   cypress:
-    image: cypress/browsers:node12.18.3-chrome83-ff77
+    image: mhart/alpine-node:12
     volumes:
       - .:/usr/src/app
+    ports:
+      - "4000:4000"
+      - "10000:10000"
     environment:
       PERCY_TOKEN: ${PERCY_TOKEN}
       CYPRESS_KEY: ${CYPRESS_KEY}
