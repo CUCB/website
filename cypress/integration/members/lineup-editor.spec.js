@@ -60,14 +60,14 @@ describe("lineup editor", () => {
     let melodeonId, clarinetId;
     cy.executeMutation(CreateGig, {
       variables: {
-        id: 15274,
+        id: 15275,
         title: "Cypress Demo Gig",
         type: 1,
         adminsOnly: false,
         allowSignups: false,
       },
     });
-    cy.executeMutation(ClearLineupForGig, { variables: { id: 15274 } });
+    cy.executeMutation(ClearLineupForGig, { variables: { id: 15275 } });
     cy.executeQuery(AllAttributes)
       .its("cucb_user_pref_types")
       .then((attributeList) => {
@@ -146,7 +146,7 @@ describe("lineup editor", () => {
                 {};
               signupsToInsert.push({
                 ...person,
-                gig_id: 15274,
+                gig_id: 15275,
                 user: {
                   data: {
                     email: `user${person.user.id}@lineup-edit.or`,
@@ -229,9 +229,9 @@ describe("lineup editor", () => {
         .then((gigTypes) => {
           for (let type of gigTypes.filter((type) => type.code !== "gig")) {
             cy.log(`Testing ${type.title}`);
-            cy.executeMutation(UpdateGigType, { variables: { gigId: 15274, typeId: type.id } }, { log: false });
+            cy.executeMutation(UpdateGigType, { variables: { gigId: 15275, typeId: type.id } }, { log: false });
             cy.request({
-              url: "/members/gigs/15274/edit-lineup",
+              url: "/members/gigs/15275/edit-lineup",
               failOnStatusCode: false,
             })
               .its("status")
@@ -243,7 +243,7 @@ describe("lineup editor", () => {
     context("viewing valid gig", () => {
       beforeEach(() => {
         cy.login("cypress", "abc123");
-        cy.visit("/members/gigs/15274/edit-lineup");
+        cy.visit("/members/gigs/15275/edit-lineup");
       });
 
       it("lists the people and instruments who have signed up to the gig", () => {
@@ -550,7 +550,7 @@ describe("lineup editor", () => {
   context("not logged in", () => {
     it("isn't accessible", () => {
       cy.request({
-        url: "/members/gigs/15274/edit-lineup",
+        url: "/members/gigs/15275/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
@@ -574,7 +574,7 @@ describe("lineup editor", () => {
 
     it("isn't accessible", () => {
       cy.request({
-        url: "/members/gigs/15274/edit-lineup",
+        url: "/members/gigs/15275/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
