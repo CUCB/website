@@ -11,7 +11,6 @@ const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypr
 
 let colors = {};
 
-
 let onConflictUser = {
   constraint: "cucb_users_id_key",
   update_columns: ["first", "last", "email"],
@@ -26,7 +25,6 @@ let onConflictLineupUserInstrument = {
   constraint: "gigs_lineups_instruments_pkey",
   update_columns: ["approved"],
 };
-
 
 let gigForSummary = {
   id: 74527,
@@ -143,6 +141,17 @@ let gigForSummary = {
 describe("gig summary", () => {
   let gig = gigForSummary;
   before(() => {
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 27250,
+        username: "cypress_user",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 9,
+        email: "cypress.user@cypress.io",
+        firstName: "Cypress",
+        lastName: "User",
+      },
+    });
     cy.executeMutation(CreateUser, {
       variables: {
         id: 32747,
