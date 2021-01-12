@@ -7,6 +7,7 @@ import {
   RemoveInstruments,
   InstrumentsOnGig,
   SetResetGig,
+  ClearLineupForGig,
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
@@ -359,6 +360,7 @@ describe("gig summary", () => {
         lastName: "Webmaster",
       },
     });
+    cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
     cy.executeMutation(CreateGig, { variables: gig });
   });
 

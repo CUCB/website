@@ -82,7 +82,7 @@ const FragmentGigFinancials = gql`
   }
 `;
 
-export const QueryGigDetails = role => {
+export const QueryGigDetails = (role) => {
   if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
     return gql`
       query QueryGigDetails($gig_id: bigint!) {
@@ -163,7 +163,7 @@ export const QueryEditGigDetails = gql`
   ${FragmentGigFinancials}
 `;
 
-export const QueryMultiGigDetails = role => {
+export const QueryMultiGigDetails = (role) => {
   if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
     return gql`
       query QueryGigDetails($where: cucb_gigs_bool_exp, $limit: Int, $offset: Int, $order_by: [cucb_gigs_order_by!]) {
@@ -563,7 +563,7 @@ export const UpdateGig = gql`
       quote_date
     }
   }
-`
+`;
 
 export const QueryContacts = gql`
   query QueryContacts {
@@ -653,6 +653,7 @@ export const QueryGigType = gql`
         id
         code
       }
+      title
     }
   }
-`
+`;

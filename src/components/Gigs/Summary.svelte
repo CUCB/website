@@ -244,7 +244,10 @@
     {#if displayLinks && ['webmaster', 'president', 'secretary', 'treasurer'].indexOf($session.hasuraRole) > -1}
       <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
     {/if}
-    {#if gig.type.code !== 'calendar'}
+    {#if displayLinks && ['webmaster', 'president'].indexOf($session.hasuraRole) > -1}
+      <a href="/members/gigs/{gig.id}/edit-lineup" class="main-detail">Edit lineup</a>
+    {/if}
+    {#if gig.type.code !== 'calendar' && gig.date}
       <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
     {/if}
     <gig-timings>

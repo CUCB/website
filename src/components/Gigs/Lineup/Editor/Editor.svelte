@@ -5,7 +5,7 @@
   export let people;
   export let updaters;
 
-  const updateEntry = cache(userId => ({
+  const updateEntry = cache((userId) => ({
     instruments: {
       setApproved: updaters.setInstrumentApproved(userId),
     },
@@ -16,7 +16,15 @@
   }));
 </script>
 
+<style>
+    .lineup-editor {
+        border: 1px solid;
+    }
+</style>
+
 <svelte:options immutable />
-{#each Object.entries(people) as [id, person] (id)}
-  <Entry {person} updateEntry="{updateEntry(id)}" />
-{/each}
+<div class="lineup-editor">
+  {#each Object.entries(people) as [id, person] (id)}
+    <Entry person="{person}" updateEntry="{updateEntry(id)}" />
+  {/each}
+</div>

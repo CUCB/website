@@ -13,7 +13,7 @@
     let client = makeClient(this.fetch);
 
     let res, res_allPeople;
-    let people, allPeople;
+    let people, allPeople, title;
     try {
       let gigType = await client.query({
         query: QueryGigType,
@@ -27,6 +27,7 @@
         res_allPeople = await client.query({
           query: AllUserNames,
         });
+        title = gigType.data.cucb_gigs_by_pk.title;
       }
     } catch (e) {
       await handleErrors.bind(this)(e, session);
@@ -54,7 +55,7 @@
       personLookup[person.user.id] = person;
     }
 
-    return { people: personLookup, gigId: gig_id, allPeople };
+    return { people: personLookup, gigId: gig_id, allPeople, title };
   }
 </script>
 
@@ -68,7 +69,8 @@
   import { Map } from "immutable";
   import Fuse from "fuse.js";
   import SearchBox from "../../../../components/SearchBox.svelte";
-  export let people, gigId, allPeople, searchText;
+  import { makeTitle } from "../../../../view";
+  export let people, gigId, allPeople, searchText, title;
   let peopleStore = new Map(people);
   let errors = [];
   let selectedUser = undefined;
@@ -120,47 +122,71 @@
   });
 </script>
 
-Gig id:
-{gigId}
+<style>
+  .add-person {
+    display: flex;
+    align-items: center;
+  }
+
+  .people-search {
+    max-width: 100%;
+    width: 400px;
+  }
+  h2 {
+    margin-top: 0.5em;
+  }
+  #add-person-form {
+    margin: 1em 0;
+  }
+</style>
+
+<svelte:head>
+  <title>{makeTitle(`${title} | Lineup Editor`)}</title>
+</svelte:head>
+
+<h1>{title}</h1>
 {#if Object.entries(approved).length}
   <h2>Approved lineup</h2>
   <div data-test="lineup-editor-approved">
     <Editor people="{approved}" updaters="{updaters}" />
   </div>
 {/if}
-{#if Object.entries(available).length + Object.entries(if_necessary).length}
-  <h2>Applicants/maybes</h2>
-  <div data-test="add-lineup-person">
-    <Select bind:value="{selectedUser}">
-      <option value="{undefined}" disabled>---PICK ONE---</option>
-      {#each unselectedUsers as userToAdd}
-        <option value="{userToAdd.id}">{userToAdd.first}&#32;{userToAdd.last}</option>
-      {/each}
-    </Select>
-    <SearchBox
-      toId="{(user) => user.id}"
-      toDisplayName="{(user) => `${user.first} ${user.last}`}"
-      fuse="{userFuse}"
-      data-test="people"
-      on:select="{selectUser}"
-      bind:value="{searchText}"
-    />
-    <button on:click="{addUser}" data-test="confirm-add-lineup-person">Add user</button>
+<h2>Applicants/maybes</h2>
+<div data-test="lineup-editor-applicants">
+  {#if Object.entries(available).length}
+    <div data-test="signup-yes">
+      <Editor people="{available}" updaters="{updaters}" />
+    </div>
+  {/if}
+  <div id="add-person-form" data-test="add-lineup-person">
+    <div class="add-person">
+      <Select bind:value="{selectedUser}">
+        <option value="{undefined}" disabled>---PICK ONE---</option>
+        {#each unselectedUsers as userToAdd}
+          <option value="{userToAdd.id}">{userToAdd.first}&#32;{userToAdd.last}</option>
+        {/each}
+      </Select>
+      <button on:click="{addUser}" data-test="confirm-add-lineup-person">Add user</button>
+    </div>
+    <div class="people-search">
+      <SearchBox
+        toId="{(user) => user.id}"
+        toDisplayName="{(user) => `${user.first} ${user.last}`}"
+        fuse="{userFuse}"
+        data-test="people"
+        placeholder="Type to search..."
+        on:select="{selectUser}"
+        bind:value="{searchText}"
+      />
+    </div>
   </div>
-  <div data-test="lineup-editor-applicants">
-    {#if Object.entries(available).length}
-      <div data-test="signup-yes">
-        <Editor people="{available}" updaters="{updaters}" />
-      </div>
-    {/if}
-    {#if Object.entries(if_necessary).length}
-      <h3>Only if necessary</h3>
-      <div data-test="signup-maybe">
-        <Editor people="{if_necessary}" updaters="{updaters}" />
-      </div>
-    {/if}
-  </div>
-{/if}
+  {#if Object.entries(if_necessary).length}
+    <h3>Only if necessary</h3>
+    <div data-test="signup-maybe">
+      <Editor people="{if_necessary}" updaters="{updaters}" />
+    </div>
+  {/if}
+</div>
 {#if Object.entries(nope).length + Object.entries(unapproved).length}
   <h2>Unavailable/discarded</h2>
   <div data-test="lineup-editor-nope">
