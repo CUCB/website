@@ -7,6 +7,8 @@ services:
     environment:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
+    ports:
+      - "8080:8080"
   cypress:
     image: node:12
     volumes:
