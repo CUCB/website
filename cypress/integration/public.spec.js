@@ -1,3 +1,6 @@
+import { CreateUser, HASHED_PASSWORDS } from "../database/users";
+import { AddCommittee } from "../database/committee";
+
 describe("homepage", () => {
   before(() => {
     cy.visit("/");
@@ -149,5 +152,152 @@ describe("join page", () => {
       .contains("mailing list")
       .should("have.prop", "href")
       .and("include", "/mailinglists/");
+  });
+});
+
+describe("header", () => {
+  before(() => cy.visit("/"));
+
+  describe("navbar", () => {
+    it("navigates to /book", () => {
+      cy.get("header nav a")
+        .contains("Book us")
+        .clickLink();
+      cy.url().should("include", "/book");
+    });
+
+    it("navigates to /join", () => {
+      cy.get("header nav a")
+        .contains("Join us")
+        .clickLink();
+      cy.url().should("include", "/join");
+    });
+
+    it("navigates to /committee", () => {
+      cy.executeMutation(AddCommittee, {
+        variables: {
+          id: 57434,
+          started: "1970-01-01T01:00Z",
+          data: {
+            on_conflict: { constraint: "cucb_committee_members_id_key", update_columns: ["position", "name"] },
+            data: [
+              {
+                id: 17547,
+                position: 1,
+                name: "Leady Lead",
+                casual_name: "Leady",
+                lookup_name: 1,
+              },
+            ],
+          },
+        },
+      });
+      cy.get("header nav a")
+        .contains("Committee")
+        .clickLink();
+      cy.url().should("include", "/committee");
+    });
+
+    context("when not logged in", () => {
+      it("doesn't navigate to /members", () => {
+        cy.get("header nav a")
+          .contains("Members")
+          .should("not.exist");
+      });
+
+      it("navigates to login page", () => {
+        cy.get("header nav")
+          .contains("Log in")
+          .click();
+      });
+    });
+
+    context("when logged in", () => {
+      before(() => {
+        cy.executeMutation(CreateUser, {
+          variables: {
+            id: 27250,
+            username: "cypress_user",
+            saltedPassword: HASHED_PASSWORDS.abc123,
+            admin: 9,
+            email: "cypress.user@cypress.io",
+            firstName: "Cypress",
+            lastName: "User",
+          },
+        });
+      });
+
+      beforeEach(() => {
+        cy.login("cypress_user", "abc123");
+        cy.visit("/");
+      });
+
+      it("navigates to /members", () => {
+        cy.get("header nav a")
+          .contains("Members")
+          .clickLink();
+        cy.url().should("include", "members");
+      });
+
+      it("contains working logout button", () => {
+        cy.get("header nav a")
+          .contains("Log out")
+          .clickLink();
+        cy.get("header nav a")
+          .contains("Members")
+          .should("not.exist");
+      });
+    });
+  });
+
+  it("shows the logo", () => {
+    cy.get("header [data-test='logo']").should("be.visible");
+  });
+});
+
+describe("FAQs pages", () => {
+  it("returns a 404 status when the page doesn't exist", () => {
+    cy.request({
+      url: "/faqs/something-completely-made-up",
+      failOnStatusCode: false,
+    })
+      .its("status")
+      .should("eq", 404);
+  });
+
+  it("returns a 200 status when the page does exist", () => {
+    cy.visit("/faqs/members");
+  });
+
+  describe("Booking FAQs", () => {
+    before(() => cy.visit("/faqs/book"));
+
+    it("includes the title", () => {
+      cy.contains("h1", "Frequently Asked Questions");
+    });
+
+    it("has an appropriate subheading", () => {
+      cy.contains("h2", "Book");
+    });
+
+    it("has an FAQ", () => {
+      cy.contains("h3", "?");
+    });
+  });
+
+  describe("Joining FAQs", () => {
+    before(() => cy.visit("/faqs/join"));
+
+    it("includes the title", () => {
+      cy.contains("h1", "Frequently Asked Questions");
+    });
+
+    it("has an appropriate subheading", () => {
+      cy.contains("h2", "Join");
+    });
+
+    it("has an FAQ", () => {
+      cy.contains("h3", "?");
+    });
   });
 });
