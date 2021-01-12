@@ -4,6 +4,8 @@ import {
   DeleteSignup,
   SignupDetails,
   ClearLineupForGig,
+  AddInstrument,
+  RemoveInstruments,
 } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
@@ -299,6 +301,23 @@ describe("gig diary", () => {
     cy.executeMutation(CreateGig, { variables: pastGig });
     cy.executeMutation(DeleteSignup, { variables: { gigId: nonSignupGig.id, userId: 27250 } });
     cy.executeMutation(DeleteSignup, { variables: { gigId: signupGig.id, userId: 27250 } });
+    cy.executeMutation(RemoveInstruments, {
+      variables: {
+        userId: 27250,
+      },
+    });
+    cy.executeMutation(AddInstrument, {
+      variables: {
+        userId: 27250,
+        instrumentId: 53,
+      },
+    });
+    cy.executeMutation(AddInstrument, {
+      variables: {
+        userId: 27250,
+        instrumentId: 20,
+      },
+    });
     cy.cssProperty("--positive").then((positive) => (colors.positive = positive));
     cy.cssProperty("--neutral").then((neutral) => (colors.neutral = neutral));
     cy.cssProperty("--negative").then((negative) => (colors.negative = negative));
