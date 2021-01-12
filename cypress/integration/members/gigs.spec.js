@@ -127,6 +127,7 @@ let gigForSummary = {
               on_conflict: onConflictUserInstrument,
               data: [
                 {
+                  id: 5765073,
                   deleted: false,
                   instr_id: 66,
                   nickname: null,

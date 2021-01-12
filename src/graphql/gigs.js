@@ -164,7 +164,28 @@ export const QueryEditGigDetails = gql`
 `;
 
 export const QueryMultiGigDetails = (role) => {
-  if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
+  if (["webmaster", "president", "secretary"].includes(role)) {
+    return gql`
+      query QueryGigDetails($where: cucb_gigs_bool_exp, $limit: Int, $offset: Int, $order_by: [cucb_gigs_order_by!]) {
+        cucb_gigs(where: $where, limit: $limit, offset: $offset, order_by: $order_by) {
+          ...GigDetails
+          ...GigAdminDetails
+          ...GigFinancials
+          signupSummary: lineup {
+            user {
+              first
+              last
+            }
+            user_available
+            user_only_if_necessary
+          }
+        }
+      }
+      ${FragmentGigDetails}
+      ${FragmentGigAdminDetails}
+      ${FragmentGigFinancials}
+    `;
+  } else if (["treasurer"].includes(role)) {
     return gql`
       query QueryGigDetails($where: cucb_gigs_bool_exp, $limit: Int, $offset: Int, $order_by: [cucb_gigs_order_by!]) {
         cucb_gigs(where: $where, limit: $limit, offset: $offset, order_by: $order_by) {
@@ -654,6 +675,19 @@ export const QueryGigType = gql`
         code
       }
       title
+    }
+  }
+`;
+
+export const QuerySignupSummary = gql`
+  query QuerySignupSummary($gig_id: bigint!) {
+    cucb_gigs_lineups(where: { gig_id: { _eq: $gig_id } }) {
+      user {
+        first
+        last
+      }
+      user_available
+      user_only_if_necessary
     }
   }
 `;

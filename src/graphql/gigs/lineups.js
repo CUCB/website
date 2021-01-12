@@ -2,6 +2,7 @@ import { AttributePreferences, extractAttributes } from "../../graphql/gigs/line
 import { LineupInstruments, LineupUserInstrument } from "../../graphql/gigs/lineups/users/instruments";
 import { LineupRoles } from "../../graphql/gigs/lineups/users/roles";
 import gql from "graphql-tag";
+import { Map } from "immutable";
 
 const LineupAvailability = gql`
   fragment LineupAvailability on cucb_gigs_lineups {
@@ -148,6 +149,33 @@ export const addUser = async ({ client, gigId, errors, people }, userId) => {
       person.user.prefs = undefined;
     return {
       people: people.set("" + userId, person), 
+      errors,
+    };
+  } else {
+    return { people, errors: errors.push(graphql_res.message) };
+  }
+};
+
+export const DestroyLineup = gql`
+  mutation DestroyLineup($gigId: bigint!) {
+    delete_cucb_gigs_lineups_instruments(where: {gig_id: {_eq: $gigId} }) {
+        affected_rows
+    }
+    delete_cucb_gigs_lineups(where: {gig_id: {_eq: $gigId} }) {
+        affected_rows
+    }
+  }
+`;
+
+export const destroyLineupInformation = async ({ client, gigId, errors, people }) => {
+  const graphql_res = await client.mutate({
+    mutation: DestroyLineup,
+    variables: { gigId },
+  });
+
+  if (graphql_res.data.delete_cucb_gigs_lineups) {
+    return {
+      people: new Map(), 
       errors,
     };
   } else {

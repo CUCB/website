@@ -34,13 +34,29 @@
 
   $: selectedInstrumentIds = new Set(Object.keys(person.user_instruments).map((str) => parseInt(str)));
   $: unselectedInstruments = person.user.user_instruments.filter((i) => !selectedInstrumentIds.has(i.id));
+  $: availability = person.user_available
+    ? person.user_only_if_necessary
+      ? "available if necessary"
+      : "available"
+    : person.user_available === false
+    ? "unavailable"
+    : null;
+  $: availableColor = person.user_available
+    ? person.user_only_if_necessary
+      ? "color-neutral"
+      : "color-positive"
+    : person.user_available === false
+    ? "color-negative"
+    : "";
 </script>
 
 <style lang="scss">
-  [aria-checked], [aria-selected] {
+  [aria-checked],
+  [aria-selected] {
     opacity: 1;
   }
-  [aria-checked="false"], [aria-selected="false"] {
+  [aria-checked="false"],
+  [aria-selected="false"] {
     text-decoration: line-through;
     opacity: 0.5;
     &:hover {
@@ -48,14 +64,14 @@
     }
   }
 
-  .name {
-    display: flex;
-  }
   .icons {
-    display: inline-block;
-    font-size: 1em;
+    display: block;
+    font-size: 1.5em;
   }
 
+  :global(.icons > *) {
+    margin: 0 0.5em;
+  }
   .notes *::before {
     font-weight: bold;
   }
@@ -104,6 +120,20 @@
     @media only screen and (min-width: 601px) {
       grid-template-columns: 1fr 1fr 1fr;
     }
+    @media only screen and (min-width: 301px) {
+      grid-template-columns: auto minmax(30%, 1fr);
+      .name {
+        grid-column: 1 / -1;
+      }
+      .notes {
+        grid-column: 1 / -1;
+      }
+    }
+    @media only screen and (max-width: 300px) {
+      .actions {
+          justify-self: center;
+      }
+    }
     &:nth-child(even) {
       background: rgba(var(--accent_triple), 0.1);
     }
@@ -113,11 +143,11 @@
     margin: 0;
     padding: 0;
   }
-.actions button {
+  .actions button {
     margin: 0.2em;
-}
+  }
   button {
-      padding: 0.1em 0.45em;
+    padding: 0.1em 0.45em;
   }
 </style>
 
@@ -127,7 +157,7 @@
     {person.user.first}&#32;{person.user.last}&#32;
     {#if person.user.attributes.length > 0}
       <div data-test="attribute-icons" class="icons">
-        ({#if person.user.attributes.includes('leader')}
+        {#if person.user.attributes.includes('leader')}
           <TooltipText data-test="icon-leader" content="{person.user.first} can lead">
             <i class="las la-music"></i>
           </TooltipText>
@@ -146,7 +176,7 @@
           <TooltipText data-test="icon-car" content="{person.user.first} has a car">
             <i class="las la-car-side"></i>
           </TooltipText>
-        {/if})
+        {/if}
       </div>
     {/if}
   </div>
@@ -177,6 +207,25 @@
   <div class="actions">
     {#if !showUnselectedInstruments}
       <button on:click="{() => (showUnselectedInstruments = true)}" data-test="add-instruments">Add instrument</button>
+      {#if person.approved}
+        <button on:click="{() => updateEntry.setApproved(null)}" data-test="person-unapprove">Un-approve</button>
+      {:else if person.approved === null}
+        <button on:click="{() => updateEntry.setApproved(true)}" data-test="person-approve">Approve</button>
+        <button on:click="{() => updateEntry.setApproved(false)}" data-test="person-discard">Discard</button>
+      {:else}
+        <button on:click="{() => updateEntry.setApproved(null)}" data-test="person-undiscard">Un-discard</button>
+      {/if}
+      <ul>
+        {#each Object.entries(roles) as [role, { name, value, disabled }]}
+          <button
+            role="checkbox"
+            disabled="{disabled}"
+            aria-checked="{value ? 'true' : 'false'}"
+            on:click="{() => updateEntry.setRole(role, !value)}"
+            data-test="toggle-{role}"
+          >{name}</button>
+        {/each}
+      </ul>
     {:else}
       <div data-test="instruments-to-add">
         {#each unselectedInstruments as instrument}
@@ -188,28 +237,16 @@
         >Cancel</button>
       </div>
     {/if}
-    {#if person.approved}
-      <button on:click="{() => updateEntry.setApproved(null)}" data-test="person-unapprove">Un-approve</button>
-    {:else if person.approved === null}
-      <button on:click="{() => updateEntry.setApproved(true)}" data-test="person-approve">Approve</button>
-      <button on:click="{() => updateEntry.setApproved(false)}" data-test="person-discard">Discard</button>
-    {:else}
-      <button on:click="{() => updateEntry.setApproved(null)}" data-test="person-undiscard">Un-discard</button>
-    {/if}
-    <ul>
-      {#each Object.entries(roles) as [role, { name, value, disabled }]}
-        <button
-          role="checkbox"
-          disabled="{disabled}"
-          aria-checked="{value ? 'true' : 'false'}"
-          on:click="{() => updateEntry.setRole(role, !value)}"
-          data-test="toggle-{role}"
-        >{name}</button>
-      {/each}
-    </ul>
   </div>
 
   <div class="notes">
+    {#if availability}
+      <div data-test="user-availability">
+        {person.user.first}
+        is
+        <span class="{availableColor}">{availability}</span>
+      </div>
+    {/if}
     {#if person.user_notes && person.user_notes.trim()}
       <div class="user-gig-notes" data-test="user-gig-notes">{person.user_notes.trim()}</div>
     {/if}

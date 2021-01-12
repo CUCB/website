@@ -4,7 +4,7 @@
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName } from "../../view";
   import { sortLineup } from "./_sort";
-  sortLineup(people);
+  $: sortLineup(people);
 </script>
 
 <style lang="scss">

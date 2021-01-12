@@ -183,6 +183,11 @@ describe("gig signup", () => {
 
   context("with instruments", () => {
     before(() => {
+      cy.executeMutation(RemoveInstruments, {
+        variables: {
+          userId: 27250,
+        }
+      })
       cy.executeMutation(AddInstrument, {
         variables: {
           userId: 27250,

@@ -2240,6 +2240,13 @@
       - money_collector_notified
       filter: {}
       check: null
+  delete_permissions:
+  - role: president
+    permission:
+      filter: {}
+  - role: webmaster
+    permission:
+      filter: {}
 - table:
     schema: cucb
     name: gigs_lineups_instruments
@@ -2436,6 +2443,12 @@
               _is_null: true
         - user_id:
             _eq: X-Hasura-User-Id
+  - role: president
+    permission:
+      filter: {}
+  - role: webmaster
+    permission:
+      filter: {}
 - table:
     schema: cucb
     name: instruments

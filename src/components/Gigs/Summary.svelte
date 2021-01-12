@@ -1,5 +1,6 @@
 <script>
   import Signup from "./Signup.svelte";
+  import SignupSummary from "./SignupSummary.svelte";
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
@@ -11,7 +12,8 @@
   export let gig,
     signupGig = writable(undefined),
     userInstruments = undefined,
-    displayLinks = true;
+    displayLinks = true,
+    signups = undefined;
   export let linkHeading = false;
   let showSignup = false;
   let showDetails = !linkHeading;
@@ -25,6 +27,7 @@
   $: date = gig.date && DateTime.fromISO(gig.date);
   $: clients = gig.contacts.filter((c) => c.client);
   $: callers = gig.contacts.filter((c) => c.calling);
+  signups = signups || gig.signupSummary;
 </script>
 
 <style lang="scss">
@@ -241,14 +244,17 @@
         </a>
       </h3>
     {/if}
-    {#if displayLinks && ['webmaster', 'president', 'secretary', 'treasurer'].indexOf($session.hasuraRole) > -1}
+    {#if displayLinks && ['webmaster', 'president', 'secretary', 'treasurer', 'gig_editor'].indexOf($session.hasuraRole) > -1}
       <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
     {/if}
-    {#if displayLinks && ['webmaster', 'president'].indexOf($session.hasuraRole) > -1}
+    {#if displayLinks && ['webmaster', 'president'].indexOf($session.hasuraRole) > -1 && gig.type.code === "gig"}
       <a href="/members/gigs/{gig.id}/edit-lineup" class="main-detail">Edit lineup</a>
     {/if}
     {#if gig.type.code !== 'calendar' && gig.date}
       <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
+    {/if}
+    {#if gig.allow_signups && signups}
+      <SignupSummary {signups} />
     {/if}
     <gig-timings>
       {#if gig.date}
