@@ -60,14 +60,14 @@ describe("lineup editor", () => {
     let melodeonId, clarinetId;
     cy.executeMutation(CreateGig, {
       variables: {
-        id: 15275,
+        id: 15274,
         title: "Cypress Demo Gig",
         type: 1,
         adminsOnly: false,
         allowSignups: false,
       },
     });
-    cy.executeMutation(ClearLineupForGig, { variables: { id: 15275 } });
+    cy.executeMutation(ClearLineupForGig, { variables: { id: 15274 } });
     cy.executeQuery(AllAttributes)
       .its("cucb_user_pref_types")
       .then((attributeList) => {
@@ -146,7 +146,7 @@ describe("lineup editor", () => {
                 {};
               signupsToInsert.push({
                 ...person,
-                gig_id: 15275,
+                gig_id: 15274,
                 user: {
                   data: {
                     email: `user${person.user.id}@lineup-edit.or`,
@@ -216,7 +216,7 @@ describe("lineup editor", () => {
 
     it("gives a 404 error when the gig doesn't exist", () => {
       cy.request({
-        url: "/members/gigs/15275/edit-lineup",
+        url: "/members/gigs/15274/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
@@ -229,9 +229,9 @@ describe("lineup editor", () => {
         .then((gigTypes) => {
           for (let type of gigTypes.filter((type) => type.code !== "gig")) {
             cy.log(`Testing ${type.title}`);
-            cy.executeMutation(UpdateGigType, { variables: { gigId: 15275, typeId: type.id } }, { log: false });
+            cy.executeMutation(UpdateGigType, { variables: { gigId: 15274, typeId: type.id } }, { log: false });
             cy.request({
-              url: "/members/gigs/15275/edit-lineup",
+              url: "/members/gigs/15274/edit-lineup",
               failOnStatusCode: false,
             })
               .its("status")
@@ -243,7 +243,7 @@ describe("lineup editor", () => {
     context("viewing valid gig", () => {
       beforeEach(() => {
         cy.login("cypress", "abc123");
-        cy.visit("/members/gigs/15275/edit-lineup");
+        cy.visit("/members/gigs/15274/edit-lineup");
       });
 
       it("lists the people and instruments who have signed up to the gig", () => {
@@ -550,7 +550,7 @@ describe("lineup editor", () => {
   context("not logged in", () => {
     it("isn't accessible", () => {
       cy.request({
-        url: "/members/gigs/15275/edit-lineup",
+        url: "/members/gigs/15274/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
@@ -559,7 +559,7 @@ describe("lineup editor", () => {
 
     it("shows not logged in error on non existent gig", () => {
       cy.request({
-        url: "/members/gigs/15275/edit-lineup",
+        url: "/members/gigs/15274/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
@@ -574,7 +574,7 @@ describe("lineup editor", () => {
 
     it("isn't accessible", () => {
       cy.request({
-        url: "/members/gigs/15275/edit-lineup",
+        url: "/members/gigs/15274/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
