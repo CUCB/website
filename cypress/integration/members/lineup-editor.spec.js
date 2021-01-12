@@ -216,7 +216,7 @@ describe("lineup editor", () => {
 
     it("gives a 404 error when the gig doesn't exist", () => {
       cy.request({
-        url: "/members/gigs/15274/edit-lineup",
+        url: "/members/gigs/15275/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
@@ -559,7 +559,7 @@ describe("lineup editor", () => {
 
     it("shows not logged in error on non existent gig", () => {
       cy.request({
-        url: "/members/gigs/15274/edit-lineup",
+        url: "/members/gigs/15275/edit-lineup",
         failOnStatusCode: false,
       })
         .its("status")
