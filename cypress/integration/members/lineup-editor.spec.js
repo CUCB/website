@@ -300,7 +300,7 @@ describe("lineup editor", () => {
                   .should("be.visible")
                   .parentsUntil("[data-test=instrument-row]")
                   .within(() => {
-                    cy.get("[data-test=instrument-maybe]").should("have.attr", "aria-selected", "true");
+                    cy.get("[data-test=instrument-maybe]").should("have.attr", "aria-checked", "true");
                   });
               }
               let availability = person.user_available
@@ -357,20 +357,20 @@ describe("lineup editor", () => {
       it("can select and discard instruments", () => {
         cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [data-test=instrument-yes]`)
           .pipe(click)
-          .should("have.attr", "aria-selected", "true");
+          .should("have.attr", "aria-checked", "true");
         cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [data-test=instrument-no]`)
           .pipe(click)
-          .should("have.attr", "aria-selected", "true");
+          .should("have.attr", "aria-checked", "true");
         cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [data-test=instrument-maybe]`)
           .pipe(click)
-          .should("have.attr", "aria-selected", "true");
+          .should("have.attr", "aria-checked", "true");
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-discard]`).pipe(click).should("not.exist");
-        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-selected=true]`).should(
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-checked=true]`).should(
           "have.attr",
           "data-test",
           "instrument-maybe",
         );
-        cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [aria-selected=true]`).should(
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [aria-checked=true]`).should(
           "have.attr",
           "data-test",
           "instrument-yes",
@@ -378,19 +378,19 @@ describe("lineup editor", () => {
         cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
         cy.get(`[data-test=instrument-${signups[1].user_instruments[0].id}] [data-test=instrument-yes]`)
           .pipe(click)
-          .should("have.attr", "aria-selected", "true");
+          .should("have.attr", "aria-checked", "true");
         cy.reload();
-        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-selected=true]`).should(
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-checked=true]`).should(
           "have.attr",
           "data-test",
           "instrument-maybe",
         );
-        cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [aria-selected=true]`).should(
+        cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [aria-checked=true]`).should(
           "have.attr",
           "data-test",
           "instrument-yes",
         );
-        cy.get(`[data-test=instrument-${signups[1].user_instruments[0].id}] [aria-selected=true]`).should(
+        cy.get(`[data-test=instrument-${signups[1].user_instruments[0].id}] [aria-checked=true]`).should(
           "have.attr",
           "data-test",
           "instrument-yes",
@@ -401,47 +401,47 @@ describe("lineup editor", () => {
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-leader]`)
           .click()
-          .should("have.attr", "aria-checked", "true");
+          .should("have.attr", "aria-pressed", "true");
         cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).click();
         cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-approve]`).click();
         cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-equipment]`)
           .click()
-          .should("have.attr", "aria-checked", "true");
+          .should("have.attr", "aria-pressed", "true");
         cy.get(`[data-test=member-${signups[3].user.id}]`).within(() => {
           cy.get(`[data-test=toggle-money_collector_notified]`).should("not.exist");
-          cy.get(`[data-test=toggle-money_collector]`).click().should("have.attr", "aria-checked", "true");
-          cy.get(`[data-test=toggle-money_collector_notified]`).click().should("have.attr", "aria-checked", "true");
+          cy.get(`[data-test=toggle-money_collector]`).click().should("have.attr", "aria-pressed", "true");
+          cy.get(`[data-test=toggle-money_collector_notified]`).click().should("have.attr", "aria-pressed", "true");
           cy.get(`[data-test=toggle-money_collector]`).should("be.disabled");
         });
         cy.reload();
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-leader]`).should(
           "have.attr",
-          "aria-checked",
+          "aria-pressed",
           "true",
         );
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-equipment]`).should(
           "have.attr",
-          "aria-checked",
+          "aria-pressed",
           "false",
         );
         cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-equipment]`).should(
           "have.attr",
-          "aria-checked",
+          "aria-pressed",
           "true",
         );
         cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-money_collector]`).should(
           "have.attr",
-          "aria-checked",
+          "aria-pressed",
           "false",
         );
         cy.get(`[data-test=member-${signups[3].user.id}] [data-test=toggle-money_collector]`).should(
           "have.attr",
-          "aria-checked",
+          "aria-pressed",
           "true",
         );
         cy.get(`[data-test=member-${signups[3].user.id}] [data-test=toggle-money_collector_notified]`).should(
           "have.attr",
-          "aria-checked",
+          "aria-pressed",
           "true",
         );
       });
@@ -510,12 +510,12 @@ describe("lineup editor", () => {
           cy.get(`[data-test=cancel-add-instruments]`).should("not.exist");
           cy.get(`[data-test=instrument-${signups[1].user.user_instruments[0].id}]`).within(() => {
             cy.contains(signups[1].user.user_instruments[0].name).should("be.visible");
-            cy.get(`[data-test=instrument-maybe]`).should("have.attr", "aria-selected", "true");
-            cy.get(`[data-test=instrument-yes]`).click().should("have.attr", "aria-selected", "true");
+            cy.get(`[data-test=instrument-maybe]`).should("have.attr", "aria-checked", "true");
+            cy.get(`[data-test=instrument-yes]`).click().should("have.attr", "aria-checked", "true");
           });
           cy.reload();
           cy.get(`[data-test=instrument-${signups[1].user.user_instruments[0].id}] [data-test=instrument-yes]`)
-            .invoke("attr", "aria-selected")
+            .invoke("attr", "aria-checked")
             .should("eq", "true");
         });
       });
@@ -553,12 +553,12 @@ describe("lineup editor", () => {
           .within(() => {
             cy.get(`[data-test=instrument-53257432] [data-test=instrument-yes]`).should(
               "have.attr",
-              "aria-selected",
+              "aria-checked",
               "true",
             );
             cy.get(`[data-test=instrument-53257433] [data-test=instrument-yes]`).should(
               "have.attr",
-              "aria-selected",
+              "aria-checked",
               "true",
             );
           });
