@@ -55,6 +55,7 @@
   type="text"
   placeholder="{placeholder}"
   data-test="{$$props['data-test'] && `${$$props['data-test']}-search`}"
+  aria-label="{$$props['aria-label']}"
   bind:value="{searchText}"
   on:keydown="{first}"
   bind:this="{searchField}"

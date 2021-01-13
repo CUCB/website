@@ -222,7 +222,7 @@
   {/if}
   <div id="add-person-form" data-test="add-lineup-person">
     <div class="add-person">
-      <Select bind:value="{selectedUser}" bind:select="{userSelectBox}">
+      <Select bind:value="{selectedUser}" bind:select="{userSelectBox}" aria-label="User to add">
         <option value="{undefined}" disabled>---PICK ONE---</option>
         {#each unselectedUsers as userToAdd}
           <option value="{userToAdd.id}">{userToAdd.first}&#32;{userToAdd.last}</option>
@@ -237,6 +237,7 @@
         fuse="{userFuse}"
         data-test="people"
         placeholder="Type to search..."
+        aria-label="Search user to add"
         on:select="{selectUser}"
         bind:value="{searchText}"
       />

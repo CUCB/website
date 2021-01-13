@@ -51,14 +51,12 @@
 </script>
 
 <style lang="scss">
-  [aria-checked],
-  [aria-selected] {
+  [aria-checked], [aria-pressed] {
     opacity: 1;
   }
-  [aria-checked="false"],
-  [aria-selected="false"] {
+  [aria-checked="false"], [aria-pressed="false"] {
     text-decoration: line-through;
-    opacity: 0.5;
+    opacity: 0.75;
     &:hover {
       opacity: 1;
     }
@@ -139,10 +137,6 @@
     }
   }
 
-  ul {
-    margin: 0;
-    padding: 0;
-  }
   .actions button {
     margin: 0.2em;
   }
@@ -182,20 +176,23 @@
   </div>
   <div class="instruments">
     {#each Object.entries(person.user_instruments) as [id, instrument]}
-      <div data-test="instrument-{id}">
+      <div data-test="instrument-{id}" role="radiogroup">
         <button
           data-test="instrument-yes"
-          aria-selected="{instrument.approved ? 'true' : 'false'}"
+          aria-checked="{instrument.approved ? 'true' : 'false'}"
+          role="radio"
           on:click="{() => updateEntry.instruments.setApproved(id, true)}"
         >Yes</button>
         <button
           data-test="instrument-maybe"
-          aria-selected="{instrument.approved === null ? 'true' : 'false'}"
+          aria-checked="{instrument.approved === null ? 'true' : 'false'}"
+          role="radio"
           on:click="{() => updateEntry.instruments.setApproved(id, null)}"
         >?</button>
         <button
           data-test="instrument-no"
-          aria-selected="{instrument.approved === false ? 'true' : 'false'}"
+          aria-checked="{instrument.approved === false ? 'true' : 'false'}"
+          role="radio"
           on:click="{() => updateEntry.instruments.setApproved(id, false)}"
         >No</button>
         <div class="instrument-name">
@@ -215,17 +212,17 @@
       {:else}
         <button on:click="{() => updateEntry.setApproved(null)}" data-test="person-undiscard">Un-discard</button>
       {/if}
-      <ul>
+      <div class="roles">
         {#each Object.entries(roles) as [role, { name, value, disabled }]}
           <button
-            role="checkbox"
+            role="button"
             disabled="{disabled}"
-            aria-checked="{value ? 'true' : 'false'}"
+            aria-pressed="{value ? 'true' : 'false'}"
             on:click="{() => updateEntry.setRole(role, !value)}"
             data-test="toggle-{role}"
           >{name}</button>
         {/each}
-      </ul>
+      </div>
     {:else}
       <div data-test="instruments-to-add">
         {#each unselectedInstruments as instrument}
