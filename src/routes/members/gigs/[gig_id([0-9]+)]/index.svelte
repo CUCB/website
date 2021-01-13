@@ -1,5 +1,5 @@
 <script context="module">
-  import { QueryGigDetails, QuerySingleGig } from "../../../../graphql/gigs";
+  import { QueryGigDetails, QuerySingleGig, QuerySignupSummary } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
@@ -11,7 +11,7 @@
     let client = makeClient(this.fetch);
     let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
 
-    let res_gig, res_signup;
+    let res_gig, res_signup, signupSummary = undefined;
     let gig;
     try {
       res_gig = await client.query({
@@ -27,6 +27,15 @@
       return;
     }
 
+    try {
+      signupSummary = (await client.query({
+          query: QuerySignupSummary,
+          variables: { gig_id },
+      })).data.cucb_gigs_lineups;
+    } catch (e){
+        console.log(e)
+    }
+
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs_by_pk) {
       gig = res_gig.data.cucb_gigs_by_pk;
     } else {
@@ -38,6 +47,7 @@
       gig,
       signupGig: res_signup.data.cucb_gigs && res_signup.data.cucb_gigs[0],
       userInstruments: res_signup.data.cucb_users_instruments,
+      signupSummary,
     };
   }
 </script>
@@ -46,7 +56,7 @@
   import Summary from "../../../../components/Gigs/Summary.svelte";
   import { makeTitle } from "../../../../view";
   import { writable } from "svelte/store";
-  export let gig, userInstruments, signupGig;
+  export let gig, userInstruments, signupGig, signupSummary;
   let signupGig2 = writable(signupGig);
 </script>
 
@@ -55,4 +65,4 @@
 </svelte:head>
 
 <h1>Gigs</h1>
-<Summary {gig} signupGig="{signupGig2}" {userInstruments} />
+<Summary {gig} signupGig="{signupGig2}" signups={signupSummary} {userInstruments} />

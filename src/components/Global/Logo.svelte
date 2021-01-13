@@ -66,7 +66,7 @@
 </style>
 
 <svelte:options immutable />
-<div {id}>
+<div {id} role="presentation">
   <div id="logo2" class="theme-{$themeName}">
     {#if animate}
       <svg

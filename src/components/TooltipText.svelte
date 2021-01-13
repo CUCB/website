@@ -43,6 +43,6 @@
   }
 </style>
 
-<span id="{`tooltip-${id}`}" class="tooltip-text theme-{$themeName}" tabindex="0">
+<span id="{`tooltip-${id}`}" class="tooltip-text theme-{$themeName}" tabindex="0" data-test={$$props["data-test"]}>
   <slot />
 </span>

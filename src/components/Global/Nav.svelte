@@ -108,7 +108,7 @@
   }
 </style>
 
-<nav on:click class="{navClass} theme-{$themeName}" aria-hidden="{!visible}">
+<nav on:click class="{navClass} theme-{$themeName}" aria-label="Main menu">
   <a aria-current="{!segment ? 'page' : undefined}" href="." rel="prefetch">Home</a>
   <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" rel="prefetch">Book us!</a>
   <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" rel="prefetch">Join us!</a>

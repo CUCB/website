@@ -19,8 +19,8 @@
 
 {#if userInstrument.nickname}
   {#if showNicknames}
-    <TooltipText content="{userInstrument.instrument.name}">{userInstrument.nickname}</TooltipText>
+    <TooltipText content="{userInstrument.instrument.name}" data-test="nickname-hover">{userInstrument.nickname}</TooltipText>
   {:else}
-    <TooltipText content="{userInstrument.nickname}">{userInstrument.instrument.name}</TooltipText>
+    <TooltipText content="{userInstrument.nickname}" data-test="nickname-hover">{userInstrument.instrument.name}</TooltipText>
   {/if}
 {:else}{userInstrument.instrument.name}{/if}

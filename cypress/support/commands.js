@@ -37,7 +37,7 @@ Cypress.Commands.add("executeQuery", (mutation, params) => cy.executeMutation(mu
 Cypress.Commands.add("searchEmails", (limit = 1, start = 0) => {
   cy.request(`${Cypress.env("MAILHOG_HOST")}/api/v2/messages?limit=${limit}&start=${start}`)
     .its("body")
-    .then(response => ({ ...response, items: response.items.map(item => Email(item)) }));
+    .then((response) => ({ ...response, items: response.items.map((item) => Email(item)) }));
 });
 // Click a link so cypress checks the response status code
 Cypress.Commands.add(
@@ -48,11 +48,9 @@ Cypress.Commands.add(
   (subject, options) => cy.visit({ ...options, url: subject[0].href }),
 );
 
-Cypress.Commands.add("checkFileExists", filename => {
+Cypress.Commands.add("checkFileExists", (filename) => {
   // `cat` returns a non-zero exit status if the file doesn't exist
-  cy.exec(`cat ${filename}`, { log: false })
-    .its("code", { log: false })
-    .should("eq", 0);
+  cy.exec(`cat ${filename}`, { log: false }).its("code", { log: false }).should("eq", 0);
   Cypress.log({
     message: filename,
     name: "checkFileExists",
@@ -60,7 +58,7 @@ Cypress.Commands.add("checkFileExists", filename => {
   });
 });
 
-Cypress.Commands.add("removeFile", filepath => {
+Cypress.Commands.add("removeFile", (filepath) => {
   cy.exec(`rm ${filepath}`, { log: false });
   Cypress.log({
     message: filepath,
@@ -69,27 +67,31 @@ Cypress.Commands.add("removeFile", filepath => {
   });
 });
 
-Cypress.Commands.add("cssProperty", name =>
+Cypress.Commands.add("cssProperty", (name) =>
   cy
     .document()
     .its("documentElement")
-    .pipe(elem => getComputedStyle(elem[0]))
+    .pipe((elem) => getComputedStyle(elem[0]))
     .invoke("getPropertyValue", name)
     .invoke("trim")
     .should("not.equal", undefined),
 );
 
 Cypress.Commands.add("hasTooltip", { prevSubject: true }, (subject, content) => {
-  cy.wrap(subject).trigger("mouseleave");
-  cy.wrap(subject).trigger("mouseenter");
-  cy.get("[data-test='tooltip']")
-    .contains(content)
-    .should("be.visible");
+  // If you're having trouble with this command, try hasMouseTooltip.
+  // Focus for tippy elements takes 100ms or so to start working and that command is cheaper than hardcoding a wait
+  cy.wrap(subject).focus();
+  cy.get("[data-test='tooltip']").contains(content).should("be.visible");
+  cy.wrap(subject).blur();
+});
+
+Cypress.Commands.add("hasMouseTooltip", { prevSubject: true }, (subject, content) => {
+  // Use mouse events to trigger tooltips to avoid having to wait until the element is focusable
+  cy.wrap(subject).trigger("mouseout").trigger("mouseenter");
+  cy.get("[data-test='tooltip']").contains(content).should("be.visible");
+  cy.wrap(subject).trigger("mouseout");
 });
 
 Cypress.Commands.add("paste", { prevSubject: true }, (subject, content) => {
-  cy.wrap(subject)
-    .focus()
-    .invoke("val", content)
-    .trigger("input");
+  cy.wrap(subject).focus().invoke("val", content).trigger("input");
 });

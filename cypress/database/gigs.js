@@ -74,6 +74,20 @@ export const DeleteSignup = `
   }
 `;
 
+export const DeleteGig = `
+  mutation DeleteGig($id: bigint!) {
+    delete_cucb_gigs_lineups_instruments(where: { gig_id: { _eq: $id } }) {
+        affected_rows
+    }
+    delete_cucb_gigs_lineups(where: { gig_id: { _eq: $id } }) {
+        affected_rows
+    }
+    delete_cucb_gigs_by_pk(id: $id) {
+        id
+    }
+  }
+`;
+
 export const SignupDetails = `
   query SignupDetails($gigId: bigint!, $userId: bigint!) {
     cucb_gigs_lineups_by_pk(gig_id: $gigId, user_id: $userId) {
@@ -245,4 +259,30 @@ export const SetResetGig = `
       affected_rows
     }
   }
+`;
+
+export const UpdateGigType = `
+    mutation UpdateGigType($gigId: bigint!, $typeId: bigint!) {
+        update_cucb_gigs(_set: { type: $typeId }, where: { id: {_eq: $gigId } }) {
+            affected_rows
+        }    
+    }
+`;
+
+export const AllGigTypes = `
+    query AllGigTypes {
+        cucb_gig_types {
+            id
+            code
+            title
+        }
+    }
+`;
+
+export const ClearLineupForGig = `
+    mutation ClearLineupForGig($id: bigint!) {
+        delete_cucb_gigs_lineups(where: {gig_id: {_eq: $id}}) {
+            affected_rows
+        }
+    }
 `

@@ -64,6 +64,15 @@
       return;
     }
 
+    try {
+      signupSummary = (await client.query({
+          query: QuerySignupSummary,
+          variables: { gig_id },
+      })).data.cucb_gigs_lineups;
+    } catch (e){
+        console.log(e)
+    }
+
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {
       let gigs = res_gig.data.cucb_gigs;
       // Sort the gigs pre render since the database can't sort by computed field
@@ -98,7 +107,7 @@
 <script>
   import { makeTitle, calendarStartDay, themeName } from "../../../view";
   import { makeClient, handleErrors, client } from "../../../graphql/client";
-  import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
+  import { QueryMultiGigDetails, QueryMultiGigSignup, QuerySignupSummary } from "../../../graphql/gigs";
   import { stores } from "@sapper/app";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";

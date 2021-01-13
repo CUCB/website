@@ -1057,7 +1057,7 @@
     {#if typeCode !== 'calendar'}
       <label class="checkbox">Advertise publicly:
         <input type="checkbox" bind:checked="{advertise}" data-test="gig-edit-{id}-advertise" /><br />
-        (Whether to allow users to express an interest in playing)</label>
+        (Whether to display on home page)</label>
       <label class="checkbox">Allow signups:
         <input type="checkbox" bind:checked="{allow_signups}" data-test="gig-edit-{id}-allow-signups" /><br />
         (Whether to allow users to express an interest in playing)</label>

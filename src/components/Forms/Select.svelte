@@ -154,7 +154,7 @@
 </style>
 
 <div class="dropdown dropdown-{$themeName}" {disabled}>
-  <select class="dropdown-select" data-test="select-box" on:change on:blur bind:value bind:this="{select}" {disabled}>
+  <select class="dropdown-select" data-test="select-box" aria-label={$$props["aria-label"]} on:change on:blur bind:value bind:this="{select}" {disabled}>
     <slot />
   </select>
 </div>

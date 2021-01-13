@@ -82,7 +82,7 @@ const FragmentGigFinancials = gql`
   }
 `;
 
-export const QueryGigDetails = role => {
+export const QueryGigDetails = (role) => {
   if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
     return gql`
       query QueryGigDetails($gig_id: bigint!) {
@@ -163,8 +163,29 @@ export const QueryEditGigDetails = gql`
   ${FragmentGigFinancials}
 `;
 
-export const QueryMultiGigDetails = role => {
-  if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
+export const QueryMultiGigDetails = (role) => {
+  if (["webmaster", "president", "secretary"].includes(role)) {
+    return gql`
+      query QueryGigDetails($where: cucb_gigs_bool_exp, $limit: Int, $offset: Int, $order_by: [cucb_gigs_order_by!]) {
+        cucb_gigs(where: $where, limit: $limit, offset: $offset, order_by: $order_by) {
+          ...GigDetails
+          ...GigAdminDetails
+          ...GigFinancials
+          signupSummary: lineup {
+            user {
+              first
+              last
+            }
+            user_available
+            user_only_if_necessary
+          }
+        }
+      }
+      ${FragmentGigDetails}
+      ${FragmentGigAdminDetails}
+      ${FragmentGigFinancials}
+    `;
+  } else if (["treasurer"].includes(role)) {
     return gql`
       query QueryGigDetails($where: cucb_gigs_bool_exp, $limit: Int, $offset: Int, $order_by: [cucb_gigs_order_by!]) {
         cucb_gigs(where: $where, limit: $limit, offset: $offset, order_by: $order_by) {
@@ -563,7 +584,7 @@ export const UpdateGig = gql`
       quote_date
     }
   }
-`
+`;
 
 export const QueryContacts = gql`
   query QueryContacts {
@@ -642,6 +663,31 @@ export const UpdateContact = gql`
       email
       caller
       notes
+    }
+  }
+`;
+
+export const QueryGigType = gql`
+  query QueryGigType($id: bigint!) {
+    cucb_gigs_by_pk(id: $id) {
+      type: gig_type {
+        id
+        code
+      }
+      title
+    }
+  }
+`;
+
+export const QuerySignupSummary = gql`
+  query QuerySignupSummary($gig_id: bigint!) {
+    cucb_gigs_lineups(where: { gig_id: { _eq: $gig_id } }) {
+      user {
+        first
+        last
+      }
+      user_available
+      user_only_if_necessary
     }
   }
 `;

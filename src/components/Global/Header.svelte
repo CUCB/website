@@ -178,7 +178,7 @@
   </noscript>
 </svelte:head>
 <header class:hidden="{!animate}" class="theme-{$themeName}">
-  <a href="/" id="logo-link">
+  <a href="/" id="logo-link" aria-label="CUCB logo" >
     <Logo id="logo" enableSpin="{spinnyLogo}" />
   </a>
   {#if animate}

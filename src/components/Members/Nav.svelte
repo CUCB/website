@@ -33,7 +33,7 @@
   }
 </style>
 
-<nav class="subnav theme-{$themeName}">
+<nav class="subnav theme-{$themeName}" aria-label="Members' submenu">
   <a href="/members" class="only-mobile">Gig signup</a>
   <a href="/members/gigs">Gig diary</a>
   <a href="/members/music">Music</a>
