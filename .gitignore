@@ -6,7 +6,6 @@ yarn-error.log
 /cypress/videos/
 /cypress/fixtures/example.json
 /__sapper__/
-.vscode
 .env
 db_restore
 images/*
