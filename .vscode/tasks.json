@@ -1,0 +1,32 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "type": "npm",
+            "script": "docker:start",
+            "problemMatcher": [],
+            "label": "npm: docker:start",
+            "detail": "Start the dev server in docker",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "npm",
+            "script": "cy:open",
+            "problemMatcher": [],
+            "label": "npm: cypress:open",
+            "detail": "Open cypress window",
+            "group": "test",
+        },
+        {
+            "type": "npm",
+            "script": "cy:run",
+            "problemMatcher": [],
+            "label": "npm: cypress:run",
+            "detail": "Run cypress in terminal",
+            "group": "test",
+        }
+    ]
+}

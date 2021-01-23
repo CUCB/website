@@ -2,21 +2,70 @@
 
 This is the new rewrite of the CUCB website, which uses [sapper](https://sapper.svelte.dev) to do the frontend, and [hasura](https://hasura.io/) for the backend.
 
-## Running the project
+## Dependencies
 
-To run the project, you need docker and docker-compose. See the section on [docker](#docker) for more information about this. **If you're running on Windows** look at [the relevant page on the wiki](/cucb/website/-/wikis/How-to-Windows) before trying to do this.
+- [Node.js and npm](https://nodejs.org/en/download/) (node package manager)
+- [Docker and docker-compose](https://www.docker.com/products/docker-desktop) - on Ubuntu use `sudo apt install docker docker-compose`
+- [Visual studio code](https://code.visualstudio.com/) (or [VSCodium](https://github.com/VSCodium/vscodium)) - an editor with good support from svelte via an extension. There is config in the repository to help you get set up.
 
-However you get the code, you can install dependencies and run the project in development mode with:
+### Installing on Windows
+
+For some tips on how to get best set up if you're running Windows, see [the relevant page on the wiki](https://github.com/CUCB/website/wiki/How-to-Windows).
+
+## Getting started
+
+1. Clone the repository
+2. Install the recommended extensions. Press `ctrl+shift+p` (or probably `cmd+shift+p` on Mac) and search for "show recommended extensions" (without the quotes) and press enter to select the option that appears. Install all the extensions under the heading "Workspace recommended extensions".
+3. Run `npm install`. This will install the dependencies locally, including Cypress (the test runner), hasura-cli (which is used to manage database migrations), prettier (a code formatter), and a git hook via husky (which will format the code with prettier when making a git commit)
+4. Run `npm run docker:start` (in VSCode, this should be possible by just pressing Ctrl+Shift+B, or right clicking the file `docker-compose.yml` and selecting "Compose up").
+
+### Running the tests
+
+The project uses the [cypress](https://cypress.io) testing framework. It is set up to run the tests in CI, using `docker-compose` in order to create a real database and Hasura backend for proper end-to-end testing. This should work automatically, and there are custom commands set up in cypress to e.g. run SQL scripts and login to the site. There are a couple of ways to run the tests locally.
+
+#### Run them locally
+
+This has a really nice GUI to let you inspect tests and see exactly what cypress is doing. Start the server, and then run
 
 ```bash
-npm run docker:start
+npm run cy:open
 ```
 
-Or you can use VSCode to start it. Make sure you have the docker extension installed, the find the file called `docker-compose.yml`, right click it, and select "Compose Up".
+This will open a window with a list of the test files. Click on a filename to run the tests in that file, or click "Run" to run all the tests. It will open up a browser window to run the tests in. To run this command more easily from VSCode, press `ctrl+shift+p`, and search for "Run test task". To set up a keyboard shortcut, you can add the following to your keybindings.json (the example uses `ctrl+k ctrl+k` (which can be executed by holding `ctrl` and tapping `k` twice)).
 
-Open up [localhost:4000](http://localhost:4000) and start clicking around once you've got the server running.
+```json
+{
+  "key": "ctrl+k ctrl+k",
+  "command": "workbench.action.tasks.runTask",
+  "args": "npm: cypress:open"
+}
+```
 
-Consult [sapper.svelte.dev](https://sapper.svelte.dev) for help getting started.
+#### Run them as if they're in CI
+
+This involves using the CI docker-compose file, which is called `docker-compose.test.yml`. Simply run
+
+```bash
+npm run docker:test
+```
+
+to run the tests. This won't give you a GUI, but should allow you to see which tests will pass and fail. If there is a discrepancy between your local test results and GitLab CI's test results, it's probably due to data still lurking in your database (but this should be cleaned up properly ([before the tests run](https://docs.cypress.io/guides/references/best-practices.html#Using-after-or-afterEach-hooks)) and recreated as necessary for the tests).
+
+To solve this using VSCode, go into the Docker panel and find the volumes section. There should be a volume called `<DIR>_db_data_test`, where `<DIR>` is the name of the directory the repository is cloned into. Right click this volume and select delete. Hopefully there shouldn't be too many issues with the test database, it's separate from the general dev server database, so your local data shouldn't make a difference to how it runs.
+
+To do this manually with the command line, run
+
+```bash
+docker volume ls
+```
+
+to list volumes, and then
+
+```bash
+docker volume rm <DB_DATA_NAME>
+```
+
+where `<DB_DATA_NAME>` is the volume with `db_data_test` at the end of the name. This will delete the entire database. When you run the app, Hasura will once again apply the migrations (all the metadata Hasura needs is stored in postgres).
 
 ## Things to note
 
@@ -61,48 +110,6 @@ The Hasura image is the cli version, which means it will automatically run migra
 #### Fixing Docker issues
 
 If docker gives an error message starting something, try replacing `up` with `down` in whatever docker command you're running, then run the `up` version again. This will delete some of the cached information, but won't delete any of the stuff the containers downloaded, that information is in the volumes.
-
-### Running the tests
-
-The project uses the [cypress](https://cypress.io) testing framework. It is set up to run the tests in CI, using `docker-compose` in order to create a real database and Hasura backend for proper end-to-end testing. This should work automatically, and there are custom commands set up in cypress to e.g. run SQL scripts and login to the site. There are a couple of ways to run the tests locally.
-
-#### Run them locally
-
-This has a really nice GUI to let you inspect tests and see exactly what cypress is doing. Start the server, and then run
-
-```bash
-npm run cy:open
-```
-
-**NB** you need to have run `npm install` before you do this for the first time. The wiki has instructions on how to set this up to run properly on Windows [here](https://gitlab.com/cucb/website/-/wikis/How-to-Windows).
-
-This will open a window with a list of the test files. Click on a filename to run the tests in that file, or click "Run" to run all the tests. It will open up a browser window to run the tests in.
-
-#### Run them as if they're in CI
-
-This involves using the CI docker-compose file, which is called `docker-compose.test.yml`. Simply run
-
-```bash
-npm run docker:test
-```
-
-to run the tests. This won't give you a GUI, but should allow you to see which tests will pass and fail. If there is a discrepancy between your local test results and GitLab CI's test results, it's probably due to data still lurking in your database.
-
-To solve this using VSCode, go into the Docker panel and find the volumes section. There should be a volume called `<DIR>_db_data_test`, where `<DIR>` is the name of the directory the repository is cloned into. Right click this volume and select delete. Hopefully there shouldn't be too many issues with the test database, it's separate from the general dev server database, so your local data shouldn't make a difference to how it runs.
-
-To do this manually with the command line, run
-
-```bash
-docker volume ls
-```
-
-to list volumes, and then
-
-```bash
-docker volume rm <DB_DATA_NAME>
-```
-
-where `<DB_DATA_NAME>` is the volume with `db_data` at the end of the name. This will delete the entire database. When you run the app, Hasura will once again apply the migrations (all the metadata Hasura needs is stored in postgres).
 
 ### Authentication/Authorization
 
