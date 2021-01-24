@@ -1,5 +1,5 @@
 <script context="module">
-  import { QueryGigDetails, QuerySingleGig, QuerySignupSummary } from "../../../../graphql/gigs";
+  import { QueryGigDetails, QuerySingleGig, QuerySingleGigSignupSummary } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
@@ -29,7 +29,7 @@
 
     try {
       signupSummary = (await client.query({
-          query: QuerySignupSummary,
+          query: QuerySingleGigSignupSummary,
           variables: { gig_id },
       })).data.cucb_gigs_lineups;
     } catch (e){

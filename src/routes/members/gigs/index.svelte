@@ -1,4 +1,7 @@
 <script context="module">
+  import { makeClient, handleErrors, client } from "../../../graphql/client";
+  import { QueryMultiGigDetails, QueryMultiGigSignup, QuerySingleGigSignupSummary } from "../../../graphql/gigs";
+  
   export async function preload(_page, session) {
     Settings.defaultZoneName = "Europe/London";
     let client = makeClient(this.fetch);
@@ -66,7 +69,7 @@
 
     try {
       signupSummary = (await client.query({
-          query: QuerySignupSummary,
+          query: QuerySingleGigSignupSummary,
           variables: { gig_id },
       })).data.cucb_gigs_lineups;
     } catch (e){
@@ -106,8 +109,6 @@
 
 <script>
   import { makeTitle, calendarStartDay, themeName } from "../../../view";
-  import { makeClient, handleErrors, client } from "../../../graphql/client";
-  import { QueryMultiGigDetails, QueryMultiGigSignup, QuerySignupSummary } from "../../../graphql/gigs";
   import { stores } from "@sapper/app";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
