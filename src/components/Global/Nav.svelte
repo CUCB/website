@@ -109,13 +109,14 @@
 </style>
 
 <nav on:click class="{navClass} theme-{$themeName}" aria-label="Main menu">
-  <a aria-current="{!segment ? 'page' : undefined}" href="." rel="prefetch">Home</a>
-  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" rel="prefetch">Book us!</a>
-  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" rel="prefetch">Join us!</a>
-  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee" rel="prefetch">Committee</a>
+  <a aria-current="{!segment ? 'page' : undefined}" href="." sapper:prefetch>Home</a>
+  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" sapper:prefetch>Book us!</a>
+  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" sapper:prefetch>Join us!</a>
+  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee" sapper:prefetch>Committee</a>
 
   {#if user.userId}
-    <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members" rel="prefetch">Members</a>
+    <!-- Don't prefetch members since it causes cache invalidation issues (see issue #50) -->
+    <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members">Members</a>
     <a href="auth/logout" class="split">Log out</a>
   {:else}
     <a aria-current="{segment === 'auth' ? 'page' : undefined}" class="split" href="/auth/login" rel="external">
