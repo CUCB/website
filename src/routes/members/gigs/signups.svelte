@@ -22,18 +22,64 @@
       return;
     }
 
-    return { sinceOneMonth: res.data.sinceOneMonth.gigs, signupsOpen: res.data.signupsOpen };
+    return { sinceOneMonth: res.data.since.map((x) => x.gig), signupsOpen: res.data.signupsOpen };
   }
 </script>
 
 <script>
-    Settings.defaultZoneName = "Europe/London";
-  import SignupSummary from "../../../components/Gigs/Lineup/SignupSummary.svelte";
+  Settings.defaultZoneName = "Europe/London";
+  import SignupAdmin from "../../../components/Gigs/Lineup/SignupAdmin.svelte";
 
   export let sinceOneMonth, signupsOpen;
-  const VIEWS = { signupsOpen: {}, sinceOneMonth: {} };
+  $: noLineup = signupsOpen.filter((gig) => gig.lineup.filter((person) => person.approved).length === 0);
+  const VIEWS = { signupsOpen: {}, sinceOneMonth: {}, noLineup: {} };
   let view = VIEWS.signupsOpen;
-  let gigs = view === VIEWS.signupsOpen ? signupsOpen : sinceOneMonth;
+  $: gigs = view === VIEWS.signupsOpen ? signupsOpen : view === VIEWS.sinceOneMonth ? sinceOneMonth : noLineup;
 </script>
 
-<SignupSummary gigs="{gigs}" />
+<style>
+  .link:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  button.link:hover {
+    filter: none;
+  }
+  button.link {
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+    padding-left: 0;
+    padding-right: 0;
+    height: auto;
+    width: auto;
+  }
+</style>
+
+<h1>Gig signup admin</h1>
+
+{#if view === VIEWS.signupsOpen}
+  <p>
+    Showing all upcoming gigs.
+    <button class="link" on:click="{() => (view = VIEWS.noLineup)}">Show only upcoming gigs without a lineup</button>
+    &#32;|
+    <button class="link" on:click="{() => (view = VIEWS.sinceOneMonth)}">Show all gigs since one month back</button>
+  </p>
+{:else if view === VIEWS.noLineup}
+  <p>
+    Showing upcoming gigs without a lineup.
+    <button class="link" on:click="{() => (view = VIEWS.signupsOpen)}">Show all upcoming gigs</button>.
+    &#32;|
+    <button class="link" on:click="{() => (view = VIEWS.sinceOneMonth)}">Show all gigs since one month back</button>
+  </p>
+{:else}
+  <p>
+    Showing all gigs since one month back.
+    <button class="link" on:click="{() => (view = VIEWS.noLineup)}">Show only upcoming gigs without a lineup</button>
+    &#32;|
+    <button class="link" on:click="{() => (view = VIEWS.signupsOpen)}">Show all upcoming gigs</button>.
+  </p>
+{/if}
+<SignupAdmin gigs="{gigs}" />

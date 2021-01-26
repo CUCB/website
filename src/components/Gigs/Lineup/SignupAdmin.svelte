@@ -1,8 +1,10 @@
 <script>
-  import { Set, Map, fromJS, getIn } from "immutable";
+  import { Set, Map, fromJS } from "immutable";
   import { makeTitle, themeName } from "../../../view";
   import TooltipText from "../../TooltipText.svelte";
-  export let gigs;
+  import { DateTime } from "luxon";
+  export let gigs = [];
+  gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date));
   $: people = Set(gigs.flatMap((gig) => gig.lineup.map((person) => person.user)));
   $: sortedPeople = fromJS(people.toArray()).sortBy((v) => `${v.get("first")} ${v.get("last")}`);
   $: gigsForPerson = Map(
@@ -76,6 +78,23 @@
       .sortBy((person) => availabilities.get(person.get("id")) || 4)
       .sortBy((person) => approvedLineup.get(person.get("id")) || 2);
   }
+
+  String.prototype.hashCode = function () {
+    var hash = 0;
+    if (this.length == 0) {
+      return hash;
+    }
+    for (var i = 0; i < this.length; i++) {
+      var char = this.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+  };
+
+  function hash(id) {
+    return id * ("" + gigs.map((gig) => gig.id).reduce((a, b) => a + b, 0)).hashCode();
+  }
 </script>
 
 <style lang="scss">
@@ -125,14 +144,14 @@
     white-space: initial;
   }
   .person div {
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   th[scope="row"],
   .gap {
     position: sticky;
-    left: 0px;
+    left: 0;
     @include themeify($themes) {
       background: themed("background");
     }
@@ -140,7 +159,6 @@
   }
   .table {
     display: grid;
-    grid-template-columns: auto;
     grid-auto-columns: min-content;
     grid-auto-flow: dense;
     max-width: 95vw;
@@ -150,17 +168,19 @@
   tr {
     display: contents;
   }
-  .name, .gap {
+  .name,
+  .gap {
     grid-column: 1;
   }
   .gap {
-      grid-row: 1;
+    grid-row: 1;
   }
-  th:not([scope='row']) {
-      grid-row: 1;
+  th:not([scope="row"]) {
+    grid-row: 1;
   }
 </style>
 
+<svelte:options immutable="{true}" />
 <svelte:head>
   <title>{makeTitle('Gig signups')}</title>
 </svelte:head>
@@ -168,15 +188,17 @@
 <div class="table theme-{$themeName}">
   <tr>
     <td class="gap"></td>
-    {#each gigs as gig (gig.id)}
+    {#each gigs as gig (hash(gig.id))}
       <th scope="col" class="rotate">
-        <button on:click="{availabilitySort(gig)}"><div tabindex="-1">{gig.date}&#32;{gig.title}</div></button>
+        <button on:click="{availabilitySort(gig)}"><div tabindex="-1">
+            {DateTime.fromISO(gig.date).toFormat('dd LLL')}&#32;{gig.title}
+          </div></button>
       </th>
     {/each}
   </tr>
-  {#each sortedPeople.toJS() as person (person.id)}
+  {#each sortedPeople.toJS() as person (hash(person.id))}
     <tr>
-      <th class="name" scope="row">{person.first}&nbsp;{person.last}</th>
+      <th class="name" data-test="person-name" scope="row">{person.first}&nbsp;{person.last}</th>
       {#each gigsForPerson.get(person.id) as gig}
         <td class="person {signupStatus(gig)} {lineupStatus(gig)}">
           {#if signupStatus(gig) || lineupStatus(gig)}

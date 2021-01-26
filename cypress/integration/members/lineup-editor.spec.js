@@ -18,43 +18,50 @@ import {
 
 const click = ($el) => $el.click();
 
-describe("lineup editor", () => {
-  let signups = [
-    // Names from http://tabbycats.club/
-    {
-      user: { first: "Huggable", last: "Treasurechest", gig_notes: "Can only lead on fiddle", user_prefs: ["leader"] },
-      user_available: true,
-      user_instruments: [["Fiddle", "Stringy"], "Mandolin"],
-      user_notes: "Fiddle if possible, please",
+let signups = [
+  // Names from http://tabbycats.club/
+  {
+    user: { first: "Huggable", last: "Treasurechest", gig_notes: "Can only lead on fiddle", user_prefs: ["leader"] },
+    user_available: true,
+    user_instruments: [["Fiddle", "Stringy"], "Mandolin"],
+    user_notes: "Fiddle if possible, please",
+  },
+  {
+    user: {
+      first: "Infinite",
+      last: "Smasher",
+      gig_notes: "",
+      user_prefs: ["soundtech"],
+      user_instruments: ["Drum(s)", "Cajón"],
     },
-    {
-      user: {
-        first: "Infinite",
-        last: "Smasher",
-        gig_notes: "",
-        user_prefs: ["soundtech"],
-        user_instruments: ["Drum(s)", "Cajón"],
-      },
-      user_available: true,
-      user_instruments: ["Bodhran"],
-      user_notes: "",
-    },
-    {
-      user: { first: "Poofy", last: "Bubby", gig_notes: "", user_prefs: ["soundtech", "driver", "car"] },
-      user_available: true,
-      user_only_if_necessary: true,
-      user_instruments: ["Guitar", "Whistle(s)"],
-      user_notes: "",
-    },
-    {
-      user: { first: "Sneaky", last: "Burglar", gig_notes: "", user_prefs: [] },
-      user_available: false,
-      user_only_if_necessary: false,
-      user_instruments: [],
-      user_notes: "Can't make this one",
-    },
-  ];
+    user_available: true,
+    user_instruments: ["Bodhran"],
+    user_notes: "",
+  },
+  {
+    user: { first: "Poofy", last: "Bubby", gig_notes: "", user_prefs: ["soundtech", "driver", "car"] },
+    user_available: true,
+    user_only_if_necessary: true,
+    user_instruments: ["Guitar", "Whistle(s)"],
+    user_notes: "",
+  },
+  {
+    user: { first: "Sneaky", last: "Burglar", gig_notes: "", user_prefs: [] },
+    user_available: false,
+    user_only_if_necessary: false,
+    user_instruments: [],
+    user_notes: "Can't make this one",
+  },
+  {
+    user: { first: "Old Man", last: "Ringpop", gig_notes: "", user_prefs: [] },
+    user_available: false,
+    user_only_if_necessary: false,
+    user_instruments: ["Kazoo", "Bombarde"],
+    user_notes: "",
+  },
+];
 
+describe("lineup editor", () => {
   let signupsToInsert;
   beforeEach(() => {
     let melodeonId, clarinetId;
@@ -644,5 +651,186 @@ describe("lineup editor", () => {
         .its("status")
         .should("eq", 403);
     });
+  });
+});
+
+describe.only("signup admin", () => {
+    let signupsToInsert;
+  before(() => {
+    let melodeonId, clarinetId;
+    cy.executeMutation(CreateGig, {
+      variables: {
+        id: 15274,
+        title: "Cypress Demo Gig",
+        type: 1,
+        adminsOnly: false,
+        allowSignups: true,
+      },
+    });
+    cy.executeMutation(DeleteGig, { variables: { id: 15275 } });
+    cy.executeMutation(ClearLineupForGig, { variables: { id: 15274 } });
+    cy.executeQuery(AllAttributes)
+      .its("cucb_user_pref_types")
+      .then((attributeList) => {
+        let attributeIds = new Map();
+        for (let attribute of attributeList) attributeIds.set(attribute.name.split(".")[1], attribute.id);
+        cy.executeQuery(AllInstrumentNames)
+          .its("cucb_instruments")
+          .then((instrumentList) => {
+            let userIdBase = 283472;
+            let userInstrumentIdBase = 283479;
+            let userInstrumentCount = 0;
+            let userCount = 0;
+            signupsToInsert = [];
+            let instrumentIds = new Map();
+            for (let instrument of instrumentList) {
+              instrumentIds = instrumentIds.set(instrument.name, instrument.id);
+            }
+            melodeonId = instrumentIds.get("Melodeon");
+            clarinetId = instrumentIds.get("Clarinet");
+            for (let person of signups) {
+              person.user.id = userIdBase * ++userCount;
+              if (
+                person.user_instruments &&
+                person.user_instruments.length > 0 &&
+                (typeof person.user_instruments[0] === "string" ||
+                  (typeof person.user_instruments[0] === "object" && person.user_instruments[0].hasOwnProperty(0)))
+              ) {
+                person.user_instruments = person.user_instruments.map((name) => {
+                  let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+                  return {
+                    id: userInstrumentIdBase * ++userInstrumentCount,
+                    instr_id: instrumentIds.get(fields.name),
+                    ...fields,
+                  };
+                });
+                person.user.user_instruments =
+                  person.user.user_instruments &&
+                  person.user.user_instruments.map((name) => {
+                    let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+                    return {
+                      id: userInstrumentIdBase * ++userInstrumentCount,
+                      instr_id: instrumentIds.get(fields.name),
+                      ...fields,
+                    };
+                  });
+              }
+              let userPrefs = person.user.user_prefs.map((name) => ({
+                pref_id: attributeIds.get(name),
+                value: true,
+              }));
+              let signupInstruments =
+                person.user_instruments &&
+                person.user_instruments.map(({ id, instr_id, nickname }) => ({
+                  approved: null,
+                  user_instrument: {
+                    data: {
+                      id,
+                      instr_id,
+                      user_id: person.user.id,
+                      nickname,
+                    },
+                    on_conflict: OnConflictUserInstruments,
+                  },
+                }));
+              let nonSignupInstruments =
+                (person.user.user_instruments && {
+                  user_instruments: {
+                    data: person.user.user_instruments.map(({ id, instr_id, nickname }) => ({
+                      id,
+                      instr_id,
+                      nickname,
+                    })),
+                    on_conflict: OnConflictUserInstruments,
+                  },
+                }) ||
+                {};
+              signupsToInsert.push({
+                ...person,
+                gig_id: 15274,
+                user: {
+                  data: {
+                    email: `user${person.user.id}@lineup-edit.or`,
+                    username: `cypress_gig_lineup_u${person.user.id}`,
+                    admin: 9,
+                    ...person.user,
+                    user_prefs: { data: userPrefs, on_conflict: OnConflictUserPrefs },
+                    ...nonSignupInstruments,
+                  },
+                  on_conflict: OnConflictUser,
+                },
+                user_instruments: { data: signupInstruments, on_conflict: OnConflictLineupInstruments },
+                leader: false,
+                money_collector: false,
+                money_collector_notified: false,
+                equipment: false,
+                driver: false,
+                approved: null,
+              });
+            }
+            cy.executeMutation(DeleteUsers, {
+              variables: { ids: signupsToInsert.map((signup) => signup.user.data.id) },
+            });
+            cy.executeMutation(CreateLineup, { variables: { entries: signupsToInsert } });
+            cy.executeMutation(DeleteUserInstruments, { variables: { userId: 27382 } });
+            cy.executeMutation(CreateUser, {
+              variables: {
+                id: 27382,
+                username: "cypress_president",
+                saltedPassword: HASHED_PASSWORDS.abc123,
+                admin: 2,
+                email: "cucb.president@cypress.io",
+                firstName: "Cypress",
+                lastName: "President",
+                userInstruments: {
+                  data: [
+                    {
+                      id: 53257432,
+                      instr_id: melodeonId,
+                    },
+                    {
+                      id: 53257433,
+                      instr_id: clarinetId,
+                    },
+                  ],
+                  on_conflict: OnConflictUserInstruments,
+                },
+              },
+            });
+          });
+      });
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 27250,
+        username: "cypress_user",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 9,
+        email: "cypress.user@cypress.io",
+        firstName: "Cypress",
+        lastName: "User",
+      },
+    });
+  });
+
+  it("is not accessible to normal users", () => {
+      cy.login("cypress_user", "abc123");
+      cy.request({ url: "/members/gigs/signups", failOnStatusCode: false }).its("status").should("eq", 403);
+  });
+
+  it("is accessible to the president", () => {
+      cy.login("cypress_president", "abc123");
+      cy.visit("/members/gigs/signups");
+      cy.contains("Cypress Demo Gig").should("be.visible");
+      let peopleCount = null;
+      cy.get("[data-test=person-name]").then(elements => {
+          let names = Cypress.$.map(elements, (e) => e.innerHTML);
+          expect(names).to.have.length.at.least(signups.length).and.be.ascending;
+          peopleCount = names.length;
+      });
+      cy.contains("Cypress Demo Gig").click();
+      cy.get("[data-test=person-name]").then(elements => {
+          let names = Cypress.$.map(elements, (e) => e.innerHTML);
+          expect(names).to.have.length(peopleCount).and.not.be.ascending;
+      });
   });
 });

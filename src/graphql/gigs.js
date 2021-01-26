@@ -694,10 +694,11 @@ export const QuerySingleGigSignupSummary = gql`
 
 export const QueryAllGigSignupSummary = gql`
   query QueryGigSignupSummary($since: date!) {
-    signupsOpen: cucb_gigs(where: { allow_signups: { _eq: true } }) {
+    signupsOpen: cucb_gigs(where: { allow_signups: { _eq: true }, admins_only: { _eq: false } }) {
       id
       title
       date
+      sort_date
       lineup {
         user {
           first
@@ -711,11 +712,12 @@ export const QueryAllGigSignupSummary = gql`
         user_notes
       }
     }
-    sinceOneMonth: cucb_gigs_lineups(distinct_on: [gig_id], where: { gig: { date: { _gt: $since } } }) {
+    since: cucb_gigs_lineups(distinct_on: [gig_id], where: { gig: { date: { _gt: $since } } }) {
       gig {
         id
         title
         date
+        sort_date
         lineup {
           user {
             first
