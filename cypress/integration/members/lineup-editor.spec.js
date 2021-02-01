@@ -265,7 +265,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`)
                 .should("be.visible")
                 .click()
-                .hasMouseTooltip(`${person.user.first} can lead`);
+                .hasTooltip(`${person.user.first} can lead`);
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`).should(
                 "not.exist",
@@ -275,7 +275,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`)
                 .should("be.visible")
                 .click()
-                .hasMouseTooltip(`${person.user.first} can tech`);
+                .hasTooltip(`${person.user.first} can tech`);
             } else {
               cy.get(
                 `[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`,
@@ -295,7 +295,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`)
                 .should("be.visible")
                 .click()
-                .hasMouseTooltip(`${person.user.first} has a car`);
+                .hasTooltip(`${person.user.first} has a car`);
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`).should(
                 "not.exist",
@@ -654,7 +654,7 @@ describe("lineup editor", () => {
   });
 });
 
-describe.only("signup admin", () => {
+describe("signup admin", () => {
     let signupsToInsert;
   before(() => {
     let melodeonId, clarinetId;

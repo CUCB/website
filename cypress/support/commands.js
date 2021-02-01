@@ -80,16 +80,10 @@ Cypress.Commands.add("cssProperty", (name) =>
 Cypress.Commands.add("hasTooltip", { prevSubject: true }, (subject, content) => {
   // If you're having trouble with this command, try hasMouseTooltip.
   // Focus for tippy elements takes 100ms or so to start working and that command is cheaper than hardcoding a wait
+  cy.get("[data-test=tooltip-loaded]").should("exist");
   cy.wrap(subject).focus();
   cy.get("[data-test='tooltip']").contains(content).should("be.visible");
   cy.wrap(subject).blur();
-});
-
-Cypress.Commands.add("hasMouseTooltip", { prevSubject: true }, (subject, content) => {
-  // Use mouse events to trigger tooltips to avoid having to wait until the element is focusable
-  cy.wrap(subject).trigger("mouseout").trigger("mouseenter");
-  cy.get("[data-test='tooltip']").contains(content).should("be.visible");
-  cy.wrap(subject).trigger("mouseout");
 });
 
 Cypress.Commands.add("paste", { prevSubject: true }, (subject, content) => {

@@ -24,6 +24,11 @@
       allowHTML: true,
       theme: "cucb",
     });
+    if (window.Cypress) {
+        let node = document.createElement("span");
+        node.setAttribute("data-test", "tooltip-loaded");
+        document.body.appendChild(node);
+    }
   });
 
   onDestroy(() => {

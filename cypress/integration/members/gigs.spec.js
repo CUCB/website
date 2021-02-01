@@ -198,10 +198,10 @@ describe("gig summary", () => {
       cy.contains(`Twizzly Dialy`).should("be.visible");
 
       cy.log("Shows instrument with nickname on hover");
-      cy.contains(`Eigenharp`).hasMouseTooltip("Cluck cluck");
+      cy.contains(`Eigenharp`).hasTooltip("Cluck cluck");
 
       cy.log("Shows who's leading");
-      cy.get("[data-test='is-leading']").hasMouseTooltip("Leady is leading");
+      cy.get("[data-test='is-leading']").hasTooltip("Leady is leading");
     });
 
     it("doesn't show financial information or admin notes", () => {
