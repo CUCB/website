@@ -878,7 +878,7 @@ describe("signup admin", () => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names.slice(0, 2)).to.eql(["Floofy Beggar", "Sparkly Tiger"]);
       });
-      cy.get("[data-test=gig-title-52349] > .svelte-1j570eu").click();
+      cy.get("[data-test=gig-title-52349]").click();
       cy.get("[data-test=person-name]").then((elements) => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names.slice(0, 2)).to.contain("Floofy Beggar", "Sleepy Prince");
