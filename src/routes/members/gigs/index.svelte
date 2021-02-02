@@ -73,7 +73,7 @@
           variables: { gig_id },
       })).data.cucb_gigs_lineups;
     } catch (e){
-        console.log(e)
+        console.error(e)
     }
 
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {

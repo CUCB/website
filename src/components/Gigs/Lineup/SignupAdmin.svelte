@@ -1,11 +1,13 @@
 <script>
-  import { Set, Map, fromJS } from "immutable";
+  import { List, Map, fromJS } from "immutable";
   import { makeTitle, themeName } from "../../../view";
   import TooltipText from "../../TooltipText.svelte";
   import { DateTime } from "luxon";
   export let gigs = [];
   gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date));
-  $: people = Set(gigs.flatMap((gig) => gig.lineup.map((person) => person.user)));
+  let sortedBy = null;
+  $: people = List(Map(gigs.flatMap((gig) => gig.lineup.map((person) => [person.user.id, person.user]))).values());
+  $: people && (sortedBy = null);
   $: sortedPeople = fromJS(people.toArray()).sortBy((v) => `${v.get("first")} ${v.get("last")}`);
   $: gigsForPerson = Map(
     people.map((user) => [
@@ -77,6 +79,7 @@
       .sortBy((person) => `${person.first} ${person.last}`)
       .sortBy((person) => availabilities.get(person.get("id")) || 4)
       .sortBy((person) => approvedLineup.get(person.get("id")) || 2);
+    sortedBy = gig.id;
   }
 
   String.prototype.hashCode = function () {
@@ -189,10 +192,12 @@
   <tr>
     <td class="gap"></td>
     {#each gigs as gig (hash(gig.id))}
-      <th scope="col" class="rotate">
-        <button on:click="{availabilitySort(gig)}"><div tabindex="-1">
-            {DateTime.fromISO(gig.date).toFormat('dd LLL')}&#32;{gig.title}
-          </div></button>
+      <th scope="col">
+        <button
+          on:click="{availabilitySort(gig)}"
+          data-test="gig-title-{gig.id}"
+          aria-selected="{sortedBy === gig.id ? true : false}"
+        ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat('dd LLL')}&#32;{gig.title}</div></button>
       </th>
     {/each}
   </tr>
@@ -213,6 +218,7 @@
                   'user',
                   'gig_notes',
                 ]) ? `\nGeneral notes: ${gig.getIn(['signup', 'user', 'gig_notes'])}` : ``}`}"
+              data-test="signup-details-{person.id}-{gig.get('id')}"
             >
               <div style="width:100%; height: 100%">
                 {#if gig.getIn(['signup', 'user_available'])}
