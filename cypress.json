@@ -8,5 +8,6 @@
     "runMode": 2,
     "openMode": 0
   },
-  "pageLoadTimeout": 600000
+  "pageLoadTimeout": 600000,
+  "experimentalStudio": true
 }

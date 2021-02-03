@@ -679,7 +679,7 @@ export const QueryGigType = gql`
   }
 `;
 
-export const QuerySignupSummary = gql`
+export const QuerySingleGigSignupSummary = gql`
   query QuerySignupSummary($gig_id: bigint!) {
     cucb_gigs_lineups(where: { gig_id: { _eq: $gig_id } }) {
       user {
@@ -688,6 +688,49 @@ export const QuerySignupSummary = gql`
       }
       user_available
       user_only_if_necessary
+    }
+  }
+`;
+
+export const QueryAllGigSignupSummary = gql`
+  query QueryGigSignupSummary($since: date!) {
+    signupsOpen: cucb_gigs(where: { allow_signups: { _eq: true }, admins_only: { _eq: false } }) {
+      id
+      title
+      date
+      sort_date
+      lineup {
+        user {
+          first
+          last
+          id
+          gig_notes
+        }
+        approved
+        user_available
+        user_only_if_necessary
+        user_notes
+      }
+    }
+    since: cucb_gigs_lineups(distinct_on: [gig_id], where: { gig: { date: { _gt: $since } } }) {
+      gig {
+        id
+        title
+        date
+        sort_date
+        lineup {
+          user {
+            first
+            last
+            id
+            gig_notes
+          }
+          approved
+          user_available
+          user_only_if_necessary
+          user_notes
+        }
+      }
     }
   }
 `;

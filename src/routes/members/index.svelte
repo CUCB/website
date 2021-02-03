@@ -16,9 +16,11 @@
 </script>
 
 <script>
-  import GigSignup from "../../components/Gigs/Signup.svelte";
+import GigSignup from "../../components/Gigs/Signup.svelte";
   import { makeTitle } from "../../view";
+  import { stores} from "@sapper/app";
   export let gigSignups, userInstruments;
+  let { session } = stores();
 </script>
 
 <svelte:head>
@@ -28,6 +30,9 @@
 <h1>Members</h1>
 
 <h2>Gig signup</h2>
+{#if ["webmaster", "president", "secretary"].includes($session.hasuraRole)}
+    <p>You're an important person. You can <a href="/members/gigs/signups">view the gig signup summary</a>.</p>
+{/if}
 {#each gigSignups as gig}
   <GigSignup {gig} {userInstruments} />
 {:else}No gigs are open for signups at the moment :(.{/each}

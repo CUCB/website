@@ -18,43 +18,50 @@ import {
 
 const click = ($el) => $el.click();
 
-describe("lineup editor", () => {
-  let signups = [
-    // Names from http://tabbycats.club/
-    {
-      user: { first: "Huggable", last: "Treasurechest", gig_notes: "Can only lead on fiddle", user_prefs: ["leader"] },
-      user_available: true,
-      user_instruments: [["Fiddle", "Stringy"], "Mandolin"],
-      user_notes: "Fiddle if possible, please",
+let signups = [
+  // Names from http://tabbycats.club/
+  {
+    user: { first: "Huggable", last: "Treasurechest", gig_notes: "Can only lead on fiddle", user_prefs: ["leader"] },
+    user_available: true,
+    user_instruments: [["Fiddle", "Stringy"], "Mandolin"],
+    user_notes: "Fiddle if possible, please",
+  },
+  {
+    user: {
+      first: "Infinite",
+      last: "Smasher",
+      gig_notes: "",
+      user_prefs: ["soundtech"],
+      user_instruments: ["Drum(s)", "Cajón"],
     },
-    {
-      user: {
-        first: "Infinite",
-        last: "Smasher",
-        gig_notes: "",
-        user_prefs: ["soundtech"],
-        user_instruments: ["Drum(s)", "Cajón"],
-      },
-      user_available: true,
-      user_instruments: ["Bodhran"],
-      user_notes: "",
-    },
-    {
-      user: { first: "Poofy", last: "Bubby", gig_notes: "", user_prefs: ["soundtech", "driver", "car"] },
-      user_available: true,
-      user_only_if_necessary: true,
-      user_instruments: ["Guitar", "Whistle(s)"],
-      user_notes: "",
-    },
-    {
-      user: { first: "Sneaky", last: "Burglar", gig_notes: "", user_prefs: [] },
-      user_available: false,
-      user_only_if_necessary: false,
-      user_instruments: [],
-      user_notes: "Can't make this one",
-    },
-  ];
+    user_available: true,
+    user_instruments: ["Bodhran"],
+    user_notes: "",
+  },
+  {
+    user: { first: "Poofy", last: "Bubby", gig_notes: "", user_prefs: ["soundtech", "driver", "car"] },
+    user_available: true,
+    user_only_if_necessary: true,
+    user_instruments: ["Guitar", "Whistle(s)"],
+    user_notes: "",
+  },
+  {
+    user: { first: "Sneaky", last: "Burglar", gig_notes: "", user_prefs: [] },
+    user_available: false,
+    user_only_if_necessary: false,
+    user_instruments: [],
+    user_notes: "Can't make this one",
+  },
+  {
+    user: { first: "Old Man", last: "Ringpop", gig_notes: "", user_prefs: [] },
+    user_available: false,
+    user_only_if_necessary: false,
+    user_instruments: ["Kazoo", "Bombarde"],
+    user_notes: "",
+  },
+];
 
+describe("lineup editor", () => {
   let signupsToInsert;
   beforeEach(() => {
     let melodeonId, clarinetId;
@@ -258,7 +265,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`)
                 .should("be.visible")
                 .click()
-                .hasMouseTooltip(`${person.user.first} can lead`);
+                .hasTooltip(`${person.user.first} can lead`);
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`).should(
                 "not.exist",
@@ -268,7 +275,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`)
                 .should("be.visible")
                 .click()
-                .hasMouseTooltip(`${person.user.first} can tech`);
+                .hasTooltip(`${person.user.first} can tech`);
             } else {
               cy.get(
                 `[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`,
@@ -288,7 +295,7 @@ describe("lineup editor", () => {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`)
                 .should("be.visible")
                 .click()
-                .hasMouseTooltip(`${person.user.first} has a car`);
+                .hasTooltip(`${person.user.first} has a car`);
             } else {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`).should(
                 "not.exist",
@@ -643,6 +650,252 @@ describe("lineup editor", () => {
       })
         .its("status")
         .should("eq", 403);
+    });
+  });
+});
+
+let currentDate = Cypress.DateTime.local();
+
+let signupAdminGigs = [
+  {
+    date: currentDate.minus({ weeks: 1 }),
+    title: "Gone gig",
+    allowSignups: false,
+  },
+  {
+    date: currentDate.plus({ days: 2 }),
+    title: "Soon gig",
+    allowSignups: false,
+  },
+  {
+    date: currentDate.plus({ weeks: 2 }),
+    title: "Then gig",
+    allowSignups: true,
+  },
+  {
+    date: currentDate.plus({ weeks: 3 }),
+    title: "Further gig",
+    allowSignups: true,
+  },
+];
+
+let signupAdminStatuses = [
+  {
+    first: "Sparkly",
+    last: "Tiger",
+    gigs: [
+      { approved: true, user_available: true, user_only_if_necessary: false },
+      { user_available: true, user_only_if_necessary: false },
+      { approved: null, user_available: true, user_only_if_necessary: true },
+      { approved: null, user_available: true, user_only_if_necessary: true },
+    ],
+    gig_notes: "Some general note about... something general?",
+  },
+  {
+    first: "Teeny",
+    last: "Mug",
+    gigs: [null, { approved: true }, null, null],
+  },
+  {
+    first: "Sleepy",
+    last: "Prince",
+    gigs: [
+      { user_available: false },
+      {
+        approved: true,
+        user_available: true,
+        user_only_if_necessary: true,
+        user_notes: "Need to be up early the next morning, so would rather not play this",
+      },
+      { user_available: true, user_only_if_necessary: false },
+      null,
+    ],
+  },
+  {
+    first: "Floofy",
+    last: "Beggar",
+    gigs: [
+      null,
+      { user_available: false },
+      { user_available: true, user_only_if_necessary: false, user_notes: "I have some notes for this gig" },
+      { user_available: true, user_only_if_necessary: false, user_notes: "I have some different notes for this gig" },
+    ],
+    gig_notes: "I also have general notes",
+  },
+  {
+    first: "L'il",
+    last: "Cherio",
+    gigs: [null, { user_available: true, user_only_if_necessary: true }, null, null],
+  },
+];
+
+describe("signup admin", () => {
+  let signupsToInsert;
+  before(() => {
+    let gigIds = [...Array(4).keys()].map((offset) => offset + 52347);
+    for (let index in signupAdminGigs) {
+      let gig = signupAdminGigs[index];
+      gig.id = gigIds[index];
+      cy.executeMutation(CreateGig, {
+        variables: {
+          ...gig,
+          adminsOnly: false,
+          type: 1,
+        },
+      });
+      cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
+    }
+    signupsToInsert = [];
+    let userIdBase = 737632;
+    for (let personIndex in signupAdminStatuses) {
+      let person = signupAdminStatuses[personIndex];
+      person.id = userIdBase + parseInt(personIndex);
+      for (let gigIndex in signupAdminGigs) {
+        let gigSignup = person.gigs[gigIndex];
+        if (gigSignup) {
+          gigSignup.gig_id = signupAdminGigs[gigIndex].id;
+          signupsToInsert.push({
+            user: {
+              data: {
+                id: person.id,
+                email: `user${person.id}@signup-adm.in`,
+                username: `cypress_gig_signup_admin_u${person.id}`,
+                admin: 9,
+                first: person.first,
+                last: person.last,
+                gig_notes: person.gig_notes,
+              },
+              on_conflict: OnConflictUser,
+            },
+            ...gigSignup,
+          });
+        }
+      }
+    }
+    cy.executeMutation(CreateLineup, { variables: { entries: signupsToInsert } });
+  });
+
+  it("is not accessible to normal users", () => {
+    cy.login("cypress_user", "abc123");
+    cy.request({ url: "/members/gigs/signups", failOnStatusCode: false }).its("status").should("eq", 403);
+  });
+
+  context("authorised as president", () => {
+    beforeEach(() => {
+      cy.login("cypress_president", "abc123");
+      cy.visit("/members/gigs/signups");
+      cy.get(`[data-test=tooltip-loaded]`).should("exist");
+    });
+
+    it("is accessible", () => {
+      cy.contains("Then gig").should("be.visible");
+      let peopleCount = null;
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML);
+        expect(names).to.have.length.at.least(signups.length).and.be.ascending;
+        peopleCount = names.length;
+      });
+      cy.contains("Then gig").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML);
+        expect(names).to.have.length(peopleCount).and.not.be.ascending;
+      });
+    });
+
+    it("shows icons for signup status and notes", () => {
+      cy.get("[data-test=signup-details-737635-52349] i").should("have.class", "la-check");
+      cy.get("[data-test=signup-details-737635-52349] i").should("have.class", "la-comment");
+      cy.get("[data-test=signup-details-737632-52350] i").should("have.class", "la-question");
+      cy.get("[data-test=show-past-month]").click();
+      cy.get("[data-test=signup-details-737634-52347] i").should("have.class", "la-times");
+      cy.get("[data-test=signup-details-737634-52347] i").should("not.have.class", "la-comment");
+      cy.get("[data-test=signup-details-737633-52348]").should("be.visible");
+      cy.get("[data-test=signup-details-737633-52348] i").should("not.exist");
+    });
+
+    it("shows the correct gigs on each view", () => {
+      cy.get("[data-test=gig-title-52347]").should("not.exist");
+      cy.get("[data-test=gig-title-52348]").should("be.visible");
+      cy.get("[data-test=gig-title-52349]").should("be.visible");
+      cy.get("[data-test=gig-title-52350]").should("be.visible");
+      cy.get("[data-test=show-upcoming-no-lineup]").click();
+      cy.get("[data-test=gig-title-52347]").should("not.exist");
+      cy.get("[data-test=gig-title-52348]").should("not.exist");
+      cy.get("[data-test=gig-title-52349]").should("be.visible");
+      cy.get("[data-test=gig-title-52350]").should("be.visible");
+      cy.get("[data-test=show-past-month]").click();
+      cy.get("[data-test=gig-title-52347]").should("be.visible");
+      cy.get("[data-test=gig-title-52348]").should("be.visible");
+      cy.get("[data-test=gig-title-52349]").should("be.visible");
+      cy.get("[data-test=gig-title-52350]").should("be.visible");
+    });
+
+    it("sorts signups for different gigs", () => {
+      cy.get("[data-test=gig-title-52348]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names.slice(0, 2)).to.contain("Sleepy Prince", "Teeny Mug");
+        expect(names.slice(2, 5)).to.eql(["Sparkly Tiger", "L'il Cherio", "Floofy Beggar"]);
+      });
+      cy.get("[data-test=gig-title-52349]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names.slice(0, 2)).to.contain("Sleepy Prince", "Floofy Beggar");
+        expect(names[2]).to.equal("Sparkly Tiger");
+      });
+    });
+
+    it("sorts signups across different views", () => {
+      cy.get("[data-test=gig-title-52348]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names.slice(0, 2)).to.contain("Sleepy Prince", "Teeny Mug");
+        expect(names.slice(2, 5)).to.eql(["Sparkly Tiger", "L'il Cherio", "Floofy Beggar"]);
+      });
+      cy.get("[data-test=show-past-month]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names).to.be.ascending;
+      });
+      cy.get("[data-test=gig-title-52347]").pipe(click).should("have.attr", "aria-selected", "true");
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names.slice(0, 2)).to.eql(["Sparkly Tiger", "Sleepy Prince"]);
+      });
+      cy.get("[data-test=gig-title-52349]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names.slice(0, 2)).to.contain("Floofy Beggar", "Sleepy Prince");
+        expect(names[2]).to.equal("Sparkly Tiger");
+      });
+      cy.get("[data-test=show-upcoming-no-lineup]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names).to.be.ascending;
+      });
+      cy.get("[data-test=gig-title-52350]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names.slice(0, 2)).to.eql(["Floofy Beggar", "Sparkly Tiger"]);
+      });
+      cy.get("[data-test=gig-title-52349]").click();
+      cy.get("[data-test=person-name]").then((elements) => {
+        let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
+        expect(names.slice(0, 2)).to.contain("Floofy Beggar", "Sleepy Prince");
+        expect(names[2]).to.equal("Sparkly Tiger");
+      });
+    });
+
+    it("shows notes in tooltips if they exist", () => {
+      cy.get("[data-test=gig-title-52349]").click();
+      cy.get("[data-test=signup-details-737635-52349]").hasTooltip("Notes: I have some notes for this gig");
+      cy.get("[data-test=signup-details-737635-52349]").hasTooltip("General notes: I also have general notes");
+      cy.get("[data-test=signup-details-737634-52349]").click();
+      cy.get("[data-test=signup-details-737634-52349]").tooltipContents().should("not.contain", "Notes");
+      cy.get("[data-test=signup-details-737632-52349]").hasTooltip("General notes:");
+      cy.get("[data-test=signup-details-737632-52349]").tooltipContents().should("not.contain", "Notes:");
+      cy.get("[data-test=signup-details-737634-52348]").hasTooltip("Notes:");
+      cy.get("[data-test=signup-details-737634-52348]").tooltipContents().should("not.contain", "General notes:");
     });
   });
 });

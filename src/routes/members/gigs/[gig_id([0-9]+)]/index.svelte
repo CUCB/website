@@ -1,5 +1,5 @@
 <script context="module">
-  import { QueryGigDetails, QuerySingleGig, QuerySignupSummary } from "../../../../graphql/gigs";
+  import { QueryGigDetails, QuerySingleGig, QuerySingleGigSignupSummary } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
@@ -11,7 +11,9 @@
     let client = makeClient(this.fetch);
     let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
 
-    let res_gig, res_signup, signupSummary = undefined;
+    let res_gig,
+      res_signup,
+      signupSummary = undefined;
     let gig;
     try {
       res_gig = await client.query({
@@ -28,12 +30,14 @@
     }
 
     try {
-      signupSummary = (await client.query({
-          query: QuerySignupSummary,
+      signupSummary = (
+        await client.query({
+          query: QuerySingleGigSignupSummary,
           variables: { gig_id },
-      })).data.cucb_gigs_lineups;
-    } catch (e){
-        console.log(e)
+        })
+      ).data.cucb_gigs_lineups;
+    } catch (e) {
+      console.error(e);
     }
 
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs_by_pk) {
@@ -65,4 +69,4 @@
 </svelte:head>
 
 <h1>Gigs</h1>
-<Summary {gig} signupGig="{signupGig2}" signups={signupSummary} {userInstruments} />
+<Summary gig="{gig}" signupGig="{signupGig2}" signups="{signupSummary}" userInstruments="{userInstruments}" />
