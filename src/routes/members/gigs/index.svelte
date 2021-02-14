@@ -67,15 +67,6 @@
       return;
     }
 
-    try {
-      signupSummary = (await client.query({
-          query: QuerySingleGigSignupSummary,
-          variables: { gig_id },
-      })).data.cucb_gigs_lineups;
-    } catch (e){
-        console.error(e)
-    }
-
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {
       let gigs = res_gig.data.cucb_gigs;
       // Sort the gigs pre render since the database can't sort by computed field

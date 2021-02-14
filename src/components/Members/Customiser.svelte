@@ -1,5 +1,6 @@
 <script>
   import Popup from "../Popup.svelte";
+  import Select from "../Forms/Select.svelte";
   import { HsvPicker } from "svelte-color-picker";
   import { onMount } from "svelte";
   import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
@@ -17,7 +18,7 @@
   let selectedTheme = settings.get("color");
   let selectedCalendarStartDay = settings.get("calendarStartDay");
 
-  const setDefaultColors = settings => {
+  const setDefaultColors = (settings) => {
     if (typeof getComputedStyle !== "undefined") {
       let color = settings.get("color");
       if (!settings.get(`accent_${color}`) || settings.get(`accent_${color}`) === "null") {
@@ -29,9 +30,7 @@
   const currentLogoColor = () => {
     if (typeof getComputedStyle !== "undefined" && fromCurrentStyle("logo_color").trim()[0] === "#") {
       // If var(--logo_color) is a hex value, return that
-      return fromCurrentStyle("logo_color")
-        .trim()
-        .slice(1);
+      return fromCurrentStyle("logo_color").trim().slice(1);
     } else {
       // As a default, assume it's black
       return "000000";
@@ -48,10 +47,10 @@
       ? settings.get(`logo_${color}`)
       : currentLogoColor();
   $: $calendarStartDay = settings.get("calendarStartDay");
-  let updateLocalStorage = _ => {};
+  let updateLocalStorage = (_) => {};
 
   let updateSession = () => {};
-  const propLocalStorage = name => {
+  const propLocalStorage = (name) => {
     const value = localStorage.getItem(`${name}_${$session.userId}`);
     try {
       return JSON.parse(value);
@@ -60,13 +59,11 @@
     }
   };
 
-  const fromCurrentStyle = prop => {
+  const fromCurrentStyle = (prop) => {
     try {
       return (
         typeof getComputedStyle !== "undefined" &&
-        getComputedStyle(document.documentElement)
-          .getPropertyValue(`--${prop}`)
-          .trim()
+        getComputedStyle(document.documentElement).getPropertyValue(`--${prop}`).trim()
       );
     } catch (e) {
       // Swallow error, probably due to custom properties not being a thing on old devices
@@ -74,13 +71,13 @@
     }
   };
 
-  const rgbStringToHex = triple =>
+  const rgbStringToHex = (triple) =>
     triple &&
     triple
       .split(",")
-      .map(i => parseInt(i))
-      .map(i => i.toString(16))
-      .map(i => (i.length === 1 ? "0" + i : i))
+      .map((i) => parseInt(i))
+      .map((i) => i.toString(16))
+      .map((i) => (i.length === 1 ? "0" + i : i))
       .join("");
 
   function componentToHex(c) {
@@ -115,7 +112,7 @@
       }
     }
 
-    updateLocalStorage = settings => {
+    updateLocalStorage = (settings) => {
       if ($session.userId) {
         for (let prop of updateProps) {
           settings.get(prop) !== undefined &&
@@ -157,21 +154,22 @@
       updateSession(settings);
     }}"
   >
-    <button on:click="{() => (settings = settings.update('accentOpen', x => !x).set('logoOpen', false))}">
+    <button on:click="{() => (settings = settings.update('accentOpen', (x) => !x).set('logoOpen', false))}">
       Change accent colour
     </button>
     <button on:click="{() => (settings = settings.set(`accent_${color}`, null))}">Reset accent colour</button>
-    <button on:click="{() => (settings = settings.update('logoOpen', x => !x).set('accentOpen', false))}">
+    <button on:click="{() => (settings = settings.update('logoOpen', (x) => !x).set('accentOpen', false))}">
       Change logo colour
     </button>
     <button on:click="{() => (settings = settings.set(`logo_${color}`, null))}">Reset logo colour</button>
+    <!-- svelte-ignore a11y-label-has-associated-control-->
     <label>
       Theme
-      <select bind:value="{selectedTheme}">
+      <Select bind:value="{selectedTheme}">
         <option value="default">Default (system settings)</option>
         <option value="light">Light</option>
         <option value="dark">Dark</option>
-      </select>
+      </Select>
     </label>
     <button on:click="{() => (settings = settings.set('color', selectedTheme))}">Set theme</button>
     <label>
@@ -179,12 +177,13 @@
       <input
         type="checkbox"
         checked="{settings.get('spinnyLogo')}"
-        on:change="{() => (settings = settings.update('spinnyLogo', x => !x))}"
+        on:change="{() => (settings = settings.update('spinnyLogo', (x) => !x))}"
       />
     </label>
+    <!-- svelte-ignore a11y-label-has-associated-control-->
     <label>
       Start calendar week on...
-      <select bind:value="{selectedCalendarStartDay}">
+      <Select bind:value="{selectedCalendarStartDay}">
         <option value="mon">Monday</option>
         <option value="tue">Tuesday</option>
         <option value="wed">Wednesday</option>
@@ -192,7 +191,7 @@
         <option value="fri">Friday</option>
         <option value="sat">Saturday</option>
         <option value="sun">Sunday</option>
-      </select>
+      </Select>
     </label>
     <button on:click="{() => (settings = settings.set('calendarStartDay', selectedCalendarStartDay))}">
       Set day
@@ -202,7 +201,7 @@
     <Popup on:close="{() => (settings = settings.set('accentOpen', false))}" width="auto">
       <HsvPicker
         startColor="{accentColor}"
-        on:colorChange="{event => debounce(`accent_${color}`, rgbToHex(event.detail))}"
+        on:colorChange="{(event) => debounce(`accent_${color}`, rgbToHex(event.detail))}"
       />
     </Popup>
   {/if}
@@ -210,7 +209,7 @@
     <Popup on:close="{() => (settings = settings.set('logoOpen', false))}" width="auto">
       <HsvPicker
         startColor="{logoColor}"
-        on:colorChange="{event => debounce(`logo_${color}`, rgbToHex(event.detail))}"
+        on:colorChange="{(event) => debounce(`logo_${color}`, rgbToHex(event.detail))}"
       />
     </Popup>
   {/if}

@@ -1,11 +1,11 @@
 <script>
-  import { fade } from "svelte/transition";
   import { createEventDispatcher } from "svelte";
   import { goto } from "@sapper/app";
   import TooltipText from "../TooltipText.svelte";
   import { Map, Set } from "immutable";
   import { themeName } from "../../view";
   import { DateTime, Settings } from "luxon";
+  import Select from "../Forms/Select.svelte";
   Settings.defaultZoneName = "Europe/London";
   Settings.defaultLocale = "en-gb";
 
@@ -367,19 +367,19 @@
 {#if showSelection}
   <div class="month-selector">
     <!-- svelte-ignore a11y-no-onchange -->
-    <select on:change="{(e) => dispatchEvent('changeDate', { month: e.target.value })}">
+    <Select on:change="{(e) => dispatchEvent('changeDate', { month: e.target.value })}">
       {#each selectableMonths() as month (month)}
         <option value="{month}" selected="{month === displayedMonth.month}">
           {DateTime.local().set({ month }).toFormat('LLLL')}
         </option>
       {/each}
-    </select>
+    </Select>
     <!-- svelte-ignore a11y-no-onchange -->
-    <select on:change="{(e) => dispatchEvent('changeDate', { year: e.target.value })}">
+    <Select on:change="{(e) => dispatchEvent('changeDate', { year: e.target.value })}">
       {#each selectableYears() as year (year)}
         <option value="{year}" selected="{year === displayedMonth.year}">{year}</option>
       {/each}
-    </select>
+    </Select>
   </div>
 {/if}
 <table class="theme-{$themeName}">
@@ -418,8 +418,8 @@
   {#if !showKey}Show key{:else}Hide key{/if}
 </button>
 <div class="key" class:hidden="{!showKey}">
-  <p class="key-title" transition:fade>Key:</p>
-  <ul class="key" transition:fade>
+  <p class="key-title">Key:</p>
+  <ul class="key">
     {#each keyItems.toJS() as item, n}
       <li
         style="--delay: {n * 0.1}s"
