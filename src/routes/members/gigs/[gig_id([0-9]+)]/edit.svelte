@@ -115,7 +115,7 @@
     finance_payment_received,
     finance_caller_paid,
     quote_date;
-  import { makeTitle, themeName } from "../../../../view";
+  import { makeTitle, themeName, createValidityChecker } from "../../../../view";
   import Select from "../../../../components/Forms/Select.svelte";
   import VenueEditor from "../../../../components/Gigs/VenueEditor.svelte";
   import ContactEditor from "../../../../components/Gigs/ContactEditor.svelte";
@@ -131,6 +131,7 @@
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   const { session } = stores();
+  let checkValid = createValidityChecker();
 
   let venue;
   let displayVenueEditor = false;
@@ -238,52 +239,6 @@
     quote_date,
   };
 
-  let validityFields = {};
-
-  const checkValid = (node, options) => {
-    if (options.bothPresent) {
-      if (!validityFields[options.bothPresent.id]) {
-        validityFields[options.bothPresent.id] = [];
-      }
-      validityFields[options.bothPresent.id].push(node);
-    }
-    const changeHandler = () => {
-      for (let key of Object.keys(options.validityErrors)) {
-        if (node.validity[key]) {
-          node.setCustomValidity(options.validityErrors[key]);
-          return;
-        }
-      }
-
-      node.setCustomValidity("");
-
-      if (options.bothPresent) {
-        let presence = validityFields[options.bothPresent.id].map((field) => field.value.length > 0);
-        if (!presence.every((x) => x) && !presence.every((x) => !x)) {
-          for (let field of validityFields[options.bothPresent.id]) {
-            if (!field.value.length) {
-              field.setCustomValidity(options.bothPresent.error);
-            }
-          }
-          return;
-        }
-        for (let field of validityFields[options.bothPresent.id]) {
-          if (field.validationMessage === options.bothPresent.error) {
-            field.setCustomValidity("");
-            field.dispatchEvent(new Event("change"));
-          }
-        }
-      }
-    };
-
-    node.addEventListener("change", changeHandler);
-
-    return {
-      destroy() {
-        node.removeEventListener("change", changeHandler);
-      },
-    };
-  };
 
   function unloadIfSaved(e) {
     if (saved || window.Cypress) {

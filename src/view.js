@@ -24,3 +24,54 @@ export const themeName = writable("");
 
 export const suffix = (n) =>
   ({ one: "st", two: "nd", few: "rd", other: "th" }[new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)]);
+
+export const createValidityChecker = () => {
+  let validityFields = {};
+
+  return (node, options) => {
+    if (options.bothPresent) {
+      if (!validityFields[options.bothPresent.id]) {
+        validityFields[options.bothPresent.id] = [];
+      }
+      validityFields[options.bothPresent.id].push(node);
+    }
+    const changeHandler = () => {
+      if (options.validityErrors) {
+        for (let key of Object.keys(options.validityErrors)) {
+          if (node.validity[key]) {
+            node.setCustomValidity(options.validityErrors[key]);
+            return;
+          }
+        }
+      }
+
+      node.setCustomValidity("");
+
+      if (options.bothPresent) {
+        let presence = validityFields[options.bothPresent.id].map((field) => field.value.length > 0);
+        if (!presence.every((x) => x) && !presence.every((x) => !x)) {
+          for (let field of validityFields[options.bothPresent.id]) {
+            if (!field.value.length) {
+              field.setCustomValidity(options.bothPresent.error);
+            }
+          }
+          return;
+        }
+        for (let field of validityFields[options.bothPresent.id]) {
+          if (field.validationMessage === options.bothPresent.error) {
+            field.setCustomValidity("");
+            field.dispatchEvent(new Event("change"));
+          }
+        }
+      }
+    };
+
+    node.addEventListener("change", changeHandler);
+
+    return {
+      destroy() {
+        node.removeEventListener("change", changeHandler);
+      },
+    };
+  };
+};

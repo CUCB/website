@@ -137,6 +137,14 @@
       - php_title
       - hasura_role
       filter: {}
+  - role: server
+    permission:
+      columns:
+      - id
+      - title
+      - php_title
+      - hasura_role
+      filter: {}
   - role: treasurer
     permission:
       columns:
@@ -2548,6 +2556,38 @@
       filter: {}
 - table:
     schema: cucb
+    name: list042
+  insert_permissions:
+  - role: webmaster
+    permission:
+      check: {}
+      columns:
+      - email
+      backend_only: false
+  select_permissions:
+  - role: server
+    permission:
+      columns:
+      - email
+      filter: {}
+  - role: webmaster
+    permission:
+      columns:
+      - email
+      filter: {}
+  update_permissions:
+  - role: webmaster
+    permission:
+      columns:
+      - email
+      filter: {}
+      check: null
+  delete_permissions:
+  - role: webmaster
+    permission:
+      filter: {}
+- table:
+    schema: cucb
     name: music
   select_permissions:
   - role: blue_gig
@@ -3324,6 +3364,20 @@
         schema: cucb
         name: user_prefs_or_default
     comment: ""
+  insert_permissions:
+  - role: server
+    permission:
+      check: {}
+      set:
+        admin: "9"
+      columns:
+      - email
+      - first
+      - join_date
+      - last
+      - salted_password
+      - username
+      backend_only: false
   select_permissions:
   - role: blue_gig
     permission:
@@ -3439,6 +3493,16 @@
       - last_login_date
       - location_info
       - mobile_contact_info
+      - username
+      filter: {}
+  - role: server
+    permission:
+      columns:
+      - email
+      - first
+      - id
+      - last
+      - salted_password
       - username
       filter: {}
   - role: treasurer
@@ -3579,6 +3643,15 @@
       filter:
         id:
           _ne: X-Hasura-User-Id
+      check: null
+  - role: server
+    permission:
+      columns:
+      - last_login_date
+      - password_reset_deadline
+      - password_reset_token
+      - salted_password
+      filter: {}
       check: null
   - role: treasurer
     permission:

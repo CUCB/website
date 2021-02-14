@@ -1,4 +1,4 @@
-import { CreateUser, HASHED_PASSWORDS } from "../database/users";
+import { CreateUser, DeleteUsersWhere, AppendToList042, DeleteFromList042, UserWithUsername, HASHED_PASSWORDS } from "../database/users";
 
 describe("login page", () => {
   before(() => {
@@ -24,12 +24,11 @@ describe("login page", () => {
   });
 
   it("links to register page", () => {
-    // TODO uncomment this when the register page is created (issue #15)
-    //cy.get("a[data-test=register]").clickLink();
+    cy.get("a[data-test=register]").clickLink();
   });
 
   describe("form", () => {
-    it("accepts a valid username and password", () => {
+    it("accepts a correct username/password combination", () => {
       cy.get("input[data-test=username]").type("cypress_user");
       cy.get("input[data-test=password]").type("abc123");
       cy.get("input[data-test=submit]").click();
@@ -51,12 +50,8 @@ describe("login page", () => {
       cy.get("input[data-test=password]").type("abc1e23{enter}");
       cy.get("[data-test=errors]").contains("Incorrect username or password");
 
-      cy.get("input[data-test=username]")
-        .clear()
-        .type("cypres_user");
-      cy.get("input[data-test=password]")
-        .clear()
-        .type("abc123{enter}");
+      cy.get("input[data-test=username]").clear().type("cypres_user");
+      cy.get("input[data-test=password]").clear().type("abc123{enter}");
       cy.get("[data-test=errors]").contains("Incorrect username or password");
     });
 
@@ -65,9 +60,7 @@ describe("login page", () => {
       cy.get("[data-test=errors]").contains("Missing username or password");
 
       cy.get("input[data-test=username]").type("cypress_user");
-      cy.get("input[data-test=password]")
-        .clear()
-        .type("{enter}");
+      cy.get("input[data-test=password]").clear().type("{enter}");
       cy.get("[data-test=errors]").contains("Missing username or password");
     });
   });
@@ -156,5 +149,118 @@ describe("password verification", () => {
     })
       .its("status")
       .should("eq", 401);
+  });
+});
+
+describe("registration form", () => {
+  before(() => {
+    cy.executeMutation(DeleteUsersWhere, {
+      variables: { where: { _or: [{ username: { _ilike: "%cy-register%" } }, { username: { _eq: "cy456" } }] } },
+    });
+    cy.executeMutation(DeleteFromList042, { variables: { where: { email: { _ilike: "%cy-register%" } } } });
+    cy.executeMutation(AppendToList042, {
+      variables: {
+        objects: ["nonuni@cy-register.test", "cy456@cam.ac.uk"].map((email) => ({ email })),
+      },
+    });
+  });
+  beforeEach(() => {
+    cy.visit("/auth/register");
+  });
+
+  it("has a title", () => {
+    cy.contains("Create an account").should("be.visible");
+  });
+
+  it("has a link to sign up to the mailing list", () => {
+    cy.get("a[data-test='mailinglists']").clickLink();
+  })
+
+  it("accepts valid CRSids and email addresses", () => {
+    cy.get("[data-test=username]").click();
+    cy.get("[data-test=username]").type("ab1234");
+    cy.get("[data-test=username]:invalid").should("have.length", 0);
+    cy.get("[data-test=username]").clear().type("xyz44");
+    cy.get("[data-test=username]:invalid").should("have.length", 0);
+    cy.get("[data-test=username]").clear().type("someone@valid.email");
+    cy.get("[data-test=username]:invalid").should("have.length", 0);
+    cy.get("[data-test=username]").clear().type("abc22@cam.ac.uk");
+    cy.get("[data-test=username]:invalid").should("have.length", 0);
+    cy.get("[data-test=username]").clear().type("XYZ527");
+    cy.get("[data-test=username]:invalid").should("have.length", 0);
+    cy.get("[data-test=username]").clear().type("AxBc57");
+    cy.get("[data-test=username]:invalid").should("have.length", 0);
+  });
+
+  it("rejects invalid CRSids and email addresses", () => {
+    cy.get("[data-test=username]:invalid").should("have.length", 1);
+    cy.get("[data-test=username]").clear().type("someone@");
+    cy.get("[data-test=username]:invalid").should("have.length", 1);
+    cy.get("[data-test=username]").clear().type("@notanemailjustatwitterhandle");
+    cy.get("[data-test=username]:invalid").should("have.length", 1);
+    cy.get("[data-test=username]").clear().type("abc25b");
+    cy.get("[data-test=username]:invalid").should("have.length", 1);
+    cy.get("[data-test=username]").clear().type("XYZ");
+    cy.get("[data-test=username]:invalid").should("have.length", 1);
+  });
+
+  it.skip("rejects signups from emails that aren't on the mailing list", () => {
+    cy.get("[data-test=first-name]").click();
+    cy.get("[data-test=first-name]").type("Cypress");
+    cy.get("[data-test=last-name]").click();
+    cy.get("[data-test=last-name]").type("RegistrationUser");
+    cy.get("[data-test=username]").click();
+    cy.get("[data-test=username]").type("notonthelist@cy-register.test");
+    cy.get("[data-test=password]").click();
+    cy.get("[data-test=password]").type("areallysecurepassword");
+    cy.get("[data-test=password-confirm]").type("areallysecurepassword");
+    cy.get("[type=submit]").click();
+    cy.get("[data-test=error]").contains("mailing list").should("be.visible");
+  });
+
+  it.skip("rejects signups if the provided passwords are not the same", () => {
+    cy.get("[data-test=first-name]").type("Cypress");
+    cy.get("[data-test=last-name]").type("RegistrationUser");
+    cy.get("[data-test=username]").type("cy456");
+    cy.get("[data-test=password]").type("areallysecurepassword");
+    cy.get("[data-test=password-confirm]").type("adifferentreallysecurepassword");
+    cy.get("[type=submit]").click();
+    cy.get("[data-test=password]:invalid").should("have.length", 1);
+    cy.get("[data-test=password-confirm]:invalid").should("have.length", 1);
+    cy.get("[data-test=error]").contains("password").should("be.visible");
+  });
+
+  it.skip("rejects passwords that are too short", () => {
+    cy.get('[data-test=first-name]').type('Cypress');
+    cy.get('[data-test=last-name]').type('RegistrationUser');
+    cy.get('[data-test=username]').type('cy456');
+    cy.get('[data-test=password]').type('short');
+    cy.get('[data-test=password-confirm]').type('short');
+    cy.get("[type=submit]").click();
+    cy.get("[data-test=password]:invalid").should("have.length", 1);
+    cy.get("[data-test=password-confirm]:invalid").should("have.length", 1);
+    cy.get("[data-test=error]").contains("password").should("be.visible");
+  });
+
+  it("accepts CRSids and @cam.ac.uk addresses", () => {
+    cy.get('[data-test=first-name]').type('Cypress');
+    cy.get('[data-test=last-name]').type('RegistrationUser');
+    cy.get('[data-test=username]').type('cy456');
+    cy.get("[data-test=password]").type("areallysecurepassword");
+    cy.get("[data-test=password-confirm]").type("areallysecurepassword");
+    cy.get("[type=submit]").click();
+    cy.get("[data-test=error]").should("not.exist");
+    cy.get("input:invalid").should("not.exist");
+    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
+    cy.executeMutation(DeleteUsersWhere, { variables: { where: { username: { _eq: "cy456" } } } });
+    cy.get('[data-test=first-name]').type('Cypress');
+    cy.get('[data-test=last-name]').type('RegistrationUser');
+    cy.get('[data-test=username]').type('cy456@cam.ac.uk');
+    cy.get("[data-test=password]").type("areallysecurepassword");
+    cy.get("[data-test=password-confirm]").type("areallysecurepassword");
+    cy.get("[type=submit]").click();
+    cy.get("[data-test=error]").should("not.exist");
+    cy.get("input:invalid").should("not.exist");
+    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
   });
 });

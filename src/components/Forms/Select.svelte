@@ -153,8 +153,17 @@
   }
 </style>
 
-<div class="dropdown dropdown-{$themeName}" {disabled}>
-  <select class="dropdown-select" data-test="select-box" aria-label={$$props["aria-label"]} on:change on:blur bind:value bind:this="{select}" {disabled}>
+<div class="dropdown dropdown-{$themeName}" disabled="{disabled}">
+  <select
+    class="dropdown-select"
+    data-test="select-box"
+    aria-label="{$$props['aria-label']}"
+    on:change
+    on:blur
+    bind:value
+    bind:this="{select}"
+    disabled="{disabled}"
+  >
     <slot />
   </select>
 </div>
