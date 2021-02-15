@@ -4,7 +4,7 @@ import compression from "compression";
 import * as sapper from "@sapper/server";
 import session from "express-session";
 import dotenv from "dotenv";
-import { pool } from "./auth";
+import { Pool } from "pg";
 import bodyParser from "body-parser";
 import httpProxy from "http-proxy";
 import { simpleParser } from "mailparser";
@@ -24,7 +24,7 @@ const GRAPHQL_PATH = process.env.GRAPHQL_PATH;
 
 const pgSession = require("connect-pg-simple")(session);
 const apiProxy = httpProxy.createProxyServer();
-apiProxy.on("error", function(err, req, res) {
+apiProxy.on("error", function (err, req, res) {
   res.writeHead(500, {
     "Content-Type": "text/plain",
   });
@@ -43,7 +43,7 @@ const server =
     ? polka()
         .use("/images/committee", sirv("static/static/images/committee", { dev }))
         .use(sirv("static", { dev }))
-        .use("/renderemail", async function(req, res) {
+        .use("/renderemail", async function (req, res) {
           const id = req.query["id"];
           try {
             const email = await fetch(`http://${process.env.EMAIL_POSTFIX_HOST}:8025/api/v1/messages/${id}/download`);
@@ -58,7 +58,7 @@ const server =
     : polka().use(sirv("static", { dev }));
 
 server
-  .all(`${GRAPHQL_PATH}`, function(req, res) {
+  .all(`${GRAPHQL_PATH}`, function (req, res) {
     apiProxy.web(req, res, { target: GRAPHQL_REMOTE });
   })
   .use(
@@ -66,7 +66,14 @@ server
     bodyParser.urlencoded({ extended: true }),
     session({
       store: new pgSession({
-        pool: pool(),
+        pool: new Pool({
+          user: process.env.PG_USER,
+          host: process.env.PG_HOST,
+          database: process.env.PG_DATABASE,
+          password: process.env.PG_PASSWORD,
+          port: process.env.PG_PORT,
+          max: 5,
+        }),
         schemaName: "cucb",
       }),
       saveUninitialized: false,
@@ -94,6 +101,6 @@ server
       },
     }),
   )
-  .listen(PORT, err => {
+  .listen(PORT, (err) => {
     if (err) console.error("error", err);
   });
