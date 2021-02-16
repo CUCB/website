@@ -40,6 +40,7 @@ const errors = {
 };
 
 export const login = async ({ username, password }) => {
+  username = username.toLowerCase();
   let client = makeGraphqlClient();
   let res = await client.query({
     query: gql`
@@ -84,14 +85,16 @@ export const createAccount = async ({ username, password, email, firstName, last
   let emailSearch = await client.query({
     query: gql`
       query SearchList042($email: String!) {
-        cucb_list042(where: { email: { _eq: $email } }) {
+        cucb_list042(where: { email: { _ilike: $email } }) {
           email
         }
       }
     `,
-    variables: { email },
+    variables: { email: mysql_real_escape_string(email) },
   });
   if (emailSearch && emailSearch.data && emailSearch.data.cucb_list042.length > 0) {
+    username = username.toLowerCase();
+    email = email.toLowerCase();
     const SALT_ROUNDS = 10;
     let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     // Discard password before we accidentally do anything stupid
@@ -142,3 +145,30 @@ export const createAccount = async ({ username, password, email, firstName, last
     throw errors.NOT_ON_MAILING_LIST;
   }
 };
+
+function mysql_real_escape_string (str) {
+    return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+        switch (char) {
+            case "\0":
+                return "\\0";
+            case "\x08":
+                return "\\b";
+            case "\x09":
+                return "\\t";
+            case "\x1a":
+                return "\\z";
+            case "\n":
+                return "\\n";
+            case "\r":
+                return "\\r";
+            case "\"":
+            case "'":
+            case "\\":
+            case "%":
+                return "\\"+char; // prepends a backslash to backslash, percent,
+                                  // and double/single quotes
+            default:
+                return char;
+        }
+    });
+}

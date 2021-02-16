@@ -35,6 +35,13 @@ describe("login page", () => {
       cy.url().should("match", /\/members/);
     });
 
+    it("uses a case-insensitive match for username", () => {
+      cy.get("input[data-test=username]").type("CYPRESS_USER");
+      cy.get("input[data-test=password]").type("abc123");
+      cy.get("input[data-test=submit]").click();
+      cy.url().should("match", /\/members/);
+    });
+
     it("submits on pressing enter", () => {
       cy.intercept({
         method: "POST",
@@ -289,7 +296,30 @@ describe("registration form", () => {
     cy.get('[data-test=password]').type('areallylongpassword');
     cy.get('[data-test=password-confirm]').type('areallylongpassword');
     cy.get('[type="submit"]').click();
-    cy.get('[data-test=error]').contains(/already .*exists/).should("be.visible");
+    cy.get('[data-test=error]').contains(/already exists/).should("be.visible");
     cy.get('[data-test=error] a[data-test=login]').clickLink();
+  });
+
+  it("ignores captilisation of usernames to prevent double registration", () => {
+    cy.get('[data-test=first-name]').type('Cypress');
+    cy.get('[data-test=last-name]').type('RegistrationUser');
+    cy.get('[data-test=username]').type('cy456');
+    cy.get("[data-test=password]").type("areallysecurepassword");
+    cy.get("[data-test=password-confirm]").type("areallysecurepassword");
+    cy.get("[type=submit]").click();
+    cy.get("[data-test=error]").should("not.exist");
+    cy.get("input:invalid").should("not.exist");
+
+    cy.clearCookies();
+    cy.visit("/auth/register");
+    cy.waitForFormInteractive();
+    cy.get('[data-test=first-name]').type('Cypress');
+    cy.get('[data-test=last-name]').type('RegistrationUser');
+    cy.get('[data-test=username]').type('CY456');
+    cy.get("[data-test=password]").type("areallysecurepassword");
+    cy.get("[data-test=password-confirm]").type("areallysecurepassword");
+    cy.get("[type=submit]").click();
+    cy.get("[data-test=error]").contains(/already exists/).should("be.visible")
+    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
   });
 });
