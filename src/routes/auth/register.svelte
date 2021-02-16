@@ -83,7 +83,7 @@
   {#if errors.length > 0}
     <ul class="errors" data-test="errors">
       {#each errors as error}
-        <li class="error" data-test="error">{error}</li>
+        <li class="error" data-test="error">{@html error}</li>
       {/each}
     </ul>
   {/if}
@@ -103,8 +103,8 @@
   </label>
   <label for="password">Password<input
       type="password"
-      use:checkValid="{{ validityErrors: { tooShort: 'Password should be at least 8 characters long' }, bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
       bind:this={fields.password}
+      use:checkValid="{{ validityErrors: { tooShort: 'Password should be at least 8 characters long' }, bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
       bind:value="{password}"
       minlength="8"
       data-test="password"
@@ -112,8 +112,8 @@
     /></label>
   <label for="password-confirm">Confirm password<input
       id="password-confirm"
-      use:checkValid="{{ bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
       bind:this={fields.confirmPassword}
+      use:checkValid="{{ validityErrors: { tooShort: 'Password should be at least 8 characters long' }, bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
       type="password"
       bind:value="{passwordConfirm}"
       data-test="password-confirm"

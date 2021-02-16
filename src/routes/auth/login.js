@@ -13,10 +13,8 @@ export async function post(req, res, next) {
       req.session.lastName = loginResult.last;
       req.session.save(() => (res.statusCode = 200), res.end(req.session.userId));
     } catch (e) {
-      // TODO better error handling here in case something on the server is not right
-      console.error(e)
-      res.statusCode = 401;
-      res.end("Incorrect username or password");
+      res.statusCode = e.status;
+      res.end(e.message);
     }
   } else {
     res.statusCode = 400;

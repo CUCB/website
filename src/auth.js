@@ -32,6 +32,11 @@ const errors = {
       "The provided email/CRSid is not signed up to the mailing list. If you are signed up, let the webmaster know you've got this error and they should be able to help you out.",
     status: 404,
   },
+  ACCOUNT_ALREADY_EXISTS: {
+    message:
+      `According to our records, an account with that email/CRSid already exists on the website. Perhaps you want to <a href="/auth/login" data-test=\"login\">login instead</a>?`,
+    status: 409,
+  },
 };
 
 export const login = async ({ username, password }) => {
@@ -91,39 +96,47 @@ export const createAccount = async ({ username, password, email, firstName, last
     let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     // Discard password before we accidentally do anything stupid
     password = null;
-    let res = await client.mutate({
-      mutation: gql`
-        mutation(
-          $username: String!
-          $email: String!
-          $saltedPassword: String!
-          $firstName: String!
-          $lastName: String!
-        ) {
-          insert_cucb_users_one(
-            object: {
-              username: $username
-              salted_password: $saltedPassword
-              first: $firstName
-              last: $lastName
-              email: $email
-            }
+    try {
+      let res = await client.mutate({
+        mutation: gql`
+          mutation(
+            $username: String!
+            $email: String!
+            $saltedPassword: String!
+            $firstName: String!
+            $lastName: String!
           ) {
-            first
-            last
-            admin_type {
-              hasura_role
+            insert_cucb_users_one(
+              object: {
+                username: $username
+                salted_password: $saltedPassword
+                first: $firstName
+                last: $lastName
+                email: $email
+              }
+            ) {
+              first
+              last
+              admin_type {
+                hasura_role
+              }
+              id
             }
-            id
           }
-        }
-      `,
-      variables: { username, email, saltedPassword, firstName, lastName },
-    });
-    if (res && res.data && res.data.insert_cucb_users_one) {
-      return res.data.insert_cucb_users_one;
-    } else {
-      throw errors.INTERNAL_ERROR;
+        `,
+        variables: { username, email, saltedPassword, firstName, lastName },
+      });
+      if (res && res.data && res.data.insert_cucb_users_one) {
+        return res.data.insert_cucb_users_one;
+      } else {
+        throw errors.INTERNAL_ERROR;
+      }
+    } catch (e) {
+      if (e.message.match(/unique/i)) {
+        throw errors.ACCOUNT_ALREADY_EXISTS;
+      } else {
+        throw errors.INTERNAL_ERROR;
+      }
     }
   } else {
     throw errors.NOT_ON_MAILING_LIST;
