@@ -18,7 +18,7 @@
     let committee = {};
 
     try {
-      const res = await this.fetch("/committee.json").then(r => r.json());
+      const res = await this.fetch("/committee.json").then((r) => r.json());
 
       for (let person of res.committee) {
         committee[person.committee_key.name] = {
@@ -76,7 +76,7 @@
   let showSettings;
   let navVisible;
 
-  $: showSettings ? disableBodyScroll() : (typeof window !== "undefined" && enableBodyScroll());
+  $: showSettings ? disableBodyScroll() : typeof window !== "undefined" && enableBodyScroll();
 
   function correctMobileHeight() {
     let vh = window.innerHeight * 0.01;
@@ -85,12 +85,14 @@
 
   onMount(() => {
     correctMobileHeight();
-    const browserDomain = window.location.href
-      .split("/", 3)
-      .slice(0, 3)
-      .join("/");
+    const browserDomain = window.location.href.split("/", 3).slice(0, 3).join("/");
     client.set(makeClient(fetch, { host: browserDomain }));
     clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
+    if (window.Cypress) {
+      let node = document.createElement("span");
+      node.setAttribute("data-test", "page-hydrated");
+      document.body.appendChild(node);
+    }
   });
 </script>
 
@@ -165,6 +167,6 @@
     <slot />
   </main>
 
-  <Footer {committee} />
+  <Footer committee="{committee}" />
   <Customiser bind:settings bind:showSettings />
 </div>

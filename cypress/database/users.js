@@ -123,8 +123,8 @@ export const DeleteFromList042 = `
 
 export const UserWithUsername = `
     query UserWithUsername($username: String!) {
-        cucb_users(where: { username: { _eq: { $username } } }) {
+        cucb_users(where: { username: { _eq: $username } }) {
             id
         }
     }
-`
+`;

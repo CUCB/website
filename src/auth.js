@@ -27,6 +27,11 @@ const errors = {
     message: "Something went wrong. Probably best to let the webmaster know",
     status: 500,
   },
+  NOT_ON_MAILING_LIST: {
+    message:
+      "The provided email/CRSid is not signed up to the mailing list. If you are signed up, let the webmaster know you've got this error and they should be able to help you out.",
+    status: 404,
+  },
 };
 
 export const login = async ({ username, password }) => {
@@ -57,15 +62,15 @@ export const login = async ({ username, password }) => {
       if (passwordCorrect) {
         return user;
       } else {
-        throw new Error(errors.INCORRECT_USERNAME_OR_PASSWORD);
+        throw errors.INCORRECT_USERNAME_OR_PASSWORD;
       }
     } else if (res.data.cucb_users.length === 0) {
-      throw new Error(errors.INCORRECT_USERNAME_OR_PASSWORD);
+      throw errors.INCORRECT_USERNAME_OR_PASSWORD;
     } else {
-      throw new Error(errors.INTERNAL_ERROR);
+      throw errors.INTERNAL_ERROR;
     }
   } else {
-    throw new Error(errors.INTERNAL_ERROR);
+    throw errors.INTERNAL_ERROR;
   }
 };
 
@@ -118,9 +123,9 @@ export const createAccount = async ({ username, password, email, firstName, last
     if (res && res.data && res.data.insert_cucb_users_one) {
       return res.data.insert_cucb_users_one;
     } else {
-      throw new Error(errors.INTERNAL_ERROR);
+      throw errors.INTERNAL_ERROR;
     }
   } else {
-    throw new Error(errors.NOT_ON_MAILING_LIST);
+    throw errors.NOT_ON_MAILING_LIST;
   }
 };

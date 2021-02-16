@@ -26,14 +26,21 @@ export const suffix = (n) =>
   ({ one: "st", two: "nd", few: "rd", other: "th" }[new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)]);
 
 export const createValidityChecker = () => {
-  let validityFields = {};
+  let bothPresentFields = {};
+  let bothEqualFields = {};
 
   return (node, options) => {
     if (options.bothPresent) {
-      if (!validityFields[options.bothPresent.id]) {
-        validityFields[options.bothPresent.id] = [];
+      if (!bothPresentFields[options.bothPresent.id]) {
+        bothPresentFields[options.bothPresent.id] = [];
       }
-      validityFields[options.bothPresent.id].push(node);
+      bothPresentFields[options.bothPresent.id].push(node);
+    }
+    if (options.bothEqual) {
+      if (!bothEqualFields[options.bothEqual.id]) {
+        bothEqualFields[options.bothEqual.id] = [];
+      }
+      bothEqualFields[options.bothEqual.id].push(node);
     }
     const changeHandler = () => {
       if (options.validityErrors) {
@@ -48,17 +55,35 @@ export const createValidityChecker = () => {
       node.setCustomValidity("");
 
       if (options.bothPresent) {
-        let presence = validityFields[options.bothPresent.id].map((field) => field.value.length > 0);
+        let presence = bothPresentFields[options.bothPresent.id].map((field) => field.value.length > 0);
         if (!presence.every((x) => x) && !presence.every((x) => !x)) {
-          for (let field of validityFields[options.bothPresent.id]) {
+          // If either all present or all empty...
+          for (let field of bothPresentFields[options.bothPresent.id]) {
             if (!field.value.length) {
               field.setCustomValidity(options.bothPresent.error);
             }
           }
           return;
         }
-        for (let field of validityFields[options.bothPresent.id]) {
+        for (let field of bothPresentFields[options.bothPresent.id]) {
           if (field.validationMessage === options.bothPresent.error) {
+            field.setCustomValidity("");
+            field.dispatchEvent(new Event("change"));
+          }
+        }
+      }
+
+      if (options.bothEqual) {
+        let allValues = bothEqualFields[options.bothEqual.id].map((field) => field.value);
+        if (!allValues.every((v) => v === allValues[0])) {
+          bothEqualFields[options.bothEqual.id].map((field) => {
+            field.setCustomValidity(options.bothEqual.error);
+          });
+          return;
+        }
+
+        for (let field of bothEqualFields[options.bothEqual.id]) {
+          if (field.validationMessage === options.bothEqual.error) {
             field.setCustomValidity("");
             field.dispatchEvent(new Event("change"));
           }

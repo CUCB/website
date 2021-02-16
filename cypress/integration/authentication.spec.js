@@ -155,7 +155,7 @@ describe("password verification", () => {
 describe("registration form", () => {
   before(() => {
     cy.executeMutation(DeleteUsersWhere, {
-      variables: { where: { _or: [{ username: { _ilike: "%cy-register%" } }, { username: { _eq: "cy456" } }] } },
+      variables: { where: { _or: [{ username: { _ilike: "%cy-register%" } }, { username: { _ilike: "cy456%" } }] } },
     });
     cy.executeMutation(DeleteFromList042, { variables: { where: { email: { _ilike: "%cy-register%" } } } });
     cy.executeMutation(AppendToList042, {
@@ -166,6 +166,7 @@ describe("registration form", () => {
   });
   beforeEach(() => {
     cy.visit("/auth/register");
+    cy.waitForFormInteractive();
   });
 
   it("has a title", () => {
@@ -204,7 +205,7 @@ describe("registration form", () => {
     cy.get("[data-test=username]:invalid").should("have.length", 1);
   });
 
-  it.skip("rejects signups from emails that aren't on the mailing list", () => {
+  it("rejects signups from emails that aren't on the mailing list", () => {
     cy.get("[data-test=first-name]").click();
     cy.get("[data-test=first-name]").type("Cypress");
     cy.get("[data-test=last-name]").click();
@@ -218,7 +219,7 @@ describe("registration form", () => {
     cy.get("[data-test=error]").contains("mailing list").should("be.visible");
   });
 
-  it.skip("rejects signups if the provided passwords are not the same", () => {
+  it("rejects signups if the provided passwords are not the same", () => {
     cy.get("[data-test=first-name]").type("Cypress");
     cy.get("[data-test=last-name]").type("RegistrationUser");
     cy.get("[data-test=username]").type("cy456");
@@ -227,7 +228,6 @@ describe("registration form", () => {
     cy.get("[type=submit]").click();
     cy.get("[data-test=password]:invalid").should("have.length", 1);
     cy.get("[data-test=password-confirm]:invalid").should("have.length", 1);
-    cy.get("[data-test=error]").contains("password").should("be.visible");
   });
 
   it.skip("rejects passwords that are too short", () => {
@@ -243,6 +243,7 @@ describe("registration form", () => {
   });
 
   it("accepts CRSids and @cam.ac.uk addresses", () => {
+    cy.intercept("POST", "/auth/register").as("register");
     cy.get('[data-test=first-name]').type('Cypress');
     cy.get('[data-test=last-name]').type('RegistrationUser');
     cy.get('[data-test=username]').type('cy456');
@@ -251,8 +252,12 @@ describe("registration form", () => {
     cy.get("[type=submit]").click();
     cy.get("[data-test=error]").should("not.exist");
     cy.get("input:invalid").should("not.exist");
+    cy.wait("@register").its("response.statusCode").should("eq", 200);
     cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
     cy.executeMutation(DeleteUsersWhere, { variables: { where: { username: { _eq: "cy456" } } } });
+
+    cy.visit("/auth/register");
+    cy.waitForFormInteractive();
     cy.get('[data-test=first-name]').type('Cypress');
     cy.get('[data-test=last-name]').type('RegistrationUser');
     cy.get('[data-test=username]').type('cy456@cam.ac.uk');
@@ -261,6 +266,9 @@ describe("registration form", () => {
     cy.get("[type=submit]").click();
     cy.get("[data-test=error]").should("not.exist");
     cy.get("input:invalid").should("not.exist");
+    cy.wait("@register").its("response.statusCode").should("eq", 200);
     cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
   });
+
+  it("gives a suitable error message if the username/email is already registered")
 });
