@@ -146,6 +146,8 @@ export const createAccount = async ({ username, password, email, firstName, last
   }
 };
 
+// A Javascript port of a PHP function, copied from somewhere on the internet...
+// Don't know where, but is useful to escape, % symbols so we can use ilike for a case insensitive match
 function mysql_real_escape_string (str) {
     return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
         switch (char) {
