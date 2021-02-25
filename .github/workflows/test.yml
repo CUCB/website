@@ -15,7 +15,9 @@ jobs:
         with:
           node-version: 14.x
       - name: Run svelte-check
-        run: npx svelte-check
+        run: |
+          npm i
+          npx svelte-check
   test:
     name: Cypress run
     runs-on: ubuntu-16.04
