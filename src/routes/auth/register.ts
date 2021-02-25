@@ -1,13 +1,34 @@
 import { createAccount } from "../../auth";
 import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
+import type { Next } from "polka";
+import type { SapperRequest, SapperResponse } from "@sapper/server";
+import { String, Record } from "runtypes";
 
-function passwordIsValid(password) {
+function passwordIsValid(password: string): Boolean {
   return password.length >= 8;
 }
 
-export async function post(req, res, next) {
+// TODO can this be made more precise?
+type Session = {
+  save: (callback: () => void) => void;
+  userId?: string;
+  hasuraRole?: string;
+  firstName?: string;
+  lastName?: string;
+};
+type PostRequest = SapperRequest & { body: object; session: Session };
+
+const RegisterBody = Record({
+  username: String,
+  password: String,
+  passwordConfirm: String,
+  firstName: String,
+  lastName: String,
+});
+
+export async function post(req: PostRequest, res: SapperResponse, next: Next) {
   try {
-    let { username, password, passwordConfirm, firstName, lastName } = req.body;
+    let { username, password, passwordConfirm, firstName, lastName } = RegisterBody.check(req.body);
 
     if (username && password === passwordConfirm) {
       let email;
@@ -20,6 +41,10 @@ export async function post(req, res, next) {
         } else {
           email = username;
         }
+      } else {
+        res.statusCode = 400;
+        res.end("Username is not an email or CRSid");
+        return;
       }
 
       try {
@@ -30,7 +55,10 @@ export async function post(req, res, next) {
           req.session.hasuraRole = loginResult.admin_type.hasura_role;
           req.session.firstName = loginResult.first;
           req.session.lastName = loginResult.last;
-          req.session.save(() => (res.statusCode = 200), res.end(req.session.userId));
+          req.session.save(() => {
+            res.statusCode = 200;
+            res.end(req.session.userId);
+          });
         } else {
           res.statusCode = 400;
           res.end("Password must be at least 8 characters long");

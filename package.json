@@ -20,7 +20,17 @@
     "docker:stop": "docker-compose stop",
     "docker:down": "docker-compose down",
     "docker:test": "docker-compose -f docker-compose.test.yml up --exit-code-from cypress",
-    "hasura:console": "cd hasura && hasura console --endpoint \"http://localhost:8080\" --admin-secret myadminsecretkey"
+    "hasura:console": "cd hasura && hasura console --endpoint \"http://localhost:8080\" --admin-secret myadminsecretkey",
+    "watch:dev": "npm-watch dev"
+  },
+  "watch": {
+    "dev": {
+      "patterns": [
+        "tsconfig.json",
+        "rollup.config.js",
+        "package.json"
+      ]
+    }
   },
   "dependencies": {
     "apollo-boost": "^0.4.9",
@@ -40,13 +50,16 @@
     "graphql-tools": "^7.0.2",
     "http-proxy": "^1.18.1",
     "immutable": "^4.0.0-rc.12",
+    "isomorphic-fetch": "^3.0.0",
     "luxon": "^1.25.0",
     "mailparser": "^3.0.1",
     "md5": "^2.3.0",
     "pg": "^8.5.1",
     "polka": "next",
+    "runtypes": "^5.0.1",
     "sirv": "^1.0.10",
     "tippy.js": "^6.2.7",
+    "typescript": "^4.2.2",
     "vanilla-hcaptcha": "0.0.5"
   },
   "devDependencies": {
@@ -61,9 +74,18 @@
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^11.0.1",
     "@rollup/plugin-replace": "^2.3.4",
+    "@rollup/plugin-typescript": "^8.2.0",
+    "@types/bcrypt": "^3.0.0",
     "@types/body-scroll-lock": "^2.6.1",
+    "@types/compression": "^1.7.0",
     "@types/escape-html": "^1.0.0",
+    "@types/express-session": "^1.17.3",
+    "@types/http-proxy": "^1.17.5",
+    "@types/isomorphic-fetch": "^0.0.35",
+    "@types/luxon": "^1.26.0",
+    "@types/mailparser": "^3.0.1",
     "@types/md5": "^2.2.1",
+    "@types/polka": "^0.5.2",
     "autoprefixer": "^10.1.0",
     "chai-sorted": "^0.2.0",
     "cypress": "6.5.0",
@@ -73,6 +95,7 @@
     "mdsvex": "^0.8.9",
     "node-wait-for-it": "^0.2.0",
     "npm-run-all": "^4.1.5",
+    "npm-watch": "^0.7.0",
     "postcss": "^8.2.1",
     "prettier": "^2.2.1",
     "prettier-plugin-svelte": "^1.4.2",

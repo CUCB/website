@@ -1,6 +1,6 @@
 <script context="module">
   import { makeClient, handleErrors, client } from "../../../graphql/client";
-  import { QueryMultiGigDetails, QueryMultiGigSignup, QuerySingleGigSignupSummary } from "../../../graphql/gigs";
+  import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
   
   export async function preload(_page, session) {
     Settings.defaultZoneName = "Europe/London";
@@ -63,7 +63,7 @@
         variables: { where: { allow_signups: { _eq: true } } },
       });
     } catch (e) {
-      await handleErrors.bind(this)(e, session);
+      handleErrors.bind(this)(e, session);
       return;
     }
 

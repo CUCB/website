@@ -25,7 +25,7 @@
         variables: { gig_id },
       });
     } catch (e) {
-      await handleErrors.bind(this)(e, session);
+      handleErrors.bind(this)(e, session);
       return;
     }
 

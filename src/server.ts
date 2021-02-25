@@ -9,6 +9,21 @@ import bodyParser from "body-parser";
 import httpProxy from "http-proxy";
 import { simpleParser } from "mailparser";
 import fetch from "node-fetch";
+import { Record, Function, Undefined, String } from "runtypes";
+
+// TODO put this only in one place
+const Session = Record({
+  save: Function,
+  userId: String.Or(Undefined),
+  hasuraRole: String.Or(Undefined),
+  firstName: String.Or(Undefined),
+  lastName: String.Or(Undefined),
+  theme: String.Or(Undefined),
+});
+
+const AuthenticatedRequest = Record({
+  session: Session
+});
 
 // Get the environment variables from the .env file
 dotenv.config();
@@ -17,7 +32,7 @@ const { PORT, NODE_ENV } = process.env;
 const dev = NODE_ENV === "development";
 const test = NODE_ENV === "test";
 
-// Fetch these seperately, as rollup will replace them from .env
+// Fetch these seperately, as rollup will replace them from .env at build time
 // and we want the server to be consistent with the client
 const GRAPHQL_REMOTE = process.env.GRAPHQL_REMOTE;
 const GRAPHQL_PATH = process.env.GRAPHQL_PATH;
@@ -71,7 +86,7 @@ server
           host: process.env.PG_HOST,
           database: process.env.PG_DATABASE,
           password: process.env.PG_PASSWORD,
-          port: process.env.PG_PORT,
+          port: parseInt(process.env.PG_PORT as string),
           max: 5,
         }),
         schemaName: "cucb",
@@ -91,16 +106,25 @@ server
     sapper.middleware({
       session: (req, res) => {
         res.setHeader("cache-control", "no-cache, no-store");
-        return {
-          userId: req.session.userId,
-          firstName: req.session.firstName,
-          lastName: req.session.lastName,
-          hasuraRole: req.session.hasuraRole,
-          theme: req.session.theme,
-        };
+        // if (AuthenticatedRequest.guard(req)) {
+          return {
+              //@ts-ignore
+            userId: req.session.userId,
+              //@ts-ignore
+            firstName: req.session.firstName,
+              //@ts-ignore
+            lastName: req.session.lastName,
+              //@ts-ignore
+            hasuraRole: req.session.hasuraRole,
+              //@ts-ignore
+            theme: req.session.theme,
+          };
+        // } else {
+        //   return {};
+        // }
       },
     }),
   )
-  .listen(PORT, (err) => {
+  .listen(PORT, (err: unknown) => {
     if (err) console.error("error", err);
   });

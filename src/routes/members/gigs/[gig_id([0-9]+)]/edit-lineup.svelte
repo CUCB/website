@@ -30,7 +30,7 @@
         title = gigType.data.cucb_gigs_by_pk.title;
       }
     } catch (e) {
-      await handleErrors.bind(this)(e, session);
+      handleErrors.bind(this)(e, session);
       return;
     }
 

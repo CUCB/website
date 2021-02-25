@@ -2,6 +2,7 @@ import resolve from "@rollup/plugin-node-resolve";
 import replace from "@rollup/plugin-replace";
 import commonjs from "@rollup/plugin-commonjs";
 import json from "@rollup/plugin-json";
+import typescript from "@rollup/plugin-typescript";
 import svelte from "rollup-plugin-svelte";
 import babel from "rollup-plugin-babel";
 import { terser } from "rollup-plugin-terser";
@@ -12,6 +13,7 @@ import { mdsvex } from "mdsvex";
 
 const mode = process.env.NODE_ENV;
 const dev = mode === "development";
+const sourcemap = dev ? "inline" : false;
 
 require("dotenv").config();
 const GRAPHQL_REMOTE = process.env.GRAPHQL_REMOTE;
@@ -33,7 +35,7 @@ const preprocess = sveltePreprocess({
 });
 
 const removeWhitespace = {
-  markup: input => ({
+  markup: (input) => ({
     code: input.filename.match(/.*\.svelte/)
       ? input.content.replace(/(>|})\s+(?![^]*?<\/(?:script|style)>|[A-z0-9\-&]|[^<]*?>|[^{]*?})/g, "$1")
       : input.content,
@@ -64,6 +66,10 @@ export default {
         dedupe: ["svelte"],
       }),
       commonjs(),
+      typescript({
+        noEmitOnError: !dev,
+        sourceMap: !!sourcemap,
+      }),
       json(),
 
       !dev &&
@@ -75,7 +81,7 @@ export default {
             [
               "@babel/preset-env",
               {
-              targets: "> 0.25%",
+                targets: "> 0.25%",
               },
             ],
           ],
@@ -101,8 +107,8 @@ export default {
   },
 
   server: {
-    input: config.server.input(),
-    output: { ...config.server.output(), sourcemap: true },
+    input: { server: config.server.input().server.replace(/\.js$/, ".ts") },
+    output: { ...config.server.output(), sourcemap },
     plugins: [
       replace({
         "process.browser": false,
@@ -122,11 +128,15 @@ export default {
         dedupe: ["svelte"],
       }),
       commonjs(),
+      typescript({
+        noEmitOnError: !dev,
+        sourceMap: !!sourcemap,
+      }),
     ],
     external: Object.keys(pkg.dependencies).concat(
       require("module").builtinModules || Object.keys(process.binding("natives")),
     ),
-    preserveEntrySignatures: 'strict',
+    preserveEntrySignatures: "strict",
 
     onwarn,
   },
@@ -142,6 +152,10 @@ export default {
       replace({
         "process.browser": true,
         "process.env.NODE_ENV": JSON.stringify(mode),
+      }),
+      typescript({
+        noEmitOnError: !dev,
+        sourceMap: !!sourcemap,
       }),
     ],
 
