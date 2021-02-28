@@ -4,6 +4,20 @@ on:
   push:
 
 jobs:
+  svelte-check:
+    name: Type-check svelte
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.x
+      - name: Run svelte-check
+        run: |
+          npm i
+          npx svelte-check
   test:
     name: Cypress run
     runs-on: ubuntu-16.04
@@ -18,7 +32,7 @@ jobs:
         containers: [1, 2, 3, 4]
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       # because of "record" and "parallel" parameters
       # these containers will load balance all found tests among themselves
       - name: Cypress run
@@ -75,7 +89,9 @@ jobs:
 
   build:
     if: ${{ github.ref=='refs/heads/master' }}
-    needs: test
+    needs:
+      - test
+      - svelte-check
     name: Build and push docker image for deploy
     runs-on: ubuntu-latest
     steps:

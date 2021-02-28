@@ -4,7 +4,7 @@
   import Mailto from "../components/Mailto.svelte";
   let name = "";
   let email = "";
-  let lists = ["soc-cucb", "soc-cucb-chat", "soc-cucb-interested", "soc-cucb-alumni"].map(name => ({
+  let lists = ["soc-cucb", "soc-cucb-chat", "soc-cucb-interested", "soc-cucb-alumni"].map((name) => ({
     name,
     selected: false,
   }));
@@ -13,7 +13,7 @@
   let submitted = false;
   let success;
 
-  let onCaptchaVerified = e => {
+  let onCaptchaVerified = (e) => {
     captchaKey = e.detail.key;
   };
 
@@ -26,7 +26,7 @@
     const body = new URLSearchParams();
     body.append("name", name);
     body.append("email", email);
-    body.append("lists", JSON.stringify(lists.filter(list => list.selected).map(list => list.name)));
+    body.append("lists", JSON.stringify(lists.filter((list) => list.selected).map((list) => list.name)));
     body.append("captchaKey", captchaKey);
 
     let res;
@@ -43,7 +43,7 @@
       return;
     }
 
-    const isSuccessful = status => status >= 200 && status < 300;
+    const isSuccessful = (status) => status >= 200 && status < 300;
 
     if (isSuccessful(res.status)) {
       success = true;
@@ -77,6 +77,13 @@
   .error {
     @include themeifyThemeElement($themes) {
       color: themed("negative");
+    }
+  }
+
+  input:invalid {
+    box-shadow: none;
+    &:focus {
+      box-shadow: 0px 0px 4px 1px var(--accent);
     }
   }
 </style>
@@ -117,21 +124,12 @@
       with your name and the name(s) of the list(s) you would like to sign up to.
     </p>
     <form on:submit|preventDefault="{submit}">
-      <label>
-        Name
-        <input type="text" required bind:value="{name}" />
-      </label>
-      <label>
-        Email
-        <input type="email" required bind:value="{email}" />
-      </label>
+      <label> Name <input type="text" required bind:value="{name}" /> </label>
+      <label> Email <input type="email" required bind:value="{email}" /> </label>
       <p>I want to join:</p>
       <div class="options">
         {#each lists as list}
-          <label class="checkbox">
-            <input type="checkbox" bind:checked="{list.selected}" />
-            {list.name}
-          </label>
+          <label class="checkbox"> <input type="checkbox" bind:checked="{list.selected}" /> {list.name} </label>
         {/each}
       </div>
       <HCaptcha on:verified="{onCaptchaVerified}" />

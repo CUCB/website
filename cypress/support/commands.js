@@ -96,3 +96,7 @@ Cypress.Commands.add("tooltipContents", { prevSubject: true }, (subject) => {
 Cypress.Commands.add("paste", { prevSubject: true }, (subject, content) => {
   cy.wrap(subject).focus().invoke("val", content).trigger("input");
 });
+
+Cypress.Commands.add("waitForFormInteractive", () => {
+  cy.get("[data-test=page-hydrated]").should("exist");
+});

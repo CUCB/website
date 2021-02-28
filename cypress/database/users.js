@@ -90,3 +90,41 @@ export const CreateLineup = `
     }
   }
 `;
+
+export const DeleteUsersWhere = `
+    mutation DeleteUsers($where: cucb_users_bool_exp!) {
+        delete_cucb_users(where: $where) {
+            affected_rows
+        }
+    }
+`;
+
+export const AppendToList042 = `
+    mutation AppendToList042($objects: [cucb_list042_insert_input!]!) {
+        insert_cucb_list042(
+            objects: $objects
+            on_conflict: {
+                constraint: list042_pkey
+                update_columns: [email]
+            }
+        ) {
+            affected_rows
+        }
+    }
+`;
+
+export const DeleteFromList042 = `
+    mutation DeleteFromList042($where: cucb_list042_bool_exp!) {
+        delete_cucb_list042(where: $where) {
+            affected_rows
+        }
+    }
+`;
+
+export const UserWithUsername = `
+    query UserWithUsername($username: String!) {
+        cucb_users(where: { username: { _eq: $username } }) {
+            id
+        }
+    }
+`;

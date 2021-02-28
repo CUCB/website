@@ -109,10 +109,10 @@
 </style>
 
 <nav on:click class="{navClass} theme-{$themeName}" aria-label="Main menu">
-  <a aria-current="{!segment ? 'page' : undefined}" href="." sapper:prefetch>Home</a>
-  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" sapper:prefetch>Book us!</a>
-  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" sapper:prefetch>Join us!</a>
-  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee" sapper:prefetch>Committee</a>
+  <a aria-current="{!segment ? 'page' : undefined}" href="." sapper:prefetch="true">Home</a>
+  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book" sapper:prefetch="true">Book us!</a>
+  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join" sapper:prefetch="true">Join us!</a>
+  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee" sapper:prefetch="true">Committee</a>
 
   {#if user.userId}
     <!-- Don't prefetch members since it causes cache invalidation issues (see issue #50) -->

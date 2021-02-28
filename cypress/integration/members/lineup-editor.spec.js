@@ -251,6 +251,7 @@ describe("lineup editor", () => {
     context("viewing valid gig", () => {
       beforeEach(() => {
         cy.visit("/members/gigs/15274/edit-lineup");
+        cy.waitForFormInteractive();
       });
 
       it("lists the people and instruments who have signed up to the gig", () => {
@@ -326,27 +327,27 @@ describe("lineup editor", () => {
 
       it("can approve/discard people", () => {
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`)
-          .pipe(click)
+          .click()
           .should(($el) => expect($el).to.not.exist);
         cy.get(`[data-test=lineup-editor-approved] [data-test=member-${signups[0].user.id}]`).should("be.visible");
         cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[0].user.id}]`).should("not.exist");
         cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`)
-          .pipe(click)
+          .click()
           .should(($el) => expect($el).to.not.exist);
         cy.get(`[data-test=lineup-editor-approved] [data-test=member-${signups[1].user.id}]`).should("be.visible");
         cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[1].user.id}]`).should("not.exist");
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-unapprove]`)
-          .pipe(click)
+          .click()
           .should(($el) => expect($el).to.not.exist);
         cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[0].user.id}]`).should("be.visible");
         cy.get(`[data-test=lineup-editor-approved] [data-test=member-${signups[0].user.id}]`).should("not.exist");
         cy.get(`[data-test=member-${signups[2].user.id}] [data-test=person-discard]`)
-          .pipe(click)
+          .click()
           .should(($el) => expect($el).to.not.exist);
         cy.get(`[data-test=lineup-editor-nope] [data-test=member-${signups[2].user.id}]`).should("be.visible");
         cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[2].user.id}]`).should("not.exist");
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-discard]`)
-          .pipe(click)
+          .click()
           .should(($el) => expect($el).to.not.exist);
         cy.get(`[data-test=lineup-editor-nope] [data-test=member-${signups[0].user.id}]`).should("be.visible");
         cy.get(`[data-test=lineup-editor-applicants] [data-test=member-${signups[0].user.id}]`).should("not.exist");
@@ -356,22 +357,22 @@ describe("lineup editor", () => {
         cy.get(`[data-test=signup-yes]`).should("contain", `${signups[0].user.first} ${signups[0].user.last}`);
         cy.get(`[data-test=signup-maybe]`).should("contain", `${signups[2].user.first} ${signups[2].user.last}`);
         cy.get(`[data-test=signup-nope]`).should("contain", `${signups[3].user.first} ${signups[3].user.last}`);
-        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-discard]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-discard]`).click().should("not.exist");
         cy.get(`[data-test=people-discarded] [data-test=member-${signups[3].user.id}]`).should("be.visible");
         cy.get(`[data-test=signup-nope] [data-test=member-${signups[3].user.id}]`).should("not.exist");
       });
 
       it("can select and discard instruments", () => {
         cy.get(`[data-test=instrument-${signups[0].user_instruments[1].id}] [data-test=instrument-yes]`)
-          .pipe(click)
+          .click()
           .should("have.attr", "aria-checked", "true");
         cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [data-test=instrument-no]`)
-          .pipe(click)
+          .click()
           .should("have.attr", "aria-checked", "true");
         cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [data-test=instrument-maybe]`)
-          .pipe(click)
+          .click()
           .should("have.attr", "aria-checked", "true");
-        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-discard]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-discard]`).click().should("not.exist");
         cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-checked=true]`).should(
           "have.attr",
           "data-test",
@@ -382,9 +383,9 @@ describe("lineup editor", () => {
           "data-test",
           "instrument-yes",
         );
-        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).click().should("not.exist");
         cy.get(`[data-test=instrument-${signups[1].user_instruments[0].id}] [data-test=instrument-yes]`)
-          .pipe(click)
+          .click()
           .should("have.attr", "aria-checked", "true");
         cy.reload();
         cy.get(`[data-test=instrument-${signups[0].user_instruments[0].id}] [aria-checked=true]`).should(
@@ -405,7 +406,7 @@ describe("lineup editor", () => {
       });
 
       it("can assign roles to members of the lineup", () => {
-        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).click().should("not.exist");
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-leader]`)
           .click()
           .should("have.attr", "aria-pressed", "true");
@@ -498,7 +499,7 @@ describe("lineup editor", () => {
       it("can add instruments not selected by the user", () => {
         for (let person of signups) {
           cy.get(`[data-test=member-${person.user.id}]`).within(() => {
-            cy.get(`[data-test=add-instruments]`).pipe(click).should("not.exist");
+            cy.get(`[data-test=add-instruments]`).click().should("not.exist");
             person.user_instruments &&
               cy
                 .wrap(person.user_instruments)
@@ -541,7 +542,7 @@ describe("lineup editor", () => {
           .within(() => {
             cy.contains("Cypress President").should("be.visible");
             cy.get(`[data-test^=instrument]`).should("not.exist");
-            cy.get(`[data-test=add-instruments]`).pipe(click).should("not.exist");
+            cy.get(`[data-test=add-instruments]`).click().should("not.exist");
             cy.get(`[data-test=instruments-to-add]`).contains("Melodeon").click();
             cy.get(`[data-test=instrument-53257432] [data-test=instrument-yes]`).should("be.visible").click();
             cy.get(`[data-test=person-approve]`).click();
@@ -549,7 +550,7 @@ describe("lineup editor", () => {
         cy.get(`[data-test=lineup-editor-approved] [data-test=member-27382]`)
           .should("be.visible")
           .within(() => {
-            cy.get(`[data-test=add-instruments]`).pipe(click).should("not.exist");
+            cy.get(`[data-test=add-instruments]`).click().should("not.exist");
             cy.get(`[data-test=instruments-to-add]`).contains("Melodeon").should("not.exist");
             cy.get(`[data-test=instruments-to-add]`).contains("Clarinet").click();
             cy.get(`[data-test=instrument-53257433] [data-test=instrument-yes]`).should("be.visible").click();
@@ -573,7 +574,7 @@ describe("lineup editor", () => {
 
       it("warns about invalid lineups", () => {
         cy.get(`[data-test=lineup-warnings]`).should("not.exist");
-        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).click().should("not.exist");
         cy.get(`[data-test=lineup-warnings]`)
           .should("contain", "No leader selected")
           .and("contain", "No techie selected");

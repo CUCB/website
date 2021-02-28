@@ -18,7 +18,7 @@
         variables: { since: DateTime.local().minus({ months: 1 }) },
       });
     } catch (e) {
-      await handleErrors.bind(this)(e, session);
+      handleErrors.bind(this)(e, session);
       return;
     }
 
