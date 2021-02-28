@@ -7,6 +7,7 @@
   import { themeName } from "../../view";
   let rotation = tweened(0, { easing: sineInOut, duration: 250 });
   let { session } = stores();
+  let self;
   export let id;
   export let enableSpin;
   let animate = false;
@@ -15,14 +16,14 @@
   onMount(() => (animate = true));
   let timer;
 
-  const debounce = v => {
+  const debounce = (v) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
       rotation.set(v);
     }, 200);
   };
 
-  let _triggerRotation = event => {
+  let _triggerRotation = (event) => {
     let rect = event.target.getBoundingClientRect();
     let [x, y] = [event.offsetX / rect.width, event.offsetY / rect.height];
     if (Math.abs(x - 0.5) > Math.abs(y - 0.5)) {
@@ -30,11 +31,24 @@
     }
     // Default direction to 1 on the off chance x or y is 0.5 exactly
     let direction = Math.sign(x - 0.5) * Math.sign(y - 0.5) || 1;
-    $rotation === 0 ? rotation.set(direction * -120) : clearTimeout(timer);
+    if ($rotation === 0) {
+      if (window.Cypress) {
+        self.dispatchEvent(new CustomEvent("beginRotate"));
+      }
+      rotation.set(direction * -120);
+    } else {
+      clearTimeout(timer);
+    }
   };
   let triggerDerotation = () => window.setTimeout(() => debounce(0), 100);
 
-  $: triggerRotation = enableSpin ? _triggerRotation : () => {};
+  $: triggerRotation = enableSpin
+    ? _triggerRotation
+    : () => {
+        if (window.Cypress) {
+          self.dispatchEvent(new CustomEvent("noRotate"));
+        }
+      };
 </script>
 
 <style lang="scss">
@@ -66,7 +80,7 @@
 </style>
 
 <svelte:options immutable />
-<div {id} role="presentation">
+<div id="{id}" role="presentation">
   <div id="logo2" class="theme-{$themeName}">
     {#if animate}
       <svg
@@ -77,6 +91,7 @@
         on:mouseout="{triggerDerotation}"
         viewBox="-10 15 230 225"
         data-test="logo"
+        bind:this="{self}"
       >
         <title>CUCB Logo</title>
         <g>

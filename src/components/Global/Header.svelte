@@ -194,6 +194,7 @@
         }}"
         aria-label="Settings"
         tabindex="0"
+        data-test="settings-cog"
       >
         <i
           class="las la-cog"

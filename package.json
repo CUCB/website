@@ -41,6 +41,7 @@
     "body-scroll-lock": "^3.1.5",
     "compression": "^1.7.4",
     "connect-pg-simple": "^6.2.1",
+    "dotenv": "^8.2.0",
     "emailjs": "^3.4.0",
     "escape-html": "^1.0.3",
     "express-session": "^1.17.1",
