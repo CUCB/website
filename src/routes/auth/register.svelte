@@ -1,3 +1,11 @@
+<script context="module">
+  export async function preload(_, session) {
+    if (session.userId !== undefined) {
+      this.redirect(302, "/members");
+    }
+  }
+</script>
+
 <script>
   import { createValidityChecker, makeTitle, themeName, committee } from "../../view";
   import Mailto from "../../components/Mailto.svelte";
@@ -81,7 +89,9 @@
   {#if errors.length > 0}
     <ul class="errors" data-test="errors">
       {#each errors as error}
-        <li class="error" data-test="error">{@html error}</li>
+        <li class="error" data-test="error">
+          {@html error}
+        </li>
       {/each}
     </ul>
   {/if}
@@ -90,7 +100,7 @@
   <label for="username">CRSid/Email address
     <input
       id="username"
-      bind:this={fields.username}
+      bind:this="{fields.username}"
       type="text"
       bind:value="{username}"
       data-test="username"
@@ -101,7 +111,7 @@
   </label>
   <label for="password">Password<input
       type="password"
-      bind:this={fields.password}
+      bind:this="{fields.password}"
       use:checkValid="{{ validityErrors: { tooShort: 'Password should be at least 8 characters long' }, bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
       bind:value="{password}"
       minlength="8"
@@ -110,7 +120,7 @@
     /></label>
   <label for="password-confirm">Confirm password<input
       id="password-confirm"
-      bind:this={fields.confirmPassword}
+      bind:this="{fields.confirmPassword}"
       use:checkValid="{{ validityErrors: { tooShort: 'Password should be at least 8 characters long' }, bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
       type="password"
       bind:value="{passwordConfirm}"

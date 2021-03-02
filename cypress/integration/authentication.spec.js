@@ -1,4 +1,11 @@
-import { CreateUser, DeleteUsersWhere, AppendToList042, DeleteFromList042, UserWithUsername, HASHED_PASSWORDS } from "../database/users";
+import {
+  CreateUser,
+  DeleteUsersWhere,
+  AppendToList042,
+  DeleteFromList042,
+  UserWithUsername,
+  HASHED_PASSWORDS,
+} from "../database/users";
 
 describe("login page", () => {
   before(() => {
@@ -178,10 +185,13 @@ describe("registration form", () => {
     cy.executeMutation(DeleteFromList042, { variables: { where: { email: { _ilike: "%cy-register%" } } } });
     cy.executeMutation(AppendToList042, {
       variables: {
-        objects: ["nonuni@cy-register.test", "cy456@cam.ac.uk", "cypress.user@cypress.io"].map((email) => ({ email })),
+        objects: ["nonuni@cy-register.test", "cy456@cam.ac.uk", "cypress.user@cypress.io"].map((email) => ({
+          email,
+        })),
       },
     });
   });
+
   beforeEach(() => {
     cy.visit("/auth/register");
     cy.waitForFormInteractive();
@@ -193,7 +203,7 @@ describe("registration form", () => {
 
   it("has a link to sign up to the mailing list", () => {
     cy.get("a[data-test='mailinglists']").clickLink();
-  })
+  });
 
   it("accepts valid CRSids and email addresses", () => {
     cy.get("[data-test=username]").click();
@@ -252,74 +262,109 @@ describe("registration form", () => {
     // See https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/minlength
     // "Constraint validation is only applied when the value is changed by the user"
     // So we can't check HTML validation with Cypress :(
-    cy.get('[data-test=first-name]').click().type('Cypress');
-    cy.get('[data-test=last-name]').click().type('RegistrationUser');
-    cy.get('[data-test=username]').click().type('cy456');
-    cy.get('[data-test=password]').click().type('short');
-    cy.get('[data-test=password-confirm]').click().type('short');
+    cy.get("[data-test=first-name]").click().type("Cypress");
+    cy.get("[data-test=last-name]").click().type("RegistrationUser");
+    cy.get("[data-test=username]").click().type("cy456");
+    cy.get("[data-test=password]").click().type("short");
+    cy.get("[data-test=password-confirm]").click().type("short");
     cy.get("[type=submit]").click();
-    cy.get("[data-test=error]").contains(/[Pp]assword/).should("be.visible");
+    cy.get("[data-test=error]")
+      .contains(/[Pp]assword/)
+      .should("be.visible");
   });
 
   it("accepts CRSids and @cam.ac.uk addresses", () => {
     cy.intercept("POST", "/auth/register").as("register");
-    cy.get('[data-test=first-name]').type('Cypress');
-    cy.get('[data-test=last-name]').type('RegistrationUser');
-    cy.get('[data-test=username]').type('cy456');
+    cy.get("[data-test=first-name]").type("Cypress");
+    cy.get("[data-test=last-name]").type("RegistrationUser");
+    cy.get("[data-test=username]").type("cy456");
     cy.get("[data-test=password]").type("areallysecurepassword");
     cy.get("[data-test=password-confirm]").type("areallysecurepassword");
     cy.get("[type=submit]").click();
     cy.get("[data-test=error]").should("not.exist");
     cy.get("input:invalid").should("not.exist");
     cy.wait("@register").its("response.statusCode").should("eq", 200);
-    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
+    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" } })
+      .its("cucb_users")
+      .should("have.length", 1);
     cy.executeMutation(DeleteUsersWhere, { variables: { where: { username: { _eq: "cy456" } } } });
 
+    cy.request("POST", "/auth/logout");
     cy.visit("/auth/register");
     cy.waitForFormInteractive();
-    cy.get('[data-test=first-name]').type('Cypress');
-    cy.get('[data-test=last-name]').type('RegistrationUser');
-    cy.get('[data-test=username]').type('cy456@cam.ac.uk');
+    cy.get("[data-test=first-name]").type("Cypress");
+    cy.get("[data-test=last-name]").type("RegistrationUser");
+    cy.get("[data-test=username]").type("cy456@cam.ac.uk");
     cy.get("[data-test=password]").type("areallysecurepassword");
     cy.get("[data-test=password-confirm]").type("areallysecurepassword");
     cy.get("[type=submit]").click();
     cy.get("[data-test=error]").should("not.exist");
     cy.get("input:invalid").should("not.exist");
     cy.wait("@register").its("response.statusCode").should("eq", 200);
-    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
+    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" } })
+      .its("cucb_users")
+      .should("have.length", 1);
   });
 
   it("gives a suitable error message if the username/email is already registered", () => {
-    cy.get('[data-test=first-name]').type('Cypress');
-    cy.get('[data-test=last-name]').type('User');
-    cy.get('[data-test=username]').type('cypress.user@cypress.io');
-    cy.get('[data-test=password]').type('areallylongpassword');
-    cy.get('[data-test=password-confirm]').type('areallylongpassword');
+    cy.get("[data-test=first-name]").type("Cypress");
+    cy.get("[data-test=last-name]").type("User");
+    cy.get("[data-test=username]").type("cypress.user@cypress.io");
+    cy.get("[data-test=password]").type("areallylongpassword");
+    cy.get("[data-test=password-confirm]").type("areallylongpassword");
     cy.get('[type="submit"]').click();
-    cy.get('[data-test=error]').contains(/already exists/).should("be.visible");
-    cy.get('[data-test=error] a[data-test=login]').clickLink();
+    cy.get("[data-test=error]")
+      .contains(/already exists/)
+      .should("be.visible");
+    cy.get("[data-test=error] a[data-test=login]").clickLink();
   });
 
   it("ignores captilisation of usernames to prevent double registration", () => {
-    cy.get('[data-test=first-name]').type('Cypress');
-    cy.get('[data-test=last-name]').type('RegistrationUser');
-    cy.get('[data-test=username]').type('cy456');
+    cy.get("[data-test=first-name]").type("Cypress");
+    cy.get("[data-test=last-name]").type("RegistrationUser");
+    cy.get("[data-test=username]").type("cy456");
     cy.get("[data-test=password]").type("areallysecurepassword");
     cy.get("[data-test=password-confirm]").type("areallysecurepassword");
     cy.get("[type=submit]").click();
     cy.get("[data-test=error]").should("not.exist");
     cy.get("input:invalid").should("not.exist");
 
-    cy.clearCookies();
+    cy.request("POST", "/auth/logout");
     cy.visit("/auth/register");
     cy.waitForFormInteractive();
-    cy.get('[data-test=first-name]').type('Cypress');
-    cy.get('[data-test=last-name]').type('RegistrationUser');
-    cy.get('[data-test=username]').type('CY456');
+    cy.get("[data-test=first-name]").type("Cypress");
+    cy.get("[data-test=last-name]").type("RegistrationUser");
+    cy.get("[data-test=username]").type("CY456");
     cy.get("[data-test=password]").type("areallysecurepassword");
     cy.get("[data-test=password-confirm]").type("areallysecurepassword");
     cy.get("[type=submit]").click();
-    cy.get("[data-test=error]").contains(/already exists/).should("be.visible")
-    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" }}).its("cucb_users").should("have.length", 1);
+    cy.get("[data-test=error]")
+      .contains(/already exists/)
+      .should("be.visible");
+    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" } })
+      .its("cucb_users")
+      .should("have.length", 1);
+  });
+});
+
+describe("registration page", () => {
+  before(() => {
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 27250,
+        username: "cypress_user",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 9,
+        email: "cypress.user@cypress.io",
+        firstName: "Cypress",
+        lastName: "User",
+      },
+    });
+  });
+
+  it("can't be accessed by logged in users", () => {
+    cy.login("cypress_user", "abc123");
+    cy.visit("/auth/register");
+    cy.url().should("contain", "/members").and("not.contain", "/auth");
   });
 });
