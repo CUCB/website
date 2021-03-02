@@ -1,9 +1,9 @@
 import { Writable, writable } from "svelte/store";
-import type { Committee } from "./routes/_layout.svelte";
+// import type { Committee } from "./routes/_layout.svelte";
 
 const NAME = `Cambridge University Ceilidh Band`;
 export const makeTitle = (pageTitle?: string) => pageTitle ? `${pageTitle} | ${NAME}` : NAME;
-export const committee: Writable<Committee | null> = writable(null);
+export const committee: Writable<any | null> = writable(null);
 
 // @ts-ignore
 const hexToRgb = (hex) => {
@@ -71,7 +71,7 @@ export const createValidityChecker = () => {
 
       if (options.bothPresent) {
 // @ts-ignore
-        let presence = bothPresentFields[options.bothPresent.id].map((field) => field.value.length > 0);
+        let presence: boolean[] = bothPresentFields[options.bothPresent.id].map((field) => field.value.length > 0);
         if (!presence.every((x) => x) && !presence.every((x) => !x)) {
           // If either all present or all empty...
 // @ts-ignore

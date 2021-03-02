@@ -33,6 +33,7 @@ export function makeClient(fetch: typeof fetch_, kwargs?: { role?: string }) {
   });
 
   return new ApolloClient({
+    // @ts-ignore
     link: authLink.concat(httpLink),
     cache: new InMemoryCache(),
   });
