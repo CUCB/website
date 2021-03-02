@@ -1,5 +1,5 @@
-<script>
-  export let person;
+<script lang="ts">
+  export let person: any;
   export let showEmail = false;
   import { onMount } from "svelte";
 
@@ -7,11 +7,9 @@
   let email_display = person.email_obfus
     .replace(/_/g, "")
     .split("")
-    .map(c => `&#${c.charCodeAt(0)};`)
+    .map((c: any) => `&#${c.charCodeAt(0)};`)
     .join("");
-  $: subject = email_obfus.match(/_/)
-    ? "Remove underscores from email address"
-    : "";
+  $: subject = email_obfus.match(/_/) ? "Remove underscores from email address" : "";
   $: mailto = `mailto:${email_obfus}?subject=${subject}`;
 
   onMount(() => {

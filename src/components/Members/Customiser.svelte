@@ -26,7 +26,7 @@
   import { Record, Map } from "immutable";
   import { String, Static, Null, Literal, Union, Boolean } from "runtypes";
 
-  export let settings: Settings, showSettings: boolean, settingsPopup: Popup;
+  export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null;
 
   class ViewSettings extends Record({
     accentOpen: false,
@@ -159,8 +159,8 @@
   // TODO better name to describe what this actually debounces
   function debounceColor(setting: unknown, value: RGBObject) {
     if (ColorableProperty.guard(setting)) {
-      timer[setting] && clearTimeout(timer[setting]);
-      timer[setting] = setTimeout(() => {
+      timer[setting] && window.clearTimeout(timer[setting]);
+      timer[setting] = window.setTimeout(() => {
         settings = settings.update(setting, (map) => {
           let hexValue = rgbToHex(value);
           return hexValue !== null ? map.set(color, hexValue) : map;

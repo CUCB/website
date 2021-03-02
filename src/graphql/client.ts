@@ -2,22 +2,19 @@ import ApolloClient from "apollo-client";
 import { createHttpLink } from "apollo-link-http";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { setContext } from "apollo-link-context";
-import { writable } from "svelte/store";
+import { Writable, writable } from "svelte/store";
+import type fetch_ from "isomorphic-fetch";
+import type { PreloadContext } from "@sapper/common";
 
 const host = process.env.GRAPHQL_REMOTE;
 const path = process.env.GRAPHQL_PATH;
 
-export const client = writable(null);
-export const clientCurrentUser = writable(null);
+export const client: Writable<ApolloClient<unknown> | null> = writable(null);
+export const clientCurrentUser: Writable<ApolloClient<unknown> | null> = writable(null);
 
-export function makeClient(fetch, kwargs) {
+export function makeClient(fetch: typeof fetch_, kwargs?: { role?: string }) {
   const browserDomain =
-    typeof window !== "undefined"
-      ? window.location.href
-          .split("/", 3)
-          .slice(0, 3)
-          .join("/")
-      : undefined;
+    typeof window !== "undefined" ? window.location.href.split("/", 3).slice(0, 3).join("/") : undefined;
 
   const httpLink = createHttpLink({
     uri: `${browserDomain || host}${path}`,
@@ -41,7 +38,11 @@ export function makeClient(fetch, kwargs) {
   });
 }
 
-export function handleErrors(e, session) {
+export function handleErrors(
+  this: PreloadContext,
+  e?: { graphQLErrors?: { extensions: { code: string } }[] },
+  session?: { hasuraRole?: string },
+) {
   if (!e) {
     return;
   } else if (e.graphQLErrors && e.graphQLErrors[0]) {
@@ -61,9 +62,6 @@ export function handleErrors(e, session) {
       );
     }
   } else {
-    this.error(
-      500,
-      `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`,
-    );
+    this.error(500, `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`);
   }
 }

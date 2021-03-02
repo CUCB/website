@@ -3,6 +3,7 @@
   import { fallbackPeople } from "./committee.json";
   import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
   import type { Static } from "runtypes";
+  import type { Preload } from "@sapper/common";
 
   type ThemeColor = Static<typeof ThemeColor>;
   type HexValue = Static<typeof HexValue>;
@@ -38,12 +39,12 @@
     }
   }
 
-  // @ts-ignore
-  export async function preload({ query }, session) {
+  export const preload: Preload = async function({ query }, session) {
     let committee = {};
 
     try {
-      // @ts-ignore
+        // @ts-ignore
+        // TODO fix the typeerror by making this more portable
       const res = await this.fetch("/committee.json").then((r) => r.json());
 
       for (let person of res.committee) {
@@ -105,6 +106,7 @@
   import { makeTitle, calendarStartDay, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
+  import type Popup from "../components/Popup.svelte";
 
   export let committee: Committee;
   export let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty };
@@ -116,11 +118,11 @@
 
   committeeStore.set(committee);
 
-  let windowWidth;
+  let windowWidth: number | undefined;
   let { session } = stores();
   let showSettings: boolean;
-  let settingsPopup: HTMLElement | null;
-  let navVisible;
+  let settingsPopup: Popup | null;
+  let navVisible: boolean;
 
   // @ts-ignore
   $: showSettings ? disableBodyScroll(settingsPopup) : typeof window !== "undefined" && enableBodyScroll(settingsPopup);
@@ -132,9 +134,9 @@
 
   onMount(() => {
     correctMobileHeight();
-    const browserDomain = window.location.href.split("/", 3).slice(0, 3).join("/");
-    client.set(makeClient(fetch, { host: browserDomain }));
-    clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
+    client.set(makeClient(fetch));
+    clientCurrentUser.set(makeClient(fetch, { role: "current_user" }));
+    // @ts-ignore
     if (window.Cypress) {
       let node = document.createElement("span");
       node.setAttribute("data-test", "page-hydrated");

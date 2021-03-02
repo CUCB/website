@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "lib": ["DOM", "ES2017", "WebWorker"],
     "target": "es2017",
     "allowSyntheticDefaultImports": true,
     "emitDecoratorMetadata": true,
@@ -9,8 +8,15 @@
     "isolatedModules": true,
     "moduleResolution": "node",
     "sourceMap": true,
-    "strict": true,
-    "types": ["svelte"],
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "alwaysStrict": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    // TODO raise an issue about this in the svelte repo
+    "strictFunctionTypes": false, // <- causes typeerror in Logo.svelte due to what appears to be dodgy inference when enabled
     "baseUrl": "./",
     "paths": {
       "*": ["src/@customTypes/*"]
