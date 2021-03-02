@@ -77,7 +77,7 @@ export const login: (details: LoginData) => Promise<SessionData> = async ({ user
       variables: { username },
     });
   } catch (e) {
-      console.error(e)
+    console.error(e);
     throw { status: 500, message: e.message || "Internal server error" };
   }
 

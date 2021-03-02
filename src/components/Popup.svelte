@@ -8,7 +8,7 @@
   import { themeName } from "../view";
   export let dirty = false;
   export let icons = true;
-  export let width = undefined;
+  export let width = "";
 
   const dispatch = createEventDispatcher();
   const closeOrCancel = () => dispatch(dirty ? "cancel" : "close");
@@ -69,20 +69,31 @@
   }
 </style>
 
-<click-target on:click|self={() => current && !dirty && dispatch('close')}></click-target>
+<click-target on:click|self="{() => current && !dirty && dispatch('close')}"></click-target>
 <box-container on:click|self="{() => current && !dirty && dispatch('close')}">
   <popup-box
     on:click|stopPropagation
     transition:fade="{{ duration: 250 }}"
     style="{width ? `width: ${width}` : ``}"
     class="theme-{$themeName}"
+    data-test="{$$props['data-test'] ? $$props['data-test'] : undefined}"
   >
     {#if icons}
       <div class="icons">
         {#if dirty}
-          <i class="las la-save" on:click="{() => dispatch('save')}" transition:fade="{{ duration: 250 }}"></i>
+          <i
+            class="las la-save"
+            on:click="{() => dispatch('save')}"
+            transition:fade="{{ duration: 250 }}"
+            data-test="icon-save"
+          ></i>
         {/if}
-        <i class="las la-times" on:click="{closeOrCancel}" transition:fade="{{ duration: 250 }}"></i>
+        <i
+          class="las la-times"
+          on:click="{closeOrCancel}"
+          transition:fade="{{ duration: 250 }}"
+          data-test="icon-close"
+        ></i>
       </div>
     {/if}
     <slot />

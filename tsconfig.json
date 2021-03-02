@@ -1,30 +1,27 @@
 {
-    "compilerOptions": {
-        "lib": [
-            "DOM",
-            "ES2017",
-            "WebWorker"
-        ],
-        "target": "es2017",
-        "allowSyntheticDefaultImports": true,
-        "emitDecoratorMetadata": true,
-        "experimentalDecorators": true,
-        "importsNotUsedAsValues": "error",
-        "isolatedModules": true,
-        "moduleResolution": "node",
-        "sourceMap": true,
-        "strict": true,
-        "types": [
-            "svelte"
-        ],
-    },
-    "include": [
-        "src/**/*",
-        "src/node_modules/**/*"
-    ],
-    "exclude": [
-        "node_modules/*",
-        "__sapper__/*",
-        "static/*"
-    ],
+  "compilerOptions": {
+    "target": "es2017",
+    "allowSyntheticDefaultImports": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importsNotUsedAsValues": "error",
+    "isolatedModules": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "alwaysStrict": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    // TODO raise an issue about this in the svelte repo
+    "strictFunctionTypes": false, // <- causes typeerror in Logo.svelte due to what appears to be dodgy inference when enabled
+    "baseUrl": "./",
+    "paths": {
+      "*": ["src/@customTypes/*"]
+    }
+  },
+  "include": ["src/**/*", "src/node_modules/**/*"],
+  "exclude": ["node_modules/*", "__sapper__/*", "static/*", "src/@customTypes"]
 }

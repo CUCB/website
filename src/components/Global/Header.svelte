@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import Nav from "./Nav.svelte";
   import Logo from "./Logo.svelte";
   import { fade } from "svelte/transition";
@@ -6,12 +6,13 @@
   import { sineInOut } from "svelte/easing";
   import { onMount } from "svelte";
   import { themeName } from "../../view";
-  export let user;
+  // TODO improve typing
+  export let user: any;
   export let showSettings = false;
-  export let spinnyLogo;
+  export let spinnyLogo: boolean;
   let animate = false;
-  let button;
-  let cog;
+  let button: any;
+  let cog: any;
   let cogRotation = tweened(0, { duration: 200, easing: sineInOut });
   export let navVisible = false;
   let toggleNav = () => {
@@ -194,6 +195,7 @@
         }}"
         aria-label="Settings"
         tabindex="0"
+        data-test="settings-cog"
       >
         <i
           class="las la-cog"

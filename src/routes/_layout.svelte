@@ -1,8 +1,33 @@
-<script context="module">
+<script context="module" lang="ts">
   import { makeClient } from "../graphql/client";
   import { fallbackPeople } from "./committee.json";
+  import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
+  import type { Static } from "runtypes";
+  import type { Preload } from "@sapper/common";
 
-  function fromSessionTheme(session, name) {
+  type ThemeColor = Static<typeof ThemeColor>;
+  type HexValue = Static<typeof HexValue>;
+  interface ThemedProperty {
+    default?: HexValue;
+    light?: HexValue;
+    dark?: HexValue;
+  }
+
+  export interface CommitteeMember {
+    name: string;
+    casual_name: string;
+    email_obfus: string;
+    committee_key: { name: string; __typename: string };
+    __typename: string;
+  }
+  export interface Committee {
+    president: CommitteeMember;
+    secretary: CommitteeMember;
+    webmaster: CommitteeMember;
+  }
+
+  // TODO improve typing
+  function fromSessionTheme(session: { theme?: any } | null, name: string): string | undefined {
     if (session && session.theme && session.theme[name]) {
       try {
         return JSON.parse(session.theme[name]);
@@ -14,13 +39,16 @@
     }
   }
 
-  export async function preload({ query }, session) {
+  export const preload: Preload = async function({ query }, session) {
     let committee = {};
 
     try {
+        // @ts-ignore
+        // TODO fix the typeerror by making this more portable
       const res = await this.fetch("/committee.json").then((r) => r.json());
 
       for (let person of res.committee) {
+        // @ts-ignore
         committee[person.committee_key.name] = {
           ...person,
         };
@@ -31,6 +59,7 @@
 
     let fallbackCommittee = {};
     for (let person of fallbackPeople) {
+      // @ts-ignore
       fallbackCommittee[person.committee_key.name] = {
         ...person,
       };
@@ -38,45 +67,65 @@
 
     committee = { ...fallbackCommittee, ...committee };
 
-    let color = query.color || fromSessionTheme(session, "color") || "default";
+    let color: ThemeColor;
+    try {
+      color = ThemeColor.check(query.color || fromSessionTheme(session, "color"));
+    } catch {
+      color = "default";
+    }
     let settings = {
+      accent: {} as ThemedProperty,
+      logo: {} as ThemedProperty,
       color,
       font: query.font || fromSessionTheme(session, "font") || "standard",
-      accentOpen: false,
-      logoOpen: false,
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
       calendarStartDay: fromSessionTheme(session, "calendarStartDay") || "mon",
     };
-    settings[`accent_${color}`] = query.accent || fromSessionTheme(session, `accent_${color}`) || undefined;
-    settings[`logo_${color}`] = query.logo || fromSessionTheme(session, `logo_${color}`) || undefined;
+    let accent = query.accent || fromSessionTheme(session, `accent_${color}`);
+    if (HexValue.guard(accent)) {
+      settings.accent[color] = accent;
+    }
+    let logo = query.logo || fromSessionTheme(session, `logo_${color}`);
+    if (HexValue.guard(logo)) {
+      settings.logo[color] = logo;
+    }
     calendarStartDay.set(settings["calendarStartDay"]);
 
-    return { settings, committee };
+    return { settingsWithoutMaps: settings, committee };
   }
 </script>
 
-<script>
+<script lang="ts">
   import Header from "../components/Global/Header.svelte";
   import Footer from "../components/Global/Footer.svelte";
   import Customiser from "../components/Members/Customiser.svelte";
+  import { Settings } from "../components/Members/Customiser.svelte";
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
   import { makeTitle, calendarStartDay, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
+  import type Popup from "../components/Popup.svelte";
 
-  export let committee = {};
-  export let settings = {};
-  settings = Map(settings);
+  export let committee: Committee;
+  export let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty };
+  let settings = new Settings({
+    ...settingsWithoutMaps,
+    accent: Map(Object.entries(settingsWithoutMaps.accent)) as Map<ThemeColor, HexValue>,
+    logo: Map(Object.entries(settingsWithoutMaps.logo)) as Map<ThemeColor, HexValue>,
+  });
+
   committeeStore.set(committee);
 
-  let windowWidth;
+  let windowWidth: number | undefined;
   let { session } = stores();
-  let showSettings;
-  let navVisible;
+  let showSettings: boolean;
+  let settingsPopup: Popup | null;
+  let navVisible: boolean;
 
-  $: showSettings ? disableBodyScroll() : typeof window !== "undefined" && enableBodyScroll();
+  // @ts-ignore
+  $: showSettings ? disableBodyScroll(settingsPopup) : typeof window !== "undefined" && enableBodyScroll(settingsPopup);
 
   function correctMobileHeight() {
     let vh = window.innerHeight * 0.01;
@@ -85,9 +134,9 @@
 
   onMount(() => {
     correctMobileHeight();
-    const browserDomain = window.location.href.split("/", 3).slice(0, 3).join("/");
-    client.set(makeClient(fetch, { host: browserDomain }));
-    clientCurrentUser.set(makeClient(fetch, { host: browserDomain, role: "current_user" }));
+    client.set(makeClient(fetch));
+    clientCurrentUser.set(makeClient(fetch, { role: "current_user" }));
+    // @ts-ignore
     if (window.Cypress) {
       let node = document.createElement("span");
       node.setAttribute("data-test", "page-hydrated");
@@ -161,12 +210,12 @@
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
 <div class="layout theme-{$themeName}">
-  <Header user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.get('spinnyLogo')}" />
+  <Header user="{$session}" bind:navVisible bind:showSettings spinnyLogo="{settings.spinnyLogo}" />
 
   <main>
     <slot />
   </main>
 
   <Footer committee="{committee}" />
-  <Customiser bind:settings bind:showSettings />
+  <Customiser bind:settings bind:showSettings bind:settingsPopup />
 </div>

@@ -1,65 +1,126 @@
-<script>
+<script context="module" lang="ts">
+  export const ThemeColor = Union(Literal("default"), Literal("light"), Literal("dark"));
+  export const HexValue = String.withConstraint((s) => s.match(/^[A-F0-9]{6}$/i) !== null);
+  const BLACK = HexValue.check("000000");
+  type HexValue = Static<typeof HexValue>;
+  type ThemeColor = Static<typeof ThemeColor>;
+  type Font = "default" | "hacker";
+  type Day = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+  export class Settings extends Record({
+    color: "default" as ThemeColor,
+    accent: Map() as Map<ThemeColor, HexValue>,
+    logo: Map() as Map<ThemeColor, HexValue>,
+    font: "default" as Font,
+    calendarStartDay: "mon" as Day,
+    spinnyLogo: false,
+  }) {}
+</script>
+
+<script lang="ts">
   import Popup from "../Popup.svelte";
   import Select from "../Forms/Select.svelte";
   import { HsvPicker } from "svelte-color-picker";
   import { onMount } from "svelte";
   import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
   import { stores } from "@sapper/app";
-  export let settings, showSettings;
-  let colors = ["default", "light", "dark"];
-  let { session } = stores();
-  $: themeName.set(settings.get("color"));
-  $: color = settings.get("color");
-  $: font = settings.get("font");
-  $: accent = settings.get(`accent_${color}`);
-  $: updateProps = [`accent_${color}`, `color`, `spinnyLogo`, `logo_${color}`, `calendarStartDay`];
-  $: logo = settings.get(`logo_${color}`);
-  $: updateLocalStorage(settings);
-  let selectedTheme = settings.get("color");
-  let selectedCalendarStartDay = settings.get("calendarStartDay");
+  import { Record, Map } from "immutable";
+  import { String, Static, Null, Literal, Union, Boolean } from "runtypes";
 
-  const setDefaultColors = (settings) => {
+  export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null;
+
+  class ViewSettings extends Record({
+    accentOpen: false,
+    logoOpen: false,
+  }) {}
+
+  let colors: ThemeColor[] = ["default", "light", "dark"];
+  let fonts: Font[] = ["default", "hacker"];
+  type CssVariable = "accent_triple" | "logo_color";
+  const ColorableProperty = Union(Literal("accent"), Literal("logo"));
+  type ColorableProperty = Static<typeof ColorableProperty>;
+  type ColoredLocalStorageProperty = `${ColorableProperty}_${ThemeColor}`;
+  type LocalStorageProperty = ColoredLocalStorageProperty | "color" | "font" | "calendarStartDay" | "spinnyLogo";
+
+  let { session } = stores();
+  let viewSettings = new ViewSettings();
+  $: color = settings.color;
+  $: themeName.set(settings.color);
+  $: font = settings.font;
+  $: accent = settings.accent.get(color);
+  $: updateProps = [
+    coloredProperty("accent", color),
+    `color`,
+    `spinnyLogo`,
+    coloredProperty("logo", color),
+    `calendarStartDay`,
+    `font`,
+  ] as LocalStorageProperty[];
+  $: logo = settings.logo.get(color);
+  $: updateLocalStorage(settings);
+
+  // Initialise the select fields to the current values from the user's preferences
+  let selectedTheme: ThemeColor | undefined = settings.color;
+  let selectedCalendarStartDay: Day | undefined = settings.calendarStartDay;
+
+  function isColoredProperty(property: LocalStorageProperty): property is ColoredLocalStorageProperty {
+    return colors.some((color) => property.endsWith(`_${color}`));
+  }
+
+  const setDefaultColors = (settings: Settings) => {
     if (typeof getComputedStyle !== "undefined") {
-      let color = settings.get("color");
-      if (!settings.get(`accent_${color}`) || settings.get(`accent_${color}`) === "null") {
-        settings = settings.set(`accent_${color}`, rgbStringToHex(fromCurrentStyle("accent_triple")));
+      let color = settings.color;
+      if (!settings.accent.get(color)) {
+        console.log("no accent");
+        console.log(settings);
+        settings = settings.update("accent", (map) => {
+          let value = hexValueFromCurrentStyle("accent_triple");
+          return value !== null ? map.set(color, value) : map;
+        });
       }
     }
   };
 
-  const currentLogoColor = () => {
-    if (typeof getComputedStyle !== "undefined" && fromCurrentStyle("logo_color").trim()[0] === "#") {
-      // If var(--logo_color) is a hex value, return that
-      return fromCurrentStyle("logo_color").trim().slice(1);
+  function hexValueFromCurrentStyle(property: CssVariable): HexValue | null {
+    let rgbString = fromCurrentStyle(property);
+    if (rgbString) {
+      let hexValue = rgbStringToHex(rgbString);
+      if (HexValue.guard(hexValue)) {
+        return hexValue;
+      } else {
+        return null;
+      }
     } else {
-      // As a default, assume it's black
-      return "000000";
+      return null;
     }
-  };
+  }
+
+  function currentLogoColor(): HexValue {
+    let cssLogoColor = fromCurrentStyle("logo_color");
+    let hexValue = cssLogoColor && cssLogoColor.trim().slice(1);
+    if (cssLogoColor && cssLogoColor.trim()[0] === "#" && HexValue.guard(hexValue)) {
+      return hexValue;
+    } else {
+      return BLACK;
+    }
+  }
 
   $: setDefaultColors(settings);
-  $: accentColor =
-    settings.get(`accent_${color}`) && settings.get(`accent_${color}`).length === 6
-      ? settings.get(`accent_${color}`)
-      : rgbStringToHex(fromCurrentStyle(`accent_triple`));
-  $: logoColor =
-    settings.get(`logo_${color}`) && settings.get(`logo_${color}`).length === 6
-      ? settings.get(`logo_${color}`)
-      : currentLogoColor();
-  $: $calendarStartDay = settings.get("calendarStartDay");
-  let updateLocalStorage = (_) => {};
+  $: accentColor = settings.accent.get(color) || hexValueFromCurrentStyle(`accent_triple`);
+  $: logoColor = settings.logo.get(color) || currentLogoColor();
+  $: $calendarStartDay = settings.calendarStartDay;
+  let updateLocalStorage = (_: Settings): void => {};
 
-  let updateSession = () => {};
-  const propLocalStorage = (name) => {
+  let updateSession = (_: Settings): void => {};
+  const propLocalStorage = (name: LocalStorageProperty): string | null | boolean => {
     const value = localStorage.getItem(`${name}_${$session.userId}`);
     try {
-      return JSON.parse(value);
+      return String.Or(Null).Or(Boolean).check(JSON.parse(String.check(value)));
     } catch {
       return value;
     }
   };
 
-  const fromCurrentStyle = (prop) => {
+  const fromCurrentStyle = (prop: CssVariable): string | false => {
     try {
       return (
         typeof getComputedStyle !== "undefined" &&
@@ -71,8 +132,7 @@
     }
   };
 
-  const rgbStringToHex = (triple) =>
-    triple &&
+  const rgbStringToHex = (triple: string): string =>
     triple
       .split(",")
       .map((i) => parseInt(i))
@@ -80,43 +140,80 @@
       .map((i) => (i.length === 1 ? "0" + i : i))
       .join("");
 
-  function componentToHex(c) {
+  function componentToHex(c: number): string {
     var hex = c.toString(16);
     return hex.length == 1 ? "0" + hex : hex;
   }
 
-  function rgbToHex({ r, g, b }) {
-    return componentToHex(r) + componentToHex(g) + componentToHex(b);
+  type RGBObject = { r: number; g: number; b: number };
+
+  function rgbToHex({ r, g, b }: RGBObject): HexValue | null {
+    let hexString = componentToHex(r) + componentToHex(g) + componentToHex(b);
+    return HexValue.guard(hexString) ? hexString : null;
   }
 
-  let timer = {};
-  function debounce(setting, value) {
-    timer[setting] && clearTimeout(timer[setting]);
-    timer[setting] = setTimeout(() => {
-      value && (settings = settings.set(setting, value));
-    }, 200);
+  let timer = {
+    accent: undefined as number | undefined,
+    logo: undefined as number | undefined,
+  };
+  // TODO better name to describe what this actually debounces
+  function debounceColor(setting: unknown, value: RGBObject) {
+    if (ColorableProperty.guard(setting)) {
+      timer[setting] && window.clearTimeout(timer[setting]);
+      timer[setting] = window.setTimeout(() => {
+        settings = settings.update(setting, (map) => {
+          let hexValue = rgbToHex(value);
+          return hexValue !== null ? map.set(color, hexValue) : map;
+        });
+      }, 200);
+    } else if (setting) {
+      console.error(`Expected ColorableProperty, got ${setting}`);
+    }
+  }
+
+  function coloredProperty(property: "accent" | "logo", color: ThemeColor): ColoredLocalStorageProperty {
+    return (property + "_" + color) as ColoredLocalStorageProperty;
   }
 
   onMount(() => {
-    if (!settings.get(`accent_${color}`)) {
-      settings = settings.set(`accent_${color}`, rgbStringToHex(fromCurrentStyle("accent_triple")));
+    if (!settings.accent.has(color)) {
+      if (accentColor !== null) {
+        settings = settings.update("accent", (map) => map.set(color, HexValue.check(accentColor)));
+      }
+      console.log(settings.toJS());
+      settings = settings.update("accent", (map) => {
+        let value = hexValueFromCurrentStyle("accent_triple");
+        console.log("accent " + value);
+        return value !== null ? map.set(color, value) : map;
+      });
+      console.log(settings.toJS());
     }
-    color = propLocalStorage("color") || settings.get("color");
-    accent = propLocalStorage(`accent_${color}`) || rgbStringToHex(fromCurrentStyle("accent_triple"));
+    let colorLocalStorage = propLocalStorage("color");
+    color = ThemeColor.guard(colorLocalStorage) ? colorLocalStorage : color;
     for (let color_ of colors) {
-      if (propLocalStorage(`accent_${color_}`)) {
-        settings = settings.set(`accent_${color_}`, propLocalStorage(`accent_${color_}`));
-      }
-      if (propLocalStorage(`logo_${color_}`)) {
-        settings = settings.set(`logo_${color_}`, propLocalStorage(`logo_${color_}`));
-      }
+      try {
+        let accentFromLocalStorage = propLocalStorage(coloredProperty("accent", color_));
+        settings = settings.update("accent", (map) => map.set(color_, HexValue.check(accentFromLocalStorage)));
+      } catch {}
+      try {
+        let logoColorFromLocalStorage = propLocalStorage(coloredProperty("logo", color_));
+        settings = settings.update("logo", (map) => map.set(color_, HexValue.check(logoColorFromLocalStorage)));
+      } catch {}
     }
 
     updateLocalStorage = (settings) => {
       if ($session.userId) {
         for (let prop of updateProps) {
-          settings.get(prop) !== undefined &&
-            localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(settings.get(prop)));
+          if (isColoredProperty(prop)) {
+            let [setting, color] = prop.split("_") as [ColorableProperty, ThemeColor];
+            let value = settings[setting].get(color);
+            if (value !== undefined) {
+              localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(value));
+            }
+          } else {
+            settings[prop] !== undefined &&
+              localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(settings[prop]));
+          }
         }
       }
     };
@@ -153,17 +250,33 @@
       showSettings = false;
       updateSession(settings);
     }}"
+    bind:this="{settingsPopup}"
   >
-    <button on:click="{() => (settings = settings.update('accentOpen', (x) => !x).set('logoOpen', false))}">
+    <!-- TODO check that the disabled thing actually works -->
+    <button
+      on:click="{() => (viewSettings = viewSettings.update('accentOpen', (x) => !x).set('logoOpen', false))}"
+      disabled="{accentColor === null}"
+      data-test="change-accent-color"
+    >
       Change accent colour
     </button>
-    <button on:click="{() => (settings = settings.set(`accent_${color}`, null))}">Reset accent colour</button>
-    <button on:click="{() => (settings = settings.update('logoOpen', (x) => !x).set('accentOpen', false))}">
+    <button
+      on:click="{() => (settings = settings.update('accent', (accents) => accents.remove(color)))}"
+      data-test="reset-accent-color"
+    >Reset accent colour</button>
+    <button
+      on:click="{() => (viewSettings = viewSettings.update('logoOpen', (x) => !x).set('accentOpen', false))}"
+      disabled="{accentColor === null}"
+      data-test="change-logo-color"
+    >
       Change logo colour
     </button>
-    <button on:click="{() => (settings = settings.set(`logo_${color}`, null))}">Reset logo colour</button>
+    <button
+      on:click="{() => (settings = settings.update('logo', (logoColors) => logoColors.remove(color)))}"
+      data-test="reset-logo-color"
+    >Reset logo colour</button>
     <!-- svelte-ignore a11y-label-has-associated-control-->
-    <label>
+    <label data-test="select-theme">
       Theme
       <Select bind:value="{selectedTheme}">
         <option value="default">Default (system settings)</option>
@@ -171,17 +284,21 @@
         <option value="dark">Dark</option>
       </Select>
     </label>
-    <button on:click="{() => (settings = settings.set('color', selectedTheme))}">Set theme</button>
+    <button
+      on:click="{() => (selectedTheme ? (settings = settings.set('color', selectedTheme)) : {})}"
+      data-test="confirm-theme"
+    >Set theme</button>
     <label>
       Spinny logo
       <input
         type="checkbox"
-        checked="{settings.get('spinnyLogo')}"
+        checked="{settings.spinnyLogo}"
         on:change="{() => (settings = settings.update('spinnyLogo', (x) => !x))}"
+        data-test="check-spinny-logo"
       />
     </label>
     <!-- svelte-ignore a11y-label-has-associated-control-->
-    <label>
+    <label data-test="select-calendar-day">
       Start calendar week on...
       <Select bind:value="{selectedCalendarStartDay}">
         <option value="mon">Monday</option>
@@ -193,24 +310,25 @@
         <option value="sun">Sunday</option>
       </Select>
     </label>
-    <button on:click="{() => (settings = settings.set('calendarStartDay', selectedCalendarStartDay))}">
+    <button
+      on:click="{() => (selectedCalendarStartDay ? (settings = settings.set('calendarStartDay', selectedCalendarStartDay)) : {})}"
+      data-test="confirm-calendar-day"
+    >
       Set day
     </button>
   </Popup>
-  {#if settings.get('accentOpen')}
-    <Popup on:close="{() => (settings = settings.set('accentOpen', false))}" width="auto">
-      <HsvPicker
-        startColor="{accentColor}"
-        on:colorChange="{(event) => debounce(`accent_${color}`, rgbToHex(event.detail))}"
-      />
+  {#if viewSettings.accentOpen}
+    <Popup
+      on:close="{() => (viewSettings = viewSettings.set('accentOpen', false))}"
+      width="auto"
+      data-test="accent-popup"
+    >
+      <HsvPicker startColor="{accentColor}" on:colorChange="{(event) => debounceColor('accent', event.detail)}" />
     </Popup>
   {/if}
-  {#if settings.get('logoOpen')}
-    <Popup on:close="{() => (settings = settings.set('logoOpen', false))}" width="auto">
-      <HsvPicker
-        startColor="{logoColor}"
-        on:colorChange="{(event) => debounce(`logo_${color}`, rgbToHex(event.detail))}"
-      />
+  {#if viewSettings.logoOpen}
+    <Popup on:close="{() => (viewSettings = viewSettings.set('logoOpen', false))}" width="auto" data-test="logo-popup">
+      <HsvPicker startColor="{logoColor}" on:colorChange="{(event) => debounceColor('logo', event.detail)}" />
     </Popup>
   {/if}
 {/if}
