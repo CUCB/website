@@ -1,12 +1,19 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher, onMount } from "svelte";
-  let dispatch = createEventDispatcher();
-  let callback = key => dispatch("verified", { key });
+  let dispatch = createEventDispatcher<{ verified: { key: string } }>();
+  let callback = (key: string) => dispatch("verified", { key });
   let theme = "light";
-  let captchaElement;
+  let captchaElement: HTMLElement;
   let sitekey = process.env.HCAPTCHA_SITE_KEY;
 
-  function loadHCaptcha(cb) {
+  type HCaptchaRenderArgs = { theme?: string; sitekey?: string; callback: (key: string) => void };
+  interface WithScript {
+    hcaptcha: {
+      render: (element: HTMLElement, args: HCaptchaRenderArgs) => void;
+    };
+  }
+
+  function loadHCaptcha(cb: () => void) {
     const script = document.createElement("script");
     script.src = "https://hcaptcha.com/1/api.js?render=explicit";
     script.async = true;
@@ -21,7 +28,9 @@
     } catch (e) {
       // Swallow error for old safari compatibility
     }
-    loadHCaptcha(() => window.hcaptcha.render(captchaElement, { theme, sitekey, callback }));
+    loadHCaptcha(() =>
+      ((window as unknown) as WithScript).hcaptcha.render(captchaElement, { theme, sitekey, callback }),
+    );
   });
 </script>
 
