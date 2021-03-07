@@ -1,4 +1,5 @@
 <script context="module">
+  import { writable } from "svelte/store";
   let count = writable(0);
 </script>
 
