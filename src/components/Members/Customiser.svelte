@@ -24,7 +24,8 @@
   import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
   import { stores } from "@sapper/app";
   import { Record, Map } from "immutable";
-  import { String, Static, Null, Literal, Union, Boolean } from "runtypes";
+  import { String, Null, Literal, Union, Boolean } from "runtypes";
+  import type { Static } from "runtypes";
 
   export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null;
 
