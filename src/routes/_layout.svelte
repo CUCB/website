@@ -4,6 +4,7 @@
   import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
   import type { Static } from "runtypes";
   import type { Preload } from "@sapper/common";
+  import { Day } from "../view";
 
   type ThemeColor = Static<typeof ThemeColor>;
   type HexValue = Static<typeof HexValue>;
@@ -73,13 +74,18 @@
     } catch {
       color = "default";
     }
+    let dayFromSession = fromSessionTheme(session, "calendarStartDay");
+    if (Day.guard(dayFromSession)) {
+        calendarStartDay.set(dayFromSession);
+    } else {
+        calendarStartDay.set("mon");
+    }
     let settings = {
       accent: {} as ThemedProperty,
       logo: {} as ThemedProperty,
       color,
       font: query.font || fromSessionTheme(session, "font") || "standard",
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
-      calendarStartDay: fromSessionTheme(session, "calendarStartDay") || "mon",
     };
     let accent = query.accent || fromSessionTheme(session, `accent_${color}`);
     if (HexValue.guard(accent)) {
@@ -89,7 +95,6 @@
     if (HexValue.guard(logo)) {
       settings.logo[color] = logo;
     }
-    calendarStartDay.set(settings["calendarStartDay"]);
 
     return { settingsWithoutMaps: settings, committee };
   }

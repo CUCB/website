@@ -1,9 +1,13 @@
 import { Writable, writable } from "svelte/store";
+import { Literal, Union } from "runtypes";
+import type { Static } from "runtypes";
 // import type { Committee } from "./routes/_layout.svelte";
 
 const NAME = `Cambridge University Ceilidh Band`;
 export const makeTitle = (pageTitle?: string) => pageTitle ? `${pageTitle} | ${NAME}` : NAME;
 export const committee: Writable<any | null> = writable(null);
+export const Day = Union(Literal("mon"), Literal("tue"), Literal("wed"), Literal("thu"), Literal("fri"), Literal("sat"), Literal("sun"));
+export type Day = Static<typeof Day>;
 
 // @ts-ignore
 const hexToRgb = (hex) => {
@@ -25,7 +29,7 @@ export const accentCss = (color) =>
   `<style>:root{--accent: #${color}; --accent_triple: ${colorTriple(color)};}</style>`;
 // @ts-ignore
 export const logoCss = (logo) => ((logo && hexToRgb(logo)) || "") && `<style>:root{--logo_color: #${logo};}</style>`;
-export const calendarStartDay = writable("mon");
+export const calendarStartDay: Writable<Day> = writable("mon");
 export const themeName = writable("");
 
 // @ts-ignore

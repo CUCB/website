@@ -1,5 +1,5 @@
 <script context="module">
-  let count = 0;
+  let count = writable(0);
 </script>
 
 <script>
@@ -15,9 +15,12 @@
 
   let index;
 
-  onMount(() => (index = count++));
-  onDestroy(() => count--);
-  $: current = index === count - 1;
+  onMount(() => {
+    index = $count;
+    $count += 1;
+  });
+  onDestroy(() => ($count -= 1));
+  $: current = index === $count - 1;
 </script>
 
 <style lang="scss">

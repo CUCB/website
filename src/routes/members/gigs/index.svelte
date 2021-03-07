@@ -1,15 +1,15 @@
 <script context="module">
-  import { makeClient, handleErrors, client } from "../../../graphql/client";
+  import { makeClient, handleErrors } from "../../../graphql/client";
   import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
-  
+
   export async function preload(_page, session) {
     Settings.defaultZoneName = "Europe/London";
-    let client = makeClient(this.fetch);
-    let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
 
     let res_gig, res_signup, res_gig_2;
+    let preloadClient = makeClient(this.fetch);
+    let preloadClientCurrentUser = makeClient(this.fetch, { role: "current_user" });
     try {
-      res_gig = await client.query({
+      res_gig = await preloadClient.query({
         query: QueryMultiGigDetails(session.hasuraRole),
         variables: {
           where: {
@@ -18,39 +18,27 @@
           order_by: [{ date: "asc" }, { arrive_time: "asc" }],
         },
       });
-      res_gig_2 = await client.query({
+      res_gig_2 = await preloadClient.query({
         query: QueryMultiGigDetails(session.hasuraRole),
         variables: {
           where: {
             _or: [
               {
                 date: {
-                  _gte: DateTime.local()
-                    .startOf("month")
-                    .toISO(),
-                  _lte: DateTime.local()
-                    .endOf("month")
-                    .toISO(),
+                  _gte: DateTime.local().startOf("month").toISO(),
+                  _lte: DateTime.local().endOf("month").toISO(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: DateTime.local()
-                    .startOf("month")
-                    .toISO(),
-                  _lte: DateTime.local()
-                    .endOf("month")
-                    .toISO(),
+                  _gte: DateTime.local().startOf("month").toISO(),
+                  _lte: DateTime.local().endOf("month").toISO(),
                 },
               },
               {
                 finish_time: {
-                  _gte: DateTime.local()
-                    .startOf("month")
-                    .toISO(),
-                  _lte: DateTime.local()
-                    .endOf("month")
-                    .toISO(),
+                  _gte: DateTime.local().startOf("month").toISO(),
+                  _lte: DateTime.local().endOf("month").toISO(),
                 },
               },
             ],
@@ -58,7 +46,7 @@
           order_by: { date: "asc" },
         },
       });
-      res_signup = await clientCurrentUser.query({
+      res_signup = await preloadClientCurrentUser.query({
         query: QueryMultiGigSignup,
         variables: { where: { allow_signups: { _eq: true } } },
       });
@@ -100,6 +88,7 @@
 
 <script>
   import { makeTitle, calendarStartDay, themeName } from "../../../view";
+  import { client } from "../../../graphql/client";
   import { stores } from "@sapper/app";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
@@ -110,13 +99,13 @@
 
   $: reloadSignupGigs(gigs);
   function reloadSignupGigs(gigs) {
-    let newlyMerged = gigs.map(gig =>
+    let newlyMerged = gigs.map((gig) =>
       gig.id in signupGigs && typeof signupGigs[gig.id].subscribe === "undefined"
         ? [
             gig.id,
             writable({
               ...mergeDeep(signupGigs[gig.id], gig),
-              lineup: signupGigs[gig.id].lineup.filter(person => person.user_id),
+              lineup: signupGigs[gig.id].lineup.filter((person) => person.user_id),
             }),
           ]
         : [],
@@ -125,7 +114,7 @@
   }
   let allUpcoming = gigs;
   let { session } = stores();
-  let drafts = gigs.filter(gig => gig.type.code === "draft");
+  let drafts = gigs.filter((gig) => gig.type.code === "draft");
   $: currentCalendarMonthLuxon = DateTime.fromFormat(currentCalendarMonth, "yyyy-LL");
   let displaying = "allUpcoming";
 
@@ -152,7 +141,7 @@
     return mergeDeep(target, ...sources);
   }
 
-  const display = toDisplay => {
+  const display = (toDisplay) => {
     if (toDisplay === "byMonth") {
       gigs = calendarGigs[currentCalendarMonth];
     }
@@ -164,7 +153,7 @@
 
   $: currentCalendarMonth && display(displaying);
 
-  let gotoDate = newDate => async () => {
+  let gotoDate = (newDate) => async () => {
     if (!(newDate in calendarGigs)) {
       let res_gig_2 = await $client.query({
         query: QueryMultiGigDetails($session.hasuraRole),
@@ -173,32 +162,20 @@
             _or: [
               {
                 date: {
-                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
-                    .startOf("month")
-                    .toISO(),
-                  _lte: DateTime.fromFormat(newDate, "yyyy-LL")
-                    .endOf("month")
-                    .toISO(),
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL").startOf("month").toISO(),
+                  _lte: DateTime.fromFormat(newDate, "yyyy-LL").endOf("month").toISO(),
                 },
               },
               {
                 arrive_time: {
-                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
-                    .startOf("month")
-                    .toISO(),
-                _lte: DateTime.fromFormat(newDate, "yyyy-LL")
-                    .endOf("month")
-                    .toISO(),
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL").startOf("month").toISO(),
+                  _lte: DateTime.fromFormat(newDate, "yyyy-LL").endOf("month").toISO(),
                 },
               },
               {
                 finish_time: {
-                  _gte: DateTime.fromFormat(newDate, "yyyy-LL")
-                    .startOf("month")
-                    .toISO(),
-                  _lte: DateTime.fromFormat(newDate, "yyyy-LL")
-                    .endOf("month")
-                    .toISO(),
+                  _gte: DateTime.fromFormat(newDate, "yyyy-LL").startOf("month").toISO(),
+                  _lte: DateTime.fromFormat(newDate, "yyyy-LL").endOf("month").toISO(),
                 },
               },
             ],
@@ -215,28 +192,20 @@
     gigs = gigs;
   };
   $: gotoPreviousCalendarMonth = gotoDate(
-    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
-      .minus({ months: 1 })
-      .toFormat("yyyy-LL"),
+    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").minus({ months: 1 }).toFormat("yyyy-LL"),
   );
   $: gotoNextCalendarMonth = gotoDate(
-    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
-      .plus({ months: 1 })
-      .toFormat("yyyy-LL"),
+    DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").plus({ months: 1 }).toFormat("yyyy-LL"),
   );
-  $: changeCalendarDate = async event => {
+  $: changeCalendarDate = async (event) => {
     if (event.detail.month !== undefined) {
       await gotoDate(
-        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
-          .set({ month: event.detail.month })
-          .toFormat("yyyy-LL"),
+        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").set({ month: event.detail.month }).toFormat("yyyy-LL"),
       )();
     }
     if (event.detail.year !== undefined) {
       await gotoDate(
-        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL")
-          .set({ year: event.detail.year })
-          .toFormat("yyyy-LL"),
+        DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").set({ year: event.detail.year }).toFormat("yyyy-LL"),
       )();
     }
   };
