@@ -12,7 +12,7 @@
   import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
   import { committee, createValidityChecker } from "../../view";
   import HCaptcha from "../../components/Global/HCaptcha.svelte";
-  import Mailto from "../..//components/Mailto.svelte";
+  import Mailto from "../../components/Mailto.svelte";
 
   const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
   const checkValid = createValidityChecker();
