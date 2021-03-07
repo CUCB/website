@@ -75,17 +75,13 @@
       color = "default";
     }
     let dayFromSession = fromSessionTheme(session, "calendarStartDay");
-    if (Day.guard(dayFromSession)) {
-        calendarStartDay.set(dayFromSession);
-    } else {
-        calendarStartDay.set("mon");
-    }
     let settings = {
       accent: {} as ThemedProperty,
       logo: {} as ThemedProperty,
       color,
       font: query.font || fromSessionTheme(session, "font") || "standard",
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
+      calendarStartDay: Day.guard(dayFromSession) ? dayFromSession : "mon",
     };
     let accent = query.accent || fromSessionTheme(session, `accent_${color}`);
     if (HexValue.guard(accent)) {
@@ -108,7 +104,7 @@
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
-  import { makeTitle, calendarStartDay, themeName, committee as committeeStore } from "../view";
+  import { makeTitle, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import type Popup from "../components/Popup.svelte";

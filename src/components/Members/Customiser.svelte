@@ -185,8 +185,8 @@
         let value = hexValueFromCurrentStyle("accent_triple");
         return value !== null ? map.set(color, value) : map;
       });
-      settings = settings.set("calendarStartDay", $calendarStartDay);
     }
+    settings.set("calendarStartDay", $calendarStartDay); // Removes a svelte-check warning
     let colorLocalStorage = propLocalStorage("color");
     color = ThemeColor.guard(colorLocalStorage) ? colorLocalStorage : color;
     for (let color_ of colors) {
