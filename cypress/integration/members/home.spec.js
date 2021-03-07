@@ -235,6 +235,7 @@ describe("members' home page", () => {
 
       cy.contains("Log out").click();
       cy.contains("Log in").click();
+      cy.waitForFormInteractive(); // Needed because login link is rel='external' while we're migrating to allow access to the old site
       cy.get("[data-test=username]").type("cypress_user");
       cy.get("[data-test=password]").type("abc123");
       cy.get("[data-test=submit]").click();

@@ -10,21 +10,20 @@
 
     if (notLoggedIn.bind(this)(session)) return;
 
-    let client = makeClient(this.fetch);
-
     let res, res_allPeople;
     let people, allPeople, title;
     try {
-      let gigType = await client.query({
+      let preloadClient = makeClient(this.fetch);
+      let gigType = await preloadClient.query({
         query: QueryGigType,
         variables: { id: gig_id },
       });
       if (gigType && gigType.data && gigType.data.cucb_gigs_by_pk && gigType.data.cucb_gigs_by_pk.type.code === "gig") {
-        res = await client.query({
+        res = await preloadClient.query({
           query: QueryGigLineup,
           variables: { gig_id },
         });
-        res_allPeople = await client.query({
+        res_allPeople = await preloadClient.query({
           query: AllUserNames,
         });
         title = gigType.data.cucb_gigs_by_pk.title;
@@ -64,7 +63,12 @@
   import Editor from "../../../../components/Gigs/Lineup/Editor/Editor.svelte";
   import { setInstrumentApproved, addInstrument } from "../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../graphql/gigs/lineups/users/roles";
-  import { setApproved, setAdminNotes, addUser as addUserUpdater, destroyLineupInformation } from "../../../../graphql/gigs/lineups";
+  import {
+    setApproved,
+    setAdminNotes,
+    addUser as addUserUpdater,
+    destroyLineupInformation,
+  } from "../../../../graphql/gigs/lineups";
   import { client } from "../../../../graphql/client";
   import { Map } from "immutable";
   import Fuse from "fuse.js";
@@ -147,7 +151,7 @@
     if (confirm("Are you sure you wish to delete all lineup information?")) {
       await wrap(destroyLineupInformation)()();
     }
-  }
+  };
 </script>
 
 <style lang="scss">
@@ -244,16 +248,20 @@
     </div>
   </div>
   {#if Object.entries(if_necessary).length}
-  <hr>
+    <hr />
     <h3>Only if necessary</h3>
     <div data-test="signup-maybe">
       <Editor people="{if_necessary}" updaters="{updaters}" />
     </div>
   {/if}
 </div>
-<hr>
-<p><b>Warning: Do not use this link unless you really need to!</b> <button on:click={checkDestroyLineup} data-test="destroy-lineup">Destroy all lineup information and lineup applications</button></p>
-<hr>
+<hr />
+<p>
+  <b>Warning: Do not use this link unless you really need to!</b>
+  <button on:click="{checkDestroyLineup}" data-test="destroy-lineup">Destroy all lineup information and lineup
+    applications</button>
+</p>
+<hr />
 {#if Object.entries(nope).length + Object.entries(unapproved).length}
   <h2>Unavailable/discarded</h2>
   <div data-test="lineup-editor-nope">

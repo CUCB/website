@@ -52,14 +52,14 @@
 
 <committee-person class="theme-{$themeName}">
   {#if person.pic}
-    <img class="image" {src} alt="" width="" />
+    <img class="image" src="{src}" alt="" width="" />
   {:else}
     <div class="image">No picture</div>
   {/if}
   <person-details>
     <span class="name">
       {#if person.email_obfus && showEmail}
-        <Mailto {person}>
+        <Mailto person="{person}">
           {@html person.name}
         </Mailto>
       {:else}
@@ -68,11 +68,7 @@
     </span>
     <span class="position">
       {person.position.name}
-      {#if person.sub_position}
-        &nbsp;(
-        {@html person.sub_position}
-        )
-      {/if}
+      {#if person.sub_position}&nbsp;({person.sub_position}){/if}
     </span>
   </person-details>
   {#if person.comments}

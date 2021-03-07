@@ -1,11 +1,11 @@
 <script context="module" lang="ts">
+  import type { Day } from "../../view";
   export const ThemeColor = Union(Literal("default"), Literal("light"), Literal("dark"));
   export const HexValue = String.withConstraint((s) => s.match(/^[A-F0-9]{6}$/i) !== null);
   const BLACK = HexValue.check("000000");
   type HexValue = Static<typeof HexValue>;
   type ThemeColor = Static<typeof ThemeColor>;
   type Font = "default" | "hacker";
-  type Day = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
   export class Settings extends Record({
     color: "default" as ThemeColor,
     accent: Map() as Map<ThemeColor, HexValue>,
@@ -24,7 +24,8 @@
   import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
   import { stores } from "@sapper/app";
   import { Record, Map } from "immutable";
-  import { String, Static, Null, Literal, Union, Boolean } from "runtypes";
+  import { String, Null, Literal, Union, Boolean } from "runtypes";
+  import type { Static } from "runtypes";
 
   export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null;
 
@@ -70,8 +71,6 @@
     if (typeof getComputedStyle !== "undefined") {
       let color = settings.color;
       if (!settings.accent.get(color)) {
-        console.log("no accent");
-        console.log(settings);
         settings = settings.update("accent", (map) => {
           let value = hexValueFromCurrentStyle("accent_triple");
           return value !== null ? map.set(color, value) : map;
@@ -114,7 +113,9 @@
   const propLocalStorage = (name: LocalStorageProperty): string | null | boolean => {
     const value = localStorage.getItem(`${name}_${$session.userId}`);
     try {
-      return String.Or(Null).Or(Boolean).check(JSON.parse(String.check(value)));
+      return String.Or(Null)
+        .Or(Boolean)
+        .check(JSON.parse(String.check(value)));
     } catch {
       return value;
     }
@@ -180,14 +181,12 @@
       if (accentColor !== null) {
         settings = settings.update("accent", (map) => map.set(color, HexValue.check(accentColor)));
       }
-      console.log(settings.toJS());
       settings = settings.update("accent", (map) => {
         let value = hexValueFromCurrentStyle("accent_triple");
-        console.log("accent " + value);
         return value !== null ? map.set(color, value) : map;
       });
-      console.log(settings.toJS());
     }
+    settings.set("calendarStartDay", $calendarStartDay); // Removes a svelte-check warning
     let colorLocalStorage = propLocalStorage("color");
     color = ThemeColor.guard(colorLocalStorage) ? colorLocalStorage : color;
     for (let color_ of colors) {

@@ -4,6 +4,7 @@
   import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
   import type { Static } from "runtypes";
   import type { Preload } from "@sapper/common";
+  import { Day } from "../view";
 
   type ThemeColor = Static<typeof ThemeColor>;
   type HexValue = Static<typeof HexValue>;
@@ -73,13 +74,14 @@
     } catch {
       color = "default";
     }
+    let dayFromSession = fromSessionTheme(session, "calendarStartDay");
     let settings = {
       accent: {} as ThemedProperty,
       logo: {} as ThemedProperty,
       color,
       font: query.font || fromSessionTheme(session, "font") || "standard",
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
-      calendarStartDay: fromSessionTheme(session, "calendarStartDay") || "mon",
+      calendarStartDay: Day.guard(dayFromSession) ? dayFromSession : "mon",
     };
     let accent = query.accent || fromSessionTheme(session, `accent_${color}`);
     if (HexValue.guard(accent)) {
@@ -89,7 +91,6 @@
     if (HexValue.guard(logo)) {
       settings.logo[color] = logo;
     }
-    calendarStartDay.set(settings["calendarStartDay"]);
 
     return { settingsWithoutMaps: settings, committee };
   }
@@ -103,7 +104,7 @@
   import { stores } from "@sapper/app";
   import { client, clientCurrentUser } from "../graphql/client";
   import { onMount } from "svelte";
-  import { makeTitle, calendarStartDay, themeName, committee as committeeStore } from "../view";
+  import { makeTitle, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import type Popup from "../components/Popup.svelte";

@@ -35,10 +35,8 @@
   import { List, Map } from "immutable";
 
   export let sinceOneMonth, signupsOpen;
-  $: noLineup = signupsOpen.filter((gig) => gig.lineup.filter((person) => person.approved).length === 0);
-  $: futureGigs = sinceOneMonth.filter(
-    (gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day"),
-  );
+  $: noLineup = signupsOpen.filter(hasNoLineup);
+  $: futureGigs = sinceOneMonth.filter(isInFuture);
   $: signupsOpenOrLineupSelectedForFuture = List(
     Map([...futureGigs.map((gig) => [gig.id, gig]), ...signupsOpen.map((gig) => [gig.id, gig])]).values(),
   )
@@ -52,6 +50,9 @@
       : view === VIEWS.sinceOneMonth
       ? sinceOneMonth
       : noLineup;
+
+  const hasNoLineup =(gig) => gig.lineup.filter((person) => person.approved).length === 0
+  const isInFuture = (gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
 </script>
 
 <style>
