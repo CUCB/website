@@ -135,6 +135,7 @@ describe("members' home page", () => {
       cy.get("[data-test=icon-close]").click();
 
       cy.reload();
+      cy.waitForFormInteractive();
       cy.get("[data-test=logo] path").should("have.stroke", "#fc2900");
 
       cy.get("[data-test=settings-cog]").click();

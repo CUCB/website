@@ -368,3 +368,45 @@ describe("registration page", () => {
     cy.url().should("contain", "/members").and("not.contain", "/auth");
   });
 });
+
+describe("password reset form", () => {
+  before(() => {
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 50000,
+        username: "pass2",
+        saltedPassword: "$2y$10$e2NuZ7jmxhI33TuD9gjWMevohZOWtRCTUzKOz7cqLqKd80DCCG.iu", // "password"
+        admin: 1,
+        email: "password.user0@cypress.io",
+        firstName: "Password",
+        lastName: "User",
+      },
+    });
+  });
+  it("can't be accessed by logged in users", () => {
+    cy.login("cypress_user", "abc123");
+    cy.visit("/auth/reset-password");
+    cy.url().should("contain", "/members").and("not.contain", "/auth");
+  });
+
+  it("creates a valid password reset link", { browser: ["chromium", "chrome", "electron"] }, () => {
+    cy.visit("/auth/reset-password");
+    cy.waitForFormInteractive();
+    cy.get("[data-test='username']").click().type("pass2");
+    cy.get("[data-test='submit']").click();
+    cy.contains("A pasword reset link has been generated and emailed to you.");
+    cy.searchEmails(1)
+      .its("items")
+      .then((emails) => {
+        const email = emails[0];
+        expect(email).to.be.sentTo("password.user0@cypress.io");
+        expect(email.replyTo).to.contain("CUCB Webmaster <webmaster@cucb.co.uk>");
+        console.log(email)
+        cy.visit(`/renderemail?id=${email.ID}`)
+      });
+      cy.get("a").should("have.attr", "href").and("match", /^https:\/\/www.cucb.co.uk\/auth\/reset-password/).then(link => {
+          link = link.replace(/^https:\/\/www.cucb.co.uk/, Cypress.config().baseUrl)
+          cy.visit(link);
+      });
+  });
+});

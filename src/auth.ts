@@ -3,14 +3,16 @@ import crypto from "crypto";
 import ApolloClient from "apollo-client";
 import { HttpLink } from "apollo-link-http";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import { SMTPClient } from "emailjs";
 import gql from "graphql-tag";
 import fetch from "isomorphic-fetch";
+import jwt from "jwt-simple";
 const SESSION_SECRET_HASH = crypto
   .createHash("sha512")
   .update(Buffer.from(process.env.SESSION_SECRET as string))
   .digest("hex");
 
-function makeGraphqlClient() {
+export function makeGraphqlClient() {
   return new ApolloClient({
     link: new HttpLink({
       uri: `${process.env.GRAPHQL_REMOTE}${process.env.GRAPHQL_PATH}`,
@@ -183,6 +185,48 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
     throw errors.NOT_ON_MAILING_LIST;
   }
 };
+
+export async function startPasswordReset({
+  first,
+  last,
+  email,
+}: {
+  first: string;
+  last: string;
+  email: string;
+}): Promise<void> {
+  const payload = { email };
+  const token = jwt.encode(payload, process.env.SESSION_SECRET as string);
+  const emailClient = new SMTPClient({
+    host: process.env.EMAIL_POSTFIX_HOST,
+    ssl: false,
+    port: JSON.parse(process.env.EMAIL_POSTFIX_PORT as string) as number,
+  });
+  const link = `https://www.cucb.co.uk/auth/reset-password?token=${token}`;
+  const text = `A password reset has been requested for your account. To choose a new password, go to ${link}. If you have any problems, please get in touch with the webmaster by replying to this email.`
+  const html = `A password reset has been requested for your account. To choose a new password, go to <a href="${link}">${link}</a>. If you have any problems, please get in touch with the webmaster by replying to this email.`
+  emailClient.send({
+    //@ts-ignore
+    from: `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
+    "reply-to": `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
+    to: `${first} ${last} <${email}>`,
+    subject: `CUCB — Password Reset`,
+    content: `Hi ${first},
+
+${text}
+
+Thanks,
+CUCB Webmaster\n`,
+    attachment: [
+        { data: `<html><p>Hi ${first},</p><p>${html}</p><p>Thanks,<br>CUCB Webmaster</p>`, alternative: true }
+    ]
+  }, (err, msg) => {
+    if (err != null) {
+        console.error(`Error sending password reset email: ${err.message}`);
+        throw errors.INTERNAL_ERROR;
+    }
+  });
+}
 
 // A Javascript port of a PHP function, copied from somewhere on the internet...
 // Don't know where, but is useful to escape, % symbols so we can use ilike for a case insensitive match

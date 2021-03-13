@@ -11,7 +11,6 @@
 <script lang="ts">
   import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
   import { committee, createValidityChecker } from "../../view";
-  import HCaptcha from "../../components/Global/HCaptcha.svelte";
   import Mailto from "../../components/Mailto.svelte";
 
   const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
@@ -20,17 +19,11 @@
   let usernameField: HTMLElement;
   let username: string;
   let error: string | undefined = undefined;
-  let captchaKey: string | undefined = undefined;
   let success: boolean = false;
 
   async function submit() {
-    if (!captchaKey) {
-      error = "Please complete captcha";
-      return;
-    }
     const body = new URLSearchParams();
     body.append("username", username);
-    body.append("captchaKey", captchaKey);
 
     let res = await fetch("/auth/reset-password", {
       method: "POST",
@@ -76,8 +69,7 @@
         pattern="{regexString(CRSID_PATTERN)}|{regexString(EMAIL_PATTERN)}"
         required="{true}"
       /></label>
-    <HCaptcha on:verified="{(e) => (captchaKey = e.detail.key)}" />
-    <input type="submit" value="Reset password" />
+    <input type="submit" value="Reset password" data-test="submit" />
   </form>
 {:else}
   <p>
