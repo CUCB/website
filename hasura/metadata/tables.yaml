@@ -3390,6 +3390,26 @@
       - last_login_date
       - id
       filter: {}
+  - role: current_user
+    permission:
+      columns:
+      - admin
+      - bio
+      - bio_changed_date
+      - dietaries
+      - email
+      - first
+      - gig_notes
+      - id
+      - join_date
+      - last
+      - last_login_date
+      - location_info
+      - mobile_contact_info
+      - username
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
   - role: equipment
     permission:
       columns:
@@ -3622,6 +3642,13 @@
       filter:
         id:
           _ne: X-Hasura-User-Id
+      check: null
+  - role: server
+    permission:
+      columns:
+      - last_login_date
+      - salted_password
+      filter: {}
       check: null
   - role: treasurer
     permission:
