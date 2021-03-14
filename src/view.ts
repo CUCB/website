@@ -63,7 +63,7 @@ interface ValidityErrors {
 interface ValidityOptions {
   bothPresent?: { id: string; error: string };
   bothEqual?: { id: string; error: string };
-  validityErrors: ValidityErrors;
+  validityErrors?: ValidityErrors;
 }
 
 export const createValidityChecker = () => {

@@ -26,6 +26,7 @@ module.exports = (on, config) => {
     (config.env.GRAPHQL_PATH = process.env.GRAPHQL_PATH || "/v1/graphql");
   config.env.MAILHOG_HOST = "http://" + (process.env.EMAIL_POSTFIX_HOST || "localhost") + ":8025";
   config.env.HASURA_GRAPHQL_ADMIN_SECRET = process.env.HASURA_GRAPHQL_ADMIN_SECRET || "myadminsecretkey";
+  config.env.SESSION_SECRET = process.env.SESSION_SECRET || "somethingrandom";
 
   return config;
 };

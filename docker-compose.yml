@@ -41,6 +41,7 @@ services:
       EMAIL_POSTFIX_HOST: mailhog
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
       EMAIL_POSTFIX_PORT: 1025
+      SESSION_SECRET: somethingrandom
     volumes:
       - .:/root/site
       - node_modules:/root/site/node_modules/

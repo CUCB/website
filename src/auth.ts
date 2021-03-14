@@ -6,11 +6,13 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { SMTPClient } from "emailjs";
 import gql from "graphql-tag";
 import fetch from "isomorphic-fetch";
-import jwt from "jwt-simple";
+import jwt from "jsonwebtoken";
+import { String, Record, Number, Static } from "runtypes";
 const SESSION_SECRET_HASH = crypto
   .createHash("sha512")
   .update(Buffer.from(process.env.SESSION_SECRET as string))
   .digest("hex");
+const SALT_ROUNDS = 10;
 
 export function makeGraphqlClient() {
   return new ApolloClient({
@@ -29,7 +31,7 @@ const errors = {
     status: 401,
   },
   INTERNAL_ERROR: {
-    message: "Something went wrong. Probably best to let the webmaster know",
+    message: "Something went wrong. Probably best to let the webmaster know.",
     status: 500,
   },
   NOT_ON_MAILING_LIST: {
@@ -40,6 +42,14 @@ const errors = {
   ACCOUNT_ALREADY_EXISTS: {
     message: `According to our records, an account with that email/CRSid already exists on the website. Perhaps you want to <a href="/auth/login" data-test=\"login\">login instead</a>?`,
     status: 409,
+  },
+  TOKEN_EXPIRED: {
+    message: `The password reset token has expired. Please generate a new password reset link and try again.`,
+    status: 401,
+  },
+  INVALID_TOKEN: {
+    message: `The token provided is not valid.`,
+    status: 400,
   },
 };
 
@@ -135,7 +145,6 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
   if (emailSearch && emailSearch.data && emailSearch.data.cucb_list042.length > 0) {
     username = username.toLowerCase();
     email = email.toLowerCase();
-    const SALT_ROUNDS = 10;
     let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     // Discard password before we accidentally do anything stupid
     password = "";
@@ -186,46 +195,91 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
   }
 };
 
+const PasswordResetToken = Record({
+  id: Number,
+  email: String,
+});
+
 export async function startPasswordReset({
+  id,
   first,
   last,
   email,
 }: {
+  id: number;
   first: string;
   last: string;
   email: string;
 }): Promise<void> {
-  const payload = { email };
-  const token = jwt.encode(payload, process.env.SESSION_SECRET as string);
+  const payload: Static<typeof PasswordResetToken> = { id, email };
+  const token = jwt.sign(payload, process.env.SESSION_SECRET as string, { expiresIn: "1 hour" });
   const emailClient = new SMTPClient({
     host: process.env.EMAIL_POSTFIX_HOST,
     ssl: false,
     port: JSON.parse(process.env.EMAIL_POSTFIX_PORT as string) as number,
   });
   const link = `https://www.cucb.co.uk/auth/reset-password?token=${token}`;
-  const text = `A password reset has been requested for your account. To choose a new password, go to ${link}. If you have any problems, please get in touch with the webmaster by replying to this email.`
-  const html = `A password reset has been requested for your account. To choose a new password, go to <a href="${link}">${link}</a>. If you have any problems, please get in touch with the webmaster by replying to this email.`
-  emailClient.send({
-    //@ts-ignore
-    from: `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
-    "reply-to": `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
-    to: `${first} ${last} <${email}>`,
-    subject: `CUCB — Password Reset`,
-    content: `Hi ${first},
+  const text = `A password reset has been requested for your account. To choose a new password, go to ${link}. If you have any problems, please get in touch with the webmaster by replying to this email.`;
+  const html = `A password reset has been requested for your account. To choose a new password, go to <a href="${link}">${link}</a>. If you have any problems, please get in touch with the webmaster by replying to this email.`;
+  emailClient.send(
+    {
+      //@ts-ignore
+      from: `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
+      "reply-to": `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
+      to: `${first} ${last} <${email}>`,
+      subject: `CUCB — Password Reset`,
+      content: `Hi ${first},
 
 ${text}
 
 Thanks,
 CUCB Webmaster\n`,
-    attachment: [
-        { data: `<html><p>Hi ${first},</p><p>${html}</p><p>Thanks,<br>CUCB Webmaster</p>`, alternative: true }
-    ]
-  }, (err, msg) => {
-    if (err != null) {
+      attachment: [
+        { data: `<html><p>Hi ${first},</p><p>${html}</p><p>Thanks,<br>CUCB Webmaster</p>`, alternative: true },
+      ],
+    },
+    (err, msg) => {
+      if (err != null) {
         console.error(`Error sending password reset email: ${err.message}`);
         throw errors.INTERNAL_ERROR;
+      }
+    },
+  );
+}
+
+export async function completePasswordReset({ password, token }: { password: string; token: string }): Promise<void> {
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.SESSION_SECRET as string);
+  } catch (e) {
+    if (e instanceof jwt.TokenExpiredError) {
+      throw errors.TOKEN_EXPIRED;
+    } else {
+      throw errors.INVALID_TOKEN;
     }
-  });
+  }
+
+  if (PasswordResetToken.guard(decoded)) {
+    const client = await makeGraphqlClient();
+    try {
+      let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+      // Discard password before we accidentally do anything stupid
+      password = "";
+      await client.mutate({
+        mutation: gql`
+          mutation UpdateUserPassword($id: bigint!, $saltedPassword: String!) {
+            update_cucb_users_by_pk(pk_columns: { id: $id }, _set: { salted_password: $saltedPassword }) {
+              id
+            }
+          }
+        `,
+        variables: { id: decoded.id, saltedPassword },
+      });
+    } catch (e) {
+      console.error(`GraphQL error trying to update user's password: ${e}`);
+      throw errors.INTERNAL_ERROR;
+    }
+  }
 }
 
 // A Javascript port of a PHP function, copied from somewhere on the internet...
