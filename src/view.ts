@@ -122,7 +122,6 @@ export const createValidityChecker = () => {
 
       if (options.bothEqual) {
         const fields = bothEqualFields.get(options.bothEqual.id);
-        console.log(fields);
         if (fields) {
           let allValues = fields.map((field) => field.value);
           if (!allValues.every((v) => v === allValues.get(0))) {
