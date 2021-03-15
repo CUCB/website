@@ -79,7 +79,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Pulumi CLI
         uses: pulumi/action-install-pulumi-cli@v1.0.1
-      - run: cd pumlumi && npm install
+      - run: cd pulumi && npm install
       - uses: pulumi/actions@v2
         with:
           command: preview
