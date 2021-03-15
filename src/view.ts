@@ -73,16 +73,16 @@ export const createValidityChecker = () => {
   return (node: HTMLInputElement, options: ValidityOptions) => {
     if (options.bothPresent) {
       if (!bothPresentFields.has(options.bothPresent.id)) {
-        bothPresentFields.set(options.bothPresent.id, List([node]));
+        bothPresentFields = bothPresentFields.set(options.bothPresent.id, List([node]));
       } else {
-        bothPresentFields.update(options.bothPresent.id, (nodes) => nodes.push(node));
+        bothPresentFields = bothPresentFields.update(options.bothPresent.id, (nodes) => nodes.push(node));
       }
     }
     if (options.bothEqual) {
       if (!bothEqualFields.has(options.bothEqual.id)) {
-        bothEqualFields.set(options.bothEqual.id, List([node]));
+        bothEqualFields = bothEqualFields.set(options.bothEqual.id, List([node]));
       } else {
-        bothEqualFields.update(options.bothEqual.id, (nodes) => nodes.push(node));
+        bothEqualFields = bothEqualFields.update(options.bothEqual.id, (nodes) => nodes.push(node));
       }
     }
     const changeHandler = () => {
@@ -122,6 +122,7 @@ export const createValidityChecker = () => {
 
       if (options.bothEqual) {
         const fields = bothEqualFields.get(options.bothEqual.id);
+        console.log(fields);
         if (fields) {
           let allValues = fields.map((field) => field.value);
           if (!allValues.every((v) => v === allValues.get(0))) {
