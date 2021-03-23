@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
-  import { goto } from "@sapper/app";
+  import { goto } from "$app/navigation";
   import TooltipText from "../TooltipText.svelte";
   import { Map, Set } from "immutable";
   import { themeName } from "../../view";

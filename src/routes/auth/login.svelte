@@ -2,10 +2,14 @@
   import LoginForm from "../../components/LoginForm.svelte";
   import { makeTitle } from "../../view";
 
-  export async function preload(_page, session) {
+  export async function load({ session }) {
     if (session.userId !== undefined) {
-      this.redirect(302, "/members");
+      return {
+          redirect: "/members",
+          status: 302
+      }
     }
+    return {};
   }
 </script>
 

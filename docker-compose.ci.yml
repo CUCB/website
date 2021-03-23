@@ -10,7 +10,8 @@ services:
     ports:
       - "8080:8080"
   cypress:
-    image: node:12
+    image: node:14
+    user: "root"
     volumes:
       - .:/usr/src/app
     ports:

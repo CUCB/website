@@ -1,7 +1,6 @@
 <script>
-  import { stores } from "@sapper/app";
+  import { session } from "$app/stores";
 
-  const { session } = stores();
   const loggedIn = $session.userId !== undefined;
 </script>
 

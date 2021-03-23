@@ -9,7 +9,7 @@
     RemoveGigContact,
   } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
-  import { makeClient, handleErrors } from "../../../../graphql/client";
+  import { makeClient, handleErrors, client as graphqlClient } from "../../../../graphql/client";
 
   function sortVenues(venues) {
     return venues.sort(
@@ -35,12 +35,13 @@
     });
   }
 
-  export async function preload({ params }, session) {
+  export async function load({ page: { params }, fetch, session }) {
     let { gig_id } = params;
 
-    if (notLoggedIn.bind(this)(session)) return;
+    const loginFail = notLoggedIn(session);
+    if (loginFail) return loginFail;
 
-    let client = makeClient(this.fetch);
+    let client = makeClient(fetch);
 
     let res_gig, res_venues, res_gigTypes, res_contacts;
     let gig, venues, gigTypes, allContacts;
@@ -59,8 +60,7 @@
         query: QueryContacts,
       });
     } catch (e) {
-      handleErrors.bind(this)(e, session);
-      return;
+      return handleErrors(e, session);
     }
 
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs_by_pk) {
@@ -71,16 +71,17 @@
       sortVenues(venues);
       sortContacts(gig.contacts);
     } else {
-      this.error(404, "Gig not found");
-      return;
+      return { status: 404, error: "Gig not found" };
     }
 
     return {
-      ...gig,
-      lastSaved: gig,
-      venues,
-      gigTypes,
-      allContacts,
+      props: {
+        ...gig,
+        lastSaved: gig,
+        venues,
+        gigTypes,
+        allContacts,
+      },
     };
   }
 </script>
@@ -121,16 +122,14 @@
   import ContactEditor from "../../../../components/Gigs/ContactEditor.svelte";
   import Summary from "../../../../components/Gigs/Summary.svelte";
   import Fuse from "fuse.js";
-  import { client as graphqlClient } from "../../../../graphql/client";
   import { tick } from "svelte";
   import { tweened } from "svelte/motion"; // TODO move the messages to their own component (#34)
   import { fade } from "svelte/transition";
-  import { stores } from "@sapper/app";
+  import { session } from "$app/stores";
   import SearchBox from "../../../../components/SearchBox.svelte";
   import { DateTime, Settings } from "luxon";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
-  const { session } = stores();
   let checkValid = createValidityChecker();
 
   let venue;
@@ -239,7 +238,6 @@
     quote_date,
   };
 
-
   function unloadIfSaved(e) {
     if (saved || window.Cypress) {
       delete e["returnValue"];
@@ -276,7 +274,7 @@
 
   function editVenue() {
     // A subvenue only has a name set, so one key
-    editingSubvenue = venue && Object.keys(venue).length === 1; 
+    editingSubvenue = venue && Object.keys(venue).length === 1;
     clearVenueSearch();
     displayVenueEditor = true;
   }
@@ -302,12 +300,14 @@
     lastSaved.venue = venue;
     displayVenueEditor = false;
     await tick();
+    await tick();
     venueListElement.focus();
   }
 
   async function cancelEditVenue() {
     venue = venues.find((venue) => venue.id === venue_id);
     displayVenueEditor = false;
+    await tick();
     await tick();
     venueListElement.focus();
   }
@@ -499,6 +499,7 @@
       sortContacts(allContacts);
       allContacts = allContacts;
       displayContactEditor = false;
+      await tick();
       await tick();
       if (editContactType === contactTypes.CLIENT) {
         selectedClient = updatedContact.id;
@@ -700,19 +701,21 @@
 <a href="/members/gigs/{id}" rel="{!saved ? 'external' : undefined}">View gig summary</a><br /><br />
 
 {#if previewSummary}
-  <button class="gig-preview" on:click="{() => (previewSummary = false)}" data-test="gig-edit-{id}-hide-preview">Hide
-    gig preview</button>
+  <button class="gig-preview" on:click="{() => (previewSummary = false)}" data-test="gig-edit-{id}-hide-preview"
+    >Hide gig preview</button
+  >
   <Summary gig="{summaryGig}" displayLinks="{false}" />
   <!-- TODO show public advert when that's implemented (#35) -->
 {:else}
-  <button class="gig-preview" on:click="{() => (previewSummary = true)}" data-test="gig-edit-{id}-show-preview">Show gig
-    preview</button>
+  <button class="gig-preview" on:click="{() => (previewSummary = true)}" data-test="gig-edit-{id}-show-preview"
+    >Show gig preview</button
+  >
 {/if}
 
 <p>
   {#if editing_time}
     This gig was last edited at
-    {DateTime.fromISO(editing_time).toFormat('HH:mm dd/LL/yyyy')}
+    {DateTime.fromISO(editing_time).toFormat("HH:mm dd/LL/yyyy")}
     {#if editing_user}
       &nbsp;by user
       <a href="/members/users/{editing_user.id}">{editing_user.first}&#32;{editing_user.last}</a>
@@ -720,7 +723,7 @@
   {/if}
   {#if posting_time}
     It was created at
-    {DateTime.fromISO(posting_time).toFormat('HH:mm dd/LL/yyyy')}
+    {DateTime.fromISO(posting_time).toFormat("HH:mm dd/LL/yyyy")}
     {#if posting_user}
       &nbsp;by user
       <a href="/members/users/{posting_user.id}">{posting_user.first}&#32;{posting_user.last}</a>
@@ -749,16 +752,18 @@
       Title
       <input type="text" bind:value="{title}" data-test="gig-edit-{id}-title" disabled="{cancelled}" />
     </label>
-    {#if typeCode === 'calendar'}
+    {#if typeCode === "calendar"}
       <label>
         Start date
         <input
           type="date"
           bind:this="{fields.start_date}"
-          use:checkValid="{{ validityErrors: { rangeOverflow: 'Start date should be the same as or before the end date.' } }}"
+          use:checkValid="{{
+            validityErrors: { rangeOverflow: 'Start date should be the same as or before the end date.' },
+          }}"
           bind:value="{arrive_time_date}"
           data-test="gig-edit-{id}-arrive-time-date"
-          max={finish_time_date}
+          max="{finish_time_date}"
         />
       </label>
       <label>
@@ -766,16 +771,24 @@
         <input
           type="date"
           bind:this="{fields.end_date}"
-          use:checkValid="{{ validityErrors: { rangeOverflow: 'End date should be the same as or after the start date.' } }}"
+          use:checkValid="{{
+            validityErrors: { rangeOverflow: 'End date should be the same as or after the start date.' },
+          }}"
           bind:value="{finish_time_date}"
           data-test="gig-edit-{id}-finish-time-date"
-          min={arrive_time_date}
+          min="{arrive_time_date}"
         />
       </label>
     {:else}
       <label>
         Date
-        <input type="date" bind:value="{date}" data-test="gig-edit-{id}-date" disabled="{cancelled}" required={!cancelled} />
+        <input
+          type="date"
+          bind:value="{date}"
+          data-test="gig-edit-{id}-date"
+          disabled="{cancelled}"
+          required="{!cancelled}"
+        />
       </label>
     {/if}
     <!-- svelte-ignore a11y-label-has-associated-control -->
@@ -786,7 +799,7 @@
         {#each venues as venue}
           <option value="{venue.id}">
             {venue.name}
-            {#if venue.subvenue}&nbsp;| {venue.subvenue}{/if}
+            {#if venue.subvenue} | {venue.subvenue}{/if}
           </option>
         {/each}
       </Select>
@@ -803,19 +816,23 @@
     />
 
     <div class="button-group">
-      <button on:click="{newVenue}" data-test="gig-edit-{id}-create-venue" disabled="{cancelled}">Create new venue</button>
+      <button on:click="{newVenue}" data-test="gig-edit-{id}-create-venue" disabled="{cancelled}"
+        >Create new venue</button
+      >
       &nbsp;
-      <button on:click="{newSubvenue}" data-test="gig-edit-{id}-create-subvenue" disabled="{cancelled}">Create new
-        subvenue</button>
+      <button on:click="{newSubvenue}" data-test="gig-edit-{id}-create-subvenue" disabled="{cancelled}"
+        >Create new subvenue</button
+      >
       &nbsp;
-      <button on:click="{editVenue}" data-test="gig-edit-{id}-edit-venue" disabled="{cancelled}">Edit this venue</button>
+      <button on:click="{editVenue}" data-test="gig-edit-{id}-edit-venue" disabled="{cancelled}">Edit this venue</button
+      >
     </div>
   {:else}
     <VenueEditor on:saved="{updateVenue}" on:cancel="{cancelEditVenue}" {...venue} nameEditable="{!editingSubvenue}" />
   {/if}
 </form>
 <hr />
-{#if typeCode !== 'calendar'}
+{#if typeCode !== "calendar"}
   <h3>Client/caller details</h3>
   {#if !displayContactEditor}
     <h4>Clients</h4>
@@ -828,25 +845,27 @@
               <button
                 on:click="{editContact(contact.id, contactTypes.CLIENT)}"
                 data-test="gig-edit-{id}-clients-{contact.id}-edit"
-                disabled="{cancelled}"
-              >Edit</button>
+                disabled="{cancelled}">Edit</button
+              >
               <button
                 on:click="{removeClient(contact.id)}"
                 data-test="gig-edit-{id}-clients-{contact.id}-remove"
-                disabled="{cancelled}"
-              >Remove</button>
+                disabled="{cancelled}">Remove</button
+              >
             </div>
           </div>
         {/each}
       </div>
       <!-- svelte-ignore a11y-label-has-associated-control -->
-      <label data-test="gig-edit-{id}-client-select">Add client
+      <label data-test="gig-edit-{id}-client-select"
+        >Add client
         <Select bind:value="{selectedClient}" bind:select="{clientListElement}" disabled="{cancelled}">
           <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
           {#each potentialClients as contact}
             <option value="{contact.id}">{contactDisplayName(contact)}</option>
           {/each}
-        </Select></label>
+        </Select></label
+      >
       <SearchBox
         placeholder="Search clients"
         fuse="{clientFuse}"
@@ -857,12 +876,15 @@
         disabled="{cancelled}"
       />
       <div class="button-group">
-        <button on:click="{selectClient}" data-test="gig-edit-{id}-client-select-confirm" disabled="{cancelled}">Select
-          client</button>
-        <button on:click="{newClient}" data-test="gig-edit-{id}-client-new" disabled="{cancelled}">Create new client</button>
+        <button on:click="{selectClient}" data-test="gig-edit-{id}-client-select-confirm" disabled="{cancelled}"
+          >Select client</button
+        >
+        <button on:click="{newClient}" data-test="gig-edit-{id}-client-new" disabled="{cancelled}"
+          >Create new client</button
+        >
       </div>
     </form>
-    {#if typeCode !== 'kit'}
+    {#if typeCode !== "kit"}
       <h4>Callers</h4>
       <form on:submit|preventDefault class="theme-{$themeName} contacts" data-test="caller-form">
         <div data-test="gig-edit-{id}-caller-list">
@@ -873,19 +895,20 @@
                 <button
                   on:click="{editContact(contact.id, contactTypes.CALLER)}"
                   data-test="gig-edit-{id}-callers-{contact.id}-edit"
-                  disabled="{cancelled}"
-                >Edit</button>
+                  disabled="{cancelled}">Edit</button
+                >
                 <button
                   on:click="{removeCaller(contact.id)}"
                   data-test="gig-edit-{id}-callers-{contact.id}-remove"
-                  disabled="{cancelled}"
-                >Remove</button>
+                  disabled="{cancelled}">Remove</button
+                >
               </div>
             </div>
           {/each}
         </div>
         <!-- svelte-ignore a11y-label-has-associated-control -->
-        <label data-test="gig-edit-{id}-caller-select">Add caller
+        <label data-test="gig-edit-{id}-caller-select"
+          >Add caller
           <Select bind:value="{selectedCaller}" bind:select="{callerListElement}" disabled="{cancelled}">
             <option selected="selected" disabled value="{undefined}">--- SELECT A CALLER ---</option>
             {#each potentialCallers as contact}
@@ -906,13 +929,11 @@
           <button
             on:click|preventDefault="{selectCaller}"
             data-test="gig-edit-{id}-caller-select-confirm"
-            disabled="{cancelled}"
-          >Select caller</button>
-          <button
-            on:click|preventDefault="{newCaller}"
-            data-test="gig-edit-{id}-caller-new"
-            disabled="{cancelled}"
-          >Create new caller</button>
+            disabled="{cancelled}">Select caller</button
+          >
+          <button on:click|preventDefault="{newCaller}" data-test="gig-edit-{id}-caller-new" disabled="{cancelled}"
+            >Create new caller</button
+          >
         </div>
       </form>
     {/if}
@@ -938,7 +959,10 @@
         type="date"
         bind:value="{arrive_time_date}"
         bind:this="{fields.arrive_time_date}"
-        use:checkValid="{{ validityErrors: { rangeOverflow: 'Arrive time should be before start time and finish time' }, bothPresent: { id: 'arrive_time', error: 'Arrive time needs both date and time' } }}"
+        use:checkValid="{{
+          validityErrors: { rangeOverflow: 'Arrive time should be before start time and finish time' },
+          bothPresent: { id: 'arrive_time', error: 'Arrive time needs both date and time' },
+        }}"
         max="{date || finish_time_date}"
         pattern="\d{4}-\d{2}-\d{2}"
         placeholder="YYYY-MM-DD"
@@ -949,17 +973,26 @@
         type="time"
         bind:value="{arrive_time_time}"
         bind:this="{fields.arrive_time_time}"
-        use:checkValid="{{ validityErrors: { rangeOverflow: 'Arrive time should be before start time and finish time' }, bothPresent: { id: 'arrive_time', error: 'Arrive time needs both date and time' } }}"
+        use:checkValid="{{
+          validityErrors: { rangeOverflow: 'Arrive time should be before start time and finish time' },
+          bothPresent: { id: 'arrive_time', error: 'Arrive time needs both date and time' },
+        }}"
         on:blur="{fillArriveDate}"
-        max="{arrive_time_date === date && time ? time : arrive_time_date === finish_time_date ? finish_time_time : undefined}"
+        max="{arrive_time_date === date && time
+          ? time
+          : arrive_time_date === finish_time_date
+          ? finish_time_time
+          : undefined}"
         data-test="gig-edit-{id}-arrive-time-time"
         disabled="{cancelled}"
       />
     </label>
     <div class="button-group">
-      <button on:click="{(e) => fillArriveDate({ ...e, force: true })}" disabled="{cancelled}">Infer arrive date</button>
+      <button on:click="{(e) => fillArriveDate({ ...e, force: true })}" disabled="{cancelled}">Infer arrive date</button
+      >
     </div>
-    <label>Start time
+    <label
+      >Start time
       <input
         type="time"
         step="60"
@@ -967,7 +1000,12 @@
         bind:this="{fields.time}"
         min="{arrive_time_date === date ? arrive_time_time : undefined}"
         max="{finish_time_date === date ? finish_time_time : undefined}"
-        use:checkValid="{{ validityErrors: { rangeOverflow: 'Start time should not be before arrive time', rangeUnderflow: 'Start time should not be after finish time' } }}"
+        use:checkValid="{{
+          validityErrors: {
+            rangeOverflow: 'Start time should not be before arrive time',
+            rangeUnderflow: 'Start time should not be after finish time',
+          },
+        }}"
         data-test="gig-edit-{id}-time"
         disabled="{cancelled}"
       />
@@ -979,7 +1017,10 @@
         bind:value="{finish_time_date}"
         bind:this="{fields.finish_time_date}"
         min="{date || arrive_time_date}"
-        use:checkValid="{{ validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' }, bothPresent: { id: 'finish_time' } }}"
+        use:checkValid="{{
+          validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
+          bothPresent: { id: 'finish_time' },
+        }}"
         data-test="gig-edit-{id}-finish-time-date"
         disabled="{cancelled}"
       />
@@ -987,8 +1028,15 @@
         type="time"
         bind:value="{finish_time_time}"
         bind:this="{fields.finish_time_time}"
-        use:checkValid="{{ validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' }, bothPresent: { id: 'finish_time' } }}"
-        min="{finish_time_date === date && time ? time : finish_time_date === arrive_time_date ? arrive_time_time : undefined}"
+        use:checkValid="{{
+          validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
+          bothPresent: { id: 'finish_time' },
+        }}"
+        min="{finish_time_date === date && time
+          ? time
+          : finish_time_date === arrive_time_date
+          ? arrive_time_time
+          : undefined}"
         data-test="gig-edit-{id}-finish-time-time"
         disabled="{cancelled}"
       />
@@ -997,83 +1045,95 @@
       <button
         on:click="{(e) => fillFinishDate({ ...e, force: true })}"
         disabled="{cancelled}"
-        data-test="gig-edit-{id}-infer-finish-date"
-      >Infer finish date</button>
+        data-test="gig-edit-{id}-infer-finish-date">Infer finish date</button
+      >
     </div>
   </form>
   <hr />
 {/if}
-{#if typeCode !== 'kit'}
+{#if typeCode !== "kit"}
   <h3>Options</h3>
   <form on:submit|preventDefault class="theme-{$themeName}">
-    <label class="checkbox">Admins only:
+    <label class="checkbox"
+      >Admins only:
       <input type="checkbox" bind:checked="{admins_only}" data-test="gig-edit-{id}-admins-only" /><br />
-      (Whether to hide from normal users)</label>
-    {#if typeCode !== 'calendar'}
-      <label class="checkbox">Advertise publicly:
+      (Whether to hide from normal users)</label
+    >
+    {#if typeCode !== "calendar"}
+      <label class="checkbox"
+        >Advertise publicly:
         <input type="checkbox" bind:checked="{advertise}" data-test="gig-edit-{id}-advertise" /><br />
-        (Whether to display on home page)</label>
-      <label class="checkbox">Allow signups:
+        (Whether to display on home page)</label
+      >
+      <label class="checkbox"
+        >Allow signups:
         <input type="checkbox" bind:checked="{allow_signups}" data-test="gig-edit-{id}-allow-signups" /><br />
-        (Whether to allow users to express an interest in playing)</label>
-      <label class="checkbox">Food provided:
+        (Whether to allow users to express an interest in playing)</label
+      >
+      <label class="checkbox"
+        >Food provided:
         <input type="checkbox" bind:checked="{food_provided}" data-test="gig-edit-{id}-food-provided" /><br />
-        (Whether food is provided at the gig. Will request dietary requirements when people sign up.)</label>
+        (Whether food is provided at the gig. Will request dietary requirements when people sign up.)</label
+      >
     {/if}
   </form>
   <hr />
 {/if}
 <h3>Notes</h3>
 <form on:submit|preventDefault class="theme-{$themeName}">
-  <label>{#if advertise}Public advert{:else}Summary{/if}<textarea
+  <label
+    >{#if advertise}Public advert{:else}Summary{/if}<textarea
       bind:value="{summary}"
       rows="7"
-      data-test="gig-edit-{id}-summary"
-    ></textarea>
+      data-test="gig-edit-{id}-summary"></textarea>
     <p><i>Note:</i> HTML is allowed here, though paragraphing is managed automatically based on new lines.</p>
   </label>
-  {#if typeCode !== 'kit'}
-    <label>Band notes<textarea
-        bind:value="{notes_band}"
-        rows="7"
-        data-test="gig-edit-{id}-notes-band"
-      ></textarea></label>
+  {#if typeCode !== "kit"}
+    <label
+      >Band notes<textarea bind:value="{notes_band}" rows="7" data-test="gig-edit-{id}-notes-band"></textarea></label
+    >
   {/if}
-  <label>Admin notes<textarea
-      bind:value="{notes_admin}"
-      rows="7"
-      data-test="gig-edit-{id}-notes-admin"
-    ></textarea></label>
+  <label
+    >Admin notes<textarea bind:value="{notes_admin}" rows="7" data-test="gig-edit-{id}-notes-admin"></textarea></label
+  >
 </form>
-{#if typeCode !== 'calendar'}
+{#if typeCode !== "calendar"}
   <hr />
   <h3>Financial details</h3>
   <form on:submit|preventDefault class="theme-{$themeName}">
-    <label>Quote date<input
+    <label
+      >Quote date<input
         type="date"
         bind:this="{fields.quote_date}"
         use:checkValid="{{ validityErrors: { rangeOverflow: 'Quote date cannot be set to the future.' } }}"
         bind:value="{quote_date}"
         max="{DateTime.local().toFormat('yyyy-LL-dd')}"
-      /></label>
+      /></label
+    >
     <label>Finance notes<textarea bind:value="{finance}" rows="7" data-test="gig-edit-{id}-finance"></textarea></label>
-    <label class="checkbox">Deposit received:<input
+    <label class="checkbox"
+      >Deposit received:<input
         type="checkbox"
         bind:checked="{finance_deposit_received}"
         data-test="gig-edit-{id}-finance-deposit"
-      /></label>
-    {#if typeCode !== 'gig_enquiry'}
-      <label class="checkbox">Payment received:<input
+      /></label
+    >
+    {#if typeCode !== "gig_enquiry"}
+      <label class="checkbox"
+        >Payment received:<input
           type="checkbox"
           bind:checked="{finance_payment_received}"
           data-test="gig-edit-{id}-finance-payment"
-        /></label>
-      {#if typeCode !== 'kit'}
-        <label class="checkbox">Caller paid:<input
+        /></label
+      >
+      {#if typeCode !== "kit"}
+        <label class="checkbox"
+          >Caller paid:<input
             type="checkbox"
             bind:checked="{finance_caller_paid}"
             data-test="gig-edit-{id}-finance-caller"
-          /></label>
+          /></label
+        >
       {/if}
     {/if}
   </form>

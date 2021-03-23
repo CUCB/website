@@ -5,7 +5,7 @@
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
   import { themeName, suffix } from "../../view";
-  import { stores } from "@sapper/app";
+  import { session } from "$app/stores";
   import { DateTime, Settings } from "luxon";
   Settings.defaultZoneName = "Europe/London";
 
@@ -17,7 +17,6 @@
   export let linkHeading = false;
   let showSignup = false;
   let showDetails = !linkHeading;
-  let { session } = stores();
   const formatCalendarDate = (date) => date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
   const formatTimeOnly = (date) => date.toFormat("HH:mm");
   const formatTimeWithDate = (date) => date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");

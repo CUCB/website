@@ -24,11 +24,10 @@
 <p>
   We are
   <a href="/book">always available for ceilidhs</a>
-  , May Balls, weddings, birthday parties, or any other events which might benefit from our talent and energy. With a
-  rotating lineup, we play at over 70 events a year, mainly around Cambridge. Since we are so active, we, and our
-  associated callers, have a wealth of experience to offer in creating the perfect atmosphere for an fantastic evening's
-  dancing, or perhaps simply livening up a social occasion. If this sounds interesting, we look forward to hearing from
-  you!
+  , May Balls, weddings, birthday parties, or any other events which might benefit from our talent and energy. With a rotating
+  lineup, we play at over 70 events a year, mainly around Cambridge. Since we are so active, we, and our associated callers,
+  have a wealth of experience to offer in creating the perfect atmosphere for an fantastic evening's dancing, or perhaps
+  simply livening up a social occasion. If this sounds interesting, we look forward to hearing from you!
 </p>
 
 <p>

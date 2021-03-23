@@ -4,10 +4,11 @@
   import { QueryPrefsLike } from "../../graphql/prefs";
   import { prefs } from "../../state";
 
-  export async function preload(_, session) {
-    if (notLoggedIn.bind(this)(session)) return;
+  export async function load({ fetch, session }) {
+    const loginFail = notLoggedIn(session);
+    if (loginFail) return loginFail;
 
-    let clientCurrentUser = makeClient(this.fetch, {
+    let clientCurrentUser = makeClient(fetch, {
       role: "current_user",
     });
     let res = await clientCurrentUser.query({
@@ -26,6 +27,7 @@
 
       prefs.set(prefs_);
     }
+    return {}
   }
 </script>
 

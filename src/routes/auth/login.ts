@@ -10,22 +10,22 @@ const LoginBody = Record({
 // TODO import an accurate version of this from somewhere!
 type Session = any;
 
-export async function post(req: SapperRequest & { body: any; session: Session }, res: SapperResponse, _next: unknown) {
-  if (LoginBody.guard(req.body)) {
+export async function post(req: SapperRequest & { body: any; session: Session }) {
+  const body = Object.fromEntries(req.body.entries());
+  if (LoginBody.guard(body)) {
     try {
-      const loginResult = await login(req.body);
+      const loginResult = await login(body);
 
-      req.session.userId = loginResult.user_id.toString();
-      req.session.hasuraRole = loginResult.admin_type.hasura_role;
-      req.session.firstName = loginResult.first;
-      req.session.lastName = loginResult.last;
-      req.session.save(() => (res.statusCode = 200), res.end(req.session.userId));
+      req.context.session.userId = loginResult.user_id.toString();
+      req.context.session.hasuraRole = loginResult.admin_type.hasura_role;
+      req.context.session.firstName = loginResult.first;
+      req.context.session.lastName = loginResult.last;
+      let setCookie = await req.context.session.save();
+      return { status: 200, body: req.context.session.userId, headers: setCookie };
     } catch (e) {
-      res.statusCode = e.status;
-      res.end(e.message);
+      return { status: e.status, body: e.message };
     }
   } else {
-    res.statusCode = 400;
-    res.end("Missing username or password");
+    return { status: 400, body: "Missing username or password" };
   }
 }

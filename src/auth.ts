@@ -1,27 +1,25 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
-import ApolloClient from "apollo-client";
-import { HttpLink } from "apollo-link-http";
-import { InMemoryCache } from "apollo-cache-inmemory";
 import { SMTPClient } from "emailjs";
+import { makeClient } from "../src/graphql/client";
 import gql from "graphql-tag";
-import fetch from "isomorphic-fetch";
+import fetch from "node-fetch";
+import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { String, Record, Number, Static } from "runtypes";
+import { Static, Record, Number, String } from "runtypes";
+
+dotenv.config();
 const SESSION_SECRET_HASH = crypto
   .createHash("sha512")
-  .update(Buffer.from(process.env.SESSION_SECRET as string))
+  .update(Buffer.from(process.env["SESSION_SECRET"] as string))
   .digest("hex");
 const SALT_ROUNDS = 10;
 
 export function makeGraphqlClient() {
-  return new ApolloClient({
-    link: new HttpLink({
-      uri: `${process.env.GRAPHQL_REMOTE}${process.env.GRAPHQL_PATH}`,
-      headers: { "session-secret-hash": SESSION_SECRET_HASH, "x-hasura-role": "server" },
-      fetch,
-    }),
-    cache: new InMemoryCache(),
+  return makeClient(fetch, {
+    domain: process.env["GRAPHQL_REMOTE"],
+    role: "server",
+    headers: { "session-secret-hash": SESSION_SECRET_HASH },
   });
 }
 
@@ -142,7 +140,7 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
     `,
     variables: { email: mysql_real_escape_string(email) },
   });
-  if (emailSearch && emailSearch.data && emailSearch.data.cucb_list042.length > 0) {
+  if (emailSearch?.data?.cucb_list042.length > 0) {
     username = username.toLowerCase();
     email = email.toLowerCase();
     let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
@@ -178,7 +176,7 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
         `,
         variables: { username, email, saltedPassword, firstName, lastName },
       });
-      if (res && res.data && res.data.insert_cucb_users_one) {
+      if (res?.data?.insert_cucb_users_one) {
         return res.data.insert_cucb_users_one;
       } else {
         throw errors.INTERNAL_ERROR;
@@ -212,11 +210,11 @@ export async function startPasswordReset({
   email: string;
 }): Promise<void> {
   const payload: Static<typeof PasswordResetToken> = { id, email };
-  const token = jwt.sign(payload, process.env.SESSION_SECRET as string, { expiresIn: "1 hour" });
+  const token = jwt.sign(payload, process.env["SESSION_SECRET"] as string, { expiresIn: "1 hour" });
   const emailClient = new SMTPClient({
-    host: process.env.EMAIL_POSTFIX_HOST,
+    host: process.env["EMAIL_POSTFIX_HOST"],
     ssl: false,
-    port: JSON.parse(process.env.EMAIL_POSTFIX_PORT as string) as number,
+    port: JSON.parse(process.env["EMAIL_POSTFIX_PORT"] as string) as number,
   });
   const link = `https://www.cucb.co.uk/auth/reset-password?token=${token}`;
   const text = `A password reset has been requested for your account. To choose a new password, go to ${link}. If you have any problems, please get in touch with the webmaster by replying to this email.`;
@@ -224,8 +222,8 @@ export async function startPasswordReset({
   emailClient.send(
     {
       //@ts-ignore
-      from: `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
-      "reply-to": `CUCB Webmaster <${process.env.EMAIL_SEND_ADDRESS}>`,
+      from: `CUCB Webmaster <${process.env["EMAIL_SEND_ADDRESS"]}>`,
+      "reply-to": `CUCB Webmaster <${process.env["EMAIL_SEND_ADDRESS"]}>`,
       to: `${first} ${last} <${email}>`,
       subject: `CUCB — Password Reset`,
       content: `Hi ${first},
@@ -250,7 +248,8 @@ CUCB Webmaster\n`,
 export async function completePasswordReset({ password, token }: { password: string; token: string }): Promise<void> {
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.SESSION_SECRET as string);
+    decoded = jwt.verify(token, process.env["SESSION_SECRET"] as string);
+    console.log(decoded)
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
       throw errors.TOKEN_EXPIRED;
@@ -258,14 +257,20 @@ export async function completePasswordReset({ password, token }: { password: str
       throw errors.INVALID_TOKEN;
     }
   }
+  try {
+  console.log(PasswordResetToken.guard(decoded))
+  } catch(e) {
+      console.error(e)
+  }
 
   if (PasswordResetToken.guard(decoded)) {
-    const client = await makeGraphqlClient();
+      console.log("Guarded")
+    const client = makeGraphqlClient();
     try {
       let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
       // Discard password before we accidentally do anything stupid
       password = "";
-      await client.mutate({
+      let res = await client.mutate({
         mutation: gql`
           mutation UpdateUserPassword($id: bigint!, $saltedPassword: String!) {
             update_cucb_users_by_pk(pk_columns: { id: $id }, _set: { salted_password: $saltedPassword }) {
@@ -275,10 +280,13 @@ export async function completePasswordReset({ password, token }: { password: str
         `,
         variables: { id: decoded.id, saltedPassword },
       });
+      console.log(res)
     } catch (e) {
       console.error(`GraphQL error trying to update user's password: ${e}`);
       throw errors.INTERNAL_ERROR;
     }
+  } else {
+      console.error("meow")
   }
 }
 

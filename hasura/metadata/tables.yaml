@@ -2866,6 +2866,36 @@
 - table:
     schema: cucb
     name: session
+  insert_permissions:
+  - role: server
+    permission:
+      check: {}
+      columns:
+      - sid
+      - sess
+      - expire
+      backend_only: false
+  select_permissions:
+  - role: server
+    permission:
+      columns:
+      - sess
+      - expire
+      - sid
+      filter: {}
+  update_permissions:
+  - role: server
+    permission:
+      columns:
+      - sess
+      - expire
+      - sid
+      filter: {}
+      check: null
+  delete_permissions:
+  - role: server
+    permission:
+      filter: {}
 - table:
     schema: cucb
     name: session_tunes

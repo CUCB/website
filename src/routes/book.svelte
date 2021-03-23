@@ -1,6 +1,6 @@
 <script>
   import Testimonial from "../components/Testimonial.svelte";
-  import { committee, makeTitle } from "../view.js";
+  import { committee, makeTitle } from "../view";
   import BookingForm from "../components/BookingForm.svelte";
   import Mailto from "../components/Mailto.svelte";
 
@@ -65,8 +65,7 @@
 <noscript>
   <p>
     To make a booking enquiry, please
-    <Mailto person="{$committee.secretary}">email the secretary</Mailto>
-    .
+    <Mailto person="{$committee.secretary}">email the secretary</Mailto>.
   </p>
 </noscript>
 <BookingForm on:complete="{() => (bookingFormComplete = true)}" />

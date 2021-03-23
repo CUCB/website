@@ -1,5 +1,5 @@
 import { AttributePreferences, extractAttributes } from "../../graphql/gigs/lineups/users/attributes";
-import { LineupInstruments, LineupUserInstrument } from "../../graphql/gigs/lineups/users/instruments";
+import { LineupUserInstrument } from "../../graphql/gigs/lineups/users/instruments";
 import { LineupRoles } from "../../graphql/gigs/lineups/users/roles";
 import gql from "graphql-tag";
 import { Map } from "immutable";
@@ -26,14 +26,18 @@ export const FragmentGigLineup = gql`
           ...LineupUserInstrument
         }
       }
-      ...LineupInstruments
+      user_instruments {
+        approved
+        user_instrument {
+          ...LineupUserInstrument
+        }
+      }
       ...LineupAvailability
       user_notes
       admin_notes
     }
   }
   ${AttributePreferences}
-  ${LineupInstruments}
   ${LineupUserInstrument}
   ${LineupRoles}
   ${LineupAvailability}
@@ -124,14 +128,18 @@ export const AddUserToGig = gql`
           ...LineupUserInstrument
         }
       }
-      ...LineupInstruments
+      user_instruments {
+        approved
+        user_instrument {
+          ...LineupUserInstrument
+        }
+      }
       ...LineupAvailability
       user_notes
       admin_notes
     }
   }
   ${AttributePreferences}
-  ${LineupInstruments}
   ${LineupUserInstrument}
   ${LineupRoles}
   ${LineupAvailability}
@@ -144,11 +152,11 @@ export const addUser = async ({ client, gigId, errors, people }, userId) => {
   });
 
   if (graphql_res.data.insert_cucb_gigs_lineups_one) {
-      let person = graphql_res.data.insert_cucb_gigs_lineups_one;
-      person.user.attributes = extractAttributes(person.user);
-      person.user.prefs = undefined;
+    let person = graphql_res.data.insert_cucb_gigs_lineups_one;
+    person.user.attributes = extractAttributes(person.user);
+    person.user.prefs = undefined;
     return {
-      people: people.set("" + userId, person), 
+      people: people.set("" + userId, person),
       errors,
     };
   } else {
@@ -158,11 +166,11 @@ export const addUser = async ({ client, gigId, errors, people }, userId) => {
 
 export const DestroyLineup = gql`
   mutation DestroyLineup($gigId: bigint!) {
-    delete_cucb_gigs_lineups_instruments(where: {gig_id: {_eq: $gigId} }) {
-        affected_rows
+    delete_cucb_gigs_lineups_instruments(where: { gig_id: { _eq: $gigId } }) {
+      affected_rows
     }
-    delete_cucb_gigs_lineups(where: {gig_id: {_eq: $gigId} }) {
-        affected_rows
+    delete_cucb_gigs_lineups(where: { gig_id: { _eq: $gigId } }) {
+      affected_rows
     }
   }
 `;
@@ -175,7 +183,7 @@ export const destroyLineupInformation = async ({ client, gigId, errors, people }
 
   if (graphql_res.data.delete_cucb_gigs_lineups) {
     return {
-      people: new Map(), 
+      people: new Map(),
       errors,
     };
   } else {

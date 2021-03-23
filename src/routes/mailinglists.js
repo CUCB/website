@@ -2,15 +2,17 @@ import { makeClient } from "../graphql/client";
 import { SMTPClient } from "emailjs";
 import fetch from "node-fetch";
 import gql from "graphql-tag";
+import dotenv from "dotenv";
+dotenv.config();
 
-export async function post(req, res, next) {
-  const { name, email, lists, captchaKey } = req.body;
+export async function post({ body }) {
+  const { name, email, lists, captchaKey } = body;
   const hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
     },
-    body: `response=${captchaKey}&secret=${process.env.HCAPTCHA_SECRET}`,
+    body: `response=${captchaKey}&secret=${process.env["HCAPTCHA_SECRET"]}`,
   }).then(res => res.json());
 
   if (hcaptcha.success) {
@@ -52,7 +54,7 @@ export async function post(req, res, next) {
 
     client.send(
       {
-        from: `CUCB Website <${process.env.EMAIL_SEND_ADDRESS}>`,
+        from: `CUCB Website <${process.env["EMAIL_SEND_ADDRESS"]}>`,
         to: `CUCB Webmaster <${webmaster.email}>`,
         subject: `Request to join mailing lists`,
         text: `${name}\n${email}\nWishes to join the following lists\n${JSON.parse(lists).map(list => `\t${list}\n`)}`,

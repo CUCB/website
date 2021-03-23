@@ -10,7 +10,7 @@
   import TooltipText from "../TooltipText.svelte";
   import { clientCurrentUser } from "../../graphql/client";
   import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
-  import { stores } from "@sapper/app";
+  import { session } from "$app/stores";
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
@@ -34,12 +34,11 @@
       : { ...userInstr, chosen: false, approved: false },
   );
 
-  let { session } = stores();
 
   $userNotes || (gig.lineup.length && ($userNotes = gig.lineup[0].user.gig_notes));
-  userNotes.subscribe(
-    (notes) => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
-  );
+//   userNotes.subscribe(
+//     (notes) => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
+//   );
 
   const statuses = {
     YES: {},

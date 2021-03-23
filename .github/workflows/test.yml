@@ -104,7 +104,7 @@ jobs:
 
       - name: Build and tag image
         run: |
-          echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
+          echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
           docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
           docker build -t $CI_REGISTRY/cucb/website:slim -f deploy/Dockerfile .
         env:

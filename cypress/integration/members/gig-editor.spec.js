@@ -1,7 +1,4 @@
-import {
-  onConflictVenue,
-  SetResetGig,
-} from "../../database/gigs";
+import { onConflictVenue, SetResetGig } from "../../database/gigs";
 import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
 
 const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
@@ -214,6 +211,7 @@ describe("gig editor", () => {
       });
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}/edit`);
+      cy.waitForFormInteractive();
     });
 
     it("detects unsaved changes", () => {
@@ -563,7 +561,7 @@ describe("gig editor", () => {
       cy.contains("Arrive time").should("be.visible");
       cy.contains("Start time").should("be.visible");
       cy.contains("Finish time").should("be.visible");
-      cy.get(`[data-test=show-signup-${gig.id}]`).should("be.visible")
+      cy.get(`[data-test=show-signup-${gig.id}]`).should("be.visible");
       cy.get(`[data-test=icon-food-provided]`).should("be.visible");
       cy.get(`[href='/members/gigs/${gig.id}/edit']`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-type] [data-test=select-box]`).select("Calendar Dates");
@@ -576,7 +574,7 @@ describe("gig editor", () => {
       cy.contains("Arrive time").should("not.exist");
       cy.contains("Start time").should("not.exist");
       cy.contains("Finish time").should("not.exist");
-      cy.get(`[data-test=show-signup-${gig.id}]`).should("not.exist")
+      cy.get(`[data-test=show-signup-${gig.id}]`).should("not.exist");
       cy.get(`[data-test=icon-food-provided]`).should("not.exist");
     });
   });
@@ -597,6 +595,7 @@ describe("gig editor", () => {
     beforeEach(() => {
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}/edit`);
+      cy.waitForFormInteractive();
     });
 
     it("warns when gig is unusually long", () => {

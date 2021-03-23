@@ -1,10 +1,10 @@
 <script context="module" lang="ts">
   import { makeClient } from "../graphql/client";
-  import { fallbackPeople } from "./committee.json";
+  import { fallbackPeople } from "./_committee";
   import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
   import type { Static } from "runtypes";
-  import type { Preload } from "@sapper/common";
   import { Day } from "../view";
+  import { client, clientCurrentUser } from "../graphql/client";
 
   type ThemeColor = Static<typeof ThemeColor>;
   type HexValue = Static<typeof HexValue>;
@@ -40,13 +40,11 @@
     }
   }
 
-  export const preload: Preload = async function({ query }, session) {
+  export const load = async function({ page: { query }, fetch, session }) {
     let committee = {};
 
     try {
-        // @ts-ignore
-        // TODO fix the typeerror by making this more portable
-      const res = await this.fetch("/committee.json").then((r) => r.json());
+      const res = await fetch("/committee.json").then((r) => r.json());
 
       for (let person of res.committee) {
         // @ts-ignore
@@ -92,7 +90,10 @@
       settings.logo[color] = logo;
     }
 
-    return { settingsWithoutMaps: settings, committee };
+    client.set(makeClient(fetch));
+    clientCurrentUser.set(makeClient(fetch, { role: "current_user" }));
+
+    return { props: { settingsWithoutMaps: settings, committee } };
   }
 </script>
 
@@ -101,8 +102,7 @@
   import Footer from "../components/Global/Footer.svelte";
   import Customiser from "../components/Members/Customiser.svelte";
   import { Settings } from "../components/Members/Customiser.svelte";
-  import { stores } from "@sapper/app";
-  import { client, clientCurrentUser } from "../graphql/client";
+  import { session } from "$app/stores";
   import { onMount } from "svelte";
   import { makeTitle, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
@@ -120,7 +120,6 @@
   committeeStore.set(committee);
 
   let windowWidth: number | undefined;
-  let { session } = stores();
   let showSettings: boolean;
   let settingsPopup: Popup | null;
   let navVisible: boolean;
@@ -135,8 +134,6 @@
 
   onMount(() => {
     correctMobileHeight();
-    client.set(makeClient(fetch));
-    clientCurrentUser.set(makeClient(fetch, { role: "current_user" }));
     // @ts-ignore
     if (window.Cypress) {
       let node = document.createElement("span");
@@ -193,9 +190,9 @@
     href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,700;1,400;1,700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" type="text/css" href="static/themes/color/default.css" />
-  <link rel="stylesheet" type="text/css" href="static/themes/font/standard.css" />
-  {#if $session.userId}
+  <link rel="stylesheet" type="text/css" href="/static/themes/color/default.css" />
+  <link rel="stylesheet" type="text/css" href="/static/themes/font/standard.css" />
+  {#if $session?.userId}
     <link
       rel="stylesheet"
       href="https://maxst.icons8.com/vue-static/landings/line-awesome/font-awesome-line-awesome/css/all.min.css"

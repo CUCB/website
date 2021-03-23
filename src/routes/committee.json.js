@@ -1,8 +1,10 @@
-import { makeClient } from "../graphql/client";
 import { currentCommittee } from "../graphql/committee";
 import fetch from "node-fetch";
 import { DateTime } from "luxon";
+import dotenv from "dotenv";
+import { makeClient } from "../graphql/client";
 
+dotenv.config();
 let cached;
 let retrieved;
 
@@ -39,10 +41,8 @@ export let fallbackPeople = [
   },
 ];
 
-export async function get(req, res, next) {
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const host = req.headers.host.split(":")[0] !== "127.0.0.1" ? `${protocol}://${req.headers.host}` : undefined;
-  const client = await makeClient(fetch, { host });
+export async function get() {
+  const client = makeClient(fetch, { domain: process.env["GRAPHQL_REMOTE"] });
 
   // Return from cache if recent enough
   if (!retrieved || DateTime.local().diff(retrieved).hours > 0) {
@@ -50,22 +50,30 @@ export async function get(req, res, next) {
       const graphqlRes = await client.query({
         query: currentCommittee,
       });
-      cached =
-        graphqlRes.data.cucb_committees &&
-        graphqlRes.data.cucb_committees[0] &&
-        graphqlRes.data.cucb_committees[0].committee_members;
+      cached = graphqlRes?.data?.cucb_committees?.[0]?.committee_members;
     } catch (e) {
-      res.writeHead(500, { "Content-Type": "application/json" });
-      res.end(
-        JSON.stringify({
-          message: `Something went wrong. Let the webmaster know and they'll try and help you.`,
-          code: e.graphqlErrors[0].extensions.code,
-        }),
-      );
-      return;
+      if (e.graphQLErrors?.length > 0) {
+        return {
+          status: 500,
+          body: {
+            message: `Something went wrong. Let the webmaster know and they'll try and help you.`,
+            code: e.graphQLErrors[0].extensions.code,
+          },
+        };
+      } else {
+        return {
+          status: 500,
+          body: {
+            message: `Something went wrong. Let the webmaster know and they'll try and help you.`,
+            code: e.networkError,
+          },
+        };
+      }
     }
   }
 
-  res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ committee: cached, retrieved }));
+  return {
+    status: 200,
+    body: { committee: cached, retrieved },
+  };
 }

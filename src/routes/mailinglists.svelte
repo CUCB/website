@@ -35,7 +35,7 @@
         method: "POST",
         body,
         headers: {
-          "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+          "Content-type": "multipart/form-data;charset=UTF-8",
         },
       });
     } catch (e) {

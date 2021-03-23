@@ -3,13 +3,14 @@
   import { notLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
 
-  export async function preload({ params }, session) {
+  export async function load({ page: { params }, session, fetch }) {
     let { gig_id } = params;
 
-    if (notLoggedIn.bind(this)(session)) return;
+    const loginFail = notLoggedIn(session);
+    if (loginFail) return loginFail;
 
-    let client = makeClient(this.fetch);
-    let clientCurrentUser = makeClient(this.fetch, { role: "current_user" });
+    let client = makeClient(fetch);
+    let clientCurrentUser = makeClient(fetch, { role: "current_user" });
 
     let res_gig,
       res_signup,
@@ -25,8 +26,7 @@
         variables: { gig_id },
       });
     } catch (e) {
-      handleErrors.bind(this)(e, session);
-      return;
+      return handleErrors(e, session);
     }
 
     try {
@@ -43,15 +43,16 @@
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs_by_pk) {
       gig = res_gig.data.cucb_gigs_by_pk;
     } else {
-      this.error(404, "Gig not found");
-      return;
+      return { status: 404, error: "Gig not found" };
     }
 
     return {
-      gig,
-      signupGig: res_signup.data.cucb_gigs && res_signup.data.cucb_gigs[0],
-      userInstruments: res_signup.data.cucb_users_instruments,
-      signupSummary,
+      props: {
+        gig,
+        signupGig: res_signup.data.cucb_gigs && res_signup.data.cucb_gigs[0],
+        userInstruments: res_signup.data.cucb_users_instruments,
+        signupSummary,
+      },
     };
   }
 </script>

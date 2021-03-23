@@ -25,9 +25,10 @@ const RegisterBody = Record({
   lastName: String,
 });
 
-export async function post(req: PostRequest, res: SapperResponse, _next: unknown) {
+export async function post(req: PostRequest) {
+  const body = Object.fromEntries(req.body.entries());
   try {
-    let { username, password, passwordConfirm, firstName, lastName } = RegisterBody.check(req.body);
+    let { username, password, passwordConfirm, firstName, lastName } = RegisterBody.check(body);
 
     if (username && password === passwordConfirm) {
       let email;
@@ -41,38 +42,30 @@ export async function post(req: PostRequest, res: SapperResponse, _next: unknown
           email = username;
         }
       } else {
-        res.statusCode = 400;
-        res.end("Username is not an email or CRSid");
-        return;
+        return { status: 400, body: "Username is not an email or CRSid" };
       }
 
       try {
         if (passwordIsValid(password)) {
           const loginResult = await createAccount({ firstName, lastName, username, email, password });
 
-          req.session.userId = loginResult.id.toString();
-          req.session.hasuraRole = loginResult.admin_type.hasura_role;
-          req.session.firstName = loginResult.first;
-          req.session.lastName = loginResult.last;
-          req.session.save(() => {
-            res.statusCode = 200;
-            res.end(req.session.userId);
-          });
+          req.context.session.userId = loginResult.id.toString();
+          req.context.session.hasuraRole = loginResult.admin_type.hasura_role;
+          req.context.session.firstName = loginResult.first;
+          req.context.session.lastName = loginResult.last;
+          let headers = await req.context.session.save();
+          return { status: 200, body: req.context.session.userId, headers };
         } else {
-          res.statusCode = 400;
-          res.end("Password must be at least 8 characters long");
+          return { status: 400, body: "Password must be at least 8 characters long" };
         }
       } catch (e) {
         let { message, status } = e;
-        res.statusCode = status;
-        res.end(message);
+        return { status, body: message };
       }
     } else {
-      res.statusCode = 400;
-      res.end("Missing username, password or name");
+      return { status: 400, body: "Missing username, password or name" };
     }
   } catch (e) {
-    res.statusCode = 400;
-    res.end("Missing username, password or name");
+    return { status: 400, body: "Missing username, password or name" };
   }
 }

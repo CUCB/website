@@ -1,46 +1,51 @@
 <script context="module" lang="ts">
-  import type { Preload } from "@sapper/common";
+  import type { Load } from "@sveltejs/kit";
   import { Number } from "runtypes";
   const isSuccessful = (status: number) => status >= 200 && status < 300;
 
-  type PreloadResponse =
+  type PreloadProps =
     | { valid: true; token: string }
     | { valid: false; token: undefined }
     | { valid: null; token: undefined };
-  export const preload: Preload = async function ({ query }, session): Promise<{ preload: PreloadResponse }> {
+  export const load: Load = async function ({
+    page: { query },
+    session,
+    fetch,
+  }): Promise<{ status?: number; redirect?: string; props?: { preload: PreloadProps } }> {
     if (session.userId !== undefined) {
-      this.redirect(302, "/members");
+      return { status: 302, redirect: "/members" };
     }
 
-    const token = query["token"];
+    const token = query.get("token");
 
     if (token && typeof token === "string") {
-      const res = await this.fetch(`/auth/reset-password/verify/${token}`);
+      const res = await fetch(`/auth/reset-password/verify/${token}`);
       if (isSuccessful(res.status)) {
         const body = await res.json();
         if (Number.guard(body.id)) {
-          return { preload: { valid: true, token } };
+          return { props: { preload: { valid: true, token } } };
         } else {
-          return { preload: { valid: false, token: undefined } };
+          return { props: { preload: { valid: false, token: undefined } } };
         }
       } else {
-        return { preload: { valid: false, token: undefined } };
+        return { props: { preload: { valid: false, token: undefined } } };
       }
     } else {
-      return { preload: { valid: null, token: undefined } };
+      return { props: { preload: { valid: null, token: undefined } } };
     }
   };
 </script>
 
 <script lang="ts">
-  import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
-  import { committee, createValidityChecker } from "../../view";
-  import Mailto from "../../components/Mailto.svelte";
+  import { EMAIL_PATTERN, CRSID_PATTERN } from "../_register";
+  import { committee, createValidityChecker } from "../../../view";
+  import Mailto from "../../../components/Mailto.svelte";
+  import LoginForm from "../../../components/LoginForm.svelte";
 
   const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
   const checkValid = createValidityChecker();
 
-  export let preload: PreloadResponse;
+  export let preload: PreloadProps;
   let { validToken, token } = { validToken: preload.valid, token: preload.token };
 
   let username: string | undefined;
@@ -95,16 +100,20 @@
   </p>
   {#if !success}
     <form on:submit|preventDefault="{submit('start')}">
-      <label>Email/CRSid
+      <label
+        >Email/CRSid
         <input
           id="username"
           type="text"
           bind:value="{username}"
           data-test="username"
-          use:checkValid="{{ validityErrors: { patternMismatch: 'This should be either a CRSid or an email address' } }}"
+          use:checkValid="{{
+            validityErrors: { patternMismatch: 'This should be either a CRSid or an email address' },
+          }}"
           pattern="{regexString(CRSID_PATTERN)}|{regexString(EMAIL_PATTERN)}"
           required="{true}"
-        /></label>
+        /></label
+      >
       <input type="submit" value="Reset password" data-test="submit" />
     </form>
   {:else}
@@ -119,24 +128,31 @@
   <p>Please enter your chosen password below, and click the button to set your new password.</p>
   {#if !success}
     <form on:submit|preventDefault="{submit('complete')}">
-      <label>Password<input
+      <label
+        >Password<input
           type="password"
           data-test="password"
           bind:value="{password}"
           use:checkValid="{{ bothEqual: { id: 'password', error: 'Passwords do not match' } }}"
           required="{true}"
-        /></label>
-      <label>Confirm password<input
+        /></label
+      >
+      <label
+        >Confirm password<input
           type="password"
           data-test="password-confirm"
           bind:value="{passwordConfirm}"
           use:checkValid="{{ bothEqual: { id: 'password', error: 'Passwords do not match' } }}"
           required="{true}"
-        /></label>
+        /></label
+      >
       <input type="submit" value="Change password" data-test="submit" />
     </form>
   {:else}
-    <p>Your password has been successfully reset. Please <a href="/auth/login" data-test="login-link">click here</a> to login with it.</p>
+    <p>
+      Your password has been successfully reset. Please use the form below to log in with it.
+    </p>
+    <LoginForm redirectTo="/members" />
   {/if}
 {:else}
   <!-- TODO better error messages based on what actually went wrong -->

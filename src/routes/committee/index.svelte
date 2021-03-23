@@ -1,15 +1,15 @@
 <script context="module">
   import { makeClient, handleErrors } from "../../graphql/client";
   import { currentCommitteePictures } from "../../graphql/committee";
-  export async function preload({ query }) {
+  export async function load({ page: { query }, fetch, session }) {
     let { aprilfool } = query;
-    let client = makeClient(this.fetch);
+    let client = makeClient(fetch);
     let res;
     try {
       res = await client.query({ query: currentCommitteePictures });
-      return { aprilFools: aprilfool !== undefined, committee: res.data.cucb_committees[0].committee_members };
+      return { props: { aprilFools: aprilfool !== undefined, committee: res.data.cucb_committees[0].committee_members } };
     } catch (e) {
-      handleErrors.bind(this)(e);
+      return handleErrors(e, session);
     }
   }
 </script>

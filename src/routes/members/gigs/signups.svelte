@@ -4,12 +4,13 @@
   import { QueryAllGigSignupSummary } from "../../../graphql/gigs";
   import { DateTime, Settings } from "luxon";
 
-  export async function preload(_, session) {
+  export async function load({ fetch, session }) {
     Settings.defaultZoneName = "Europe/London";
 
-    if (notLoggedIn.bind(this)(session)) return;
+    const loginFail = notLoggedIn(session);
+    if (loginFail) return loginFail;
 
-    let client = makeClient(this.fetch);
+    let client = makeClient(fetch);
 
     let res;
     try {
@@ -18,13 +19,14 @@
         variables: { since: DateTime.local().minus({ months: 1 }) },
       });
     } catch (e) {
-      handleErrors.bind(this)(e, session);
-      return;
+      return handleErrors(e, session);
     }
 
     return {
-      sinceOneMonth: res.data.since.map((x) => x.gig),
-      signupsOpen: res.data.signupsOpen,
+      props: {
+        sinceOneMonth: res.data.since.map((x) => x.gig),
+        signupsOpen: res.data.signupsOpen,
+      },
     };
   }
 </script>
@@ -51,7 +53,7 @@
       ? sinceOneMonth
       : noLineup;
 
-  const hasNoLineup =(gig) => gig.lineup.filter((person) => person.approved).length === 0
+  const hasNoLineup = (gig) => gig.lineup.filter((person) => person.approved).length === 0;
   const isInFuture = (gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
 </script>
 
@@ -81,27 +83,34 @@
 {#if view === VIEWS.signupsOpen}
   <p>
     Showing all upcoming gigs.
-    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}">Show only
-      upcoming gigs without a lineup</button>
+    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}"
+      >Show only upcoming gigs without a lineup</button
+    >
     &#32;|
-    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}">Show all gigs since
-      one month back</button>
+    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}"
+      >Show all gigs since one month back</button
+    >
   </p>
 {:else if view === VIEWS.noLineup}
   <p>
     Showing upcoming gigs without a lineup.
-    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}">Show all upcoming gigs</button>.
-    &#32;|
-    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}">Show all gigs since
-      one month back</button>
+    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}"
+      >Show all upcoming gigs</button
+    >. &#32;|
+    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}"
+      >Show all gigs since one month back</button
+    >
   </p>
 {:else}
   <p>
     Showing all gigs since one month back.
-    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}">Show only
-      upcoming gigs without a lineup</button>
+    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}"
+      >Show only upcoming gigs without a lineup</button
+    >
     &#32;|
-    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}">Show all upcoming gigs</button>.
+    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}"
+      >Show all upcoming gigs</button
+    >.
   </p>
 {/if}
 <SignupAdmin gigs="{gigs}" />

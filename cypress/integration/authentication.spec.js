@@ -36,6 +36,10 @@ describe("login page", () => {
   });
 
   describe("form", () => {
+    beforeEach(() => {
+      cy.waitForFormInteractive();
+    });
+
     it("accepts a correct username/password combination", () => {
       cy.get("input[data-test=username]").type("cypress_user");
       cy.get("input[data-test=password]").type("abc123");
@@ -370,7 +374,7 @@ describe("registration page", () => {
   });
 });
 
-describe("password reset form", () => {
+describe.only("password reset form", () => {
   before(() => {
     cy.executeMutation(CreateUser, {
       variables: {
@@ -416,10 +420,10 @@ describe("password reset form", () => {
       cy.get("[data-test=password]").type("anewpassword");
       cy.get("[data-test=password-confirm]").type("anewpassword");
       cy.get("[data-test=submit]").click();
-      cy.get("[data-test=login-link]").click();
       cy.get("[data-test=username]").type("pass2");
       cy.get("[data-test=password]").type("anewpassword{enter}");
-      cy.contains("Members").should("be.visible");
+      cy.url().should("match", /\/members/);
+
   });
 
   // TODO check expired JWT, invalid JWT, mismatched passwords...

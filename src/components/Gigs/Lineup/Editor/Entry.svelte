@@ -56,7 +56,7 @@
   }
   [aria-checked="false"], [aria-pressed="false"] {
     text-decoration: line-through;
-    opacity: 0.75;
+    opacity: 0.63;
     &:hover {
       opacity: 1;
     }

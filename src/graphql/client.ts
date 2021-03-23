@@ -1,68 +1,120 @@
-import ApolloClient from "apollo-client";
-import { createHttpLink } from "apollo-link-http";
-import { InMemoryCache } from "apollo-cache-inmemory";
-import { setContext } from "apollo-link-context";
-import { Writable, writable } from "svelte/store";
-import type fetch_ from "isomorphic-fetch";
-import type { PreloadContext } from "@sapper/common";
+import { writable } from "svelte/store";
+import type { Writable } from "svelte/store";
+import type fetch_ from "node-fetch";
 
-const host = process.env.GRAPHQL_REMOTE;
-const path = process.env.GRAPHQL_PATH;
+const path = `/v1/graphql`;
 
-export const client: Writable<ApolloClient<unknown> | null> = writable(null);
-export const clientCurrentUser: Writable<ApolloClient<unknown> | null> = writable(null);
+export const client: Writable<GraphQLClient | null> = writable(null);
+export const clientCurrentUser: Writable<GraphQLClient | null> = writable(null);
+
+export class GraphQLClient {
+  private fetch: typeof fetch_;
+  private role: string | undefined;
+  private domain: string | undefined;
+  private headers: Record<string, string> | undefined;
+
+  constructor(fetch: typeof fetch_, kwargs?: { role?: string; domain?: string; headers?: Record<string, string> }) {
+    this.fetch = fetch;
+    this.role = kwargs?.role;
+    this.domain = kwargs?.domain;
+    this.headers = kwargs?.headers;
+  }
+
+  // TODO type this better
+  async query<T>(args: { query: any, variables: Record<string, any> }): Promise<{ data: T }> {
+    let query,
+      variables = undefined;
+    typeof args === "object" ? ({ query, variables } = args) : (query = args);
+    const browserDomain =
+      typeof window !== "undefined" ? window.location.href.split("/", 3).slice(0, 3).join("/") : undefined;
+    let headers = this.role ? { "X-Hasura-Role": this.role } : {};
+    const that = typeof window !== "undefined" ? window : this;
+    let res = await this.fetch.bind(that)(
+      this.domain ? `${this.domain}${path}` : browserDomain ? `${browserDomain}${path}` : path,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          ...this.headers,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          query: typeof query === "string" ? query : query.loc.source.body,
+          variables,
+        }),
+        credentials: "include",
+      },
+    );
+    let res2 = await res.json();
+    if (res2?.errors?.length > 0) {
+      throw { ...res2.errors[0], graphQLErrors: res2.errors };
+    }
+    return res2;
+  }
+
+  // TODO better types here too
+  async mutate<T>(args: { mutation: any, variables: Record<string, any> }): Promise<{ data: T }> {
+    let mutation,
+      variables = undefined;
+    typeof args === "object" ? ({ mutation, variables } = args) : (mutation = args);
+    const browserDomain =
+      typeof window !== "undefined" ? window.location.href.split("/", 3).slice(0, 3).join("/") : undefined;
+    let headers = this.role ? { "X-Hasura-Role": this.role } : {};
+    const that = typeof window !== "undefined" ? window : this;
+    let res = await this.fetch.bind(that)(
+      this.domain ? `${this.domain}${path}` : browserDomain ? `${browserDomain}${path}` : path,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          ...this.headers,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          query: typeof mutation === "string" ? mutation : mutation.loc.source.body,
+          variables,
+        }),
+        credentials: "include",
+      },
+    );
+    let res2 = await res.json();
+    if (res2?.errors?.length > 0) {
+      throw { ...res2.errors[0], graphQLErrors: res2.errors };
+    }
+    return res2;
+  }
+}
 
 export function makeClient(fetch: typeof fetch_, kwargs?: { role?: string }) {
-  const browserDomain =
-    typeof window !== "undefined" ? window.location.href.split("/", 3).slice(0, 3).join("/") : undefined;
-
-  const httpLink = createHttpLink({
-    uri: `${browserDomain || host}${path}`,
-    fetch,
-  });
-
-  const role = kwargs && kwargs.role;
-
-  const authLink = setContext((_, { headers }) => {
-    // return the headers to the context so httpLink can read them
-    headers = role ? { ...headers, "X-Hasura-Role": role } : headers;
-    return {
-      headers,
-      credentials: "include",
-    };
-  });
-
-  return new ApolloClient({
-    // @ts-ignore
-    link: authLink.concat(httpLink),
-    cache: new InMemoryCache(),
-  });
+  return new GraphQLClient(fetch, kwargs);
 }
 
 export function handleErrors(
-  this: PreloadContext,
   e?: { graphQLErrors?: { extensions: { code: string } }[] },
   session?: { hasuraRole?: string },
-) {
+): { status: number; error: string } | undefined {
   if (!e) {
     return;
   } else if (e.graphQLErrors && e.graphQLErrors[0]) {
     const code = e.graphQLErrors[0].extensions.code;
     if (code === "validation-failed") {
       if (session && session.hasuraRole) {
-        this.error(403, "You're not supposed to be here!");
+        return { status: 403, error: "You're not supposed to be here!" };
       } else {
-        this.error(401, "Not logged in");
+        return { status: 401, error: "Not logged in" };
       }
     } else if (code === "access-denied") {
-      this.error(403, "You're not supposed to be here!");
+      return { status: 403, error: "You're not supposed to be here!" };
     } else {
-      this.error(
-        500,
-        `Something went wrong, "${code}" apparently. Let the webmaster know and they'll try and help you`,
-      );
+      return {
+        status: 500,
+        error: `Something went wrong, "${code}" apparently. Let the webmaster know and they'll try and help you`,
+      };
     }
   } else {
-    this.error(500, `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`);
+    return {
+      status: 500,
+      error: `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`,
+    };
   }
 }

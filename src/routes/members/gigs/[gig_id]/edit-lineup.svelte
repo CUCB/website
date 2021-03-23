@@ -5,15 +5,16 @@
   import { handleErrors, makeClient } from "../../../../graphql/client";
   import { notLoggedIn } from "../../../../client-auth.js";
 
-  export async function preload({ params }, session) {
+  export async function load({ page: { params }, session, fetch }) {
     let { gig_id } = params;
 
-    if (notLoggedIn.bind(this)(session)) return;
+    const loginFail = notLoggedIn(session);
+    if (loginFail) return loginFail;
 
     let res, res_allPeople;
     let people, allPeople, title;
     try {
-      let preloadClient = makeClient(this.fetch);
+      let preloadClient = makeClient(fetch);
       let gigType = await preloadClient.query({
         query: QueryGigType,
         variables: { id: gig_id },
@@ -29,16 +30,14 @@
         title = gigType.data.cucb_gigs_by_pk.title;
       }
     } catch (e) {
-      handleErrors.bind(this)(e, session);
-      return;
+      return handleErrors(e, session);
     }
 
     if (res && res.data && res.data.cucb_gigs_by_pk) {
       people = res.data.cucb_gigs_by_pk.lineup;
       allPeople = res_allPeople.data.cucb_users;
     } else {
-      this.error(404, "Gig not found");
-      return;
+      return { status: 404, error: "Gig not found" };
     }
 
     let personLookup = {};
@@ -54,7 +53,7 @@
       personLookup[person.user.id] = person;
     }
 
-    return { people: personLookup, gigId: gig_id, allPeople, title };
+    return { props: { people: personLookup, gigId: gig_id, allPeople, title } };
   }
 </script>
 
@@ -76,7 +75,7 @@
   import { makeTitle, themeName } from "../../../../view";
   import Lineup from "../../../../components/Gigs/Lineup.svelte";
   export let people, gigId, allPeople, searchText, title;
-  let peopleStore = new Map(people);
+  let peopleStore = Map(people);
   let errors = [];
   let selectedUser = undefined;
   let userSelectBox;

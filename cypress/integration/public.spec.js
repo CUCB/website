@@ -7,7 +7,11 @@ describe("homepage", () => {
   });
 
   it("has the correct favicon", () => {
-    cy.document().its("head").find('link[rel="icon"]').should("have.attr", "href").should("eq", "static/favicon.ico");
+    cy.document()
+      .its("head")
+      .find('link[rel="icon"]')
+      .should("have.attr", "href")
+      .should("eq", "/static/favicon.ico");
   });
 
   it("has the correct <h1>", () => {
@@ -23,7 +27,10 @@ describe("homepage", () => {
   });
 
   it("has a link to our FB page", () => {
-    cy.get("li a").contains("Facebook").should("have.prop", "href").and("include", "facebook.com/CUCeilidhBand");
+    cy.get("li a")
+      .contains("Facebook")
+      .should("have.prop", "href")
+      .and("include", "facebook.com/CUCeilidhBand");
   });
 
   it("has a visible footer", () => {
@@ -60,19 +67,27 @@ describe("book us page", () => {
 
   it("allows a user to submit a booking request", { browser: ["chromium", "chrome", "electron"] }, () => {
     cy.waitForFormInteractive();
-    cy.get("[data-test='booking-name']").click().type("Testy Test");
-    cy.get("[data-test='booking-email']").click().type("testy@te.st");
-    cy.get("[data-test='booking-message']").click().type("Some message about booking a ceilidh");
-    cy.get("[data-test=hcaptcha] > iframe").then(($element) => {
+    cy.get("[data-test='booking-name']")
+      .click()
+      .type("Testy Test");
+    cy.get("[data-test='booking-email']")
+      .click()
+      .type("testy@te.st");
+    cy.get("[data-test='booking-message']")
+      .click()
+      .type("Some message about booking a ceilidh");
+    cy.get("[data-test=hcaptcha] > iframe").then($element => {
       const $body = $element.contents().find("body");
-      cy.wrap($body).find("#checkbox").click();
+      cy.wrap($body)
+        .find("#checkbox")
+        .click();
       cy.wrap($body).find("#checkbox.checked");
     });
     cy.get("[data-test='booking-send']").click();
     cy.contains("Your message has been sent to our secretary");
     cy.searchEmails(2)
       .its("items")
-      .then((emails) => {
+      .then(emails => {
         let secEmail, clientEmail;
         if (emails[1]["To"][0]["Mailbox"] === "secretary") {
           secEmail = emails[1];
@@ -82,7 +97,9 @@ describe("book us page", () => {
           clientEmail = emails[1];
         }
         expect(clientEmail).to.be.sentTo("testy@te.st");
-        expect(clientEmail.body).to.contain("Dear Testy Test").and.contain("Some message about booking a ceilidh");
+        expect(clientEmail.body)
+          .to.contain("Dear Testy Test")
+          .and.contain("Some message about booking a ceilidh");
         expect(secEmail).to.be.sentTo("secretary@cucb.co.uk");
         expect(secEmail.replyTo).to.contain("Testy Test <testy@te.st>");
       });
@@ -93,12 +110,18 @@ describe("book us page", () => {
       method: "POST",
       url: "/contact",
     }).as("contact");
-    cy.get("[data-test='booking-name']").click().type("Testy test");
-    cy.get("[data-test='booking-email']").click().type("testy@te.st");
-    cy.get("[data-test='booking-message']").click().type("testy test");
+    cy.get("[data-test='booking-name']")
+      .click()
+      .type("Testy test");
+    cy.get("[data-test='booking-email']")
+      .click()
+      .type("testy@te.st");
+    cy.get("[data-test='booking-message']")
+      .click()
+      .type("testy test");
     cy.get("[data-test='booking-send']").click();
     cy.get(".error").contains("captcha");
-    cy.cssProperty("--negative").then((color) => {
+    cy.cssProperty("--negative").then(color => {
       cy.get(".error").should("have.color", color);
     });
   });
@@ -110,7 +133,10 @@ describe("sessions page", () => {
   });
 
   it("has a link to mailing lists", () => {
-    cy.get("a").contains("mailing list").should("have.prop", "href").and("include", "/mailinglists");
+    cy.get("a")
+      .contains("mailing list")
+      .should("have.prop", "href")
+      .and("include", "/mailinglists");
   });
 });
 
@@ -120,7 +146,10 @@ describe("join page", () => {
   });
 
   it("has a link to mailing list", () => {
-    cy.get("p a").contains("mailing list").should("have.prop", "href").and("include", "/mailinglists/");
+    cy.get("p a")
+      .contains("mailing list")
+      .should("have.prop", "href")
+      .and("include", "/mailinglists/");
   });
 });
 
@@ -129,12 +158,16 @@ describe("header", () => {
 
   describe("navbar", () => {
     it("navigates to /book", () => {
-      cy.get("header nav a").contains("Book us").clickLink();
+      cy.get("header nav a")
+        .contains("Book us")
+        .clickLink();
       cy.url().should("include", "/book");
     });
 
     it("navigates to /join", () => {
-      cy.get("header nav a").contains("Join us").clickLink();
+      cy.get("header nav a")
+        .contains("Join us")
+        .clickLink();
       cy.url().should("include", "/join");
     });
 
@@ -157,17 +190,23 @@ describe("header", () => {
           },
         },
       });
-      cy.get("header nav a").contains("Committee").clickLink();
+      cy.get("header nav a")
+        .contains("Committee")
+        .clickLink();
       cy.url().should("include", "/committee");
     });
 
     context("when not logged in", () => {
       it("doesn't navigate to /members", () => {
-        cy.get("header nav a").contains("Members").should("not.exist");
+        cy.get("header nav a")
+          .contains("Members")
+          .should("not.exist");
       });
 
       it("navigates to login page", () => {
-        cy.get("header nav").contains("Log in").click();
+        cy.get("header nav")
+          .contains("Log in")
+          .click();
       });
     });
 
@@ -192,13 +231,19 @@ describe("header", () => {
       });
 
       it("navigates to /members", () => {
-        cy.get("header nav a").contains("Members").clickLink();
+        cy.get("header nav a")
+          .contains("Members")
+          .clickLink();
         cy.url().should("include", "members");
       });
 
       it("contains working logout button", () => {
-        cy.get("header nav a").contains("Log out").clickLink();
-        cy.get("header nav a").contains("Members").should("not.exist");
+        cy.get("header nav a")
+          .contains("Log out")
+          .clickLink();
+        cy.get("header nav a")
+          .contains("Members")
+          .should("not.exist");
       });
     });
   });
