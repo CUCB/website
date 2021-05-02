@@ -1,19 +1,28 @@
 import { Writable, writable } from "svelte/store";
 import { Literal, Union } from "runtypes";
 import type { Static } from "runtypes";
+import { Map, List } from "immutable";
 // import type { Committee } from "./routes/_layout.svelte";
 
 const NAME = `Cambridge University Ceilidh Band`;
-export const makeTitle = (pageTitle?: string) => pageTitle ? `${pageTitle} | ${NAME}` : NAME;
+export const makeTitle = (pageTitle?: string) => (pageTitle ? `${pageTitle} | ${NAME}` : NAME);
 export const committee: Writable<any | null> = writable(null);
-export const Day = Union(Literal("mon"), Literal("tue"), Literal("wed"), Literal("thu"), Literal("fri"), Literal("sat"), Literal("sun"));
+export const Day = Union(
+  Literal("mon"),
+  Literal("tue"),
+  Literal("wed"),
+  Literal("thu"),
+  Literal("fri"),
+  Literal("sat"),
+  Literal("sun"),
+);
 export type Day = Static<typeof Day>;
 
 // @ts-ignore
 const hexToRgb = (hex) => {
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
   const shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-// @ts-ignore
+  // @ts-ignore
   hex = hex.replace(shorthandRegex, (m, r, g, b) => {
     return r + r + g + g + b + b;
   });
@@ -34,38 +43,53 @@ export const themeName = writable("");
 
 // @ts-ignore
 export const suffix = (n) =>
-// @ts-ignore
+  // @ts-ignore
   ({ one: "st", two: "nd", few: "rd", other: "th" }[new Intl.PluralRules("en-gb", { type: "ordinal" }).select(n)]);
 
-export const createValidityChecker = () => {
-  let bothPresentFields = {};
-  let bothEqualFields = {};
+interface ValidityErrors {
+  badInput?: string;
+  customError?: string;
+  patternMismatch?: string;
+  rangeOverflow?: string;
+  rangeUnderflow?: string;
+  stepMismatch?: string;
+  tooLong?: string;
+  tooShort?: string;
+  typeMismatch?: string;
+  valid?: string;
+  valueMissing?: string;
+}
 
-// @ts-ignore
-  return (node, options) => {
+interface ValidityOptions {
+  bothPresent?: { id: string; error: string };
+  bothEqual?: { id: string; error: string };
+  validityErrors?: ValidityErrors;
+}
+
+export const createValidityChecker = () => {
+  let bothPresentFields: Map<string, List<HTMLInputElement>> = Map();
+  let bothEqualFields: Map<string, List<HTMLInputElement>> = Map();
+
+  return (node: HTMLInputElement, options: ValidityOptions) => {
     if (options.bothPresent) {
-// @ts-ignore
-      if (!bothPresentFields[options.bothPresent.id]) {
-// @ts-ignore
-        bothPresentFields[options.bothPresent.id] = [];
+      if (!bothPresentFields.has(options.bothPresent.id)) {
+        bothPresentFields = bothPresentFields.set(options.bothPresent.id, List([node]));
+      } else {
+        bothPresentFields = bothPresentFields.update(options.bothPresent.id, (nodes) => nodes.push(node));
       }
-// @ts-ignore
-      bothPresentFields[options.bothPresent.id].push(node);
     }
     if (options.bothEqual) {
-// @ts-ignore
-      if (!bothEqualFields[options.bothEqual.id]) {
-// @ts-ignore
-        bothEqualFields[options.bothEqual.id] = [];
+      if (!bothEqualFields.has(options.bothEqual.id)) {
+        bothEqualFields = bothEqualFields.set(options.bothEqual.id, List([node]));
+      } else {
+        bothEqualFields = bothEqualFields.update(options.bothEqual.id, (nodes) => nodes.push(node));
       }
-// @ts-ignore
-      bothEqualFields[options.bothEqual.id].push(node);
     }
     const changeHandler = () => {
       if (options.validityErrors) {
-        for (let key of Object.keys(options.validityErrors)) {
-          if (node.validity[key]) {
-            node.setCustomValidity(options.validityErrors[key]);
+        for (const [key, message] of Object.entries(options.validityErrors)) {
+          if (node.validity[key as keyof ValidityErrors]) {
+            node.setCustomValidity(message);
             return;
           }
         }
@@ -74,44 +98,44 @@ export const createValidityChecker = () => {
       node.setCustomValidity("");
 
       if (options.bothPresent) {
-// @ts-ignore
-        let presence: boolean[] = bothPresentFields[options.bothPresent.id].map((field) => field.value.length > 0);
-        if (!presence.every((x) => x) && !presence.every((x) => !x)) {
-          // If either all present or all empty...
-// @ts-ignore
-          for (let field of bothPresentFields[options.bothPresent.id]) {
-            if (!field.value.length) {
-              field.setCustomValidity(options.bothPresent.error);
+        const fields = bothPresentFields.get(options.bothPresent.id);
+        if (fields) {
+          let presence = fields.map((field) => field.value.length > 0);
+          if (!presence.every((x) => x) && !presence.every((x) => !x)) {
+            // If either all present or all empty...
+            for (let field of fields) {
+              if (!field.value.length) {
+                field.setCustomValidity(options.bothPresent.error);
+              }
             }
+            return;
           }
-          return;
-        }
-// @ts-ignore
-        for (let field of bothPresentFields[options.bothPresent.id]) {
-          if (field.validationMessage === options.bothPresent.error) {
-            field.setCustomValidity("");
-            field.dispatchEvent(new Event("change"));
+
+          for (let field of fields) {
+            if (field.validationMessage === options.bothPresent.error) {
+              field.setCustomValidity("");
+              field.dispatchEvent(new Event("change"));
+            }
           }
         }
       }
 
       if (options.bothEqual) {
-// @ts-ignore
-        let allValues = bothEqualFields[options.bothEqual.id].map((field) => field.value);
-// @ts-ignore
-        if (!allValues.every((v) => v === allValues[0])) {
-// @ts-ignore
-          bothEqualFields[options.bothEqual.id].map((field) => {
-            field.setCustomValidity(options.bothEqual.error);
-          });
-          return;
-        }
+        const fields = bothEqualFields.get(options.bothEqual.id);
+        if (fields) {
+          let allValues = fields.map((field) => field.value);
+          if (!allValues.every((v) => v === allValues.get(0))) {
+            for (let field of fields) {
+              field.setCustomValidity(options.bothEqual.error);
+            }
+            return;
+          }
 
-// @ts-ignore
-        for (let field of bothEqualFields[options.bothEqual.id]) {
-          if (field.validationMessage === options.bothEqual.error) {
-            field.setCustomValidity("");
-            field.dispatchEvent(new Event("change"));
+          for (let field of fields) {
+            if (field.validationMessage === options.bothEqual.error) {
+              field.setCustomValidity("");
+              field.dispatchEvent(new Event("change"));
+            }
           }
         }
       }

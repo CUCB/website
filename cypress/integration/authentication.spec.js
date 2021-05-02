@@ -6,6 +6,7 @@ import {
   UserWithUsername,
   HASHED_PASSWORDS,
 } from "../database/users";
+import jwt from "jsonwebtoken"
 
 describe("login page", () => {
   before(() => {
@@ -367,4 +368,59 @@ describe("registration page", () => {
     cy.visit("/auth/register");
     cy.url().should("contain", "/members").and("not.contain", "/auth");
   });
+});
+
+describe("password reset form", () => {
+  before(() => {
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 50000,
+        username: "pass2",
+        saltedPassword: "$2y$10$e2NuZ7jmxhI33TuD9gjWMevohZOWtRCTUzKOz7cqLqKd80DCCG.iu", // "password"
+        admin: 1,
+        email: "password.user0@cypress.io",
+        firstName: "Password",
+        lastName: "User",
+      },
+    });
+  });
+  it("can't be accessed by logged in users", () => {
+    cy.login("cypress_user", "abc123");
+    cy.visit("/auth/reset-password");
+    cy.url().should("contain", "/members").and("not.contain", "/auth");
+  });
+
+  it("creates a valid password reset link", { browser: ["chromium", "chrome", "electron"] }, () => {
+    cy.visit("/auth/reset-password");
+    cy.waitForFormInteractive();
+    cy.get("[data-test='username']").click().type("pass2");
+    cy.get("[data-test='submit']").click();
+    cy.contains("A pasword reset link has been generated and emailed to you.");
+    cy.searchEmails(1)
+      .its("items")
+      .then((emails) => {
+        const email = emails[0];
+        expect(email).to.be.sentTo("password.user0@cypress.io");
+        expect(email.replyTo).to.contain("CUCB Webmaster <webmaster@cucb.co.uk>");
+        cy.visit(`/renderemail?id=${email.ID}`)
+      });
+      cy.get("a").should("have.attr", "href").and("match", /^https:\/\/www.cucb.co.uk\/auth\/reset-password/).then(link => {
+          link = link.replace(/^https:\/\/www.cucb.co.uk/, Cypress.config().baseUrl)
+          const token = link.split(/=/)[1];
+          const decoded = jwt.verify(token, Cypress.env("SESSION_SECRET"));
+          expect(decoded.exp * 1000).to.be.greaterThan(Cypress.DateTime.local().ts)
+          expect(decoded.exp * 1000).to.be.lessThan(Cypress.DateTime.local().plus({ hours: 2 }).ts)
+          cy.visit(link);
+      });
+      cy.waitForFormInteractive();
+      cy.get("[data-test=password]").type("anewpassword");
+      cy.get("[data-test=password-confirm]").type("anewpassword");
+      cy.get("[data-test=submit]").click();
+      cy.get("[data-test=login-link]").click();
+      cy.get("[data-test=username]").type("pass2");
+      cy.get("[data-test=password]").type("anewpassword{enter}");
+      cy.contains("Members").should("be.visible");
+  });
+
+  // TODO check expired JWT, invalid JWT, mismatched passwords...
 });

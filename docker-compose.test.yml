@@ -31,7 +31,7 @@ services:
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
-      SESSION_SECRET: somethingreallysecret
+      SESSION_SECRET: somethingrandom
       PG_USER: postgres
       PG_HOST: postgres
       PG_DATABASE: postgres

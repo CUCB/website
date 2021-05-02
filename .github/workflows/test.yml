@@ -77,14 +77,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-
-      - name: Preview infrastructure
-        run: |
-          chmod +x ./pulumi/scripts/*.sh
-          ./pulumi/scripts/setup.sh
-          ./pulumi/scripts/preview.sh
-          cd pulumi
-          echo "::set-output name=ip::$(pulumi stack output ip)"
+      - name: Install Pulumi CLI
+        uses: pulumi/action-install-pulumi-cli@v1.0.1
+      - run: cd pulumi && npm install
+      - uses: pulumi/actions@v2
+        with:
+          command: preview
+          stack-name: dev
+          work-dir: pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
@@ -124,15 +124,14 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
-
-      - name: Update infrastructure
-        id: update
-        run: |
-          chmod +x ./pulumi/scripts/*.sh
-          ./pulumi/scripts/setup.sh
-          ./pulumi/scripts/run.sh
-          cd pulumi
-          echo "::set-output name=ip::$(pulumi stack output ip)"
+      - name: Install Pulumi CLI
+        uses: pulumi/action-install-pulumi-cli@v1.0.1
+      - run: cd pulumi && npm install
+      - uses: pulumi/actions@v2
+        with:
+          command: up
+          stack-name: dev
+          work-dir: pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 

@@ -3406,7 +3406,6 @@
       - last_login_date
       - location_info
       - mobile_contact_info
-      - password_reset_deadline
       - username
       filter:
         id:
@@ -3648,8 +3647,6 @@
     permission:
       columns:
       - last_login_date
-      - password_reset_deadline
-      - password_reset_token
       - salted_password
       filter: {}
       check: null
