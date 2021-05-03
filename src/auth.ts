@@ -9,6 +9,10 @@ import jwt from "jsonwebtoken";
 import { Static, Record, Number, String } from "runtypes";
 
 dotenv.config();
+if (typeof process.env["SESSION_SECRET"] === "undefined") {
+  console.error("Error: SESSION_SECRET must be defined in .env before running the server");
+  process.exit(1);
+}
 const SESSION_SECRET_HASH = crypto
   .createHash("sha512")
   .update(Buffer.from(process.env["SESSION_SECRET"] as string))

@@ -30,7 +30,7 @@ interface Session {
 
 const RequestableRole = Union(Literal("server"), Literal("current_user"));
 
-export function get({ headers, context }: { headers: Record<string, string>, context: { session: any } }) {
+export function get({ headers, context }: { headers: Record<string, string>, context: { session: Session } }) {
   try {
     const mainRole = DefaultRole.Or(Undefined).check(context.session.alternativeRole || context.session.hasuraRole);
     const requestedRole = DefaultRole.Or(Undefined).Or(RequestableRole).check(headers["x-hasura-role"]) || mainRole;

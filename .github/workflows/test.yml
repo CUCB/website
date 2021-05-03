@@ -10,9 +10,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Use Node.js 14.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - name: Create dummy .env file
+        run: |
+          echo "SESSION_SECRET=somethingreallynotsecret" > .env
       - name: Run svelte-check
         run: |
-          docker run --mount type=bind,src="$(pwd)",dst=/app -i node:14 bash -c "cd /app && npm ci && npm run build && npm run svelte-check"
+          npm ci
+          npm run build
+          npm run svelte-check
   test:
     name: Cypress run
     runs-on: ubuntu-16.04
