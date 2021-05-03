@@ -374,7 +374,7 @@ describe("registration page", () => {
   });
 });
 
-describe.only("password reset form", () => {
+describe("password reset form", () => {
   before(() => {
     cy.executeMutation(CreateUser, {
       variables: {
@@ -423,7 +423,6 @@ describe.only("password reset form", () => {
       cy.get("[data-test=username]").type("pass2");
       cy.get("[data-test=password]").type("anewpassword{enter}");
       cy.url().should("match", /\/members/);
-
   });
 
   // TODO check expired JWT, invalid JWT, mismatched passwords...
