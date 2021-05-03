@@ -10,12 +10,10 @@
 
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
-import percyHealthCheck from "@percy/cypress/task";
 import dotenv from "dotenv";
 dotenv.config();
 
 module.exports = (on, config) => {
-  on("task", percyHealthCheck);
   // `on` is used to hook into various events Cypress emits
   // `config` is the resolved Cypress config
   config.env.PG_PASSWORD = config.env.PG_PASSWORD || process.env.PG_PASSWORD;
