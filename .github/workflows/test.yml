@@ -16,7 +16,7 @@ jobs:
           node-version: '14'
       - name: Run svelte-check
         run: |
-          npm i
+          npm ci
           npm run build; npm run svelte-check
   test:
     name: Cypress run
