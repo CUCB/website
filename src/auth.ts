@@ -249,7 +249,6 @@ export async function completePasswordReset({ password, token }: { password: str
   let decoded;
   try {
     decoded = jwt.verify(token, process.env["SESSION_SECRET"] as string);
-    console.log(decoded)
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
       throw errors.TOKEN_EXPIRED;
@@ -257,20 +256,14 @@ export async function completePasswordReset({ password, token }: { password: str
       throw errors.INVALID_TOKEN;
     }
   }
-  try {
-  console.log(PasswordResetToken.guard(decoded))
-  } catch(e) {
-      console.error(e)
-  }
 
   if (PasswordResetToken.guard(decoded)) {
-      console.log("Guarded")
     const client = makeGraphqlClient();
     try {
       let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
       // Discard password before we accidentally do anything stupid
       password = "";
-      let res = await client.mutate({
+      await client.mutate({
         mutation: gql`
           mutation UpdateUserPassword($id: bigint!, $saltedPassword: String!) {
             update_cucb_users_by_pk(pk_columns: { id: $id }, _set: { salted_password: $saltedPassword }) {
@@ -280,7 +273,6 @@ export async function completePasswordReset({ password, token }: { password: str
         `,
         variables: { id: decoded.id, saltedPassword },
       });
-      console.log(res)
     } catch (e) {
       console.error(`GraphQL error trying to update user's password: ${e}`);
       throw errors.INTERNAL_ERROR;
