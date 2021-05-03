@@ -1,4 +1,17 @@
-<script>
+<script lang="ts" context="module">
+    interface GigType {
+        code: string;
+    }
+    interface CalendarGig {
+        id: number,
+        type: GigType;
+        admins_only?: boolean;
+        date: string;
+        arrive_time: string;
+        finish_time: string;
+    }
+</script>
+<script lang="ts">
   import { createEventDispatcher } from "svelte";
   import { goto } from "$app/navigation";
   import TooltipText from "../TooltipText.svelte";
@@ -9,7 +22,7 @@
   Settings.defaultZoneName = "Europe/London";
   Settings.defaultLocale = "en-gb";
 
-  export let gigs;
+  export let gigs: CalendarGig[];
   export let displayedMonth = DateTime.local();
   export let startDay = "mon";
   let dispatchEvent = createEventDispatcher();
@@ -17,11 +30,11 @@
   let showSelection = false;
 
   function generateKeyItems(gigs) {
-    let types = new Set(gigs.filter((gig) => gig.type.code !== "gig").map((gig) => new Map({ ...gig.type })));
-    let standardOrHiddenGigs = new Set(
+    let types = Set(gigs.filter((gig) => gig.type.code !== "gig").map((gig) => Map({ ...gig.type })));
+    let standardOrHiddenGigs = Set(
       gigs
         .filter((gig) => gig.type.code === "gig")
-        .map((gig) => new Map({ ...gig.type, admins_only: gig.admins_only })),
+        .map((gig) => Map({ ...gig.type, admins_only: gig.admins_only })),
     );
     return types.union(standardOrHiddenGigs);
   }
@@ -72,7 +85,7 @@
         gigs: gigs.filter(
           (gig) => 
             (gig.date && DateTime.fromFormat(gig.date, "yyyy-LL-dd").hasSame(date, "day") ||
-            ((gig.type === "calendar" || gig.date === null) &&
+            ((gig.type.code === "calendar" || gig.date === null) &&
               DateTime.fromISO(gig.arrive_time).startOf("day") <= DateTime.fromISO(date).startOf("day") &&
               DateTime.fromISO(gig.finish_time).startOf("day") >= DateTime.fromISO(date).startOf("day"))),
         ),
@@ -106,6 +119,14 @@
   function selectableYears() {
     let start = displayedMonth.minus({ years: 10 }).year;
     return [...Array(20).keys()].map((x) => x + start);
+  }
+
+  function changeMonth(e: Event & { target: HTMLSelectElement }) {
+      dispatchEvent('changeDate', { month: e.target.value })
+  }
+
+  function changeYear(e: Event & { target: HTMLSelectElement }) {
+      dispatchEvent('changeDate', { year: e.target.value })
   }
 </script>
 
@@ -366,16 +387,14 @@
 </div>
 {#if showSelection}
   <div class="month-selector">
-    <!-- svelte-ignore a11y-no-onchange -->
-    <Select on:change="{(e) => dispatchEvent('changeDate', { month: e.target.value })}">
+    <Select on:change="{changeMonth}">
       {#each selectableMonths() as month (month)}
         <option value="{month}" selected="{month === displayedMonth.month}">
           {DateTime.local().set({ month }).toFormat('LLLL')}
         </option>
       {/each}
     </Select>
-    <!-- svelte-ignore a11y-no-onchange -->
-    <Select on:change="{(e) => dispatchEvent('changeDate', { year: e.target.value })}">
+    <Select on:change="{changeYear}">
       {#each selectableYears() as year (year)}
         <option value="{year}" selected="{year === displayedMonth.year}">{year}</option>
       {/each}

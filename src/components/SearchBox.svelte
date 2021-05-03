@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from "svelte";
 
   export let placeholder, fuse, toDisplayName, toId, disabled;
@@ -20,19 +20,19 @@
     if (e.which === 40) {
       // arrow down
       e.preventDefault();
-      document.activeElement.nextSibling.focus();
+      (document.activeElement?.nextSibling as HTMLElement)?.focus();
     } else if (e.which === 38) {
       // arrow up
       e.preventDefault();
       if (e.target === resultsList.childNodes[0]) {
         searchField.focus();
       } else {
-        document.activeElement.previousSibling.focus();
+        (document.activeElement?.previousSibling as HTMLElement)?.focus();
       }
     } else if (e.which === 32) {
       // spacebar
       e.preventDefault();
-      document.activeElement.click();
+      (document.activeElement as HTMLElement).click();
     }
   }
 

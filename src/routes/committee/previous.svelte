@@ -2,12 +2,12 @@
   import { makeClient, handleErrors } from "../../graphql/client";
   import { pastCommitteePictures } from "../../graphql/committee";
   export async function load({ page: { query }, fetch }) {
-    let { aprilfool } = query;
+    let aprilFools = query.get("aprilfool") !== undefined; 
     let client = makeClient(fetch);
     let res;
     try {
       res = await client.query({ query: pastCommitteePictures });
-      return { props: { aprilFools: aprilfool !== undefined, committees: res.data.cucb_committees } };
+      return { props: { aprilFools, committees: res.data.cucb_committees } };
     } catch (e) {
       return handleErrors(e);
     }

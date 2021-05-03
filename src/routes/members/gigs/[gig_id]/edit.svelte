@@ -138,6 +138,7 @@
   let editingSubvenue = false;
   let recentlySavedOpacity = tweened(0, { duration: 150 });
   let recentlySavedTimer = () => recentlySavedOpacity.set(0);
+  let runningTimer = null;
   let venueListElement,
     clientListElement,
     callerListElement,
@@ -239,7 +240,7 @@
   };
 
   function unloadIfSaved(e) {
-    if (saved || window.Cypress) {
+    if (saved || "Cypress" in window) {
       delete e["returnValue"];
     } else {
       e.preventDefault();
@@ -312,7 +313,7 @@
     venueListElement.focus();
   }
 
-  async function saveGig() {
+  async function saveGig(_e) {
     for (let field of Object.values(fields).filter((x) => x)) {
       field.dispatchEvent(new Event("change"));
       if (field.checkValidity && !field.checkValidity()) {
@@ -347,9 +348,9 @@
         },
       });
       if (res && res.data && res.data.update_cucb_gigs_by_pk) {
-        window.clearTimeout(recentlySavedTimer);
+        window.clearTimeout(runningTimer);
         recentlySavedOpacity.set(0, { duration: 50 });
-        window.setTimeout(recentlySavedTimer, 2000);
+        runningTimer = window.setTimeout(recentlySavedTimer, 2000);
         recentlySavedOpacity.set(1);
         lastSaved = { ...res.data.update_cucb_gigs_by_pk };
       }
@@ -795,7 +796,7 @@
     <label data-test="gig-edit-{id}-venue-select">
       Venue
       <Select bind:value="{venue_id}" bind:select="{venueListElement}" disabled="{cancelled}">
-        <option selected="selected" disabled value="{undefined}">--- SELECT A VENUE ---</option>
+        <option selected={true} disabled value="{undefined}">--- SELECT A VENUE ---</option>
         {#each venues as venue}
           <option value="{venue.id}">
             {venue.name}
@@ -860,7 +861,7 @@
       <label data-test="gig-edit-{id}-client-select"
         >Add client
         <Select bind:value="{selectedClient}" bind:select="{clientListElement}" disabled="{cancelled}">
-          <option selected="selected" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
+          <option selected={true} disabled value="{undefined}">--- SELECT A CLIENT ---</option>
           {#each potentialClients as contact}
             <option value="{contact.id}">{contactDisplayName(contact)}</option>
           {/each}
@@ -910,7 +911,7 @@
         <label data-test="gig-edit-{id}-caller-select"
           >Add caller
           <Select bind:value="{selectedCaller}" bind:select="{callerListElement}" disabled="{cancelled}">
-            <option selected="selected" disabled value="{undefined}">--- SELECT A CALLER ---</option>
+            <option selected={true} disabled value="{undefined}">--- SELECT A CALLER ---</option>
             {#each potentialCallers as contact}
               <option value="{contact.id}">{contactDisplayName(contact)}</option>
             {/each}
@@ -1019,7 +1020,7 @@
         min="{date || arrive_time_date}"
         use:checkValid="{{
           validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
-          bothPresent: { id: 'finish_time' },
+          bothPresent: { id: 'finish_time', error: "Date and time must be specified" },
         }}"
         data-test="gig-edit-{id}-finish-time-date"
         disabled="{cancelled}"
@@ -1030,7 +1031,7 @@
         bind:this="{fields.finish_time_time}"
         use:checkValid="{{
           validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
-          bothPresent: { id: 'finish_time' },
+          bothPresent: { id: 'finish_time', error: "Date and time must be specified" },
         }}"
         min="{finish_time_date === date && time
           ? time

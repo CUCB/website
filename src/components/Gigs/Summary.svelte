@@ -9,7 +9,7 @@
   import { DateTime, Settings } from "luxon";
   Settings.defaultZoneName = "Europe/London";
 
-  export let gig,
+  export let gig = {},
     signupGig = writable(undefined),
     userInstruments = undefined,
     displayLinks = true,
@@ -20,7 +20,7 @@
   const formatCalendarDate = (date) => date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
   const formatTimeOnly = (date) => date.toFormat("HH:mm");
   const formatTimeWithDate = (date) => date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");
-  const midnight = { hours: 0, minutes: 0, seconds: 0 };
+  const midnight = { hour: 0, minute: 0, second: 0 };
   $: arrive_time = gig.arrive_time && DateTime.fromISO(gig.arrive_time);
   $: finish_time = gig.finish_time && DateTime.fromISO(gig.finish_time);
   $: date = gig.date && DateTime.fromISO(gig.date);

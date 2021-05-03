@@ -1,14 +1,10 @@
 <svelte:options immutable="{true}" />
 
 <script lang="ts" context="module">
-  import { List, Map, getIn } from "immutable";
   declare global {
     interface String {
       hashCode(): number;
     }
-    // interface Object {
-    //   getIn(keyPath: Iterable<any>, notSetValue?: any): any
-    // }
   }
 
   String.prototype.hashCode = function () {
@@ -24,20 +20,17 @@
     return hash;
   };
 
-//   Object.prototype.getIn = function (...args) {
-//       getIn(this, ...args)
-//   }
- 
- interface GigSignup extends Gig {
-     lineup: undefined;
-     signup: LineupEntry;
- }
+  interface GigSignup extends Gig {
+    lineup: undefined;
+    signup: LineupEntry;
+  }
 </script>
 
 <script lang="ts">
   import { makeTitle, themeName } from "../../../view";
   import TooltipText from "../../TooltipText.svelte";
-  import { DateTime, FixedOffsetZone } from "luxon";
+  import { DateTime } from "luxon";
+  import { List, Map } from "immutable";
   import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups.svelte";
   export let gigs: Gig[] = [];
   gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
@@ -55,13 +48,11 @@
   $: gigsForPerson = Map<number, GigSignup[]>(
     people.map((user: User) => [
       user.id,
-      gigs.map((gig: Gig) =>
-        ({
-          ...gig,
-          lineup: undefined,
-          signup: gig.lineup && gig.lineup.find((signup) => user.id === signup.user.id),
-        }),
-      ),
+      gigs.map((gig: Gig) => ({
+        ...gig,
+        lineup: undefined,
+        signup: gig.lineup && gig.lineup.find((signup) => user.id === signup.user.id),
+      })),
     ]),
   );
   function signupStatus(gig: GigSignup): string {
@@ -238,12 +229,10 @@
         <td class="person {signupStatus(gig)} {lineupStatus(gig)}">
           {#if signupStatus(gig) || lineupStatus(gig)}
             <TooltipText
-              content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${gig.title}${statusText(gig) ? `\n${statusText(gig)}` : ''}${
-                gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``
-              }${
-                gig?.signup?.user?.gig_notes
-                  ? `\nGeneral notes: ${gig.signup.user.gig_notes}`
-                  : ``
+              content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${gig.title}${
+                statusText(gig) ? `\n${statusText(gig)}` : ''
+              }${gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``}${
+                gig?.signup?.user?.gig_notes ? `\nGeneral notes: ${gig.signup.user.gig_notes}` : ``
               }`}"
               data-test="signup-details-{person.id}-{gig.id}"
             >

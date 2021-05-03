@@ -21,13 +21,16 @@
   $: date = gig.date && DateTime.fromISO(gig.date);
 
   let selectedInstruments =
+    // @ts-ignore
     gig.lineup.length > 0
       ? Object.assign(
           {},
+          // @ts-ignore
           ...gig.lineup[0].user_instruments.map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
         )
       : {};
 
+  // @ts-ignore
   userInstruments = userInstruments.map((userInstr) =>
     userInstr.id in selectedInstruments
       ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
@@ -35,10 +38,11 @@
   );
 
 
+  // @ts-ignore
   $userNotes || (gig.lineup.length && ($userNotes = gig.lineup[0].user.gig_notes));
-//   userNotes.subscribe(
-//     (notes) => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
-//   );
+  userNotes.subscribe(
+    (notes) => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
+  );
 
   const statuses = {
     YES: {},
@@ -51,6 +55,7 @@
       (entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO)) ||
     undefined;
 
+  // @ts-ignore
   let status = gig.lineup[0] && statusFromAvailability(gig.lineup[0]);
 
   const signup = (newStatus) => async () => {

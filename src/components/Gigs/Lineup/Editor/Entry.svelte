@@ -4,6 +4,7 @@
 
   export let person;
   export let updateEntry;
+  // @ts-ignore
   let editAdminNotes = person.admin_notes || "";
   let showUnselectedInstruments = false;
 
@@ -14,6 +15,7 @@
     equipment: { name: "equip", value: person.equipment },
     driver: { name: "driver", value: person.driver },
     money_collector: { name: "money", value: person.money_collector, disabled: person.money_collector_notified },
+    money_collector_notified: undefined,
   };
   $: if (person.money_collector) {
     roles.money_collector_notified = { name: "money notified", value: person.money_collector_notified };
@@ -226,7 +228,7 @@
     {:else}
       <div data-test="instruments-to-add">
         {#each unselectedInstruments as instrument}
-          <button on:click="{selectInstrument(instrument.id)}">{instrument.instrument.name}</button>
+          <button on:click="{() => selectInstrument(instrument.id)}">{instrument.instrument.name}</button>
         {:else}No instruments available to add{/each}
         <button
           on:click="{() => (showUnselectedInstruments = false)}"

@@ -1,6 +1,5 @@
 import { writable } from "svelte/store";
 import type { Writable } from "svelte/store";
-import type fetch_ from "node-fetch";
 import type { DocumentNode } from "graphql/language/ast";
 
 const path = `/v1/graphql`;
@@ -8,13 +7,14 @@ const path = `/v1/graphql`;
 export const client: Writable<GraphQLClient | null> = writable(null);
 export const clientCurrentUser: Writable<GraphQLClient | null> = writable(null);
 
+export type Fetch = (info: RequestInfo, init?: RequestInit) => Promise<Response>;
 export class GraphQLClient {
-  private fetch: typeof fetch_;
+  private fetch: Fetch;
   private role: string | undefined;
   private domain: string | undefined;
   private headers: Record<string, string> | undefined;
 
-  constructor(fetch: typeof fetch_, kwargs?: { role?: string; domain?: string; headers?: Record<string, string> }) {
+  constructor(fetch: Fetch, kwargs?: { role?: string; domain?: string; headers?: Record<string, string> }) {
     this.fetch = fetch;
     this.role = kwargs?.role;
     this.domain = kwargs?.domain;
@@ -87,7 +87,7 @@ export class GraphQLClient {
 }
 
 // TODO kill this, should just use GraphQLClient constructor where this is called
-export function makeClient(fetch: typeof fetch_, kwargs?: { role?: string }) {
+export function makeClient(fetch: Fetch, kwargs?: { role?: string }) {
   return new GraphQLClient(fetch, kwargs);
 }
 

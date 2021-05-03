@@ -33,7 +33,7 @@
 
     let client = makeClient(fetch);
 
-    let res;
+    let res: { data: { since: { gig: Gig }[]; signupsOpen: Gig[] } };
     try {
       res = await client.query({
         query: QueryAllGigSignupSummary,

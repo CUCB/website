@@ -2,12 +2,12 @@
   import { makeClient, handleErrors } from "../../graphql/client";
   import { currentCommitteePictures } from "../../graphql/committee";
   export async function load({ page: { query }, fetch, session }) {
-    let { aprilfool } = query;
-    let client = makeClient(fetch);
+    const aprilFools = query.get("aprilfool") !== undefined; 
+    const client = makeClient(fetch);
     let res;
     try {
       res = await client.query({ query: currentCommitteePictures });
-      return { props: { aprilFools: aprilfool !== undefined, committee: res.data.cucb_committees[0].committee_members } };
+      return { props: { aprilFools, committee: res.data.cucb_committees[0].committee_members } };
     } catch (e) {
       return handleErrors(e, session);
     }
@@ -35,12 +35,11 @@
 
 <p>
   Click on a name to email that person. (Previous committees can be found by
-  <a href="/committee/previous">clicking here</a>
-  .)
+  <a href="/committee/previous">clicking here</a>.)
 </p>
 
 <cucb-committee>
   {#each committee as person}
-    <Person {person} {aprilFools} showEmail="true" />
+    <Person {person} {aprilFools} showEmail={true} />
   {/each}
 </cucb-committee>

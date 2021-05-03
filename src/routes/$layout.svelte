@@ -40,7 +40,7 @@
     }
   }
 
-  export const load = async function({ page: { query }, fetch, session }) {
+  export const load: Load = async function({ page: { query }, fetch, session }) {
     let committee = {};
 
     try {
@@ -68,7 +68,7 @@
 
     let color: ThemeColor;
     try {
-      color = ThemeColor.check(query.color || fromSessionTheme(session, "color"));
+      color = ThemeColor.check(query.get("color") || fromSessionTheme(session, "color"));
     } catch {
       color = "default";
     }
@@ -77,15 +77,15 @@
       accent: {} as ThemedProperty,
       logo: {} as ThemedProperty,
       color,
-      font: query.font || fromSessionTheme(session, "font") || "standard",
+      font: query.get("font") || fromSessionTheme(session, "font") || "standard",
       spinnyLogo: fromSessionTheme(session, "spinnyLogo") || false,
       calendarStartDay: Day.guard(dayFromSession) ? dayFromSession : "mon",
     };
-    let accent = query.accent || fromSessionTheme(session, `accent_${color}`);
+    let accent = query.get("accent") || fromSessionTheme(session, `accent_${color}`);
     if (HexValue.guard(accent)) {
       settings.accent[color] = accent;
     }
-    let logo = query.logo || fromSessionTheme(session, `logo_${color}`);
+    let logo = query.get("logo") || fromSessionTheme(session, `logo_${color}`);
     if (HexValue.guard(logo)) {
       settings.logo[color] = logo;
     }
@@ -108,6 +108,7 @@
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import type Popup from "../components/Popup.svelte";
+import type { Load } from "@sveltejs/kit";
 
   export let committee: Committee;
   export let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty };
