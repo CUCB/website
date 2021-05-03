@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Run svelte-check
         run: |
-          docker run --mount type=bind,src="$(pwd)",dst=/app -it node:14 bash -c "cd /app && npm ci && npm run build && npm run svelte-check"
+          docker run --mount type=bind,src="$(pwd)",dst=/app -i node:14 bash -c "cd /app && npm ci && npm run build && npm run svelte-check"
   test:
     name: Cypress run
     runs-on: ubuntu-16.04
