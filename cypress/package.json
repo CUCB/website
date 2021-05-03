@@ -1,8 +1,9 @@
 {
-    "type": "commonjs",
-    "devDependencies": {
-        "@percy/cypress": "^3.1.0",
-        "cypress": "^7.2.0",
-        "cypress-pipe": "^2.0.0"
-    }
+  "type": "commonjs",
+  "devDependencies": {
+    "@percy/cypress": "^3.1.0",
+    "cypress": "^7.2.0",
+    "chai-sorted": "^0.2.0",
+    "cypress-pipe": "^2.0.0"
+  }
 }
