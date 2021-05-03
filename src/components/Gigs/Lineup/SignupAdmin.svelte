@@ -1,85 +1,14 @@
-<script>
-  import { List, Map, fromJS } from "immutable";
-  import { makeTitle, themeName } from "../../../view";
-  import TooltipText from "../../TooltipText.svelte";
-  import { DateTime } from "luxon";
-  export let gigs = [];
-  gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date));
-  let sortedBy = null;
-  $: people = List(Map(gigs.flatMap((gig) => gig.lineup.map((person) => [person.user.id, person.user]))).values());
-  $: people && (sortedBy = null);
-  $: sortedPeople = fromJS(people.toArray()).sortBy((v) => `${v.get("first")} ${v.get("last")}`);
-  $: gigsForPerson = Map(
-    people.map((user) => [
-      user.id,
-      gigs.map((gig) =>
-        fromJS({
-          ...gig,
-          lineup: undefined,
-          signup: gig.lineup && gig.lineup.find((signup) => user.id === signup.user.id),
-        }),
-      ),
-    ]),
-  );
-  function signupStatus(gig) {
-    let person = gig.toJS().signup;
-    return typeof person === "undefined"
-      ? ""
-      : person.user_available === true
-      ? person.user_only_if_necessary === true
-        ? "status-only_if_necessary"
-        : "status-available"
-      : person.user_available !== null
-      ? "status-unavailable"
-      : "";
-  }
-  function lineupStatus(gig) {
-    let person = gig.toJS().signup;
-    return typeof person === "undefined"
-      ? ""
-      : person.approved === true
-      ? "status-approved"
-      : person.approved === null
-      ? ""
-      : "status-nope";
-  }
-  function lineupText(gig) {
-    let person = gig.toJS().signup;
-    return typeof person === "undefined"
-      ? ""
-      : person.approved === true
-      ? "Approved"
-      : person.approved === null
-      ? ""
-      : "Declined";
-  }
-  function statusText(gig) {
-    let person = gig.toJS().signup;
-    return typeof person === "undefined"
-      ? ""
-      : person.user_available === true
-      ? person.user_only_if_necessary === true
-        ? "Available if necessary"
-        : "Available"
-      : person.user_available !== null
-      ? "Unavailable"
-      : "";
-  }
-  function availabilitySort(gig) {
-    let availabilities = Map(
-      gig.lineup.map((person) => [
-        person.user.id,
-        person.user_available ? (person.user_only_if_necessary ? 2 : 1) : person.user_available !== null ? 3 : 4,
-      ]),
-    );
-    let approvedLineup = Map(
-      gig.lineup.map((person) => [person.user.id, person.approved ? 1 : person.approved !== null ? 3 : 2]),
-    );
-    sortedPeople = sortedPeople
-      .sortBy((person) => `${person.first} ${person.last}`)
-      .sortBy((person) => availabilities.get(person.get("id")) || 4)
-      .sortBy((person) => approvedLineup.get(person.get("id")) || 2);
-    sortedBy = gig.id;
+<svelte:options immutable="{true}" />
+
+<script lang="ts" context="module">
+  import { List, Map, getIn } from "immutable";
+  declare global {
+    interface String {
+      hashCode(): number;
+    }
+    // interface Object {
+    //   getIn(keyPath: Iterable<any>, notSetValue?: any): any
+    // }
   }
 
   String.prototype.hashCode = function () {
@@ -94,6 +23,107 @@
     }
     return hash;
   };
+
+//   Object.prototype.getIn = function (...args) {
+//       getIn(this, ...args)
+//   }
+ 
+ interface GigSignup extends Gig {
+     lineup: undefined;
+     signup: LineupEntry;
+ }
+</script>
+
+<script lang="ts">
+  import { makeTitle, themeName } from "../../../view";
+  import TooltipText from "../../TooltipText.svelte";
+  import { DateTime, FixedOffsetZone } from "luxon";
+  import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups.svelte";
+  export let gigs: Gig[] = [];
+  gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
+  let sortedBy = null;
+  // TODO use groupby to clean this up
+  $: people = List(
+    Map(
+      gigs.flatMap((gig: Gig) =>
+        gig.lineup.map<[number, User]>((person: LineupEntry) => [person.user.id, person.user]),
+      ),
+    ).values(),
+  );
+  $: people && (sortedBy = null);
+  $: sortedPeople = people.sortBy((v) => `${v.first} ${v.last}`);
+  $: gigsForPerson = Map<number, GigSignup[]>(
+    people.map((user: User) => [
+      user.id,
+      gigs.map((gig: Gig) =>
+        ({
+          ...gig,
+          lineup: undefined,
+          signup: gig.lineup && gig.lineup.find((signup) => user.id === signup.user.id),
+        }),
+      ),
+    ]),
+  );
+  function signupStatus(gig: GigSignup): string {
+    let person = gig.signup;
+    return typeof person === "undefined"
+      ? ""
+      : person.user_available === true
+      ? person.user_only_if_necessary === true
+        ? "status-only_if_necessary"
+        : "status-available"
+      : person.user_available !== null
+      ? "status-unavailable"
+      : "";
+  }
+  function lineupStatus(gig: GigSignup): string {
+    let person = gig.signup;
+    return typeof person === "undefined"
+      ? ""
+      : person.approved === true
+      ? "status-approved"
+      : person.approved === null
+      ? ""
+      : "status-nope";
+  }
+  function lineupText(gig: GigSignup): string {
+    let person = gig.signup;
+    return typeof person === "undefined"
+      ? ""
+      : person.approved === true
+      ? "Approved"
+      : person.approved === null
+      ? ""
+      : "Declined";
+  }
+  function statusText(gig: GigSignup): string {
+    let person = gig.signup;
+    return typeof person === "undefined"
+      ? ""
+      : person.user_available === true
+      ? person.user_only_if_necessary === true
+        ? "Available if necessary"
+        : "Available"
+      : person.user_available !== null
+      ? "Unavailable"
+      : "";
+  }
+  function availabilitySort(gig: Gig) {
+    let availabilities = Map(
+      gig.lineup.map((person) => [
+        person.user.id,
+        person.user_available ? (person.user_only_if_necessary ? 2 : 1) : person.user_available !== null ? 3 : 4,
+      ]),
+    );
+    let approvedLineup = Map(
+      gig.lineup.map((person) => [person.user.id, person.approved ? 1 : person.approved !== null ? 3 : 2]),
+    );
+    sortedPeople = sortedPeople
+      .sortBy((person) => `${person.first} ${person.last}`)
+      .sortBy((person) => availabilities.get(person.id) || 4)
+      .sortBy((person) => approvedLineup.get(person.id) || 2);
+    sortedBy = gig.id;
+  }
 
   function hash(id) {
     return id * ("" + gigs.map((gig) => gig.id).reduce((a, b) => a + b, 0)).hashCode();
@@ -183,9 +213,8 @@
   }
 </style>
 
-<svelte:options immutable="{true}" />
 <svelte:head>
-  <title>{makeTitle('Gig signups')}</title>
+  <title>{makeTitle("Gig signups")}</title>
 </svelte:head>
 
 <div class="table theme-{$themeName}">
@@ -194,10 +223,11 @@
     {#each gigs as gig (hash(gig.id))}
       <th scope="col">
         <button
-          on:click="{availabilitySort(gig)}"
+          on:click="{() => availabilitySort(gig)}"
           data-test="gig-title-{gig.id}"
           aria-selected="{sortedBy === gig.id ? true : false}"
-        ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat('dd LLL')}&#32;{gig.title}</div></button>
+          ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat("dd LLL")}&#32;{gig.title}</div></button
+        >
       </th>
     {/each}
   </tr>
@@ -208,30 +238,27 @@
         <td class="person {signupStatus(gig)} {lineupStatus(gig)}">
           {#if signupStatus(gig) || lineupStatus(gig)}
             <TooltipText
-              content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${gig.get('title')}${statusText(gig) ? `\n${statusText(gig)}` : ''}${gig.getIn(
-                  ['signup', 'user_notes'],
-                ) ? `\nNotes: ${gig.getIn([
-                      'signup',
-                      'user_notes',
-                    ])}` : ``}${gig.getIn([
-                  'signup',
-                  'user',
-                  'gig_notes',
-                ]) ? `\nGeneral notes: ${gig.getIn(['signup', 'user', 'gig_notes'])}` : ``}`}"
-              data-test="signup-details-{person.id}-{gig.get('id')}"
+              content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${gig.title}${statusText(gig) ? `\n${statusText(gig)}` : ''}${
+                gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``
+              }${
+                gig?.signup?.user?.gig_notes
+                  ? `\nGeneral notes: ${gig.signup.user.gig_notes}`
+                  : ``
+              }`}"
+              data-test="signup-details-{person.id}-{gig.id}"
             >
               <div style="width:100%; height: 100%">
-                {#if gig.getIn(['signup', 'user_available'])}
-                  {#if gig.getIn(['signup', 'user_only_if_necessary'])}
+                {#if gig.signup.user_available}
+                  {#if gig.signup.user_only_if_necessary}
                     <i class="las la-question"></i>
                   {:else}<i class="las la-check"></i>{/if}
-                {:else if gig.getIn(['signup', 'user_available']) === false}
+                {:else if gig.signup.user_available === false}
                   <i class="las la-times"></i>
                 {:else}
                   &nbsp;
                   <!-- Add some content to hover over for tooltip-->
                 {/if}
-                {#if gig.getIn(['signup', 'user_notes']) || gig.getIn(['signup', 'user', 'gig_notes'])}
+                {#if gig.signup.user_notes || gig.signup.user.gig_notes}
                   <i class="las la-comment"></i>
                 {/if}
               </div>

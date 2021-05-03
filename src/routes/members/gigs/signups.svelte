@@ -1,8 +1,29 @@
-<script context="module">
+<script context="module" lang="ts">
   import { handleErrors, makeClient } from "../../../graphql/client";
   import { notLoggedIn } from "../../../client-auth.js";
   import { QueryAllGigSignupSummary } from "../../../graphql/gigs";
   import { DateTime, Settings } from "luxon";
+
+  export interface User {
+    id: number;
+    first: string;
+    last: string;
+    gig_notes: string | null;
+  }
+  export interface LineupEntry {
+    approved: boolean | null;
+    user: User;
+    user_available: boolean | null;
+    user_only_if_necessary: boolean | null;
+    user_notes: string | null;
+  }
+  export interface Gig {
+    id: number;
+    date: string;
+    sort_date: string;
+    lineup: LineupEntry[];
+    title: string;
+  }
 
   export async function load({ fetch, session }) {
     Settings.defaultZoneName = "Europe/London";
@@ -31,18 +52,21 @@
   }
 </script>
 
-<script>
+<script lang="ts">
   Settings.defaultZoneName = "Europe/London";
   import SignupAdmin from "../../../components/Gigs/Lineup/SignupAdmin.svelte";
   import { List, Map } from "immutable";
 
-  export let sinceOneMonth, signupsOpen;
+  export let sinceOneMonth: Gig[], signupsOpen: Gig[];
   $: noLineup = signupsOpen.filter(hasNoLineup);
   $: futureGigs = sinceOneMonth.filter(isInFuture);
   $: signupsOpenOrLineupSelectedForFuture = List(
-    Map([...futureGigs.map((gig) => [gig.id, gig]), ...signupsOpen.map((gig) => [gig.id, gig])]).values(),
+    Map([
+      ...futureGigs.map<[number, Gig]>((gig) => [gig.id, gig]),
+      ...signupsOpen.map<[number, Gig]>((gig) => [gig.id, gig]),
+    ]).values(),
   )
-    .sortBy((gig) => gig.sort_date)
+    .sortBy((gig: Gig) => gig.sort_date)
     .toJS();
   const VIEWS = { signupsOpen: {}, sinceOneMonth: {}, noLineup: {} };
   let view = VIEWS.signupsOpen;
@@ -53,8 +77,8 @@
       ? sinceOneMonth
       : noLineup;
 
-  const hasNoLineup = (gig) => gig.lineup.filter((person) => person.approved).length === 0;
-  const isInFuture = (gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
+  const hasNoLineup = (gig: Gig) => gig.lineup.filter((person: LineupEntry) => person.approved).length === 0;
+  const isInFuture = (gig: Gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
 </script>
 
 <style>

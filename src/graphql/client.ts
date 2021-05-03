@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 import type { Writable } from "svelte/store";
 import type fetch_ from "node-fetch";
+import type { DocumentNode } from "graphql/language/ast";
 
 const path = `/v1/graphql`;
 
@@ -21,7 +22,7 @@ export class GraphQLClient {
   }
 
   // TODO type this better
-  async query<T>(args: { query: any, variables: Record<string, any> }): Promise<{ data: T }> {
+  async query<T>(args: { query: DocumentNode | string, variables?: Record<string, any> }): Promise<{ data: T }> {
     let query,
       variables = undefined;
     typeof args === "object" ? ({ query, variables } = args) : (query = args);
@@ -53,7 +54,7 @@ export class GraphQLClient {
   }
 
   // TODO better types here too
-  async mutate<T>(args: { mutation: any, variables: Record<string, any> }): Promise<{ data: T }> {
+  async mutate<T>(args: { mutation: DocumentNode | string, variables: Record<string, any> }): Promise<{ data: T }> {
     let mutation,
       variables = undefined;
     typeof args === "object" ? ({ mutation, variables } = args) : (mutation = args);
@@ -85,6 +86,7 @@ export class GraphQLClient {
   }
 }
 
+// TODO kill this, should just use GraphQLClient constructor where this is called
 export function makeClient(fetch: typeof fetch_, kwargs?: { role?: string }) {
   return new GraphQLClient(fetch, kwargs);
 }
