@@ -13,11 +13,12 @@ jobs:
       - name: Use Node.js 14.x
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
       - name: Run svelte-check
         run: |
           npm ci
-          npm run build; npm run svelte-check
+          npm run build
+          npm run svelte-check
   test:
     name: Cypress run
     runs-on: ubuntu-16.04
