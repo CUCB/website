@@ -1,3 +1,4 @@
+// @ts-ignore
 import sirv from "sirv";
 import polka from "polka";
 import compression from "compression";
@@ -22,7 +23,7 @@ const Session = Record({
 });
 
 const AuthenticatedRequest = Record({
-  session: Session
+  session: Session,
 });
 
 // Get the environment variables from the .env file
@@ -59,6 +60,7 @@ const server =
         .use("/images/committee", sirv("static/static/images/committee", { dev }))
         .use(sirv("static", { dev }))
         .use("/renderemail", async function (req, res) {
+          // @ts-ignore
           const id = req.query["id"];
           try {
             const email = await fetch(`http://${process.env.EMAIL_POSTFIX_HOST}:8025/api/v1/messages/${id}/download`);
@@ -77,6 +79,7 @@ server
     apiProxy.web(req, res, { target: GRAPHQL_REMOTE });
   })
   .use(
+    // @ts-ignore
     compression({ threshold: 0 }),
     bodyParser.urlencoded({ extended: true }),
     session({
@@ -107,24 +110,25 @@ server
       session: (req, res) => {
         res.setHeader("cache-control", "no-cache, no-store");
         // if (AuthenticatedRequest.guard(req)) {
-          return {
-              //@ts-ignore
-            userId: req.session.userId,
-              //@ts-ignore
-            firstName: req.session.firstName,
-              //@ts-ignore
-            lastName: req.session.lastName,
-              //@ts-ignore
-            hasuraRole: req.session.hasuraRole,
-              //@ts-ignore
-            theme: req.session.theme,
-          };
+        return {
+          //@ts-ignore
+          userId: req.session.userId,
+          //@ts-ignore
+          firstName: req.session.firstName,
+          //@ts-ignore
+          lastName: req.session.lastName,
+          //@ts-ignore
+          hasuraRole: req.session.hasuraRole,
+          //@ts-ignore
+          theme: req.session.theme,
+        };
         // } else {
         //   return {};
         // }
       },
     }),
   )
+  // @ts-ignore
   .listen(PORT, (err: unknown) => {
     if (err) console.error("error", err);
   });

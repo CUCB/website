@@ -1,17 +1,16 @@
 import { login } from "../../auth";
 import type { SapperRequest, SapperResponse } from "@sapper/server";
-import type { Next } from "polka";
 import { String, Record } from "runtypes";
 
-const NonEmptyString = String.withConstraint(str => str.trim().length > 0)
+const NonEmptyString = String.withConstraint((str) => str.trim().length > 0);
 const LoginBody = Record({
-    username: NonEmptyString,
-    password: NonEmptyString
+  username: NonEmptyString,
+  password: NonEmptyString,
 });
 // TODO import an accurate version of this from somewhere!
 type Session = any;
 
-export async function post(req: SapperRequest & { body: any, session: Session }, res: SapperResponse, next: Next) {
+export async function post(req: SapperRequest & { body: any; session: Session }, res: SapperResponse, _next: unknown) {
   if (LoginBody.guard(req.body)) {
     try {
       const loginResult = await login(req.body);

@@ -1,6 +1,5 @@
 import { createAccount } from "../../auth";
 import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
-import type { Next } from "polka";
 import type { SapperRequest, SapperResponse } from "@sapper/server";
 import { String, Record } from "runtypes";
 
@@ -26,7 +25,7 @@ const RegisterBody = Record({
   lastName: String,
 });
 
-export async function post(req: PostRequest, res: SapperResponse, next: Next) {
+export async function post(req: PostRequest, res: SapperResponse, _next: unknown) {
   try {
     let { username, password, passwordConfirm, firstName, lastName } = RegisterBody.check(req.body);
 

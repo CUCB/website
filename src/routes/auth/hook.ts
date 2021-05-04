@@ -1,6 +1,5 @@
 import crypto from "crypto";
 import type { SapperRequest, SapperResponse } from "@sapper/server";
-import type { Next } from "polka";
 import { Union, Literal, Undefined } from "runtypes";
 const CORRECT_SESSION_SECRET_HASH = crypto
   .createHash("sha512")
@@ -30,7 +29,7 @@ interface Session {
 
 const RequestableRole = Union(Literal("server"), Literal("current_user"));
 
-export function get(req: SapperRequest & { session: Session }, res: SapperResponse, next: Next) {
+export function get(req: SapperRequest & { session: Session }, res: SapperResponse, _next: unknown) {
   try {
     const mainRole = DefaultRole.Or(Undefined).check(req.session.alternativeRole || req.session.hasuraRole);
     const requestedRole = DefaultRole.Or(Undefined).Or(RequestableRole).check(req.headers["x-hasura-role"]) || mainRole;
