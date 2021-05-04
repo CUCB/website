@@ -1,7 +1,7 @@
 import { createAccount } from "../../auth";
 import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
-import type { SapperRequest, SapperResponse } from "@sapper/server";
-import { String, Record } from "runtypes";
+import { String, Record as RuntypeRecord } from "runtypes";
+import type { Request } from "@sveltejs/kit";
 
 function passwordIsValid(password: string): Boolean {
   return password.length >= 8;
@@ -9,15 +9,15 @@ function passwordIsValid(password: string): Boolean {
 
 // TODO can this be made more precise?
 type Session = {
-  save: (callback: () => void) => void;
+  save(): Promise<Record<string, string>>;
   userId?: string;
   hasuraRole?: string;
   firstName?: string;
   lastName?: string;
 };
-type PostRequest = SapperRequest & { body: object; session: Session };
+type PostRequest = Request<{session: Session}> & { body: FormData };
 
-const RegisterBody = Record({
+const RegisterBody = RuntypeRecord({
   username: String,
   password: String,
   passwordConfirm: String,

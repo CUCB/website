@@ -1,6 +1,6 @@
 import { login } from "../../auth";
-import type { SapperRequest, SapperResponse } from "@sapper/server";
 import { String, Record } from "runtypes";
+import type { Request } from "@sveltejs/kit";
 
 const NonEmptyString = String.withConstraint((str) => str.trim().length > 0);
 const LoginBody = Record({
@@ -10,7 +10,7 @@ const LoginBody = Record({
 // TODO import an accurate version of this from somewhere!
 type Session = any;
 
-export async function post(req: SapperRequest & { body: any; session: Session }) {
+export async function post(req: Request<{session: Session}>) {
   const body = Object.fromEntries(req.body.entries());
   if (LoginBody.guard(body)) {
     try {
