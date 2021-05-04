@@ -41,13 +41,13 @@ jobs:
         with:
           record: true
           parallel: true
-          group: 'Linux/Chrome'
+          group: "Linux/Chrome"
           start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
-          wait-on: 'http://localhost:4000'
+          wait-on: "http://localhost:4000"
           wait-on-timeout: 240
           # the entire command will automatically be prefixed with "npm"
           # and we need the second "npm" to execute "cypress run ..." command line
-          command-prefix: 'percy exec -- npx'
+          command-prefix: "percy exec -- npx"
         env:
           # pass the Dashboard record key as an environment variable
           CYPRESS_KEY: ${{ secrets.CYPRESS_KEY }}
@@ -58,7 +58,7 @@ jobs:
           # See https://dev.to/digitaledawn/github-action-cypress-and-percy-parallelisation-setup-484a for percy setup
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_TOTAL: 4
-          PERCY_PARALLEL_NONCE: '${{ github.event_name }}-${{ github.sha }}'
+          PERCY_PARALLEL_NONCE: "${{ github.event_name }}-${{ github.sha }}"
           PERCY_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
       - name: Upload artifacts
@@ -80,10 +80,10 @@ jobs:
       - name: Install Pulumi CLI
         uses: pulumi/action-install-pulumi-cli@v1.0.1
       - run: cd pulumi && npm install
-      - uses: pulumi/actions@v2
+      - uses: pulumi/actions@v3
         with:
           command: preview
-          stack-name: dev
+          stack-name: prod
           work-dir: pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
@@ -127,10 +127,10 @@ jobs:
       - name: Install Pulumi CLI
         uses: pulumi/action-install-pulumi-cli@v1.0.1
       - run: cd pulumi && npm install
-      - uses: pulumi/actions@v2
+      - uses: pulumi/actions@v3
         with:
           command: up
-          stack-name: dev
+          stack-name: prod
           work-dir: pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
