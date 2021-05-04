@@ -1,0 +1,20 @@
+- hosts: all
+  become: 'yes'
+  tasks:
+    - name: Install git
+      apt:
+        name: git
+
+    - name: Clone the repository
+      git:
+        repo: ssh://git@github.com/cucb/website.git
+        dest: /var/www
+        accept_hostkey: yes
+        key_file: ~/.ssh/deploy_pull
+        version: "{{ ci_commit_branch }}"
+
+    - name: Make env file
+      include_role:
+        name: create-env-file
+      vars:
+        repo_root: /var/www
