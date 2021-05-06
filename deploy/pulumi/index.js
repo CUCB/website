@@ -16,7 +16,7 @@ const web = new digitalocean.Droplet("website", {
   region: "lon1",
   size: "s-1vcpu-1gb",
   backups: true,
-  name: `Website (${stack})`,
+  name: `website-${stack}`,
   sshKeys: [_default.fingerprint],
 });
 
