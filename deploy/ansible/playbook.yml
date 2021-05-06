@@ -1,0 +1,37 @@
+- hosts: all
+  become: 'yes'
+  vars:
+    repo_root: /var/www
+    webmaster_email: webmaster@cucb.co.uk
+  tasks:
+    - name: Install git
+      apt:
+        name: git
+        update_cache: yes
+
+    - name: Clone the repository
+      git:
+        repo: ssh://git@github.com/cucb/website.git
+        dest: "{{ repo_root }}"
+        accept_hostkey: yes
+        key_file: ~/.ssh/deploy_pull
+        version: "{{ ci_commit_branch }}"
+
+    - name: Make env file
+      include_role:
+        name: create-env-file
+
+    - name: Install required dependencies
+      include_role:
+        name: install-dependencies
+      vars:
+        email_domain_name: dev.cucb.co.uk # TODO make this dynamic
+
+    - name: Configure OS 
+      include_role:
+        name: "{{ role_name }}" 
+      loop:
+        - configure-timezone
+        - configure-cron
+        - update-and-run-docker
+      loop_var: role_name

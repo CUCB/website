@@ -13,7 +13,7 @@ jobs:
       - name: Use Node.js 14.x
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: "16"
       - name: Create dummy .env file
         run: |
           echo "SESSION_SECRET=somethingreallynotsecret" > .env
@@ -74,7 +74,7 @@ jobs:
             cypress/screenshots/**/*.png
 
   pulumi-preview:
-    if: ${{ github.ref!='refs/heads/master' }}
+    if: ${{ github.ref!='refs/heads/master' && github.ref!='refs/heads/ansible-deployment'}}
     name: Preview infrastructure updates
     runs-on: ubuntu-latest
     steps:
@@ -87,12 +87,12 @@ jobs:
         with:
           command: preview
           stack-name: prod
-          work-dir: pulumi
+          work-dir: deploy/pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   build:
-    if: ${{ github.ref=='refs/heads/master' }}
+    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/ansible-deployment'}}
     needs:
       - test
       - svelte-check
@@ -125,6 +125,12 @@ jobs:
     outputs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
+      - name: Set env to develop
+        if: endsWith(github.ref, '/ansible-deployment')
+        run: echo "::set-env name=ENVIRONMENT::dev"
+      - name: Set env to production
+        if: endsWith(github.ref, '/master')
+        run: echo "::set-env name=ENVIRONMENT::prod"
       - name: Checkout Repo
         uses: actions/checkout@v2
       - name: Install Pulumi CLI
@@ -134,13 +140,14 @@ jobs:
         id: update
         with:
           command: up
-          stack-name: prod
-          work-dir: pulumi
+          stack-name: ${{ env.ENVIRONMENT }}
+          work-dir: deploy/pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
-  deploy:
-    name: Deploy site to DigitalOcean
+  deploy-bash:
+    if: ${{ github.ref=='refs/heads/master' }}
+    name: Deploy site to DigitalOcean using bash
     runs-on: ubuntu-latest
     needs: pulumi
     steps:
@@ -200,6 +207,42 @@ jobs:
           ssh root@$IP "chmod +x deploy.sh && ./deploy.sh"
     env:
       IP: ${{ needs.pulumi.outputs.ip }}
+
+  deploy-ansible:
+    if: ${{ github.ref=='refs/heads/ansible-deployment' }}
+    name: Deploy site to DigitalOcean using ansible
+    runs-on: ubuntu-latest
+    needs: pulumi
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+          architecture: 'x64'
+
+      - name: Install dependencies
+        run: |
+          pip install ansible
+          ansible-galaxy collection install -r deploy/ansible/requirements.yml
+
+      - name: Play ansible playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: deploy/ansible/playbook.yml
+          inventory: |
+            kit.cucb.co.uk
+          options: |
+            --extra-vars ${{ format("deploy_registry={0}", secrets.CI_REGISTRY) }}
+            --extra-vars ${{ format("deploy_registry_user={0}", secrets.CI_REGISTRY_USER) }}
+            --extra-vars ${{ format("deploy_registry_password={0}", secrets.CI_REGISTRY_PASSWORD) }}
+            --extra-vars ${{ format("ci_commit_branch={0}", secrets.CI_COMMIT_BRANCH) }}
+            --extra-vars ${{ format("dropbox_access_token={0}", secrets.DROPBOX_ACCESS_TOKEN) }}
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "false"
+          ANSIBLE_DEPRECATION_WARNINGS: "false"
 
 env:
   CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}

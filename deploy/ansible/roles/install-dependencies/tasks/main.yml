@@ -1,0 +1,34 @@
+- name: Install dependencies
+  apt:
+    name:
+      - docker-compose
+      - npm
+      - nodejs
+      - duplicity
+      - python3-pip
+      - cronic
+    update_cache: yes
+
+- debconf:
+    name: postfix
+    question: postfix/mailname
+    vtype: string
+    value: "{{ email_domain_name }}"
+
+- debconf:
+    name: postfix
+    question: postfix/main_mailer_type
+    vtype: string
+    value: Internet Site
+
+- name: Install postfix
+  apt:
+    name: postfix
+
+- name: Install Python Dropbox sdk
+  pip:
+    name: dropbox
+
+- name: Install backup script dependencies
+  community.general.npm:
+    path: "{{ repo_root }}/deploy/js"
