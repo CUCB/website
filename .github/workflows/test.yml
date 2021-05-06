@@ -74,7 +74,7 @@ jobs:
             cypress/screenshots/**/*.png
 
   pulumi-preview:
-    if: ${{ github.ref!='refs/heads/master' && github.ref!='refs/heads/ansible-deployment'}}
+    if: ${{ github.ref!='refs/heads/master' && github.ref!='refs/heads/feature/ansible-deployment'}}
     name: Preview infrastructure updates
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +92,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   build:
-    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/ansible-deployment'}}
+    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/ansible-deployment'}}
     needs:
       - test
       - svelte-check
