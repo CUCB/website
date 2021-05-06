@@ -1,5 +1,5 @@
 - hosts: all
-  become: 'yes'
+  remote_user: root
   vars:
     repo_root: /var/www
     webmaster_email: webmaster@cucb.co.uk
@@ -8,6 +8,11 @@
       apt:
         name: git
         update_cache: yes
+
+    - name: Copy private key
+      copy:
+        content: "{{ deploy_pull_key }}"
+        dest: ~/.ssh/deploy_pull
 
     - name: Clone the repository
       git:
