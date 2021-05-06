@@ -258,7 +258,7 @@ jobs:
             --extra-vars ${{ format('deploy_registry_password={0}', secrets.CI_REGISTRY_PASSWORD) }}
             --extra-vars ${{ format('ci_commit_branch={0}', secrets.CI_COMMIT_BRANCH) }}
             --extra-vars ${{ format('dropbox_access_token={0}', secrets.DROPBOX_ACCESS_TOKEN) }}
-            --extra-vars ${{ format('deploy_pull_key={0}', secrets.DEPLOY_PULL_KEY) }}
+            --extra-vars ${{ format('deploy_pull_key="{0}"', secrets.DEPLOY_PULL_KEY) }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_DEPRECATION_WARNINGS: "false"
