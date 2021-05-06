@@ -4,11 +4,11 @@ const digitalocean = require("@pulumi/digitalocean");
 const cloudflare = require("@pulumi/cloudflare");
 const fs = require("fs");
 
-const _default = new digitalocean.SshKey("gitlab-ci", {
+const stack = pulumi.getStack();
+
+const _default = new digitalocean.SshKey(`gitlab-ci-${stack}`, {
   publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
 });
-
-const stack = pulumi.getStack();
 
 // A droplet to host the site
 const web = new digitalocean.Droplet("website", {
