@@ -16,6 +16,7 @@ COPY static ./static
 COPY *.cjs ./
 COPY *.json ./
 COPY build.env ./.env
+RUN echo "SESSION_SECRET=somethingreallynotsecret" >> .env
 RUN npm run build
 
 FROM mhart/alpine-node:slim-15 AS app
