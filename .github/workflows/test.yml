@@ -235,7 +235,7 @@ jobs:
         with:
           playbook: deploy/ansible/playbook.yml
           inventory: |
-            kit.cucb.co.uk
+            ${{ needs.pulumi.outputs.IP }}
           options: |
             --extra-vars ${{ format('deploy_registry={0}', secrets.CI_REGISTRY) }}
             --extra-vars ${{ format('deploy_registry_user={0}', secrets.CI_REGISTRY_USER) }}

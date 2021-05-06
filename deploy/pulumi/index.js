@@ -40,9 +40,10 @@ const floatingIP = new digitalocean.FloatingIp("website-ip", {
   dropletId: web.id,
 });
 
+let domain;
 if (stack === "prod") {
   // Plumb the DNS stuff in
-  const domain = new cloudflare.Record("dev-server", {
+  domain = new cloudflare.Record("dev-server", {
     name: "dev",
     zoneId: "4c380f78cda5910d99c725cb96fceebc",
     type: "A",
@@ -71,7 +72,7 @@ if (stack === "prod") {
   });
 } else {
   // Plumb the DNS stuff in
-  const domain = new cloudflare.Record("dev-server", {
+  domain = new cloudflare.Record("dev-server", {
     name: "kit",
     zoneId: "4c380f78cda5910d99c725cb96fceebc",
     type: "A",
