@@ -6,7 +6,7 @@ const fs = require("fs");
 
 const stack = pulumi.getStack();
 
-const _default = new digitalocean.SshKey(`gitlab-ci-${stack}`, {
+const _default = new digitalocean.SshKey("gitlab-ci", {
   publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
 });
 
