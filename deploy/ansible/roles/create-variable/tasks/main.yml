@@ -6,7 +6,7 @@
   check_mode: yes
   register: out
 
-- name: "Generate password {{ name }}"
+- name: "Create variable {{ name }}"
   lineinfile:
     path: "{{ env_file }}"
     regexp: "^{{ name }}="

@@ -244,6 +244,7 @@ jobs:
           rm deploy_pull
         env:
           DEPLOY_PULL_KEY: ${{ secrets.DEPLOY_PULL_KEY }}
+          IP: ${{ needs.pulumi.outputs.IP }}
 
       - name: Play ansible playbook
         uses: dawidd6/action-ansible-playbook@v2
