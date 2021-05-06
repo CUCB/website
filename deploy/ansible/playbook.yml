@@ -11,7 +11,7 @@
 
     - name: Copy private key
       copy:
-        content: "{{ deploy_pull_key }}"
+        src: "{{ playbook_dir }}/deploy_pull"
         dest: ~/.ssh/deploy_pull
         mode: '600'
 

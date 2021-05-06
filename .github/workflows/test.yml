@@ -219,21 +219,6 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
-      # - name: Setup SSH
-      #   uses: webfactory/ssh-agent@v0.4.1
-      #   with:
-      #     ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # - name: Copy required SSH keys
-      #   run: |
-      #     ssh-keyscan $IP >> ~/.ssh/known_hosts
-      #     echo "$DEPLOY_PULL_KEY" > deploy_pull
-      #     scp deploy_pull root@$IP:.ssh/
-      #     rm deploy_pull
-      #   env:
-      #     DEPLOY_PULL_KEY: ${{ secrets.DEPLOY_PULL_KEY }}
-      #     IP: ${{ needs.pulumi.outputs.IP }}
-
       - name: Setup python
         uses: actions/setup-python@v2
         with:
@@ -244,6 +229,9 @@ jobs:
         run: |
           pip install ansible
           ansible-galaxy collection install -r deploy/ansible/requirements.yml
+
+      - name: Write deploy key to disk
+        run: echo "$DEPLOY_PULL_KEY" > deploy/ansible/deploy_pull
 
       - name: Play ansible playbook
         uses: dawidd6/action-ansible-playbook@v2
@@ -258,10 +246,12 @@ jobs:
             --extra-vars ${{ format('deploy_registry_password={0}', secrets.CI_REGISTRY_PASSWORD) }}
             --extra-vars ${{ format('ci_commit_branch={0}', secrets.CI_COMMIT_BRANCH) }}
             --extra-vars ${{ format('dropbox_access_token={0}', secrets.DROPBOX_ACCESS_TOKEN) }}
-            --extra-vars ${{ format('deploy_pull_key="{0}"', secrets.DEPLOY_PULL_KEY) }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_DEPRECATION_WARNINGS: "false"
+
+      - name: Remove deploy key
+        run: rm deploy/ansible/deploy_pull
 
 env:
   CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
