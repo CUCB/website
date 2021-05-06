@@ -232,6 +232,8 @@ jobs:
 
       - name: Write deploy key to disk
         run: echo "$DEPLOY_PULL_KEY" > deploy/ansible/deploy_pull
+        env:
+          DEPLOY_PULL_KEY: ${{ secrets.DEPLOY_PULL_KEY }}
 
       - name: Play ansible playbook
         uses: dawidd6/action-ansible-playbook@v2
