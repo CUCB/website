@@ -29,9 +29,8 @@
 
     - name: Configure OS 
       include_role:
-        name: "{{ role_name }}" 
+        name: "{{ item }}" 
       loop:
         - configure-timezone
         - configure-cron
         - update-and-run-docker
-      loop_var: role_name
