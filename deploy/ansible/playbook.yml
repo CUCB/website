@@ -13,6 +13,7 @@
       copy:
         content: "{{ deploy_pull_key }}"
         dest: ~/.ssh/deploy_pull
+        mode: '600'
 
     - name: Clone the repository
       git:
