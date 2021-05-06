@@ -13,13 +13,13 @@ RUN npm install --no-audit --unsafe-perm
 COPY src ./src
 # copy static files for service worker to be populated correctly
 COPY static ./static
-COPY *.js ./
+COPY *.cjs ./
 COPY *.json ./
 COPY build.env ./.env
 RUN npm run build
 
 FROM mhart/alpine-node:slim-15 AS app
 WORKDIR /usr/src/app
-COPY --from=build-app /usr/src/app/__sapper__ ./__sapper__
+COPY --from=build-app /usr/src/app/build ./build
 COPY --from=build-app /usr/src/app/static ./static
 COPY --from=build-runtime /usr/src/app/node_modules ./node_modules
