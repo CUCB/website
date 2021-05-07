@@ -1,4 +1,4 @@
-dev.cucb.co.uk {
-    tls /root/.caddy/certs/dev.cucb.co.uk.crt /root/.caddy/certs/dev.cucb.co.uk.key
+kit.cucb.co.uk {
+    # tls /root/.caddy/certs/dev.cucb.co.uk.crt /root/.caddy/certs/dev.cucb.co.uk.key
     import ./Caddyfile.lib 
 }

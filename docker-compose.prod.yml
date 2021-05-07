@@ -56,7 +56,7 @@ services:
     volumes:
       - ./static:/usr/src/app/static
     restart: always
-    command: "node __sapper__/build"
+    command: "node ./build"
     logging:
       driver: "json-file"
       options:
