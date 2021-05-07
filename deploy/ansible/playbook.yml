@@ -3,6 +3,8 @@
   vars:
     repo_root: /var/www
     webmaster_email: webmaster@cucb.co.uk
+    docker_compose_files:
+      - docker-compose.prod.yml
   tasks:
     - name: Install git
       apt:
