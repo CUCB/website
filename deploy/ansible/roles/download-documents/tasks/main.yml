@@ -22,3 +22,13 @@
     src: "{{ repo_root }}/standard-documents.zip"
     dest: "{{ repo_root }}/docs"
     remote_src: yes
+
+- name: Ensure ~/.env directory exists
+  file:
+    path: ~/.env
+    state: directory
+
+- name: Store dropbox token
+  copy:
+    content: "{{ dropbox_access_token }}"
+    dest: ~/.env/dropbox_access_token
