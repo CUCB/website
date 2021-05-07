@@ -41,4 +41,5 @@
       loop:
         - configure-timezone
         - configure-cron
+        - download-documents
         - update-and-run-docker
