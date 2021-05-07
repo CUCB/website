@@ -6,8 +6,8 @@
 - name: "Cron job: Backup each night"
   cron:
     name: Nightly backup
-    minute: 0
-    hour: 1
+    minute: '0'
+    hour: '1'
     job: "cd {{ repo_root }} && cronic ./deploy/backup.sh"
 
 - name: "Cron job: Start server on reboot"

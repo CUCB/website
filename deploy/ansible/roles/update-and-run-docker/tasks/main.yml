@@ -8,6 +8,7 @@
     pull: yes
     restarted: yes
     recreate: always
+    project_src: "{{ repo_root }}"
   environment:
     DEPLOY_REGISTRY: "{{ deploy_registry }}"
     DEPLOY_REGISTRY_USER: "{{ deploy_registry_user }}"
