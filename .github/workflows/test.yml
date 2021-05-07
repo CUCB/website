@@ -228,11 +228,6 @@ jobs:
           pip install ansible
           ansible-galaxy collection install -r deploy/ansible/requirements.yml
 
-      - name: Write deploy key to disk
-        run: echo "$DEPLOY_PULL_KEY" > deploy/ansible/deploy_pull
-        env:
-          DEPLOY_PULL_KEY: ${{ secrets.DEPLOY_PULL_KEY }}
-
       # Source https://stackoverflow.com/a/58035262
       - name: Extract branch name
         shell: bash
@@ -255,9 +250,6 @@ jobs:
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_DEPRECATION_WARNINGS: "false"
-
-      - name: Remove deploy key
-        run: rm deploy/ansible/deploy_pull
 
 env:
   CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}
