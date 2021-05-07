@@ -24,7 +24,6 @@ jobs:
           npm run svelte-check
   test:
     name: Cypress run
-    if: ${{ false }}
     runs-on: ubuntu-16.04
     strategy:
       # when one test fails, DO NOT cancel the other
@@ -93,8 +92,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   build:
-    # if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/ansible-deployment'}}
-    if: ${{ false }}
+    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/ansible-deployment'}}
     needs:
       - test
       - svelte-check
@@ -121,9 +119,9 @@ jobs:
   pulumi:
     name: Create/update infrastructure
     runs-on: ubuntu-latest
-    # needs:
-    #   - build
-    #   - test
+    needs:
+      - build
+      - test
     outputs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
