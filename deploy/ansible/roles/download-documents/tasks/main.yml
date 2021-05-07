@@ -30,5 +30,5 @@
 
 - name: Store dropbox token
   copy:
-    content: "{{ dropbox_access_token }}"
+    content: "export DROPBOX_ACCESS_TOKEN={{ dropbox_access_token }}"
     dest: ~/.env/dropbox_access_token
