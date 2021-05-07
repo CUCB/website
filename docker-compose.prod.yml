@@ -39,7 +39,7 @@ services:
     volumes:
       - ${BLOCK_STORAGE}/mail/mail.private:/etc/opendkim/domainkeys/mail.private
   sapper:
-    image: $DEPLOY_REGISTRY/cucb/website:slim
+    image: $DEPLOY_REGISTRY/cucb/sveltekit:slim
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
