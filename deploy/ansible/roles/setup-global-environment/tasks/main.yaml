@@ -12,6 +12,7 @@
     name: "{{ item.name }}"
     value: "{{ item.value }}"
   loop:
+    - { name: CI_COMMIT_BRANCH, value: "{{ ci_commit_branch }}" }
     - { name: DEPLOY_REGISTRY, value: "{{ deploy_registry }}" }
     - { name: DEPLOY_REGISTRY_USER, value: "{{ deploy_registry_user }}" }
     - { name: DEPLOY_REGISTRY_PASSWORD, value: "{{ deploy_registry_password }}" }
