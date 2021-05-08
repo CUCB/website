@@ -30,3 +30,11 @@
     name: BLOCK_STORAGE
     value: "{{ block_storage.files[0].path }}"
   when: block_storage.matched == 1
+
+- name: Create hasura secret variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: HCAPTCHA_SECRET
+    value: "{{ hcaptcha_secret }}"

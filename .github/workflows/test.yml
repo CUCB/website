@@ -252,6 +252,7 @@ jobs:
             --extra-vars ${{ format('deploy_registry_password={0}', secrets.CI_REGISTRY_PASSWORD) }}
             --extra-vars ${{ format('ci_commit_branch={0}', steps.extract_branch.outputs.branch) }}
             --extra-vars ${{ format('dropbox_access_token={0}', secrets.DROPBOX_ACCESS_TOKEN) }}
+            --extra-vars ${{ format('hcaptcha_secret={0}', secrets.HCAPTCHA_SECRET) }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_DEPRECATION_WARNINGS: "false"
