@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export async function post({ body }) {
-  const { name, email, lists, captchaKey } = body;
+  const { name, email, lists, captchaKey } = Object.fromEntries(body.entries());
   const hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
     headers: {
@@ -52,7 +52,7 @@ export async function post({ body }) {
       port: process.env.EMAIL_POSTFIX_PORT,
     });
 
-    client.send(
+    const emailPromise = new Promise((resolve, reject) => client.send(
       {
         from: `CUCB Website <${process.env["EMAIL_SEND_ADDRESS"]}>`,
         to: `CUCB Webmaster <${webmaster.email}>`,
@@ -62,16 +62,22 @@ export async function post({ body }) {
       (err, message) => {
         // TODO process the error and feed back to the client
         if (err) {
-          res.statusCode = 503;
-          res.end(
-            `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
-          );
           console.error(err);
+          reject({
+            status: 503,
+            body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+          })
         } else {
-          res.statusCode = 204;
-          res.end();
+          resolve(null);
         }
       },
-    );
+    ));
+
+    try {
+        await emailPromise;
+        return { status: 204 };
+    } catch(e) {
+        return e;
+    }
   }
 }

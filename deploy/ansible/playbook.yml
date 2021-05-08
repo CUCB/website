@@ -5,40 +5,16 @@
     webmaster_email: webmaster@cucb.co.uk
     docker_compose_files:
       - docker-compose.prod.yml
+    email_domain_name: dev.cucb.co.uk # TODO make this dynamic
   tasks:
-    - name: Install git
-      apt:
-        name: git
-        update_cache: yes
-
-    - name: Copy private key
-      copy:
-        src: "{{ playbook_dir }}/deploy_pull"
-        dest: ~/.ssh/deploy_pull
-        mode: '600'
-
-    - name: Clone the repository
-      git:
-        repo: ssh://git@github.com/cucb/website.git
-        dest: "{{ repo_root }}"
-        accept_hostkey: yes
-        key_file: ~/.ssh/deploy_pull
-        version: "{{ ci_commit_branch }}"
-
-    - name: Make env file
+    - name: Configure and run server
       include_role:
-        name: create-env-file
-
-    - name: Install required dependencies
-      include_role:
-        name: install-dependencies
-      vars:
-        email_domain_name: dev.cucb.co.uk # TODO make this dynamic
-
-    - name: Configure OS 
-      include_role:
-        name: "{{ item }}" 
+        name: "{{ item }}"
       loop:
+        - install-dependencies
+        - setup-global-environment
+        - update-code
+        - create-env-file
         - configure-timezone
         - configure-cron
         - download-documents

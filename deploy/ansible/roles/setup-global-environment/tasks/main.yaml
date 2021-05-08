@@ -1,0 +1,8 @@
+- name: Copy private key
+  copy:
+    src: "{{ playbook_dir }}/deploy_pull"
+    dest: ~/.ssh/deploy_pull
+    mode: "600"
+
+- name: Save docker variables to environment file
+  
