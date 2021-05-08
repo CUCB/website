@@ -2,4 +2,4 @@
 cd /var/www
 #./deploy/backupdb.sh
 #./deploy/backupfiles.sh
-echo "Disabled backup on test server"
+>&2 echo "Disabled backup on test server"
