@@ -5,4 +5,13 @@
     mode: "600"
 
 - name: Save docker variables to environment file
-  
+  include_role:
+    name: create-variable
+  vars:
+    env_file: ~/.ssh/environment
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - { name: DEPLOY_REGISTRY, value: "{{ deploy_registry }}" }
+    - { name: DEPLOY_REGISTRY_USER, value: "{{ deploy_registry_user }}" }
+    - { name: DEPLOY_REGISTRY_PASSWORD, value: "{{ deploy_registry_password }}" }
