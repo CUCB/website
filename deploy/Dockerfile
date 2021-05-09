@@ -13,7 +13,7 @@ RUN npm install --no-audit --unsafe-perm
 COPY src ./src
 # copy static files for service worker to be populated correctly
 COPY static ./static
-COPY *.cjs ./
+COPY *.js ./
 COPY *.json ./
 COPY build.env ./.env
 RUN echo "SESSION_SECRET=somethingreallynotsecret" >> .env
