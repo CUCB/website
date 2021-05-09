@@ -7,7 +7,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export async function post({ body }) {
-  const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(body);
+  const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(
+    body?.entries() || Object.entries(body)
+  );
   let hcaptcha;
   try {
     hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
@@ -124,5 +126,11 @@ export async function post({ body }) {
     } catch (e) {
       return e;
     }
+  } else {
+    console.error("Captcha verification failed: " + captchaKey);
+    return {
+      status: 400,
+      body: `Sorry, we had a problem sending an email. Please email the secretary directly at <a href="mailto:${secretary.email}">${secretary.email}</a>.`,
+    };
   }
 }

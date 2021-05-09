@@ -31,7 +31,7 @@
     value: "{{ block_storage.files[0].path }}"
   when: block_storage.matched == 1
 
-- name: Create hasura secret variable
+- name: Create hcaptcha secret variable
   include_role:
     name: create-variable
   vars:
