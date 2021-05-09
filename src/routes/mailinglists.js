@@ -6,6 +6,14 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export async function post({ body }) {
+    try {
+    return await realpost(body);
+    } catch(e) {
+        console.error(e);
+        return { status: 500, body: "Something went wrong."}
+    }
+}
+async function realpost(body) {
   const { name, email, lists, captchaKey } = Object.fromEntries(body.entries());
   const hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
