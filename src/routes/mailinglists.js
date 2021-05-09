@@ -28,7 +28,9 @@ async function realpost(body) {
   
   let webmasters;
   try {
-    let client = makeClient(fetch);
+    let client = makeClient(fetch, {
+        domain: process.env["GRAPHQL_REMOTE"],
+      });
     const webmasterRes = await client.query({
       query: gql`
         query CurrentSec {

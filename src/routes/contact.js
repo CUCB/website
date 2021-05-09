@@ -8,7 +8,7 @@ dotenv.config();
 
 export async function post({ body }) {
   const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(
-    body?.entries() || Object.entries(body)
+    body?.entries() || Object.entries(body),
   );
   let hcaptcha;
   try {
@@ -30,8 +30,11 @@ export async function post({ body }) {
   if (hcaptcha.success) {
     let secretaries;
     try {
-      let client = makeClient(fetch);
-      const secretaryRes = await client.query(gql`
+      let client = makeClient(fetch, {
+        domain: process.env["GRAPHQL_REMOTE"],
+      });
+      const secretaryRes = await client.query({
+        query: qql`
         query CurrentSec {
           cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
             committee_members(
@@ -43,17 +46,13 @@ export async function post({ body }) {
             }
           }
         }
-      `);
-      secretaries =
-        secretaryRes &&
-        secretaryRes.data &&
-        secretaryRes.data.cucb_committees[0] &&
-        secretaryRes.data.cucb_committees[0].committee_members;
+      `,
+      });
+      secretaries = secretaryRes?.data?.cucb_committees?.[0]?.committee_members;
     } catch {
       // We deal with not found anyway, don't worry about it
     }
-    let secretary = secretaries && secretaries[0];
-    secretary = secretary || {
+    const secretary = secretaries?.[0] || {
       casual_name: "Secretary",
       email: "secretary@cucb.co.uk",
     };
