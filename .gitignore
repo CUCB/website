@@ -10,3 +10,4 @@ yarn-error.log
 .env
 db_restore
 images/*
+.svelte-kit

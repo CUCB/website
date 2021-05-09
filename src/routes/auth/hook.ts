@@ -30,16 +30,16 @@ interface Session {
 
 const RequestableRole = Union(Literal("server"), Literal("current_user"));
 
-export function get({ headers, context }: { headers: Record<string, string>, context: { session: Session } }) {
+export function get({ headers, locals }: { headers: Record<string, string>, locals: { session: Session } }) {
   try {
-    const mainRole = DefaultRole.Or(Undefined).check(context.session.alternativeRole || context.session.hasuraRole);
+    const mainRole = DefaultRole.Or(Undefined).check(locals.session.alternativeRole || locals.session.hasuraRole);
     const requestedRole = DefaultRole.Or(Undefined).Or(RequestableRole).check(headers["x-hasura-role"]) || mainRole;
 
-    if (context.session.userId && ["current_user", mainRole].includes(requestedRole)) {
+    if (locals.session.userId && ["current_user", mainRole].includes(requestedRole)) {
       return {
         status: 200,
         body: {
-          "X-Hasura-User-Id": context.session.userId.toString(),
+          "X-Hasura-User-Id": locals.session.userId.toString(),
           "X-Hasura-Role": requestedRole,
         }
       };

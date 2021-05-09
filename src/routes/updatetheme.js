@@ -1,4 +1,4 @@
-export async function post({ context: { session }, body }) {
+export async function post({ locals: { session }, body }) {
   body = Object.fromEntries(body?.entries());
   session.theme = { ...body };
   await session.save(); // TODO handle errors

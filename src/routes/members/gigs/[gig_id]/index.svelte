@@ -2,6 +2,7 @@
   import { QueryGigDetails, QuerySingleGig, QuerySingleGigSignupSummary } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
+  import { writable } from "svelte/store";
 
   export async function load({ page: { params }, session, fetch }) {
     let { gig_id } = params;
@@ -49,7 +50,7 @@
     return {
       props: {
         gig,
-        signupGig: res_signup.data.cucb_gigs && res_signup.data.cucb_gigs[0],
+        signupGig: writable(res_signup.data.cucb_gigs?.[0]),
         userInstruments: res_signup.data.cucb_users_instruments,
         signupSummary,
       },
@@ -60,9 +61,7 @@
 <script>
   import Summary from "../../../../components/Gigs/Summary.svelte";
   import { makeTitle } from "../../../../view";
-  import { writable } from "svelte/store";
   export let gig, userInstruments, signupGig, signupSummary;
-  let signupGig2 = writable(signupGig);
 </script>
 
 <svelte:head>
@@ -70,4 +69,4 @@
 </svelte:head>
 
 <h1>Gigs</h1>
-<Summary gig="{gig}" signupGig="{signupGig2}" signups="{signupSummary}" userInstruments="{userInstruments}" />
+<Summary gig="{gig}" {signupGig} signups="{signupSummary}" userInstruments="{userInstruments}" />

@@ -69,7 +69,7 @@
       box-shadow: shadow(themed("kitHire"));
     }
   }
-  gig-summary {
+  .gig-summary {
     display: block;
     padding: 1em;
     border-radius: 5px;
@@ -80,17 +80,18 @@
     transition: box-shadow 0.25s;
   }
 
-  task-list {
+  ul.tasks {
     display: flex;
     flex-direction: column;
     margin: 1em 0;
+    list-style-type: none;
   }
 
-  gig-summary > :last-child {
+  .gig-summary > :last-child {
     margin-bottom: 0;
   }
 
-  gig-timings > p {
+  .gig-timings > p {
     margin: 0.25em 0;
   }
 
@@ -103,14 +104,14 @@
     justify-self: flex-start;
   }
 
-  admin-notes,
-  band-notes {
+  .admin-notes,
+  .band-notes {
     white-space: pre-wrap;
     display: block;
     margin: 1em 0;
   }
 
-  summary-text {
+  .summary-text {
     display: block;
     margin: 1em 0;
   }
@@ -127,15 +128,15 @@
     margin-top: 1em;
   }
 
-  gig-finance {
+  .gig-finance {
     font-style: italic;
   }
 
-  gig-finance b {
+  .gig-finance b {
     font-style: normal;
   }
 
-  gig-icons {
+  .gig-icons {
     margin-right: -0.3em;
   }
 
@@ -180,15 +181,15 @@
     display: none;
   }
 
-  .gigtype-calendar task-list {
+  .gigtype-calendar ul.tasks {
     display: none;
   }
 
-  .gigtype-kit task-list .caller {
+  .gigtype-kit ul.tasks .caller {
     display: none;
   }
 
-  :global(gig-icons > *) {
+  .gig-icons :global(*) {
     margin: 0 0.3em;
   }
 
@@ -211,8 +212,8 @@
       Show signup
     </button>
   {/if}
-  <gig-summary
-    class="gigtype-{gig.type.code} theme-{$themeName}"
+  <div
+    class="gig-summary gigtype-{gig.type.code} theme-{$themeName}"
     class:details-visible="{showDetails}"
     class:permit-fade="{linkHeading}"
     class:admins-only="{gig.admins_only}"
@@ -223,17 +224,23 @@
         <span> <a href="/members/gigs/{gig.id}">{gig.title}</a> </span>
         <!-- span for correct multiline underlining -->
       {:else}{gig.title}{/if}
-      <gig-icons>
+      <div class="gig-icons">
         {#if gig.food_provided}
-          <TooltipText content="Food provided"><i class="las la-utensils" data-test="icon-food-provided"></i></TooltipText>
+          <TooltipText content="Food provided"
+            ><i class="las la-utensils" data-test="icon-food-provided"></i></TooltipText
+          >
         {/if}
         {#if gig.admins_only}
-          <TooltipText content="Hidden from normal users"><i class="las la-eye-slash" data-test="icon-admins-only"></i></TooltipText>
+          <TooltipText content="Hidden from normal users"
+            ><i class="las la-eye-slash" data-test="icon-admins-only"></i></TooltipText
+          >
         {/if}
-        {#if gig.type.code === 'calendar'}
-          <TooltipText content="Calendar event"><i class="las la-calendar" data-test="icon-calendar-event"></i></TooltipText>
+        {#if gig.type.code === "calendar"}
+          <TooltipText content="Calendar event"
+            ><i class="las la-calendar" data-test="icon-calendar-event"></i></TooltipText
+          >
         {/if}
-      </gig-icons>
+      </div>
     </h2>
     {#if gig.venue}
       <h3 class="main-detail">
@@ -243,26 +250,26 @@
         </a>
       </h3>
     {/if}
-    {#if displayLinks && ['webmaster', 'president', 'secretary', 'treasurer', 'gig_editor'].indexOf($session.hasuraRole) > -1}
+    {#if displayLinks && ["webmaster", "president", "secretary", "treasurer", "gig_editor"].indexOf($session.hasuraRole) > -1}
       <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
     {/if}
-    {#if displayLinks && ['webmaster', 'president'].indexOf($session.hasuraRole) > -1 && gig.type.code === "gig"}
+    {#if displayLinks && ["webmaster", "president"].indexOf($session.hasuraRole) > -1 && gig.type.code === "gig"}
       <a href="/members/gigs/{gig.id}/edit-lineup" class="main-detail">Edit lineup</a>
     {/if}
-    {#if gig.type.code !== 'calendar' && gig.date}
+    {#if gig.type.code !== "calendar" && gig.date}
       <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
     {/if}
     {#if gig.allow_signups && signups}
-      <SignupSummary {signups} />
+      <SignupSummary signups="{signups}" />
     {/if}
-    <gig-timings>
+    <div class="gig-timings">
       {#if gig.date}
         {#if gig.arrive_time}
           <p>
             <b>Arrive time:&nbsp;</b>
-            {#if date && arrive_time.hasSame(date, 'day')}
+            {#if date && arrive_time.hasSame(date, "day")}
               {@html formatTimeOnly(arrive_time)}
-            {:else if !date && finish_time && arrive_time.hasSame(finish_time, 'day')}
+            {:else if !date && finish_time && arrive_time.hasSame(finish_time, "day")}
               {@html formatTimeOnly(arrive_time)}
             {:else}
               {@html formatTimeWithDate(arrive_time)}
@@ -270,7 +277,7 @@
           </p>
         {/if}
         {#if gig.time}
-          <p><b>Start time:&nbsp;</b> {DateTime.fromISO(`2020-01-01T${gig.time}`).toFormat('HH:mm')}</p>
+          <p><b>Start time:&nbsp;</b> {DateTime.fromISO(`2020-01-01T${gig.time}`).toFormat("HH:mm")}</p>
         {/if}
         {#if finish_time}
           <p>
@@ -293,61 +300,67 @@
       {:else if gig.arrive_time}
         <p>{formatCalendarDate(DateTime.fromISO(gig.arrive_time))}</p>
       {/if}
-    </gig-timings>
-    <task-list class="main-detail">
-      {#if gig.finance_deposit_received !== undefined && gig.finance_deposit_received !== null}
-        {#if gig.finance_deposit_received}
-          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Deposit received</task-summary>
-        {:else}
-          <task-summary class="color-negative"><i class="las la-exclamation"></i> Deposit not received</task-summary>
+    </div>
+    <ul class="tasks main-detail">
+      <li>
+        {#if gig.finance_deposit_received !== undefined && gig.finance_deposit_received !== null}
+          {#if gig.finance_deposit_received}
+            <div class="task-summary color-positive"><i class="las la-money-bill-wave"></i> Deposit received</div>
+          {:else}
+            <div class="task-summary color-negative"><i class="las la-exclamation"></i> Deposit not received</div>
+          {/if}
         {/if}
-      {/if}
-      {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
-        {#if gig.finance_payment_received}
-          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Payment received</task-summary>
-        {:else}
-          <task-summary class="color-negative"><i class="las la-exclamation"></i> Payment not received</task-summary>
+      </li>
+      <li>
+        {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
+          {#if gig.finance_payment_received}
+            <div class="task-summary color-positive"><i class="las la-money-bill-wave"></i> Payment received</div>
+          {:else}
+            <div class="task-summary color-negative"><i class="las la-exclamation"></i> Payment not received</div>
+          {/if}
         {/if}
-      {/if}
-      {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
-        {#if gig.finance_caller_paid}
-          <task-summary class="color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</task-summary>
-        {:else}
-          <task-summary class="color-negative caller"><i class="las la-exclamation"></i> Caller not paid</task-summary>
+      </li>
+      <li>
+        {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
+          {#if gig.finance_caller_paid}
+            <div class="task-summary color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</div>
+          {:else}
+            <div class="task-summary color-negative caller"><i class="las la-exclamation"></i> Caller not paid</div>
+          {/if}
         {/if}
-      {/if}
-    </task-list>
+      </li>
+    </ul>
     {#if gig.summary}
-      <summary-text>
+      <div class="summary-text">
         {#if gig.advertise}<b>Public advert:&nbsp;</b>{:else}<b>Summary:&nbsp;</b>{/if}
         <blockquote>
           {@html gig.summary
-            .split('\n')
+            .split("\n")
             .map((p) => p.trim())
             .filter((p) => p.length)
             .map((p) => `<p>${p}</p>`)
-            .join('')}
+            .join("")}
         </blockquote>
-      </summary-text>
+      </div>
     {/if}
     {#if gig.notes_band}
-      <band-notes>
+      <div class="band-notes">
         <b>Band notes:&nbsp;</b>
         <blockquote>
           {@html gig.notes_band.trim()}
         </blockquote>
-      </band-notes>
+      </div>
     {/if}
     {#if gig.notes_admin}
-      <admin-notes class="main-detail">
+      <div class="admin-notes main-detail">
         <b>Admin notes:&nbsp;</b>
         {@html gig.notes_admin.trim()}
-      </admin-notes>
+      </div>
     {/if}
     {#if gig.finance}
-      <gig-finance class="main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</gig-finance>
+      <div class="gig-finance main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</div>
     {/if}
-    {#if gig.gig_type === 'gig_enquiry'}Quote date: {gig.quote_date}{/if}
+    {#if gig.gig_type === "gig_enquiry"}Quote date: {gig.quote_date}{/if}
     {#if clients.length > 0}
       <p>
         <b>
@@ -372,12 +385,12 @@
     {#if gig.lineup.length > 0}
       <Lineup people="{gig.lineup}" />
     {/if}
-    {#if gig.type.code === 'gig_cancelled' && linkHeading}
+    {#if gig.type.code === "gig_cancelled" && linkHeading}
       <button class="cancelled-detail main-detail" on:click="{() => (showDetails = !showDetails)}">
         {#if !showDetails}Show full details{:else}Hide full details{/if}
       </button>
     {/if}
-  </gig-summary>
+  </div>
 {:else}
   <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
     Show summary
