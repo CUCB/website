@@ -1,8 +1,8 @@
-import { makeClient } from "../graphql/client";
 import { SMTPClient } from "emailjs";
 import fetch from "node-fetch";
 import gql from "graphql-tag";
 import dotenv from "dotenv";
+import { makeGraphqlClient } from "../auth";
 dotenv.config();
 
 export async function post({ body }) {
@@ -25,19 +25,17 @@ async function realpost(body) {
     },
     body: `response=${captchaKey}&secret=${process.env["HCAPTCHA_SECRET"]}`,
   }).then((res) => res.json());
-  
+
   let webmasters;
   try {
-    let client = makeClient(fetch, {
-        domain: process.env["GRAPHQL_REMOTE"],
-      });
+    let client = makeGraphqlClient();
     const webmasterRes = await client.query({
       query: gql`
         query CurrentSec {
           cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
             committee_members(
               order_by: { committee_position: { position: asc }, name: asc }
-              where: { committee_key: { _eq: "webmaster" } }
+              where: { committee_key: { name: { _eq: "webmaster" } } }
             ) {
               casual_name
               email
@@ -50,6 +48,7 @@ async function realpost(body) {
   } catch (e) {
     // We deal with not found anyway, don't worry about it
     console.error("Couldn't retrieve webmaster's email address: " + e);
+    console.error(e);
   }
   const webmaster = webmasters?.[0] || {
     casual_name: "Webmaster",
@@ -72,8 +71,6 @@ async function realpost(body) {
         body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
       };
     }
-    console.log("made smtpclient");
-    console.log(client);
 
     const emailPromise = new Promise((resolve, reject) =>
       client.send(

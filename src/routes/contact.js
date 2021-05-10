@@ -1,4 +1,4 @@
-import { makeClient } from "../graphql/client";
+import { makeGraphqlClient } from "../auth";
 import { SMTPClient } from "emailjs";
 import escapeHtml from "escape-html";
 import fetch from "node-fetch";
@@ -30,27 +30,27 @@ export async function post({ body }) {
   if (hcaptcha.success) {
     let secretaries;
     try {
-      let client = makeClient(fetch, {
-        domain: process.env["GRAPHQL_REMOTE"],
-      });
+      let client = makeGraphqlClient();
       const secretaryRes = await client.query({
-        query: qql`
-        query CurrentSec {
-          cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
-            committee_members(
-              order_by: { committee_position: { position: asc }, name: asc }
-              where: { committee_key: { _eq: "secretary" } }
-            ) {
-              casual_name
-              email
+        query: gql`
+          query CurrentSec {
+            cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
+              committee_members(
+                order_by: { committee_position: { position: asc }, name: asc }
+                where: { committee_key: { name: { _eq: "secretary" } } }
+              ) {
+                casual_name
+                email
+              }
             }
           }
-        }
-      `,
+        `,
       });
       secretaries = secretaryRes?.data?.cucb_committees?.[0]?.committee_members;
-    } catch {
+    } catch (e) {
       // We deal with not found anyway, don't worry about it
+      console.error("Failed to find secretary email");
+      console.error(e);
     }
     const secretary = secretaries?.[0] || {
       casual_name: "Secretary",
