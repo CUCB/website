@@ -93,9 +93,9 @@ jobs:
 
   build:
     if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/ansible-deployment'}}
-    # needs:
-    #   - test
-    #   - svelte-check
+    needs:
+      - test
+      - svelte-check
     name: Build and push docker image for deploy
     runs-on: ubuntu-latest
     steps:
