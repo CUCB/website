@@ -7,11 +7,10 @@ dotenv.config();
 
 export async function post({ body }) {
   try {
-    console.log(body);
     const res = await realpost(body);
-    console.log(res);
     return { status: 500, body: "Something else went wrong", ...res };
   } catch (e) {
+    console.error("Unhandled exception in POST /mailinglists");
     console.error(e);
     return { status: 500, body: "Something went wrong." };
   }
@@ -85,6 +84,7 @@ async function realpost(body) {
         (err, message) => {
           // TODO process the error and feed back to the client
           if (err) {
+            console.error("Error sending mailing list email");
             console.error(err);
             reject({
               status: 503,

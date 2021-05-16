@@ -8,6 +8,7 @@
       - python3-pip
       - cronic
       - git
+      - cockpit
     update_cache: yes
 
 - debconf:
