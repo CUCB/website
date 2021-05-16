@@ -37,8 +37,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      # because of "record" and "parallel" parameters
-      # these containers will load balance all found tests among themselves
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
@@ -48,8 +46,6 @@ jobs:
           start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
           wait-on: "http://localhost:4000"
           wait-on-timeout: 240
-          # the entire command will automatically be prefixed with "npm"
-          # and we need the second "npm" to execute "cypress run ..." command line
           command-prefix: "percy exec -- npx"
         env:
           # pass the Dashboard record key as an environment variable
@@ -73,24 +69,6 @@ jobs:
             cypress/videos/**/*.mp4
             cypress/screenshots/**/*.png
 
-  pulumi-preview:
-    if: ${{ github.ref!='refs/heads/master' && github.ref!='refs/heads/feature/ansible-deployment'}}
-    name: Preview infrastructure updates
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Install Pulumi CLI
-        uses: pulumi/action-install-pulumi-cli@v1.0.1
-      - run: cd deploy/pulumi && npm install
-      - uses: pulumi/actions@v3
-        with:
-          command: preview
-          stack-name: prod
-          work-dir: deploy/pulumi
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-
   build:
     if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/ansible-deployment'}}
     needs:
@@ -109,12 +87,32 @@ jobs:
         run: |
           echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
           docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
-          docker build -t $CI_REGISTRY/cucb/sveltekit:slim -f deploy/Dockerfile .
+          docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
 
       - name: Push image to registry
-        run: docker push $CI_REGISTRY/cucb/sveltekit:slim
+        run: docker push $CI_REGISTRY/cucb/$IMAGE_NAME:slim
+    env:
+      IMAGE_NAME: sveltekit
+
+  pulumi-preview:
+    if: ${{ github.ref!='refs/heads/master' && github.ref!='refs/heads/feature/ansible-deployment'}}
+    name: Preview infrastructure updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Install Pulumi CLI
+        uses: pulumi/action-install-pulumi-cli@v1.0.1
+      - run: cd deploy/pulumi && npm install
+      - uses: pulumi/actions@v3
+        with:
+          command: preview
+          stack-name: prod
+          work-dir: deploy/pulumi
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   pulumi:
     name: Create/update infrastructure
