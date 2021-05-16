@@ -21,11 +21,21 @@
     "docker:test": "docker-compose -f docker-compose.test.yml up --exit-code-from cypress",
     "hasura:console": "cd hasura && hasura console --endpoint \"http://localhost:8080\" --admin-secret myadminsecretkey",
     "watch:dev": "npm-watch dev",
+    "watch:build": "npm-watch build_start",
+    "build_start2": "svelte-kit dev --host 0.0.0.0",
+    "build_start": "svelte-kit build; node ./build",
     "svelte-check": "svelte-check",
     "prepare": "husky install"
   },
   "watch": {
     "dev": {
+      "patterns": [
+        "tsconfig.json",
+        "rollup.config.js",
+        "package.json"
+      ]
+    },
+    "build_start": {
       "patterns": [
         "tsconfig.json",
         "rollup.config.js",
@@ -46,6 +56,7 @@
     "graphql": "^15.5.0",
     "graphql-tag": "^2.12.4",
     "http-proxy": "^1.18.1",
+    "husky": "^6.0.0",
     "immutable": "^4.0.0-rc.12",
     "jsonwebtoken": "^8.5.1",
     "luxon": "^1.26.0",
@@ -79,7 +90,6 @@
     "cypress": "^7.2.0",
     "cypress-pipe": "^2.0.0",
     "hasura-cli": "^1.3.3",
-    "husky": "^6.0.0",
     "mdsvex": "^0.9.3",
     "node-wait-for-it": "^0.2.0",
     "npm-run-all": "^4.1.5",
