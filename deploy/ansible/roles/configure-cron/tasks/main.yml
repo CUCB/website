@@ -6,8 +6,8 @@
 - name: "Cron job: Backup each night"
   cron:
     name: Nightly backup
-    minute: '0'
-    hour: '1'
+    minute: "0"
+    hour: "1"
     job: "cd {{ repo_root }} && cronic ./deploy/backup.sh"
 
 - name: "Cron job: Start server on reboot"
@@ -15,9 +15,3 @@
     name: Start server on reboot
     special_time: reboot
     job: "cd {{ repo_root }} && cronic ./deploy/start.sh"
-
-
-# echo -e "MAILTO=webmaster@cucb.co.uk
-# 0 1 * * * cd /var/www/ && cronic ./deploy/backup.sh
-# @reboot cd /var/www && cronic ./deploy/start.sh" > /var/spool/cron/root
-# crontab /var/spool/cron/root

@@ -13,7 +13,7 @@ if (!SESSION_SECRET) {
 }
 
 /** @type {import('@sveltejs/kit').Handle} */
-export async function handle({ request, render }) {
+export async function handle({ request, resolve }) {
   const cookies = cookie.parse(request.headers.cookie || "");
   let session = undefined;
   let sessionId = false;
@@ -54,7 +54,7 @@ export async function handle({ request, render }) {
   }
 
   request.locals = await sessionFromHeaders(request.headers);
-  const response = await render(request);
+  const response = await resolve(request);
   if (setCookie) {
     response.headers = { ...response.headers, "set-cookie": setCookie };
   }

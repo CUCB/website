@@ -1,7 +1,7 @@
 <script lang="ts">
   import { themeName } from "../../view";
   export let value: any,
-    select: HTMLSelectElement | undefined = undefined,
+    select: HTMLSelectElement,
     disabled: boolean = false;
 </script>
 

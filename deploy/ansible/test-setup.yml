@@ -1,0 +1,27 @@
+- hosts: localhost
+  become: "yes"
+  vars:
+    repo_root: /tmp/www
+    docker_compose_files:
+      - docker-compose.prod.yml
+  tasks:
+    - name: Create directory
+      file:
+        path: "{{ repo_root }}"
+        state: directory
+
+    - name: Create fake block storage
+      file:
+        path: /mnt/website_block_001
+        state: directory
+
+    - name: Make env file
+      include_role:
+        name: "{{ item }}"
+      loop:
+        - create-env-file
+        - download-documents
+
+    - name: Install backup script dependencies
+      community.general.npm:
+        path: "{{ repo_root }}/deploy/js"
