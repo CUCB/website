@@ -133,6 +133,7 @@ describe("members' home page", () => {
       cy.get(".theme-dark").should("exist");
       cy.get(".theme-light").should("not.exist");
       cy.get("[data-test=icon-close]").click();
+      cy.get("[data-test=icon-close]").should("not.exist");
 
       cy.reload();
       cy.waitForFormInteractive();
@@ -215,7 +216,7 @@ describe("members' home page", () => {
 
       cy.get("[data-test=check-spinny-logo]").check();
       cy.get("[data-test=select-calendar-day] [data-test=select-box]").select("Tuesday");
-      cy.get('[data-test=confirm-calendar-day]').click();
+      cy.get("[data-test=confirm-calendar-day]").click();
       cy.get("[data-test=icon-close]").click();
 
       cy.get("[data-test=settings-cog]").click();
@@ -228,7 +229,7 @@ describe("members' home page", () => {
       cy.get("nav a").should("have.color", ACCENT_DARK);
       // I have no idea why Cypress thinks there are multiple close buttons
       // It seems to work this way so probably is fine unless someone discovers
-      // it's an actual bug. My own (very brief) manual testing of this seems to 
+      // it's an actual bug. My own (very brief) manual testing of this seems to
       // suggest it's fine and there isn't a problem with it.
       cy.get("[data-test=icon-close]").first().click();
 
@@ -248,7 +249,7 @@ describe("members' home page", () => {
       cy.get("[data-test=select-theme] [data-test=select-box]").select("default");
       cy.get("[data-test=select-calendar-day] [data-test=select-box] option:selected").should("have.text", "Tuesday");
       cy.get("[data-test=confirm-theme]").click();
-      cy.get("[data-test=icon-close]").click()
+      cy.get("[data-test=icon-close]").click();
 
       cy.get("nav a").should("have.color", ACCENT_LIGHT);
       cy.get("[data-test=logo] path").should("have.stroke", LOGO);
