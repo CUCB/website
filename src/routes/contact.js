@@ -1,4 +1,4 @@
-import { makeClient } from "../graphql/client";
+import { makeGraphqlClient } from "../auth";
 import { SMTPClient } from "emailjs";
 import escapeHtml from "escape-html";
 import fetch from "node-fetch";
@@ -7,7 +7,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export async function post({ body }) {
-  const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(body);
+  const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(
+    body?.entries() || Object.entries(body),
+  );
   let hcaptcha;
   try {
     hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
@@ -28,30 +30,29 @@ export async function post({ body }) {
   if (hcaptcha.success) {
     let secretaries;
     try {
-      let client = makeClient(fetch);
-      const secretaryRes = await client.query(gql`
-        query CurrentSec {
-          cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
-            committee_members(
-              order_by: { committee_position: { position: asc }, name: asc }
-              where: { committee_key: { _eq: "secretary" } }
-            ) {
-              casual_name
-              email
+      let client = makeGraphqlClient();
+      const secretaryRes = await client.query({
+        query: gql`
+          query CurrentSec {
+            cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
+              committee_members(
+                order_by: { committee_position: { position: asc }, name: asc }
+                where: { committee_key: { name: { _eq: "secretary" } } }
+              ) {
+                casual_name
+                email
+              }
             }
           }
-        }
-      `);
-      secretaries =
-        secretaryRes &&
-        secretaryRes.data &&
-        secretaryRes.data.cucb_committees[0] &&
-        secretaryRes.data.cucb_committees[0].committee_members;
-    } catch {
+        `,
+      });
+      secretaries = secretaryRes?.data?.cucb_committees?.[0]?.committee_members;
+    } catch (e) {
       // We deal with not found anyway, don't worry about it
+      console.error("Failed to find secretary email");
+      console.error(e);
     }
-    let secretary = secretaries && secretaries[0];
-    secretary = secretary || {
+    const secretary = secretaries?.[0] || {
       casual_name: "Secretary",
       email: "secretary@cucb.co.uk",
     };
@@ -124,5 +125,11 @@ export async function post({ body }) {
     } catch (e) {
       return e;
     }
+  } else {
+    console.error("Captcha verification failed: " + captchaKey);
+    return {
+      status: 400,
+      body: `Sorry, we had a problem sending an email. Please email the secretary directly at <a href="mailto:${secretary.email}">${secretary.email}</a>.`,
+    };
   }
 }

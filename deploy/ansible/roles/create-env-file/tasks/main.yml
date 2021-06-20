@@ -1,0 +1,40 @@
+- name: Generate secrets
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: "{{ item }}"
+    value: "{{ lookup('password', '/dev/null length=40') }}"
+  loop:
+    - PG_PASSWORD
+    - SESSION_SECRET
+    - HASURA_GRAPHQL_ADMIN_SECRET
+
+- name: Lookup block storage directory
+  find:
+    paths: ["/mnt"]
+    patterns: "website_*"
+    file_type: directory
+  register: block_storage
+
+- name: Fail if block storage could not be identified
+  fail:
+    msg: Block storage location could not be identified
+  when: block_storage.matched != 1
+
+- name: Create block storage variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: BLOCK_STORAGE
+    value: "{{ block_storage.files[0].path }}"
+  when: block_storage.matched == 1
+
+- name: Create hcaptcha secret variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: HCAPTCHA_SECRET
+    value: "{{ hcaptcha_secret }}"

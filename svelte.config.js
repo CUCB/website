@@ -1,17 +1,18 @@
-const sveltePreprocess = require("svelte-preprocess");
-const node = require("@sveltejs/adapter-node");
-const { mdsvex } = require("mdsvex");
+import sveltePreprocess from "svelte-preprocess";
+import node from "@sveltejs/adapter-node";
+import { mdsvex } from "mdsvex";
+import autoprefixer from "autoprefixer";
 const preprocessors = sveltePreprocess({
   scss: {
     includePaths: ["src"],
   },
   postcss: {
-    plugins: [require("autoprefixer")],
+    plugins: [autoprefixer],
   },
 });
 
 /** @type {import('@sveltejs/kit').Config} */
-module.exports = {
+export default {
   // Consult https://github.com/sveltejs/svelte-preprocess
   // for more information about preprocessors
   preprocess: [mdsvex(), preprocessors],

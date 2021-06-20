@@ -37,7 +37,6 @@
       : { ...userInstr, chosen: false, approved: false },
   );
 
-
   // @ts-ignore
   $userNotes || (gig.lineup.length && ($userNotes = gig.lineup[0].user.gig_notes));
   userNotes.subscribe(
@@ -178,21 +177,21 @@
   const instrumentTooltip = (_) => {
     tippy(".disabled", { content: "This instrument is selected as part of a lineup, you can't remove it." });
   };
-
 </script>
 
 <style lang="scss">
   @import "../../sass/themes.scss";
 
-  status-icons {
+  .statuses {
     display: flex;
     justify-content: space-around;
     user-select: none;
     max-width: 450px;
     margin-top: 1.5em;
+    border: none;
   }
 
-  status-icons :global(.annotated-icon) {
+  .statuses :global(.annotated-icon) {
     max-width: 100px;
   }
 
@@ -216,7 +215,7 @@
     padding-left: 5px;
   }
 
-  gig-signup {
+  .gig-signup {
     display: block;
     padding: 1em;
     margin-bottom: 2em;
@@ -227,24 +226,24 @@
   }
 
   @media only screen and (max-width: 400px) {
-    status-icons {
+    .statuses {
       flex-direction: column;
       justify-content: flex-start;
       align-items: stretch;
     }
 
-    status-icons :global(.annotated-icon) {
+    .statuses :global(.annotated-icon) {
       max-width: 100%;
       height: 34px;
       margin-bottom: 0.75em;
     }
 
-    status-icons :global(.annotated-icon div) {
+    .statuses :global(.annotated-icon div) {
       display: flex;
       align-items: center;
     }
 
-    status-icons :global(.annotated-icon i) {
+    .statuses :global(.annotated-icon i) {
       margin-right: 10px;
     }
   }
@@ -261,13 +260,13 @@
   }
 </style>
 
-<gig-signup data-test="gig-signup-{gig.id}" class="theme-{$themeName}">
+<div data-test="gig-signup-{gig.id}" class="gig-signup theme-{$themeName}">
   <h3>
     {#if showLink}<a href="/members/gigs/{gig.id}">{gig.title}</a>{:else}{gig.title}{/if}
     {#if date}
       <small>
         &nbsp;on
-        {date.toFormat('cccc d') + suffix(date.day) + date.toFormat(' LLLL yyyy')}
+        {date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy")}
       </small>
     {/if}
   </h3>
@@ -279,7 +278,7 @@
       </a>
     </h4>
   {/if}
-  <status-icons role="radiogroup">
+  <fieldset role="radiogroup" class="statuses">
     <AnnotatedIcon
       icon="check"
       color="{status === statuses.YES ? 'var(--positive)' : 'var(--unselected)'}"
@@ -313,11 +312,12 @@
     >
       I am unavailable
     </AnnotatedIcon>
-  </status-icons>
+  </fieldset>
   {#if status === statuses.YES || status === statuses.MAYBE}
-    <user-instruments>
+    <div>
       {#if edit}
-        <span class="notes">Instruments</span>
+        <fieldset>
+        <legend class="notes">Instruments</legend>
         {#each userInstruments as userInstrument (userInstrument.id)}
           <label
             class="checkbox"
@@ -335,6 +335,7 @@
             .
           </p>
         {/each}
+        </fieldset>
       {:else}
         <p>Signed up with:</p>
         <ul data-test="{`gig-${gig.id}-signup-instruments-selected`}">
@@ -347,23 +348,26 @@
           {/each}
         </ul>
       {/if}
-    </user-instruments>
-    <user-notes>
-      {#if edit}
+    </div>
+    {#if edit}
+      <fieldset>
+        <legend>Notes</legend>
         <label class="notes"> Notes for this gig <textarea bind:value="{gig.lineup[0].user_notes}"></textarea> </label>
         <label class="notes"> General notes <textarea bind:value="{gig.lineup[0].user.gig_notes}"></textarea> </label>
-        <br />
-      {:else if gig.lineup[0].user_notes || $userNotes}
+      </fieldset>
+      <br />
+    {:else if gig.lineup[0].user_notes || $userNotes}
+      <div class="user-notes">
         <p>
           <TooltipText content="Notes specific to this particular gig">Notes for this gig:</TooltipText>
         </p>
-        <blockquote>{gig.lineup[0].user_notes || 'None'}</blockquote>
+        <blockquote>{gig.lineup[0].user_notes || "None"}</blockquote>
         <p>
           <TooltipText content="Persistent notes for all gigs you are signed up to">General notes:</TooltipText>
         </p>
-        <blockquote>{$userNotes || 'None'}</blockquote>
-      {/if}
-    </user-notes>
+        <blockquote>{$userNotes || "None"}</blockquote>
+      </div>
+    {/if}
     {#if edit}
       <button on:click="{saveEdits}" data-test="{`gig-${gig.id}-signup-save`}">
         Save
@@ -381,4 +385,4 @@
       </button>
     {/if}
   {/if}
-</gig-signup>
+</div>

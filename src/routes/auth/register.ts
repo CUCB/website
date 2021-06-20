@@ -49,12 +49,12 @@ export async function post(req: PostRequest) {
         if (passwordIsValid(password)) {
           const loginResult = await createAccount({ firstName, lastName, username, email, password });
 
-          req.context.session.userId = loginResult.id.toString();
-          req.context.session.hasuraRole = loginResult.admin_type.hasura_role;
-          req.context.session.firstName = loginResult.first;
-          req.context.session.lastName = loginResult.last;
-          let headers = await req.context.session.save();
-          return { status: 200, body: req.context.session.userId, headers };
+          req.locals.session.userId = loginResult.id.toString();
+          req.locals.session.hasuraRole = loginResult.admin_type.hasura_role;
+          req.locals.session.firstName = loginResult.first;
+          req.locals.session.lastName = loginResult.last;
+          let headers = await req.locals.session.save();
+          return { status: 200, body: req.locals.session.userId, headers };
         } else {
           return { status: 400, body: "Password must be at least 8 characters long" };
         }

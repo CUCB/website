@@ -13,7 +13,7 @@ if (!SESSION_SECRET) {
 }
 
 /** @type {import('@sveltejs/kit').Handle} */
-export async function handle({ request, render }) {
+export async function handle({ request, resolve }) {
   const cookies = cookie.parse(request.headers.cookie || "");
   let session = undefined;
   let sessionId = false;
@@ -53,7 +53,8 @@ export async function handle({ request, render }) {
     return { status: response.status, body, headers: response.headers };
   }
 
-  const response = await render(request);
+  request.locals = await sessionFromHeaders(request.headers);
+  const response = await resolve(request);
   if (setCookie) {
     response.headers = { ...response.headers, "set-cookie": setCookie };
   }
@@ -61,7 +62,7 @@ export async function handle({ request, render }) {
   return response;
 }
 
-export async function getContext({ headers }) {
+async function sessionFromHeaders(headers) {
   const cookies = cookie.parse(headers.cookie || "");
   let session = undefined;
   let sessionId = false;
@@ -139,7 +140,7 @@ export async function getContext({ headers }) {
             });
             return { "set-cookie": setCookie };
           } catch (e) {
-            console.error(e);
+            // console.error(e);
             throw e;
           }
         } else {
@@ -173,7 +174,7 @@ export async function getContext({ headers }) {
               },
             });
           } catch (e) {
-            console.error(e);
+            // console.error(e);
             throw e;
           }
           return {};
@@ -211,6 +212,6 @@ export async function getContext({ headers }) {
   };
 }
 
-export async function getSession({ context }) {
-  return { ...context.session, save: undefined, destroy: undefined };
+export async function getSession({ locals }) {
+  return { ...locals.session, save: undefined, destroy: undefined };
 }

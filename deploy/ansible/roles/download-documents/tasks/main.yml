@@ -1,0 +1,34 @@
+- name: Install unzip package
+  apt:
+    name: unzip
+    update_cache: yes
+
+- name: Download standard document archive from Dropbox
+  uri:
+    url: "https://content.dropboxapi.com/2/files/download"
+    headers:
+      Authorization: "Bearer {{ dropbox_access_token }}"
+      Dropbox-API-Arg: '{"path":"/standard-documents.zip"}'
+    method: POST
+    dest: "{{ repo_root }}/standard-documents.zip"
+
+- name: Create docs directory
+  file:
+    path: "{{ repo_root }}/docs"
+    state: directory
+
+- name: Unzip standard document archive
+  unarchive:
+    src: "{{ repo_root }}/standard-documents.zip"
+    dest: "{{ repo_root }}/docs"
+    remote_src: yes
+
+- name: Ensure ~/.env directory exists
+  file:
+    path: ~/.env
+    state: directory
+
+- name: Store dropbox token
+  copy:
+    content: "export DROPBOX_ACCESS_TOKEN={{ dropbox_access_token }}"
+    dest: ~/.env/dropbox_access_token

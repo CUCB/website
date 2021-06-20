@@ -16,12 +16,12 @@ export async function post(req: Request<{session: Session}>) {
     try {
       const loginResult = await login(body);
 
-      req.context.session.userId = loginResult.user_id.toString();
-      req.context.session.hasuraRole = loginResult.admin_type.hasura_role;
-      req.context.session.firstName = loginResult.first;
-      req.context.session.lastName = loginResult.last;
-      let setCookie = await req.context.session.save();
-      return { status: 200, body: req.context.session.userId, headers: setCookie };
+      req.locals.session.userId = loginResult.user_id.toString();
+      req.locals.session.hasuraRole = loginResult.admin_type.hasura_role;
+      req.locals.session.firstName = loginResult.first;
+      req.locals.session.lastName = loginResult.last;
+      let setCookie = await req.locals.session.save();
+      return { status: 200, body: req.locals.session.userId, headers: setCookie };
     } catch (e) {
       return { status: e.status, body: e.message };
     }

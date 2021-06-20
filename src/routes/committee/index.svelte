@@ -21,7 +21,7 @@
 </script>
 
 <style>
-  cucb-committee {
+  div {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
@@ -38,8 +38,8 @@
   <a href="/committee/previous">clicking here</a>.)
 </p>
 
-<cucb-committee>
+<div>
   {#each committee as person}
     <Person {person} {aprilFools} showEmail={true} />
   {/each}
-</cucb-committee>
+</div>

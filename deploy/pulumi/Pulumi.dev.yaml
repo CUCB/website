@@ -1,0 +1,6 @@
+config:
+  cloudflare:apiKey:
+    secure: AAABAHhOAxDS3durNIbe1u/4NFwqPG6veNRy0vwDrKFGWLtvHVwcIhDN9+Zo+aXOhhsti0U8AA6wCfEve7KYS/GGUwMv
+  cloudflare:email: webmaster@cucb.co.uk
+  digitalocean:token:
+    secure: AAABADI6pwec1X+puPfHuSe/zj/mFG2CpmHoR5xxJVhKcYVmXI37j+b5rFnnSXmDPjPXoFzqIu3Fs8ImPhWxXlZ71+NgAQXa0r0VJUJCv2Dy4SqgCWNtwuzQgv7wjMvO
