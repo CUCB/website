@@ -6,16 +6,12 @@ const fs = require("fs");
 
 const stack = pulumi.getStack();
 
-const _default = new digitalocean.SshKey("gitlab-ci", {
+const _default = new digitalocean.SshKey("ci-bootstrap", {
   publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
 });
 
-function postfix(name) {
-  return stack === "prod" ? name : `${name}-${stack}`;
-}
-
 // A droplet to host the site
-const web = new digitalocean.Droplet(postfix("website"), {
+const web = new digitalocean.Droplet("website", {
   image: "ubuntu-20-04-x64",
   region: "lon1",
   size: "s-1vcpu-1gb",
@@ -25,7 +21,7 @@ const web = new digitalocean.Droplet(postfix("website"), {
 });
 
 // Block storage for a first tier backup (in addition to dropbox)
-const webBlock = new digitalocean.Volume(postfix("website-block"), {
+const webBlock = new digitalocean.Volume("website-block", {
   region: "lon1",
   size: 5,
   initialFilesystemType: "ext4",
@@ -33,15 +29,16 @@ const webBlock = new digitalocean.Volume(postfix("website-block"), {
 });
 
 // Attach said block storage to said droplet
-const webBlockAttachment = new digitalocean.VolumeAttachment(postfix("website-block-attachment"), {
-  dropletId: web.id,
+const webBlockAttachment = new digitalocean.VolumeAttachment("website-block-attachment", {
+  // .apply(parseInt) because of https://github.com/pulumi/pulumi-terraform-bridge/issues/352 
+  dropletId: web.id.apply(parseInt),
   volumeId: webBlock.id,
 });
 
 // Create a floating ip so we have somewhere to point dns to even if the droplet is destroyed
-const floatingIP = new digitalocean.FloatingIp(postfix("website-ip"), {
+const floatingIP = new digitalocean.FloatingIp("website-ip", {
   region: web.region,
-  dropletId: web.id,
+  dropletId: web.id.apply(parseInt),
 });
 
 let domain;
