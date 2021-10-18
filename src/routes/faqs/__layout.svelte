@@ -15,14 +15,13 @@
 </style>
 
 <h1>Frequently Asked Questions</h1>
-We've collected a few questions people commonly ask here for you to have a look through at your own leisure! There are
-sections on
+We've collected a few questions people commonly ask here for you to have a look through at your own leisure! There are sections
+on
 <a href="/faqs/book" sapper:noscroll>booking us</a>
 {#if !loggedIn}
   &nbsp;and
   <a href="/faqs/join" sapper:noscroll>joining us</a>
-{:else}
-  ,
+{:else},
   <a href="/faqs/join" sapper:noscroll>joining us</a>
   and
   <a href="/faqs/members" sapper:noscroll>information for members</a>

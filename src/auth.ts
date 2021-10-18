@@ -281,8 +281,6 @@ export async function completePasswordReset({ password, token }: { password: str
       console.error(`GraphQL error trying to update user's password: ${e}`);
       throw errors.INTERNAL_ERROR;
     }
-  } else {
-      console.error("meow")
   }
 }
 

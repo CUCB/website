@@ -1,0 +1,19 @@
+- name: Install docker SDK
+  pip:
+    name: docker
+
+- name: Login to docker repository
+  community.docker.docker_login:
+    username: "{{ deploy_registry_user }}"
+    password: "{{ deploy_registry_password }}"
+    registry_url: "{{ deploy_registry }}"
+
+- name: Pull images and restart containers
+  community.docker.docker_compose:
+    files: "{{ docker_compose_files }}"
+    pull: yes
+    restarted: yes
+    recreate: always
+    project_src: "{{ repo_root }}"
+  environment:
+    DEPLOY_REGISTRY: "{{ deploy_registry }}"

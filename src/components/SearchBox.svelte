@@ -1,7 +1,11 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
 
-  export let placeholder, fuse, toDisplayName, toId, disabled;
+  export let placeholder,
+    fuse,
+    toDisplayName,
+    toId,
+    disabled = undefined;
   let searchField,
     searchText = "",
     resultsList;

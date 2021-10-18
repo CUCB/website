@@ -16,10 +16,13 @@ COPY static ./static
 COPY *.js ./
 COPY *.json ./
 COPY build.env ./.env
+RUN echo "SESSION_SECRET=somethingreallynotsecret" >> .env
 RUN npm run build
 
 FROM mhart/alpine-node:slim-15 AS app
 WORKDIR /usr/src/app
-COPY --from=build-app /usr/src/app/__sapper__ ./__sapper__
+# Copy package.json to ensure "type":"module" is set
+COPY --from=build-app /usr/src/app/package.json ./
+COPY --from=build-app /usr/src/app/build ./build
 COPY --from=build-app /usr/src/app/static ./static
 COPY --from=build-runtime /usr/src/app/node_modules ./node_modules

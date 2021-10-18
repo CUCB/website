@@ -500,8 +500,7 @@
       sortContacts(allContacts);
       allContacts = allContacts;
       displayContactEditor = false;
-      await tick();
-      await tick();
+      while (!(callerListElement && clientListElement)) await tick();
       if (editContactType === contactTypes.CLIENT) {
         selectedClient = updatedContact.id;
         clientListElement.focus();
@@ -796,7 +795,7 @@
     <label data-test="gig-edit-{id}-venue-select">
       Venue
       <Select bind:value="{venue_id}" bind:select="{venueListElement}" disabled="{cancelled}">
-        <option selected={true} disabled value="{undefined}">--- SELECT A VENUE ---</option>
+        <option selected="{true}" disabled value="{undefined}">--- SELECT A VENUE ---</option>
         {#each venues as venue}
           <option value="{venue.id}">
             {venue.name}
@@ -861,7 +860,7 @@
       <label data-test="gig-edit-{id}-client-select"
         >Add client
         <Select bind:value="{selectedClient}" bind:select="{clientListElement}" disabled="{cancelled}">
-          <option selected={true} disabled value="{undefined}">--- SELECT A CLIENT ---</option>
+          <option selected="{true}" disabled value="{undefined}">--- SELECT A CLIENT ---</option>
           {#each potentialClients as contact}
             <option value="{contact.id}">{contactDisplayName(contact)}</option>
           {/each}
@@ -911,7 +910,7 @@
         <label data-test="gig-edit-{id}-caller-select"
           >Add caller
           <Select bind:value="{selectedCaller}" bind:select="{callerListElement}" disabled="{cancelled}">
-            <option selected={true} disabled value="{undefined}">--- SELECT A CALLER ---</option>
+            <option selected="{true}" disabled value="{undefined}">--- SELECT A CALLER ---</option>
             {#each potentialCallers as contact}
               <option value="{contact.id}">{contactDisplayName(contact)}</option>
             {/each}
@@ -1020,7 +1019,7 @@
         min="{date || arrive_time_date}"
         use:checkValid="{{
           validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
-          bothPresent: { id: 'finish_time', error: "Date and time must be specified" },
+          bothPresent: { id: 'finish_time', error: 'Date and time must be specified' },
         }}"
         data-test="gig-edit-{id}-finish-time-date"
         disabled="{cancelled}"
@@ -1031,7 +1030,7 @@
         bind:this="{fields.finish_time_time}"
         use:checkValid="{{
           validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
-          bothPresent: { id: 'finish_time', error: "Date and time must be specified" },
+          bothPresent: { id: 'finish_time', error: 'Date and time must be specified' },
         }}"
         min="{finish_time_date === date && time
           ? time
