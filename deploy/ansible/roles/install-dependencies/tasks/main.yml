@@ -30,7 +30,3 @@
 - name: Install Python Dropbox sdk
   pip:
     name: dropbox
-
-- name: Install backup script dependencies
-  community.general.npm:
-    path: "{{ repo_root }}/deploy/js"

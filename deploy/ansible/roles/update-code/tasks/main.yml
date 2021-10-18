@@ -5,3 +5,7 @@
     accept_hostkey: yes
     key_file: ~/.ssh/deploy_pull
     version: "{{ ci_commit_branch }}"
+
+- name: Install backup script dependencies
+  community.general.npm:
+    path: "{{ repo_root }}/deploy/js"
