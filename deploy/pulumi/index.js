@@ -10,8 +10,12 @@ const _default = new digitalocean.SshKey("gitlab-ci", {
   publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
 });
 
+function postfix(name) {
+  return stack === "prod" ? name : `${name}-${stack}`;
+}
+
 // A droplet to host the site
-const web = new digitalocean.Droplet("website", {
+const web = new digitalocean.Droplet(postfix("website"), {
   image: "ubuntu-20-04-x64",
   region: "lon1",
   size: "s-1vcpu-1gb",
@@ -21,7 +25,7 @@ const web = new digitalocean.Droplet("website", {
 });
 
 // Block storage for a first tier backup (in addition to dropbox)
-const webBlock = new digitalocean.Volume("website-block", {
+const webBlock = new digitalocean.Volume(postfix("website-block"), {
   region: "lon1",
   size: 5,
   initialFilesystemType: "ext4",
@@ -29,13 +33,13 @@ const webBlock = new digitalocean.Volume("website-block", {
 });
 
 // Attach said block storage to said droplet
-const webBlockAttachment = new digitalocean.VolumeAttachment("website-block-attachment", {
+const webBlockAttachment = new digitalocean.VolumeAttachment(postfix("website-block-attachment"), {
   dropletId: web.id,
   volumeId: webBlock.id,
 });
 
 // Create a floating ip so we have somewhere to point dns to even if the droplet is destroyed
-const floatingIP = new digitalocean.FloatingIp("website-ip", {
+const floatingIP = new digitalocean.FloatingIp(postfix("website-ip"), {
   region: web.region,
   dropletId: web.id,
 });
