@@ -81,7 +81,7 @@ describe("book us page", () => {
       cy.wrap($body)
         .find("#checkbox")
         .click();
-      cy.wrap($body).find("#checkbox.checked");
+      cy.wrap($body).find("#checkbox[aria-checked=true]");
     });
     cy.get("[data-test='booking-send']").click();
     cy.contains("Your message has been sent to our secretary");
