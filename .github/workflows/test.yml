@@ -22,7 +22,6 @@ jobs:
           npm ci
           npm run svelte-check
   test:
-    if: ${{ false }}
     name: Cypress run
     runs-on: ubuntu-latest
     strategy:
@@ -97,7 +96,7 @@ jobs:
       IMAGE_NAME: sveltekit
 
   pulumi-preview:
-    if: ${{ github.ref!='refs/heads/master' && github.ref!='refs/heads/feature/ansible-deployment'}}
+    if: ${{ github.ref != 'refs/heads/master' }}
     name: Preview infrastructure updates
     runs-on: ubuntu-latest
     steps:
