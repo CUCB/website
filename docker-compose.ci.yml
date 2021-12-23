@@ -15,7 +15,7 @@ services:
     volumes:
       - .:/usr/src/app
     ports:
-      - "4000:4000"
+      - "3000:3000"
       - "10000:10000"
     environment:
       PERCY_TOKEN: ${PERCY_TOKEN}

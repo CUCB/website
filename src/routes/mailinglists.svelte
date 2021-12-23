@@ -35,7 +35,7 @@
         method: "POST",
         body,
         headers: {
-            "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+          "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
         },
       });
     } catch (e) {
@@ -89,7 +89,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle('Mailing Lists')}</title>
+  <title>{makeTitle("Mailing Lists")}</title>
   <noscript>
     {@html `<style` + `>.how-to {display: none}</` + `style>`}
   </noscript>

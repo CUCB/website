@@ -75,7 +75,7 @@
     outline: 0;
   }
 
-  :global(.dropdown-select > option) {
+  .dropdown-select > :global(option) {
     margin: 3px;
     padding: 6px 8px;
     text-shadow: none;
@@ -121,7 +121,7 @@
     color: #ccc;
   }
 
-  :global(.dropdown-dark .dropdown-select > option) {
+  .dropdown-dark .dropdown-select > :global(option) {
     background: #444;
     text-shadow: 0 1px rgba(0, 0, 0, 0.4);
   }
@@ -144,7 +144,7 @@
       box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.2);
     }
 
-    :global(.dropdown-default .dropdown-select > option) {
+    .dropdown-default .dropdown-select > :global(option) {
       background: #444;
       text-shadow: 0 1px rgba(0, 0, 0, 0.4);
     }

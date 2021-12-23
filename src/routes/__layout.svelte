@@ -40,7 +40,7 @@
     }
   }
 
-  export const load: Load = async function({ page: { query }, fetch, session }) {
+  export const load: Load = async function ({ page: { query }, fetch, session }) {
     let committee = {};
 
     try {
@@ -94,7 +94,7 @@
     clientCurrentUser.set(makeClient(fetch, { role: "current_user" }));
 
     return { props: { settingsWithoutMaps: settings, committee } };
-  }
+  };
 </script>
 
 <script lang="ts">
@@ -108,7 +108,7 @@
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import type Popup from "../components/Popup.svelte";
-import type { Load } from "@sveltejs/kit";
+  import type { Load } from "@sveltejs/kit";
 
   export let committee: Committee;
   export let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty };

@@ -6,11 +6,11 @@
     "dev": "svelte-kit dev -p 3000 --host 0.0.0.0",
     "build": "svelte-kit build",
     "start": "svelte-kit preview",
-    "start:ci": "export NODE_ENV=test; svelte-kit preview -p 4000 --host 0.0.0.0",
+    "start:ci": "export NODE_ENV=test; svelte-kit preview -p 3000 --host 0.0.0.0",
     "test:ci:ff": "run-p --race start:ci cy:run:ci:ff",
     "test:ci:chrome": "run-p --race start:ci cy:run:ci:chrome",
-    "cy:run:ci:chrome": "wait-for-it localhost:4000 -t 60 -- percy exec -- cypress run --record --key $CYPRESS_KEY --browser chrome",
-    "cy:run:ci:ff": "wait-for-it localhost:4000 -t 60 -- percy exec -- cypress run --record --key $CYPRESS_KEY --browser firefox",
+    "cy:run:ci:chrome": "wait-for-it localhost:3000 -t 60 -- percy exec -- cypress run --record --key $CYPRESS_KEY --browser chrome",
+    "cy:run:ci:ff": "wait-for-it localhost:3000 -t 60 -- percy exec -- cypress run --record --key $CYPRESS_KEY --browser firefox",
     "cy:run": "cypress run",
     "cy:open": "cypress open",
     "test": "run-p --race dev cy:run",
@@ -44,7 +44,7 @@
     }
   },
   "dependencies": {
-    "@sveltejs/kit": "^1.0.0-next.115",
+    "@sveltejs/kit": "^1.0.0-next.189",
     "bcrypt": "^5.0.1",
     "body-scroll-lock": "^3.1.5",
     "cookie": "^0.4.1",
@@ -63,7 +63,7 @@
     "mailparser": "^3.2.0",
     "md5": "^2.3.0",
     "runtypes": "^6.3.1",
-    "svelte": "3.38.2",
+    "svelte": "3.44.0",
     "svelte-color-picker": "^1.0.7",
     "tippy.js": "^6.3.1",
     "typescript": "^4.3.4"
@@ -102,7 +102,7 @@
     "svelte-check": "^2.1.0",
     "svelte-preprocess": "^4.7.3",
     "tslib": "^2.3.0",
-    "vite": "=2.3.7"
+    "vite": "=2.6.10"
   },
   "engines": {
     "node": ">= 12.17.0"

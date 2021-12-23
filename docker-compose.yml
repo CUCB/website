@@ -45,17 +45,18 @@ services:
       SESSION_SECRET: somethingrandom
     volumes:
       - .:/home/node/app
-      - node_modules_2:/app/node_modules/
+      - node_modules_2:/home/node/app/node_modules/
     restart: always
     ports:
       - "24678:24678"
     command: >
       bash -c "cd /home/node/app; npm install; npm run watch:dev"
+    # bash -c "cd /home/node/app; npm install; npm run build; npm run start -- --host 0.0.0.0"
   caddy:
     image: caddy:latest
     restart: always
     ports:
-      - "4000:4000"
+      - "3000:3000"
     volumes:
       - ./Caddyfile.dev:/etc/caddy/Caddyfile
       - ./Caddyfile.lib:/etc/caddy/Caddyfile.lib

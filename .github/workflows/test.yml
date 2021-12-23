@@ -43,7 +43,7 @@ jobs:
           parallel: true
           group: "Linux/Chrome"
           start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
-          wait-on: "http://localhost:4000"
+          wait-on: "http://localhost:3000"
           wait-on-timeout: 240
           command-prefix: "percy exec -- npx"
         env:

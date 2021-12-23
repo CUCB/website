@@ -182,6 +182,10 @@
 <style lang="scss">
   @import "../../sass/themes.scss";
 
+  textarea {
+    margin-bottom: 1em;
+  }
+
   .statuses {
     display: flex;
     justify-content: space-around;
@@ -258,6 +262,12 @@
     list-style-type: none;
     font-style: italic;
   }
+
+  legend {
+    font-family: var(--title);
+    font-size: 1.2em;
+    padding: 0 0.25em;
+  }
 </style>
 
 <div data-test="gig-signup-{gig.id}" class="gig-signup theme-{$themeName}">
@@ -317,24 +327,24 @@
     <div>
       {#if edit}
         <fieldset>
-        <legend class="notes">Instruments</legend>
-        {#each userInstruments as userInstrument (userInstrument.id)}
-          <label
-            class="checkbox"
-            data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.instrument.id}-toggle`}"
-            class:disabled="{userInstrument.approved}"
-            use:instrumentTooltip
-          >
-            <input type="checkbox" bind:checked="{userInstrument.chosen}" disabled="{userInstrument.approved}" />
-            {userInstrument.instrument.name}
-          </label>
-        {:else}
-          <p>
-            You haven't added any instruments to your account, try adding one to
-            <a href="/members/user">your profile</a>
-            .
-          </p>
-        {/each}
+          <legend>Instruments</legend>
+          {#each userInstruments as userInstrument (userInstrument.id)}
+            <label
+              class="checkbox"
+              data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.instrument.id}-toggle`}"
+              class:disabled="{userInstrument.approved}"
+              use:instrumentTooltip
+            >
+              <input type="checkbox" bind:checked="{userInstrument.chosen}" disabled="{userInstrument.approved}" />
+              {userInstrument.instrument.name}
+            </label>
+          {:else}
+            <p>
+              You haven't added any instruments to your account, try adding one to
+              <a href="/members/user">your profile</a>
+              .
+            </p>
+          {/each}
         </fieldset>
       {:else}
         <p>Signed up with:</p>

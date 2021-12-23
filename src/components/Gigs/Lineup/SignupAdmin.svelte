@@ -180,6 +180,10 @@
       background: themed("background");
     }
     text-align: right;
+    box-sizing: border-box;
+    height: 100%;
+    align-self: center;
+    padding-right: 10px;
   }
   .table {
     display: grid;
@@ -187,10 +191,26 @@
     grid-auto-flow: dense;
     max-width: 95vw;
     overflow: auto;
-    grid-gap: 2px;
+    grid-row-gap: 5px;
+    thead {
+      display: contents;
+    }
+
+    tbody {
+      display: contents;
+    }
+
+    & tr {
+      display: contents;
+    }
   }
-  tr {
-    display: contents;
+  th {
+    align-self: center;
+  }
+  tr:nth-child(2n) th[scope="row"],
+  tr:nth-child(2n) td {
+    background: lightgray;
+    // outline: solid 1px red;
   }
   .name,
   .gap {
@@ -208,53 +228,57 @@
   <title>{makeTitle("Gig signups")}</title>
 </svelte:head>
 
-<div class="table theme-{$themeName}">
-  <tr>
-    <td class="gap"></td>
-    {#each gigs as gig (hash(gig.id))}
-      <th scope="col">
-        <button
-          on:click="{() => availabilitySort(gig)}"
-          data-test="gig-title-{gig.id}"
-          aria-selected="{sortedBy === gig.id ? true : false}"
-          ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat("dd LLL")}&#32;{gig.title}</div></button
-        >
-      </th>
-    {/each}
-  </tr>
-  {#each sortedPeople.toJS() as person (hash(person.id))}
+<table class="table theme-{$themeName}">
+  <thead>
     <tr>
-      <th class="name" data-test="person-name" scope="row">{person.first}&nbsp;{person.last}</th>
-      {#each gigsForPerson.get(person.id) as gig}
-        <td class="person {signupStatus(gig)} {lineupStatus(gig)}">
-          {#if signupStatus(gig) || lineupStatus(gig)}
-            <TooltipText
-              content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${gig.title}${
-                statusText(gig) ? `\n${statusText(gig)}` : ''
-              }${gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``}${
-                gig?.signup?.user?.gig_notes ? `\nGeneral notes: ${gig.signup.user.gig_notes}` : ``
-              }`}"
-              data-test="signup-details-{person.id}-{gig.id}"
-            >
-              <div style="width:100%; height: 100%">
-                {#if gig.signup.user_available}
-                  {#if gig.signup.user_only_if_necessary}
-                    <i class="las la-question"></i>
-                  {:else}<i class="las la-check"></i>{/if}
-                {:else if gig.signup.user_available === false}
-                  <i class="las la-times"></i>
-                {:else}
-                  &nbsp;
-                  <!-- Add some content to hover over for tooltip-->
-                {/if}
-                {#if gig.signup.user_notes || gig.signup.user.gig_notes}
-                  <i class="las la-comment"></i>
-                {/if}
-              </div>
-            </TooltipText>
-          {/if}
-        </td>
+      <td class="gap"></td>
+      {#each gigs as gig (hash(gig.id))}
+        <th scope="col">
+          <button
+            on:click="{() => availabilitySort(gig)}"
+            data-test="gig-title-{gig.id}"
+            aria-selected="{sortedBy === gig.id ? true : false}"
+            ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat("dd LLL")}&#32;{gig.title}</div></button
+          >
+        </th>
       {/each}
     </tr>
-  {/each}
-</div>
+  </thead>
+  <tbody>
+    {#each sortedPeople.toJS() as person (hash(person.id))}
+      <tr>
+        <th class="name" data-test="person-name" scope="row">{person.first}&nbsp;{person.last}</th>
+        {#each gigsForPerson.get(person.id) as gig}
+          <td class="person {signupStatus(gig)} {lineupStatus(gig)}">
+            {#if signupStatus(gig) || lineupStatus(gig)}
+              <TooltipText
+                content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${
+                  gig.title
+                }${statusText(gig) ? `\n${statusText(gig)}` : ''}${
+                  gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``
+                }${gig?.signup?.user?.gig_notes ? `\nGeneral notes: ${gig.signup.user.gig_notes}` : ``}`}"
+                data-test="signup-details-{person.id}-{gig.id}"
+              >
+                <div style="width:100%; height: 100%">
+                  {#if gig.signup.user_available}
+                    {#if gig.signup.user_only_if_necessary}
+                      <i class="las la-question"></i>
+                    {:else}<i class="las la-check"></i>{/if}
+                  {:else if gig.signup.user_available === false}
+                    <i class="las la-times"></i>
+                  {:else}
+                    &nbsp;
+                    <!-- Add some content to hover over for tooltip-->
+                  {/if}
+                  {#if gig.signup.user_notes || gig.signup.user.gig_notes}
+                    <i class="las la-comment"></i>
+                  {/if}
+                </div>
+              </TooltipText>
+            {/if}
+          </td>
+        {/each}
+      </tr>
+    {/each}
+  </tbody>
+</table>

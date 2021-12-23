@@ -158,13 +158,15 @@ async function sessionFromHeaders(headers) {
             hasuraRole: this.hasuraRole,
             theme: this.theme,
           };
-          // TODO implement this&
           try {
-            let res = await client.mutate({
+            await client.mutate({
               mutation: gql`
-                mutation UpdateSession($sess: json!, $sessionId: String!) {
+                mutation UpdateSession($sessionId: String!, $sess: json!) {
                   update_cucb_session_by_pk(pk_columns: { sid: $sessionId }, _set: { sess: $sess }) {
                     sid
+                  }
+                  delete_cucb_session(where: { expire: { _lte: "now()" } }) {
+                    affected_rows
                   }
                 }
               `,
