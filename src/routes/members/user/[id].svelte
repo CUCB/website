@@ -62,14 +62,14 @@
       const clientCurrentUser = makeClient(fetch, {
         role: "current_user",
       });
-      const res = await clientCurrentUser.query({
+      const res = await clientCurrentUser.query<{ cucb_users_by_pk: User }>({
         query: currentUser,
         variables: { id },
       });
       return { props: { user: res.data.cucb_users_by_pk } };
     } else {
       const client = makeClient(fetch);
-      const res = await client.query({
+      const res = await client.query<{ cucb_users_by_pk: User }>({
         query: currentUser,
         variables: { id },
       });
@@ -173,9 +173,6 @@
   @media only screen and (max-width: 300px) {
     .important-info {
       border: none;
-    }
-    .important-info > legend {
-      display: none;
     }
   }
 </style>
