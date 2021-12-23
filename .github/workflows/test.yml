@@ -69,7 +69,7 @@ jobs:
             cypress/screenshots/**/*.png
 
   build:
-    if: ${{ github.ref=='refs/heads/master' }}
+    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/sveltekit-beta' }}
     needs:
       - test
       - svelte-check
@@ -123,7 +123,7 @@ jobs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
       - name: Set env to develop
-        if: endsWith(github.ref, '/ansible-deployment')
+        if: endsWith(github.ref, '/sveltekit-beta')
         run: echo "ENVIRONMENT=dev" >> $GITHUB_ENV
       - name: Set env to production
         if: endsWith(github.ref, '/master')
@@ -143,7 +143,7 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   deploy-ansible:
-    if: ${{ github.ref=='refs/heads/feature/ansible-deployment' }}
+    if: ${{ github.ref=='refs/heads/feature/sveltekit-beta' }}
     name: Deploy site to DigitalOcean using ansible
     runs-on: ubuntu-latest
     needs: pulumi
