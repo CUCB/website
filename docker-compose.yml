@@ -41,7 +41,7 @@ services:
       EMAIL_HOST: mailhog
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
       EMAIL_PORT: 1025
-      EMAIL_SSL: false
+      EMAIL_SSL: "false"
       SESSION_SECRET: somethingrandom
     volumes:
       - .:/root/site
