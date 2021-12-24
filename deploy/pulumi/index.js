@@ -17,7 +17,7 @@ if (stack === "shared") {
   return;
 }
 
-const shared = new pulumi.StackReference("shared");
+const shared = new pulumi.StackReference("cucb/cucb-website/shared");
 
 // A droplet to host the site
 const web = new digitalocean.Droplet("website", {
