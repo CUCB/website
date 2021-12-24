@@ -120,6 +120,13 @@ jobs:
       - uses: pulumi/actions@v3
         with:
           command: preview
+          stack-name: shared
+          work-dir: deploy/pulumi
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      - uses: pulumi/actions@v3
+        with:
+          command: preview
           stack-name: prod
           work-dir: deploy/pulumi
         env:
@@ -145,6 +152,14 @@ jobs:
       - name: Install Pulumi CLI
         uses: pulumi/action-install-pulumi-cli@v1.0.1
       - run: cd deploy/pulumi && npm install
+      - uses: pulumi/actions@v3
+        id: update
+        with:
+          command: up
+          stack-name: shared
+          work-dir: deploy/pulumi
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
       - uses: pulumi/actions@v3
         id: update
         with:

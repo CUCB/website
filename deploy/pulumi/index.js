@@ -6,10 +6,16 @@ const fs = require("fs");
 
 const stack = pulumi.getStack();
 
-const _default = new digitalocean.SshKey(`ci-bootstrap`, {
-  name: `ci-bootstrap-${stack}`,
-  publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
-});
+if (stack === "shared") {
+  const _default = new digitalocean.SshKey(`ci-bootstrap`, {
+    publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
+  });
+
+  module.exports = {
+    sshKeyFingerprint: _default.fingerprint,
+  };
+  return;
+}
 
 // A droplet to host the site
 const web = new digitalocean.Droplet("website", {
