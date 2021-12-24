@@ -1,5 +1,4 @@
 version: "3.6"
-
 services:
   postgres:
     image: postgres:12
@@ -10,7 +9,7 @@ services:
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5432:5432" # exposed so cypress can connect
   graphql-engine:
     image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
     volumes:
@@ -21,14 +20,14 @@ services:
     restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # use `npm run hasura:console` instead, it persists changes via migrations
+      HASURA_GRAPHQL_ENABLE_CONSOLE: "false"
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_AUTH_HOOK: http://sapper:3000/auth/hook
+      HASURA_GRAPHQL_AUTH_HOOK: http://sapper:4000/auth/hook
     ports:
       - "8080:8080"
   sapper:
-    image: node:14
+    image: node:13
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
@@ -37,36 +36,25 @@ services:
       PG_DATABASE: postgres
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
-      VITE_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
+      HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
       HCAPTCHA_SECRET: "0x0000000000000000000000000000000000000000"
       EMAIL_POSTFIX_HOST: mailhog
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
       EMAIL_POSTFIX_PORT: 1025
       SESSION_SECRET: somethingrandom
     volumes:
-      - .:/home/node/app
-      - node_modules_2:/home/node/app/node_modules/
+      - .:/root/site
+      - node_modules:/root/site/node_modules/
     restart: always
     ports:
-      - "24678:24678"
+      - "4000:4000"
+      - "10000:10000"
     command: >
-      bash -c "cd /home/node/app; npm install; npm run watch:dev"
-    # bash -c "cd /home/node/app; npm install; npm run build; npm run start -- --host 0.0.0.0"
-  caddy:
-    image: caddy:latest
-    restart: always
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./Caddyfile.dev:/etc/caddy/Caddyfile
-      - ./Caddyfile.lib:/etc/caddy/Caddyfile.lib
-      - ./static/static:/srv/static
-      - ./images:/srv/images
-      - ./docs:/srv/docs
+      bash -c "cd /root/site; npm install; npm run watch:dev"
   mailhog:
     image: mailhog/mailhog
     ports:
       - "8025:8025"
 volumes:
   db_data:
-  node_modules_2:
+  node_modules:

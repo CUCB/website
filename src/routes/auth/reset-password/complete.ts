@@ -1,26 +1,29 @@
-import type { Request, Response } from "@sveltejs/kit";
+import type { SapperRequest, SapperResponse } from "@sapper/server";
 import { Record, String } from "runtypes";
 import { completePasswordReset } from "../../../auth";
 
-type PostRequest = Request & { body: FormData };
+type PostRequest = SapperRequest & { body: { password?: unknown; token?: unknown } };
 
 const Body = Record({
   password: String.withConstraint((value) => value.length >= 6),
   token: String,
 });
 
-export async function post(request: PostRequest): Promise<Response> {
-  const body = Object.fromEntries(request.body?.entries());
-  if (Body.guard(body)) {
+export async function post(request: PostRequest, response: SapperResponse, _next: unknown): Promise<void> {
+  if (Body.guard(request.body)) {
     try {
-      await completePasswordReset(body);
-      return { status: 204 };
+      await completePasswordReset(request.body);
+      response.statusCode = 200;
+      response.end("");
     } catch (e) {
-      return { status: e.status, body: e.message };
+      response.statusCode = e.status;
+      response.end(e.message);
     }
-  } else if ("password" in body && String.check(body["password"])) {
-      return { status: 400, body: "Password is too short" };
+  } else if ("password" in request.body && String.check(request.body["password"])) {
+    response.statusCode = 400;
+    response.end("Password is too short");
   } else {
-      return { status: 400, body: "Missing field password in body" };
+    response.statusCode = 400;
+    response.end("Missing field password in body");
   }
 }

@@ -1,10 +1,10 @@
-import type { Request, Response } from "@sveltejs/kit";
+import type { SapperRequest, SapperResponse } from "@sapper/server";
 import { Record, String } from "runtypes";
 import { CRSID_PATTERN, EMAIL_PATTERN } from "../_register";
 import { makeGraphqlClient, startPasswordReset } from "../../../auth";
 import gql from "graphql-tag";
 
-type PostRequest = Request & { body: FormData };
+type PostRequest = SapperRequest & { body: object };
 
 const Body = Record({
   username: String.withConstraint(
@@ -34,25 +34,28 @@ const UserByUsername = gql`
   }
 `;
 
-export async function post(request: PostRequest): Promise<Response> {
-  let body = Object.fromEntries(request.body.entries());
-  if (Body.guard(body)) {
+export async function post(request: PostRequest, response: SapperResponse, _next: unknown): Promise<void> {
+  if (Body.guard(request.body)) {
     let client = makeGraphqlClient();
     const userCheck = await client.query<UserEmail>({
       query: UserByUsername,
-      variables: { username: body.username.toLowerCase() },
+      variables: { username: request.body.username.toLowerCase() },
     });
     if (userCheck.data.cucb_users.length > 0) {
       try {
         await startPasswordReset(userCheck.data.cucb_users[0]);
-        return { status: 204 };
+        response.statusCode = 204;
+        response.end();
       } catch (e) {
-        return { status: e.status, body: e.message };
+        response.statusCode = e.status;
+        response.end(e.message);
       }
     } else {
-      return { status: 400, body: "Could not find email/CRSid" };
+      response.statusCode = 400;
+      response.end("Could not find email/CRSid"); // TODO change this to return 200 too so people can't just discover accounts
     }
   } else {
-    return { status: 400, body: "It looks like what you submitted wasn't a valid CRSid/email address" };
+    response.statusCode = 400;
+    response.end("It looks like what you submitted wasn't a valid CRSid/email address.");
   }
 }

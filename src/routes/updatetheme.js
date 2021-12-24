@@ -1,6 +1,7 @@
-export async function post({ locals: { session }, body }) {
-  body = Object.fromEntries(body?.entries());
-  session.theme = { ...body };
-  await session.save(); // TODO handle errors
-  return { status: 200, body: session };
+export function post(req, res, next) {
+  req.session.theme = { ...req.body };
+  req.session.save(() => {
+    res.statusCode = 204;
+    res.end(JSON.stringify(req.session));
+  });
 }

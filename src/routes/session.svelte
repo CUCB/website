@@ -1,10 +1,10 @@
 <script context="module">
-  import { makeTitle } from "../view";
+  import { makeTitle } from "../view.js";
   import CaptionedImage from "../components/CaptionedImage.svelte";
 </script>
 
 <svelte:head>
-  <title>{makeTitle('Sessions')}</title>
+  <title>{makeTitle("Sessions")}</title>
 </svelte:head>
 <h1>Sessions</h1>
 
@@ -17,15 +17,14 @@
   <li>
     On
     <b>Thursday evenings</b>
-    in term, after the weekly rehearsal which finishes at 10PM, we're currently heading to The Anchor. This can most
-    easily be found by following the trail of people heading over after a rehearsal - but it's best to come along to
-    rehearsal or contacting someone there to make sure you know where people are going on any given evening!
+    in term, after the weekly rehearsal which finishes at 10PM, we're currently heading to The Anchor. This can most easily
+    be found by following the trail of people heading over after a rehearsal - but it's best to come along to rehearsal or
+    contacting someone there to make sure you know where people are going on any given evening!
   </li>
   <li>
     We may run sessions on
     <b>Saturday or Sunday afternoons</b>
-    , but there is currently no fixed weekly slot so keep your eyes on the mailing lists for these sessions as they
-    come!
+    , but there is currently no fixed weekly slot so keep your eyes on the mailing lists for these sessions as they come!
   </li>
 </ul>
 

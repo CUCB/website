@@ -1,15 +1,15 @@
 <script context="module">
   import { makeClient, handleErrors } from "../../graphql/client";
   import { pastCommitteePictures } from "../../graphql/committee";
-  export async function load({ page: { query }, fetch }) {
-    let aprilFools = query.get("aprilfool") !== undefined;
-    let client = makeClient(fetch);
+  export async function preload({ query }) {
+    let { aprilfool } = query;
+    let client = makeClient(this.fetch);
     let res;
     try {
       res = await client.query({ query: pastCommitteePictures });
-      return { props: { aprilFools, committees: res.data.cucb_committees } };
+      return { aprilFools: aprilfool !== undefined, committees: res.data.cucb_committees };
     } catch (e) {
-      return handleErrors(e);
+      handleErrors.bind(this)(e);
     }
   }
 </script>
@@ -22,7 +22,7 @@
 </script>
 
 <style>
-  .members {
+  committee-members {
     margin-top: 0;
     display: flex;
     flex-wrap: wrap;
@@ -34,7 +34,7 @@
   hr {
     width: 70%;
   }
-  h3 {
+  cucb-committee h3 {
     text-align: center;
     font-size: 1.3em;
     padding-top: 0.5em;
@@ -56,18 +56,20 @@ For contact details for the current committee
 .
 {#each committees as committee}
   <hr />
-  <h3>
-    {DateTime.fromISO(committee.started).year}/{(DateTime.fromISO(committee.started).year + 1).toString().slice(-2)}
-  </h3>
-  <div class="members">
-    {#if aprilFools}
-      {#each committee.committee_members as person}
-        <Person person="{person}" aprilFools="{aprilFools}" />
-      {/each}
-    {:else}
-      {#each committee.committee_members.filter((person) => !person.april_fools_only) as person}
-        <Person person="{person}" />
-      {/each}
-    {/if}
-  </div>
+  <cucb-committee>
+    <h3>
+      {DateTime.fromISO(committee.started).year}/{(DateTime.fromISO(committee.started).year + 1).toString().slice(-2)}
+    </h3>
+    <committee-members>
+      {#if aprilFools}
+        {#each committee.committee_members as person}
+          <Person person="{person}" aprilFools="{aprilFools}" />
+        {/each}
+      {:else}
+        {#each committee.committee_members.filter((person) => !person.april_fools_only) as person}
+          <Person person="{person}" />
+        {/each}
+      {/if}
+    </committee-members>
+  </cucb-committee>
 {/each}

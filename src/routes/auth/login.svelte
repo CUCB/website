@@ -2,19 +2,15 @@
   import LoginForm from "../../components/LoginForm.svelte";
   import { makeTitle } from "../../view";
 
-  export async function load({ session }) {
+  export async function preload(_page, session) {
     if (session.userId !== undefined) {
-      return {
-          redirect: "/members",
-          status: 302
-      }
+      this.redirect(302, "/members");
     }
-    return {};
   }
 </script>
 
 <svelte:head>
-  <title>{makeTitle('Sign in')}</title>
+  <title>{makeTitle("Sign in")}</title>
 </svelte:head>
 
 <LoginForm redirectTo="/members" />

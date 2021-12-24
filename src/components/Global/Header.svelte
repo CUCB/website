@@ -44,7 +44,7 @@
         "nav nav nav";
       grid-template-columns: 1fr 4fr minmax(0, 1fr);
     }
-    header :global(#logo) {
+    :global(#logo) {
       max-width: 150px;
       grid-area: logo;
     }
@@ -64,7 +64,7 @@
     flex: 150px 0 3;
   }
 
-  header :global(#logo) {
+  :global(#logo) {
     width: 100%;
   }
 
@@ -79,7 +79,7 @@
     user-select: none;
   }
 
-  header :global(nav) {
+  :global(nav) {
     grid-area: nav;
   }
 
@@ -132,7 +132,7 @@
     #logo-link {
       flex-basis: 100px;
     }
-    header :global(#logo) {
+    :global(#logo) {
       max-width: 100px;
     }
   }

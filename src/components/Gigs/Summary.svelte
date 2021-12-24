@@ -5,11 +5,11 @@
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
   import { themeName, suffix } from "../../view";
-  import { session } from "$app/stores";
+  import { stores } from "@sapper/app";
   import { DateTime, Settings } from "luxon";
   Settings.defaultZoneName = "Europe/London";
 
-  export let gig = {},
+  export let gig,
     signupGig = writable(undefined),
     userInstruments = undefined,
     displayLinks = true,
@@ -17,10 +17,11 @@
   export let linkHeading = false;
   let showSignup = false;
   let showDetails = !linkHeading;
+  let { session } = stores();
   const formatCalendarDate = (date) => date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
   const formatTimeOnly = (date) => date.toFormat("HH:mm");
   const formatTimeWithDate = (date) => date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");
-  const midnight = { hour: 0, minute: 0, second: 0 };
+  const midnight = { hours: 0, minutes: 0, seconds: 0 };
   $: arrive_time = gig.arrive_time && DateTime.fromISO(gig.arrive_time);
   $: finish_time = gig.finish_time && DateTime.fromISO(gig.finish_time);
   $: date = gig.date && DateTime.fromISO(gig.date);
@@ -69,7 +70,7 @@
       box-shadow: shadow(themed("kitHire"));
     }
   }
-  .gig-summary {
+  gig-summary {
     display: block;
     padding: 1em;
     border-radius: 5px;
@@ -80,18 +81,17 @@
     transition: box-shadow 0.25s;
   }
 
-  ul.tasks {
+  task-list {
     display: flex;
     flex-direction: column;
     margin: 1em 0;
-    list-style-type: none;
   }
 
-  .gig-summary > :last-child {
+  gig-summary > :last-child {
     margin-bottom: 0;
   }
 
-  .gig-timings > p {
+  gig-timings > p {
     margin: 0.25em 0;
   }
 
@@ -104,14 +104,14 @@
     justify-self: flex-start;
   }
 
-  .admin-notes,
-  .band-notes {
+  admin-notes,
+  band-notes {
     white-space: pre-wrap;
     display: block;
     margin: 1em 0;
   }
 
-  .summary-text {
+  summary-text {
     display: block;
     margin: 1em 0;
   }
@@ -128,15 +128,15 @@
     margin-top: 1em;
   }
 
-  .gig-finance {
+  gig-finance {
     font-style: italic;
   }
 
-  .gig-finance b {
+  gig-finance b {
     font-style: normal;
   }
 
-  .gig-icons {
+  gig-icons {
     margin-right: -0.3em;
   }
 
@@ -181,15 +181,15 @@
     display: none;
   }
 
-  .gigtype-calendar ul.tasks {
+  .gigtype-calendar task-list {
     display: none;
   }
 
-  .gigtype-kit ul.tasks .caller {
+  .gigtype-kit task-list .caller {
     display: none;
   }
 
-  .gig-icons :global(*) {
+  :global(gig-icons > *) {
     margin: 0 0.3em;
   }
 
@@ -212,8 +212,8 @@
       Show signup
     </button>
   {/if}
-  <div
-    class="gig-summary gigtype-{gig.type.code} theme-{$themeName}"
+  <gig-summary
+    class="gigtype-{gig.type.code} theme-{$themeName}"
     class:details-visible="{showDetails}"
     class:permit-fade="{linkHeading}"
     class:admins-only="{gig.admins_only}"
@@ -224,7 +224,7 @@
         <span> <a href="/members/gigs/{gig.id}">{gig.title}</a> </span>
         <!-- span for correct multiline underlining -->
       {:else}{gig.title}{/if}
-      <div class="gig-icons">
+      <gig-icons>
         {#if gig.food_provided}
           <TooltipText content="Food provided"
             ><i class="las la-utensils" data-test="icon-food-provided"></i></TooltipText
@@ -240,7 +240,7 @@
             ><i class="las la-calendar" data-test="icon-calendar-event"></i></TooltipText
           >
         {/if}
-      </div>
+      </gig-icons>
     </h2>
     {#if gig.venue}
       <h3 class="main-detail">
@@ -262,7 +262,7 @@
     {#if gig.allow_signups && signups}
       <SignupSummary signups="{signups}" />
     {/if}
-    <div class="gig-timings">
+    <gig-timings>
       {#if gig.date}
         {#if gig.arrive_time}
           <p>
@@ -300,38 +300,32 @@
       {:else if gig.arrive_time}
         <p>{formatCalendarDate(DateTime.fromISO(gig.arrive_time))}</p>
       {/if}
-    </div>
-    <ul class="tasks main-detail">
-      <li>
-        {#if gig.finance_deposit_received !== undefined && gig.finance_deposit_received !== null}
-          {#if gig.finance_deposit_received}
-            <div class="task-summary color-positive"><i class="las la-money-bill-wave"></i> Deposit received</div>
-          {:else}
-            <div class="task-summary color-negative"><i class="las la-exclamation"></i> Deposit not received</div>
-          {/if}
+    </gig-timings>
+    <task-list class="main-detail">
+      {#if gig.finance_deposit_received !== undefined && gig.finance_deposit_received !== null}
+        {#if gig.finance_deposit_received}
+          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Deposit received</task-summary>
+        {:else}
+          <task-summary class="color-negative"><i class="las la-exclamation"></i> Deposit not received</task-summary>
         {/if}
-      </li>
-      <li>
-        {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
-          {#if gig.finance_payment_received}
-            <div class="task-summary color-positive"><i class="las la-money-bill-wave"></i> Payment received</div>
-          {:else}
-            <div class="task-summary color-negative"><i class="las la-exclamation"></i> Payment not received</div>
-          {/if}
+      {/if}
+      {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
+        {#if gig.finance_payment_received}
+          <task-summary class="color-positive"><i class="las la-money-bill-wave"></i> Payment received</task-summary>
+        {:else}
+          <task-summary class="color-negative"><i class="las la-exclamation"></i> Payment not received</task-summary>
         {/if}
-      </li>
-      <li>
-        {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
-          {#if gig.finance_caller_paid}
-            <div class="task-summary color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</div>
-          {:else}
-            <div class="task-summary color-negative caller"><i class="las la-exclamation"></i> Caller not paid</div>
-          {/if}
+      {/if}
+      {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
+        {#if gig.finance_caller_paid}
+          <task-summary class="color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</task-summary>
+        {:else}
+          <task-summary class="color-negative caller"><i class="las la-exclamation"></i> Caller not paid</task-summary>
         {/if}
-      </li>
-    </ul>
+      {/if}
+    </task-list>
     {#if gig.summary}
-      <div class="summary-text">
+      <summary-text>
         {#if gig.advertise}<b>Public advert:&nbsp;</b>{:else}<b>Summary:&nbsp;</b>{/if}
         <blockquote>
           {@html gig.summary
@@ -341,24 +335,24 @@
             .map((p) => `<p>${p}</p>`)
             .join("")}
         </blockquote>
-      </div>
+      </summary-text>
     {/if}
     {#if gig.notes_band}
-      <div class="band-notes">
+      <band-notes>
         <b>Band notes:&nbsp;</b>
         <blockquote>
           {@html gig.notes_band.trim()}
         </blockquote>
-      </div>
+      </band-notes>
     {/if}
     {#if gig.notes_admin}
-      <div class="admin-notes main-detail">
+      <admin-notes class="main-detail">
         <b>Admin notes:&nbsp;</b>
         {@html gig.notes_admin.trim()}
-      </div>
+      </admin-notes>
     {/if}
     {#if gig.finance}
-      <div class="gig-finance main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</div>
+      <gig-finance class="main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</gig-finance>
     {/if}
     {#if gig.gig_type === "gig_enquiry"}Quote date: {gig.quote_date}{/if}
     {#if clients.length > 0}
@@ -390,7 +384,7 @@
         {#if !showDetails}Show full details{:else}Hide full details{/if}
       </button>
     {/if}
-  </div>
+  </gig-summary>
 {:else}
   <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
     Show summary

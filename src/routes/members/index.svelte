@@ -1,32 +1,26 @@
 <script context="module">
-  import { makeClient, handleErrors } from "../../graphql/client";
+  import { makeClient } from "../../graphql/client";
   import { QueryGigSignup } from "../../graphql/gigs";
   import { notLoggedIn } from "../../client-auth.js";
 
-  export async function load({ session, fetch }) {
-    const loginError = notLoggedIn(session);
-    if (loginError) return loginError;
-
-    const client = makeClient(fetch, {
+  export async function preload(_, session) {
+    if (notLoggedIn.bind(this)(session)) return;
+    const client = makeClient(this.fetch, {
       role: "current_user",
     });
-    let res;
-    try {
-      res = await client.query({ query: QueryGigSignup });
-    } catch (e) {
-      return handleErrors(e);
-    }
+    let res = await client.query({ query: QueryGigSignup });
     let gigSignups = res.data.cucb_gigs;
     let userInstruments = res.data.cucb_users_instruments;
-    return { props: { gigSignups, userInstruments } };
+    return { gigSignups, userInstruments };
   }
 </script>
 
 <script>
-import GigSignup from "../../components/Gigs/Signup.svelte";
+  import GigSignup from "../../components/Gigs/Signup.svelte";
   import { makeTitle } from "../../view";
-  import { session } from "$app/stores";
+  import { stores } from "@sapper/app";
   export let gigSignups, userInstruments;
+  let { session } = stores();
 </script>
 
 <svelte:head>

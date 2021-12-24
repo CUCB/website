@@ -1,9 +1,8 @@
-<script lang="ts">
+<script>
   import { createEventDispatcher } from "svelte";
-  import { makeClient } from "../../graphql/client";
-  import type { Fetch } from "../../graphql/client";
-  import { CreateVenue, UpdateVenue } from "../../graphql/gigs";
 
+  import { makeClient } from "../../graphql/client";
+  import { CreateVenue, UpdateVenue } from "../../graphql/gigs";
   export let id,
     name,
     subvenue,
@@ -19,19 +18,15 @@
   let initiated = false;
 
   const dispatch = createEventDispatcher();
-  const latLngFrom = map_link => {
+  const latLngFrom = (map_link) => {
     try {
-      return map_link
-        .split(/@/)[1]
-        .split(/,/)
-        .slice(0, 2)
-        .map(parseFloat);
+      return map_link.split(/@/)[1].split(/,/).slice(0, 2).map(parseFloat);
     } catch {
       return [];
     }
   };
 
-  const updateLatLng = (latLngFromLink: [number, number]) => {
+  const updateLatLng = (latLngFromLink) => {
     if (!initiated) {
       initiated = true;
       return;
@@ -60,7 +55,7 @@
       longitude: longitude === "" ? null : longitude,
     };
 
-    let client = makeClient(fetch as Fetch);
+    let client = makeClient(fetch);
     let mutationDetails;
     if (id !== null && id !== undefined) {
       mutationDetails = [UpdateVenue, "update_cucb_gig_venues_by_pk"];
@@ -75,7 +70,7 @@
       });
 
       dispatch("saved", {
-        venue: res.data[mutationDetails[1] as string],
+        venue: res.data[mutationDetails[1]],
       });
     } catch (e) {
       // Oh shit, probably should do something here
@@ -146,7 +141,7 @@
   <div class="buttons">
     <input type="submit" value="Save venue" data-test="venue-editor-save" on:click="{saveVenue}" /><button
       on:click="{() => dispatch('cancel')}"
-      data-test="venue-editor-cancel"
-    >Cancel</button>
+      data-test="venue-editor-cancel">Cancel</button
+    >
   </div>
 </form>

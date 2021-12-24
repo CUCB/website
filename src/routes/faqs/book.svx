@@ -9,7 +9,7 @@
 
 ## Book us
 
-For more information, have a look at our <a href="/docs/standard-gig-policy.pdf" rel="external">Standard Gig Policy</a>, and if you have any questions e-mail <Mailto person={$committee.secretary}>the Secretary</Mailto> or use the [online contact form](/book).
+For more information, have a look at our [Standard Gig Policy](/docs/standard-gig-policy.pdf), and if you have any questions e-mail <Mailto person={$committee.secretary}>the Secretary</Mailto> or use the [online contact form](/book).
 
 ### How do you pronounce ceilidh?
 

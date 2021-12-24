@@ -17,7 +17,6 @@ import "./commands";
 import tinycolor from "../deps/tinycolor";
 import chaiSorted from "chai-sorted";
 import { DateTime, Settings } from "luxon";
-import "@percy/cypress";
 
 Settings.defaultZoneName = "Europe/London";
 Cypress.DateTime = DateTime;
@@ -45,8 +44,12 @@ const equalStroke = (_chai, utils) => {
     let objectColor = tinycolor(this._obj.css("stroke")).toHexString();
     this.assert(
       objectColor === tinycolor(options).toHexString(),
-      `expected #{this} to have stroke color "${tinycolor(options).toHexString()}". actual stroke color is "${objectColor}".`,
-      `expected #{this} to not have stroke color "${tinycolor(options).toHexString()}". actual stroke color is "${objectColor}".`,
+      `expected #{this} to have stroke color "${tinycolor(
+        options,
+      ).toHexString()}". actual stroke color is "${objectColor}".`,
+      `expected #{this} to not have stroke color "${tinycolor(
+        options,
+      ).toHexString()}". actual stroke color is "${objectColor}".`,
       this._obj,
     );
   }

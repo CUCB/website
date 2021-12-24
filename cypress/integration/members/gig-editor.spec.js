@@ -211,7 +211,6 @@ describe("gig editor", () => {
       });
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}/edit`);
-      cy.waitForFormInteractive();
     });
 
     it("detects unsaved changes", () => {
@@ -595,7 +594,6 @@ describe("gig editor", () => {
     beforeEach(() => {
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}/edit`);
-      cy.waitForFormInteractive();
     });
 
     it("warns when gig is unusually long", () => {

@@ -1,28 +1,29 @@
 import jwt from "jsonwebtoken";
+import type { SapperRequest, SapperResponse } from "@sapper/server";
 import { Number, Record, String } from "runtypes";
-import dotenv from "dotenv";
-import type { Request, Response } from "@sveltejs/kit";
-
-dotenv.config();
 
 const PasswordResetToken = Record({
   id: Number,
   email: String,
 });
 
-export async function get({ params }: Request): Promise<Response> {
+export async function get(req: SapperRequest, res: SapperResponse, _: never) {
   try {
-    const token = jwt.verify(params["token"], process.env["SESSION_SECRET"] as string);
+    const token = jwt.verify(req.params["token"], process.env.SESSION_SECRET as string);
     if (PasswordResetToken.guard(token)) {
-      return { status: 200, body: token };
+      res.statusCode = 200;
+      res.end(JSON.stringify(token));
     } else {
-      return { status: 400, body: "Token contents invalid" };
+      res.statusCode = 400;
+      res.end("Token contents invalid");
     }
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
-      return { status: 410, body: "Expired token" };
+      res.statusCode = 410;
+      res.end("Expired token");
     } else {
-      return { status: 400, body: "Token is not a valid JWT" };
+      res.statusCode = 400;
+      res.end("Token is not a valid JWT");
     }
   }
 }

@@ -574,31 +574,31 @@ describe("lineup editor", () => {
 
       it("warns about invalid lineups", () => {
         cy.get(`[data-test=lineup-warnings]`).should("not.exist");
-        cy.approveLineupPerson(signups[0].user.id);
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).click().should("not.exist");
         cy.get(`[data-test=lineup-warnings]`)
           .should("contain", "No leader selected")
           .and("contain", "No techie selected");
-        cy.toggleLineupRole(signups[0].user.id, "leader");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-leader]`).click();
         cy.get(`[data-test=lineup-warnings]`)
           .should("not.contain", "No leader selected")
           .and("contain", "No techie selected");
-        cy.toggleLineupRole(signups[0].user.id, "equipment");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-equipment]`).click();
         cy.get(`[data-test=lineup-warnings]`).should("contain", "Someone leading and teching");
-        cy.toggleLineupRole(signups[0].user.id, "money_collector");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-money_collector]`).click();
         cy.get(`[data-test=lineup-warnings]`)
           .should("contain", "Someone leading and teching")
           .and("contain", "Money collector not notified");
-        cy.toggleLineupRole(signups[0].user.id, "money_collector_notified");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-money_collector_notified]`).click();
         cy.get(`[data-test=lineup-warnings]`)
           .should("contain", "Someone leading and teching")
           .and("not.contain", "Money collector not notified");
-        cy.toggleLineupRole(signups[0].user.id, "money_collector_notified");
-        cy.toggleLineupRole(signups[0].user.id, "money_collector");
-        cy.approveLineupPerson(signups[1].user.id);
-        cy.toggleLineupRole(signups[0].user.id, "equipment");
-        cy.toggleLineupRole(signups[1].user.id, "equipment");
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-money_collector_notified]`).click();
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-money_collector]`).click();
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).click();
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-equipment]`).click();
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-equipment]`).click();
         cy.get(`[data-test=lineup-warnings]`).should("not.exist");
-        cy.approveLineupPerson(signups[3].user.id);
+        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-approve]`).click();
         cy.get(`[data-test=lineup-warnings]`).should("contain", "Someone unavailable selected");
       });
 

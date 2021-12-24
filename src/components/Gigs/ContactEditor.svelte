@@ -34,7 +34,6 @@
       });
 
       dispatch("saved", {
-        // @ts-ignore
         contact: res.data[mutationDetails[1]],
       });
     } catch (e) {
@@ -75,7 +74,7 @@
   <label> Notes <input type="text" bind:value="{notes}" data-test="contact-editor-notes" /> </label>
   <div class="buttons">
     <input type="submit" value="Save contact" data-test="contact-editor-save" /><button
-      on:click="{() => dispatch('cancel')}"
-    >Cancel</button>
+      on:click="{() => dispatch('cancel')}">Cancel</button
+    >
   </div>
 </form>

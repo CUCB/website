@@ -20,7 +20,7 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       ## uncomment next line to set an admin secret
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_AUTH_HOOK: http://cypress:3000/auth/hook
+      HASURA_GRAPHQL_AUTH_HOOK: http://cypress:4000/auth/hook
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
   cypress:
     image: cypress/base:10
@@ -37,7 +37,7 @@ services:
       PG_DATABASE: postgres
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
-      VITE_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
+      HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
       HCAPTCHA_SECRET: "0x0000000000000000000000000000000000000000"
       EMAIL_POSTFIX_HOST: mailhog
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk

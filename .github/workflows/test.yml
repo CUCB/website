@@ -6,33 +6,22 @@ on:
 jobs:
   svelte-check:
     name: Type-check svelte
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Use Node.js 14.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v1
         with:
-          node-version: "16"
-      - name: Create dummy .env file
-        run: |
-          echo "SESSION_SECRET=somethingreallynotsecret" > .env
+          node-version: 14.x
       - name: Run svelte-check
         run: |
-          npm ci
+          npm i
+          npm run build
           npm run svelte-check
-  unique_id:
-    name: "Generate unique ID for workflow run"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Generate unique id
-        id: unique_id
-        run: echo "::set-output name=id::$(uuidgen)"
-    outputs:
-      unique_id: ${{ steps.unique_id.outputs.id }}
   test:
     name: Cypress run
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     strategy:
       # when one test fails, DO NOT cancel the other
       # containers, because this will kill Cypress processes
@@ -42,11 +31,11 @@ jobs:
       matrix:
         # run 4 copies of the current job in parallel
         containers: [1, 2, 3, 4]
-    needs:
-      - unique_id
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      # because of "record" and "parallel" parameters
+      # these containers will load balance all found tests among themselves
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
@@ -54,8 +43,10 @@ jobs:
           parallel: true
           group: "Linux/Chrome"
           start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
-          wait-on: "http://localhost:3000"
+          wait-on: "http://localhost:4000"
           wait-on-timeout: 240
+          # the entire command will automatically be prefixed with "npm"
+          # and we need the second "npm" to execute "cypress run ..." command line
           command-prefix: "percy exec -- npx"
         env:
           # pass the Dashboard record key as an environment variable
@@ -67,8 +58,7 @@ jobs:
           # See https://dev.to/digitaledawn/github-action-cypress-and-percy-parallelisation-setup-484a for percy setup
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_TOTAL: 4
-          # We need a uuid (as mentioned here https://github.com/actions/toolkit/issues/65#issuecomment-718134668) to uniquely identify re-runs)
-          PERCY_PARALLEL_NONCE: "${{ github.event_name }}-${{ github.sha }}-${{ needs.unique_id.outputs.unique_id }}"
+          PERCY_PARALLEL_NONCE: "${{ github.event_name }}-${{ github.sha }}"
           PERCY_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
       - name: Upload artifacts
@@ -79,6 +69,24 @@ jobs:
           path: |
             cypress/videos/**/*.mp4
             cypress/screenshots/**/*.png
+
+  pulumi-preview:
+    if: ${{ github.ref!='refs/heads/master' }}
+    name: Preview infrastructure updates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+      - name: Install Pulumi CLI
+        uses: pulumi/action-install-pulumi-cli@v1.0.1
+      - run: cd pulumi && npm install
+      - uses: pulumi/actions@v3
+        with:
+          command: preview
+          stack-name: prod
+          work-dir: pulumi
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   build:
     if: ${{ github.ref=='refs/heads/master' }}
@@ -96,101 +104,58 @@ jobs:
 
       - name: Build and tag image
         run: |
-          echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
+          echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
           docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
-          docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
+          docker build -t $CI_REGISTRY/cucb/website:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
 
       - name: Push image to registry
-        run: docker push $CI_REGISTRY/cucb/$IMAGE_NAME:slim
-    env:
-      IMAGE_NAME: sveltekit
-
-  pulumi-preview:
-    if: ${{ github.ref != 'refs/heads/master' }}
-    name: Preview infrastructure updates
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v2
-      - name: Install Pulumi CLI
-        uses: pulumi/action-install-pulumi-cli@v1.0.1
-      - run: cd deploy/pulumi && npm install
-      - uses: pulumi/actions@v3
-        with:
-          command: preview
-          stack-name: shared
-          work-dir: deploy/pulumi
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-      - uses: pulumi/actions@v3
-        with:
-          command: preview
-          stack-name: prod
-          work-dir: deploy/pulumi
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        run: docker push $CI_REGISTRY/cucb/website:slim
 
   pulumi:
     name: Create/update infrastructure
-    runs-on:
-      ubuntu-latest
-      #needs:
-      #      - build
-      #      - test
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test
     outputs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
-      - name: Set env to develop
-        if: endsWith(github.ref, '/sveltekit-beta')
-        run: echo "ENVIRONMENT=dev" >> $GITHUB_ENV
-      - name: Set env to production
-        if: endsWith(github.ref, '/master')
-        run: echo "ENVIRONMENT=prod" >> $GITHUB_ENV
       - name: Checkout Repo
         uses: actions/checkout@v2
       - name: Install Pulumi CLI
         uses: pulumi/action-install-pulumi-cli@v1.0.1
-      - run: cd deploy/pulumi && npm install
-      - uses: pulumi/actions@v3
-        with:
-          command: up
-          stack-name: shared
-          work-dir: deploy/pulumi
-        env:
-          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      - run: cd pulumi && npm install
       - uses: pulumi/actions@v3
         id: update
         with:
           command: up
-          stack-name: ${{ env.ENVIRONMENT }}
-          work-dir: deploy/pulumi
+          stack-name: prod
+          work-dir: pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
-  deploy-ansible:
-    if: ${{ github.ref=='refs/heads/master' }}
-    name: Deploy site to DigitalOcean using ansible
+  deploy:
+    name: Deploy site to DigitalOcean
     runs-on: ubuntu-latest
     needs: pulumi
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
 
-      - name: Setup python
-        uses: actions/setup-python@v2
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.4.1
         with:
-          python-version: "3.x"
-          architecture: "x64"
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Install dependencies
+      - name: Copy required SSH keys
         run: |
-          pip install ansible
-          ansible-galaxy collection install -r deploy/ansible/requirements.yml
-
-      - name: Write deploy key to disk
-        run: echo "$DEPLOY_PULL_KEY" > deploy/ansible/deploy_pull
+          ssh-keyscan $IP >> ~/.ssh/known_hosts
+          echo "$DEPLOY_PULL_KEY" > deploy_pull
+          scp deploy_pull root@$IP:.ssh/
+          scp pulumi/ssh_keys/ci_login.pub root@$IP:.ssh/
+          rm deploy_pull
         env:
           DEPLOY_PULL_KEY: ${{ secrets.DEPLOY_PULL_KEY }}
 
@@ -200,26 +165,38 @@ jobs:
         run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
 
-      - name: Play ansible playbook
-        uses: dawidd6/action-ansible-playbook@v2
-        with:
-          playbook: deploy/ansible/playbook.yml
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          inventory: |
-            ${{ needs.pulumi.outputs.IP }}
-          options: |
-            --extra-vars ${{ format('deploy_registry={0}', secrets.CI_REGISTRY) }}
-            --extra-vars ${{ format('deploy_registry_user={0}', secrets.CI_REGISTRY_USER) }}
-            --extra-vars ${{ format('deploy_registry_password={0}', secrets.CI_REGISTRY_PASSWORD) }}
-            --extra-vars ${{ format('ci_commit_branch={0}', steps.extract_branch.outputs.branch) }}
-            --extra-vars ${{ format('dropbox_access_token={0}', secrets.DROPBOX_ACCESS_TOKEN) }}
-            --extra-vars ${{ format('hcaptcha_secret={0}', secrets.HCAPTCHA_SECRET) }}
+      - name: Copy environment secrets
+        run: |
+          echo "CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH" > sshenv
+          echo "DEPLOY_REGISTRY=$CI_REGISTRY" >> sshenv
+          echo "DEPLOY_REGISTRY_USER=$CI_REGISTRY_USER" >> sshenv
+          echo "DEPLOY_REGISTRY_PASSWORD=$CI_REGISTRY_PASSWORD" >> sshenv
+          scp sshenv root@$IP:~/.ssh/environment
+          echo "HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" > hcaptcha
+          echo "HCAPTCHA_SECRET=$HCAPTCHA_SECRET" >> hcaptcha
+          echo "export DROPBOX_ACCESS_TOKEN=$DROPBOX_ACCESS_TOKEN" > dropbox_access_token
+          ssh root@$IP "mkdir -p .env"
+          scp hcaptcha root@$IP:.env/hcaptcha
+          scp dropbox_access_token root@$IP:.env/dropbox_access_token
+          rm dropbox_access_token
+          echo "CLOUDFLARE_EMAIL=webmaster@cucb.co.uk" > cloudflare_api_key
+          echo "CLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY" >> cloudflare_api_key
+          scp cloudflare_api_key root@$IP:.env/cloudflare_api_key
+          rm cloudflare_api_key
         env:
-          ANSIBLE_HOST_KEY_CHECKING: "false"
-          ANSIBLE_DEPRECATION_WARNINGS: "false"
+          CI_COMMIT_BRANCH: ${{ steps.extract_branch.outputs.branch }}
+          CLOUDFLARE_EMAIL: ${{ secrets.CLOUDFLARE_EMAIL }}
+          CLOUDFLARE_API_KEY: ${{ secrets.CLOUDFLARE_API_KEY }}
+          HCAPTCHA_SECRET: ${{ secrets.HCAPTCHA_SECRET }}
+          HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
+          DROPBOX_ACCESS_TOKEN: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
 
-      - name: Remove deploy key
-        run: rm deploy/ansible/deploy_pull
+      - name: Copy and run deploy script
+        run: |
+          scp deploy.sh root@$IP:deploy.sh
+          ssh root@$IP "chmod +x deploy.sh && ./deploy.sh"
+    env:
+      IP: ${{ needs.pulumi.outputs.ip }}
 
 env:
   CI_REGISTRY_USER: ${{ secrets.CI_REGISTRY_USER }}

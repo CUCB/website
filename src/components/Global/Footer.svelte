@@ -1,7 +1,7 @@
 <script lang="ts">
   import Mailto from "../Mailto.svelte";
   import { themeName } from "../../view";
-  import type { Committee } from "../../routes/__layout.svelte";
+  import type { Committee } from "../../routes/_layout.svelte";
   export let committee: Committee;
 </script>
 

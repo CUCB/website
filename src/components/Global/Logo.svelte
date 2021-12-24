@@ -1,12 +1,14 @@
+<svelte:options immutable />
+
 <script lang="ts">
   import { draw } from "svelte/transition";
   import { onMount } from "svelte";
   import { tweened } from "svelte/motion";
   import { sineInOut } from "svelte/easing";
-  import { getStores } from "$app/stores";
+  import { stores } from "@sapper/app";
   import { themeName } from "../../view";
   let rotation = tweened(0, { easing: sineInOut, duration: 250 });
-  let { session } = getStores();
+  let { session } = stores();
   let self: SVGSVGElement;
   export let id: string;
   export let enableSpin: boolean;
@@ -48,7 +50,7 @@
     : () => {
         // @ts-ignore
         if (window.Cypress) {
-            self.dispatchEvent(new CustomEvent("noRotate"));
+          self.dispatchEvent(new CustomEvent("noRotate"));
         }
       };
 </script>
@@ -81,7 +83,6 @@
   }
 </style>
 
-<svelte:options immutable />
 <div id="{id}" role="presentation">
   <div id="logo2" class="theme-{$themeName}">
     {#if animate}

@@ -9,7 +9,7 @@ docker-compose -f docker-compose.prod.yml run -v "$BLOCK/db_backup:/db_backup" p
 	su postgres -c '"'"'current_time=$(date "+%Y%m%d-%H%M%S");
 	pg_dump -Fc -h postgres < /pgpassword > "/db_backup/$current_time-full.sql";
 	pg_dump -Fc --data-only -h postgres < /pgpassword > "/db_backup/$current_time-data.sql"
-	'"'" 2>&1
+	'"'"
 
 FILES=$(ls -d $BLOCK/db_backup/* | tail -n 2)
 

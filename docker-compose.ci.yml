@@ -10,12 +10,11 @@ services:
     ports:
       - "8080:8080"
   cypress:
-    image: node:14
-    user: "root"
+    image: node:12
     volumes:
       - .:/usr/src/app
     ports:
-      - "3000:3000"
+      - "4000:4000"
       - "10000:10000"
     environment:
       PERCY_TOKEN: ${PERCY_TOKEN}

@@ -10,7 +10,7 @@
   import TooltipText from "../TooltipText.svelte";
   import { clientCurrentUser } from "../../graphql/client";
   import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
-  import { session } from "$app/stores";
+  import { stores } from "@sapper/app";
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
@@ -21,23 +21,21 @@
   $: date = gig.date && DateTime.fromISO(gig.date);
 
   let selectedInstruments =
-    // @ts-ignore
     gig.lineup.length > 0
       ? Object.assign(
           {},
-          // @ts-ignore
           ...gig.lineup[0].user_instruments.map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
         )
       : {};
 
-  // @ts-ignore
   userInstruments = userInstruments.map((userInstr) =>
     userInstr.id in selectedInstruments
       ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
       : { ...userInstr, chosen: false, approved: false },
   );
 
-  // @ts-ignore
+  let { session } = stores();
+
   $userNotes || (gig.lineup.length && ($userNotes = gig.lineup[0].user.gig_notes));
   userNotes.subscribe(
     (notes) => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
@@ -54,7 +52,6 @@
       (entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO)) ||
     undefined;
 
-  // @ts-ignore
   let status = gig.lineup[0] && statusFromAvailability(gig.lineup[0]);
 
   const signup = (newStatus) => async () => {
@@ -182,20 +179,15 @@
 <style lang="scss">
   @import "../../sass/themes.scss";
 
-  textarea {
-    margin-bottom: 1em;
-  }
-
-  .statuses {
+  status-icons {
     display: flex;
     justify-content: space-around;
     user-select: none;
     max-width: 450px;
     margin-top: 1.5em;
-    border: none;
   }
 
-  .statuses :global(.annotated-icon) {
+  status-icons :global(.annotated-icon) {
     max-width: 100px;
   }
 
@@ -219,7 +211,7 @@
     padding-left: 5px;
   }
 
-  .gig-signup {
+  gig-signup {
     display: block;
     padding: 1em;
     margin-bottom: 2em;
@@ -230,24 +222,24 @@
   }
 
   @media only screen and (max-width: 400px) {
-    .statuses {
+    status-icons {
       flex-direction: column;
       justify-content: flex-start;
       align-items: stretch;
     }
 
-    .statuses :global(.annotated-icon) {
+    status-icons :global(.annotated-icon) {
       max-width: 100%;
       height: 34px;
       margin-bottom: 0.75em;
     }
 
-    .statuses :global(.annotated-icon div) {
+    status-icons :global(.annotated-icon div) {
       display: flex;
       align-items: center;
     }
 
-    .statuses :global(.annotated-icon i) {
+    status-icons :global(.annotated-icon i) {
       margin-right: 10px;
     }
   }
@@ -262,15 +254,9 @@
     list-style-type: none;
     font-style: italic;
   }
-
-  legend {
-    font-family: var(--title);
-    font-size: 1.2em;
-    padding: 0 0.25em;
-  }
 </style>
 
-<div data-test="gig-signup-{gig.id}" class="gig-signup theme-{$themeName}">
+<gig-signup data-test="gig-signup-{gig.id}" class="theme-{$themeName}">
   <h3>
     {#if showLink}<a href="/members/gigs/{gig.id}">{gig.title}</a>{:else}{gig.title}{/if}
     {#if date}
@@ -288,7 +274,7 @@
       </a>
     </h4>
   {/if}
-  <fieldset role="radiogroup" class="statuses">
+  <status-icons role="radiogroup">
     <AnnotatedIcon
       icon="check"
       color="{status === statuses.YES ? 'var(--positive)' : 'var(--unselected)'}"
@@ -322,30 +308,28 @@
     >
       I am unavailable
     </AnnotatedIcon>
-  </fieldset>
+  </status-icons>
   {#if status === statuses.YES || status === statuses.MAYBE}
-    <div>
+    <user-instruments>
       {#if edit}
-        <fieldset>
-          <legend>Instruments</legend>
-          {#each userInstruments as userInstrument (userInstrument.id)}
-            <label
-              class="checkbox"
-              data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.instrument.id}-toggle`}"
-              class:disabled="{userInstrument.approved}"
-              use:instrumentTooltip
-            >
-              <input type="checkbox" bind:checked="{userInstrument.chosen}" disabled="{userInstrument.approved}" />
-              {userInstrument.instrument.name}
-            </label>
-          {:else}
-            <p>
-              You haven't added any instruments to your account, try adding one to
-              <a href="/members/user">your profile</a>
-              .
-            </p>
-          {/each}
-        </fieldset>
+        <span class="notes">Instruments</span>
+        {#each userInstruments as userInstrument (userInstrument.id)}
+          <label
+            class="checkbox"
+            data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.instrument.id}-toggle`}"
+            class:disabled="{userInstrument.approved}"
+            use:instrumentTooltip
+          >
+            <input type="checkbox" bind:checked="{userInstrument.chosen}" disabled="{userInstrument.approved}" />
+            {userInstrument.instrument.name}
+          </label>
+        {:else}
+          <p>
+            You haven't added any instruments to your account, try adding one to
+            <a href="/members/user">your profile</a>
+            .
+          </p>
+        {/each}
       {:else}
         <p>Signed up with:</p>
         <ul data-test="{`gig-${gig.id}-signup-instruments-selected`}">
@@ -358,16 +342,13 @@
           {/each}
         </ul>
       {/if}
-    </div>
-    {#if edit}
-      <fieldset>
-        <legend>Notes</legend>
+    </user-instruments>
+    <user-notes>
+      {#if edit}
         <label class="notes"> Notes for this gig <textarea bind:value="{gig.lineup[0].user_notes}"></textarea> </label>
         <label class="notes"> General notes <textarea bind:value="{gig.lineup[0].user.gig_notes}"></textarea> </label>
-      </fieldset>
-      <br />
-    {:else if gig.lineup[0].user_notes || $userNotes}
-      <div class="user-notes">
+        <br />
+      {:else if gig.lineup[0].user_notes || $userNotes}
         <p>
           <TooltipText content="Notes specific to this particular gig">Notes for this gig:</TooltipText>
         </p>
@@ -376,8 +357,8 @@
           <TooltipText content="Persistent notes for all gigs you are signed up to">General notes:</TooltipText>
         </p>
         <blockquote>{$userNotes || "None"}</blockquote>
-      </div>
-    {/if}
+      {/if}
+    </user-notes>
     {#if edit}
       <button on:click="{saveEdits}" data-test="{`gig-${gig.id}-signup-save`}">
         Save
@@ -395,4 +376,4 @@
       </button>
     {/if}
   {/if}
-</div>
+</gig-signup>

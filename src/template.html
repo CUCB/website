@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="theme-color" content="#333333" />
+
+    %sapper.base%
+
+    <link rel="stylesheet" href="static/global.css" />
+    <link rel="manifest" href="static/manifest.json" crossorigin="use-credentials" />
+    <link rel="icon" type="image/x-icon" href="static/favicon.ico" />
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=fetch%2CPromise%2Ces2019%2Ces2018%2Ces2017%2Ces2016%2Ces2015%2Ces5%2Ces6%2Ces7%2CURLSearchParams"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/2.5.0/custom-elements-es5-adapter.js"></script>
+
+    <!-- Sapper generates a <style> tag containing critical CSS
+	     for the current page. CSS for the rest of the app is
+	     lazily loaded when it precaches secondary pages -->
+    %sapper.styles%
+
+    <!-- This contains the contents of the <svelte:head> component, if
+	     the current page has one -->
+    %sapper.head% %sapper.scripts%
+  </head>
+
+  <body>
+    <!-- The application will be rendered inside this element,
+	     because `src/client.js` references it -->
+    <div id="sapper">%sapper.html%</div>
+
+    <!-- Sapper creates a <script> tag containing `src/client.js`
+	     and anything else it needs to hydrate the app and
+	     initialise the router -->
+  </body>
+</html>

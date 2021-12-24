@@ -1,6 +1,6 @@
 import { login } from "../../auth";
+import type { SapperRequest, SapperResponse } from "@sapper/server";
 import { String, Record } from "runtypes";
-import type { Request } from "@sveltejs/kit";
 
 const NonEmptyString = String.withConstraint((str) => str.trim().length > 0);
 const LoginBody = Record({
@@ -10,22 +10,22 @@ const LoginBody = Record({
 // TODO import an accurate version of this from somewhere!
 type Session = any;
 
-export async function post(req: Request<{session: Session}>) {
-  const body = Object.fromEntries(req.body.entries());
-  if (LoginBody.guard(body)) {
+export async function post(req: SapperRequest & { body: any; session: Session }, res: SapperResponse, _next: unknown) {
+  if (LoginBody.guard(req.body)) {
     try {
-      const loginResult = await login(body);
+      const loginResult = await login(req.body);
 
-      req.locals.session.userId = loginResult.user_id.toString();
-      req.locals.session.hasuraRole = loginResult.admin_type.hasura_role;
-      req.locals.session.firstName = loginResult.first;
-      req.locals.session.lastName = loginResult.last;
-      let setCookie = await req.locals.session.save();
-      return { status: 200, body: req.locals.session.userId, headers: setCookie };
+      req.session.userId = loginResult.user_id.toString();
+      req.session.hasuraRole = loginResult.admin_type.hasura_role;
+      req.session.firstName = loginResult.first;
+      req.session.lastName = loginResult.last;
+      req.session.save(() => (res.statusCode = 200), res.end(req.session.userId));
     } catch (e) {
-      return { status: e.status, body: e.message };
+      res.statusCode = e.status;
+      res.end(e.message);
     }
   } else {
-    return { status: 400, body: "Missing username or password" };
+    res.statusCode = 400;
+    res.end("Missing username or password");
   }
 }

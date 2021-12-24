@@ -9,8 +9,7 @@
     "graphql.vscode-graphql",
     "silvenon.mdx",
     "svelte.svelte-vscode",
-    "esbenp.prettier-vscode",
-    "zbr.vscode-ansible"
+    "esbenp.prettier-vscode"
   ],
   // List of extensions recommended by VS Code that should not be recommended for users of this workspace.
   "unwantedRecommendations": []

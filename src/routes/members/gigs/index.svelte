@@ -2,12 +2,12 @@
   import { makeClient, handleErrors } from "../../../graphql/client";
   import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
 
-  export async function load({ fetch, session }) {
+  export async function preload(_page, session) {
     Settings.defaultZoneName = "Europe/London";
 
     let res_gig, res_signup, res_gig_2;
-    let preloadClient = makeClient(fetch);
-    let preloadClientCurrentUser = makeClient(fetch, { role: "current_user" });
+    let preloadClient = makeClient(this.fetch);
+    let preloadClientCurrentUser = makeClient(this.fetch, { role: "current_user" });
     try {
       res_gig = await preloadClient.query({
         query: QueryMultiGigDetails(session.hasuraRole),
@@ -51,13 +51,14 @@
         variables: { where: { allow_signups: { _eq: true } } },
       });
     } catch (e) {
-      return handleErrors(e, session);
+      handleErrors.bind(this)(e, session);
+      return;
     }
 
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {
       let gigs = res_gig.data.cucb_gigs;
-      // Sort the gigs before rendering since the database can't sort by computed field
-      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
+      // Sort the gigs pre render since the database can't sort by computed field
+      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date));
 
       let signup_dict = {};
       let signups = res_signup.data.cucb_gigs;
@@ -68,33 +69,32 @@
       let currentCalendarMonth = DateTime.local().toFormat("yyyy-LL");
 
       return {
-        props: {
-          gigs,
-          signupGigs: signup_dict,
-          userInstruments: res_signup.data.cucb_users_instruments,
-          calendarGigs: {
-            [currentCalendarMonth]: res_gig_2.data.cucb_gigs.sort(
-              (gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
-            ),
-          },
-          currentCalendarMonth,
+        gigs,
+        signupGigs: signup_dict,
+        userInstruments: res_signup.data.cucb_users_instruments,
+        calendarGigs: {
+          [currentCalendarMonth]: res_gig_2.data.cucb_gigs.sort(
+            (gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date),
+          ),
         },
+        currentCalendarMonth,
       };
     } else {
-      return { status: 500, error: "Couldn't retrieve gig details" };
+      this.error(500, "Couldn't retrieve gig details");
+      return;
     }
   }
 </script>
 
-<script lang="ts">
+<script>
   import { makeTitle, calendarStartDay, themeName } from "../../../view";
   import { client } from "../../../graphql/client";
-  import { session } from "$app/stores";
+  import { stores } from "@sapper/app";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
   import { DateTime, Settings } from "luxon";
   import { writable } from "svelte/store";
-  export let gigs: any[], calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
+  export let gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
   Settings.defaultZoneName = "Europe/London";
 
   $: reloadSignupGigs(gigs);
@@ -113,6 +113,7 @@
     signupGigs = Object.fromEntries([...Object.entries(signupGigs), ...newlyMerged]);
   }
   let allUpcoming = gigs;
+  let { session } = stores();
   let drafts = gigs.filter((gig) => gig.type.code === "draft");
   $: currentCalendarMonthLuxon = DateTime.fromFormat(currentCalendarMonth, "yyyy-LL");
   let displaying = "allUpcoming";
@@ -182,10 +183,9 @@
           order_by: { date: "asc" },
         },
       });
-      // @ts-ignore
       calendarGigs[newDate] = res_gig_2.data.cucb_gigs;
       calendarGigs[newDate] = calendarGigs[newDate].sort(
-        (gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
+        (gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date),
       );
     }
     currentCalendarMonth = newDate;
@@ -197,7 +197,7 @@
   $: gotoNextCalendarMonth = gotoDate(
     DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").plus({ months: 1 }).toFormat("yyyy-LL"),
   );
-  $: changeCalendarDate = async (event: CustomEvent<{month?: number, year?: number}>) => {
+  $: changeCalendarDate = async (event) => {
     if (event.detail.month !== undefined) {
       await gotoDate(
         DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").set({ month: event.detail.month }).toFormat("yyyy-LL"),

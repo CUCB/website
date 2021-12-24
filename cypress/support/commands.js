@@ -103,26 +103,3 @@ Cypress.Commands.add("paste", { prevSubject: true }, (subject, content) => {
 Cypress.Commands.add("waitForFormInteractive", () => {
   cy.get("[data-test=page-hydrated]").should("exist");
 });
-
-function parseBool(b) {
-  if (b === "true") return true;
-  else if (b === "false") return false;
-  else throw new Exception(`Expected ${b} to be a bool value`);
-}
-
-Cypress.Commands.add("toggleLineupRole", (...args) => {
-  const [userId, name] = args.length == 2 ? args : [undefined, args[0]];
-  const userRow = userId ? `[data-test=member-${userId}]` : ``;
-  const button = `${userRow} [data-test=toggle-${name}]`;
-  cy.get(button)
-    .invoke("attr", "aria-pressed")
-    .then(parseBool)
-    .then((previousPressedState) => {
-      cy.get(button).click();
-      cy.get(button).should("have.attr", "aria-pressed", (!previousPressedState).toString());
-    });
-});
-
-Cypress.Commands.add("approveLineupPerson", (userId) => {
-  cy.get(`[data-test=member-${userId}] [data-test=person-approve]`).click().should("not.exist");
-});

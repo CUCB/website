@@ -22,7 +22,7 @@
   import { HsvPicker } from "svelte-color-picker";
   import { onMount } from "svelte";
   import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
-  import { session } from "$app/stores";
+  import { stores } from "@sapper/app";
   import { Record, Map } from "immutable";
   import { String, Null, Literal, Union, Boolean } from "runtypes";
   import type { Static } from "runtypes";
@@ -42,6 +42,7 @@
   type ColoredLocalStorageProperty = `${ColorableProperty}_${ThemeColor}`;
   type LocalStorageProperty = ColoredLocalStorageProperty | "color" | "font" | "calendarStartDay" | "spinnyLogo";
 
+  let { session } = stores();
   let viewSettings = new ViewSettings();
   $: color = settings.color;
   $: themeName.set(settings.color);
@@ -207,13 +208,10 @@
             let value = settings[setting].get(color);
             if (value !== undefined) {
               localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(value));
-            } else {
-              localStorage.removeItem(`${prop}_${$session.userId}`);
             }
-          } else if (settings[prop] !== undefined) {
-            localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(settings[prop]));
           } else {
-            localStorage.removeItem(`${prop}_${$session.userId}`);
+            settings[prop] !== undefined &&
+              localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(settings[prop]));
           }
         }
       }
@@ -236,17 +234,15 @@
 </script>
 
 <svelte:head>
-  <link rel="stylesheet" type="text/css" href="/static/themes/color/{color}.css" />
-  <link rel="stylesheet" type="text/css" href="/static/themes/font/{font}.css" />
+  <link rel="stylesheet" type="text/css" href="static/themes/color/{color}.css" />
+  <link rel="stylesheet" type="text/css" href="static/themes/font/{font}.css" />
+  {#if accent && accent !== "null"}
+    {@html accentCss(accent)}
+  {/if}
+  {#if logo && logo !== "null"}
+    {@html logoCss(logo)}
+  {/if}
 </svelte:head>
-<!-- It feels like these should go in svelte:head, but it seems at the moment (svelte 3.44.0), this doesn't like reactivity
-  but previous versions seemed to work-->
-{#if accent && accent !== "null"}
-  {@html accentCss(accent)}
-{/if}
-{#if logo && logo !== "null"}
-  {@html logoCss(logo)}
-{/if}
 {#if showSettings}
   <Popup
     on:close="{() => {

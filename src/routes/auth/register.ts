@@ -1,7 +1,7 @@
 import { createAccount } from "../../auth";
 import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
-import { String, Record as RuntypeRecord } from "runtypes";
-import type { Request } from "@sveltejs/kit";
+import type { SapperRequest, SapperResponse } from "@sapper/server";
+import { String, Record } from "runtypes";
 
 function passwordIsValid(password: string): Boolean {
   return password.length >= 8;
@@ -9,15 +9,15 @@ function passwordIsValid(password: string): Boolean {
 
 // TODO can this be made more precise?
 type Session = {
-  save(): Promise<Record<string, string>>;
+  save: (callback: () => void) => void;
   userId?: string;
   hasuraRole?: string;
   firstName?: string;
   lastName?: string;
 };
-type PostRequest = Request<{session: Session}> & { body: FormData };
+type PostRequest = SapperRequest & { body: object; session: Session };
 
-const RegisterBody = RuntypeRecord({
+const RegisterBody = Record({
   username: String,
   password: String,
   passwordConfirm: String,
@@ -25,10 +25,9 @@ const RegisterBody = RuntypeRecord({
   lastName: String,
 });
 
-export async function post(req: PostRequest) {
-  const body = Object.fromEntries(req.body.entries());
+export async function post(req: PostRequest, res: SapperResponse, _next: unknown) {
   try {
-    let { username, password, passwordConfirm, firstName, lastName } = RegisterBody.check(body);
+    let { username, password, passwordConfirm, firstName, lastName } = RegisterBody.check(req.body);
 
     if (username && password === passwordConfirm) {
       let email;
@@ -42,30 +41,38 @@ export async function post(req: PostRequest) {
           email = username;
         }
       } else {
-        return { status: 400, body: "Username is not an email or CRSid" };
+        res.statusCode = 400;
+        res.end("Username is not an email or CRSid");
+        return;
       }
 
       try {
         if (passwordIsValid(password)) {
           const loginResult = await createAccount({ firstName, lastName, username, email, password });
 
-          req.locals.session.userId = loginResult.id.toString();
-          req.locals.session.hasuraRole = loginResult.admin_type.hasura_role;
-          req.locals.session.firstName = loginResult.first;
-          req.locals.session.lastName = loginResult.last;
-          let headers = await req.locals.session.save();
-          return { status: 200, body: req.locals.session.userId, headers };
+          req.session.userId = loginResult.id.toString();
+          req.session.hasuraRole = loginResult.admin_type.hasura_role;
+          req.session.firstName = loginResult.first;
+          req.session.lastName = loginResult.last;
+          req.session.save(() => {
+            res.statusCode = 200;
+            res.end(req.session.userId);
+          });
         } else {
-          return { status: 400, body: "Password must be at least 8 characters long" };
+          res.statusCode = 400;
+          res.end("Password must be at least 8 characters long");
         }
       } catch (e) {
         let { message, status } = e;
-        return { status, body: message };
+        res.statusCode = status;
+        res.end(message);
       }
     } else {
-      return { status: 400, body: "Missing username, password or name" };
+      res.statusCode = 400;
+      res.end("Missing username, password or name");
     }
   } catch (e) {
-    return { status: 400, body: "Missing username, password or name" };
+    res.statusCode = 400;
+    res.end("Missing username, password or name");
   }
 }

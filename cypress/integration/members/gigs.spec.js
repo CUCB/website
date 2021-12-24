@@ -179,7 +179,8 @@ describe("gig summary", () => {
   });
 
   context("logged in as normal user", () => {
-    beforeEach(() => { // Changed from before to beforeEach as some tests were flaky
+    before(() => {
+      cy.clock(Cypress.DateTime.fromISO("2020-07-07T02:00").valueOf());
       cy.login("cypress_user", "abc123");
       cy.visit(`/members/gigs/${gig.id}`);
     });
@@ -207,7 +208,6 @@ describe("gig summary", () => {
       cy.contains("deposit").should("not.exist");
       cy.contains("payment").should("not.exist");
     });
-
 
     it("shows a signup button", () => {
       cy.get(`[data-test='show-signup-${gig.id}']`).should("be.visible");
@@ -243,7 +243,6 @@ describe("gig summary", () => {
         .should("have.value", gig.venue.data.id)
         .find(":selected")
         .invoke("html")
-        .invoke("trim")
         .should("eq", gig.venue.data.name);
     });
   });
@@ -334,6 +333,7 @@ describe("gig diary", () => {
 
   context("logged in as normal user", () => {
     beforeEach(() => {
+      cy.clock(Cypress.DateTime.fromISO("2020-07-07 02:00").valueOf());
       cy.login("cypress_user", "abc123");
     });
 

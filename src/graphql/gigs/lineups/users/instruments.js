@@ -13,17 +13,6 @@ const UpdateInstrumentApproved = gql`
   }
 `;
 
-export const LineupInstruments = gql`
-  fragment LineupInstruments on cucb_gigs_lineups {
-    user_instruments {
-      approved
-      user_instrument {
-        ...LineupUserInstrument
-      }
-    }
-  }
-`;
-
 export const LineupUserInstrument = gql`
   fragment LineupUserInstrument on cucb_users_instruments {
     id
@@ -39,6 +28,18 @@ export const LineupUserInstrument = gql`
     }
     nickname
   }
+`;
+
+export const LineupInstruments = gql`
+  fragment LineupInstruments on cucb_gigs_lineups {
+    user_instruments {
+      approved
+      user_instrument {
+        ...LineupUserInstrument
+      }
+    }
+  }
+  ${LineupUserInstrument}
 `;
 
 export const setInstrumentApproved = async (

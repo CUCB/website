@@ -1,72 +1,46 @@
-<script context="module" lang="ts">
+<script context="module">
   import { handleErrors, makeClient } from "../../../graphql/client";
   import { notLoggedIn } from "../../../client-auth.js";
   import { QueryAllGigSignupSummary } from "../../../graphql/gigs";
   import { DateTime, Settings } from "luxon";
 
-  export interface User {
-    id: number;
-    first: string;
-    last: string;
-    gig_notes: string | null;
-  }
-  export interface LineupEntry {
-    approved: boolean | null;
-    user: User;
-    user_available: boolean | null;
-    user_only_if_necessary: boolean | null;
-    user_notes: string | null;
-  }
-  export interface Gig {
-    id: number;
-    date: string;
-    sort_date: string;
-    lineup: LineupEntry[];
-    title: string;
-  }
-
-  export async function load({ fetch, session }) {
+  export async function preload(_, session) {
     Settings.defaultZoneName = "Europe/London";
 
-    const loginFail = notLoggedIn(session);
-    if (loginFail) return loginFail;
+    if (notLoggedIn.bind(this)(session)) return;
 
-    let client = makeClient(fetch);
+    let client = makeClient(this.fetch);
 
-    let res: { data: { since: { gig: Gig }[]; signupsOpen: Gig[] } };
+    let res;
     try {
       res = await client.query({
         query: QueryAllGigSignupSummary,
         variables: { since: DateTime.local().minus({ months: 1 }) },
       });
     } catch (e) {
-      return handleErrors(e, session);
+      handleErrors.bind(this)(e, session);
+      return;
     }
 
     return {
-      props: {
-        sinceOneMonth: res.data.since.map((x) => x.gig),
-        signupsOpen: res.data.signupsOpen,
-      },
+      sinceOneMonth: res.data.since.map((x) => x.gig),
+      signupsOpen: res.data.signupsOpen,
     };
   }
 </script>
 
-<script lang="ts">
+<script>
   Settings.defaultZoneName = "Europe/London";
   import SignupAdmin from "../../../components/Gigs/Lineup/SignupAdmin.svelte";
   import { List, Map } from "immutable";
 
-  export let sinceOneMonth: Gig[], signupsOpen: Gig[];
+  export let sinceOneMonth, signupsOpen;
   $: noLineup = signupsOpen.filter(hasNoLineup);
   $: futureGigs = sinceOneMonth.filter(isInFuture);
   $: signupsOpenOrLineupSelectedForFuture = List(
-    Map([
-      ...futureGigs.map<[number, Gig]>((gig) => [gig.id, gig]),
-      ...signupsOpen.map<[number, Gig]>((gig) => [gig.id, gig]),
-    ]).values(),
+    Map([...futureGigs.map((gig) => [gig.id, gig]), ...signupsOpen.map((gig) => [gig.id, gig])]).values(),
   )
-    .sortBy((gig: Gig) => gig.sort_date)
+    .sortBy((gig) => gig.sort_date)
     .toJS();
   const VIEWS = { signupsOpen: {}, sinceOneMonth: {}, noLineup: {} };
   let view = VIEWS.signupsOpen;
@@ -77,8 +51,8 @@
       ? sinceOneMonth
       : noLineup;
 
-  const hasNoLineup = (gig: Gig) => gig.lineup.filter((person: LineupEntry) => person.approved).length === 0;
-  const isInFuture = (gig: Gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
+  const hasNoLineup = (gig) => gig.lineup.filter((person) => person.approved).length === 0;
+  const isInFuture = (gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
 </script>
 
 <style>

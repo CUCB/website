@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { stores } from "@sapper/app";
   import { themeName } from "../../view";
+  let { page } = stores();
   $: segment = $page.path.split("/")[1];
   export let user: any;
   export let visible: boolean;
@@ -110,15 +111,15 @@
 </style>
 
 <nav on:click class="{navClass} theme-{$themeName}" aria-label="Main menu">
-  <a href="/" aria-current="{!segment ? 'page' : undefined}">Home</a>
-  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="/book">Book us!</a>
-  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="/join">Join us!</a>
-  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="/committee">Committee</a>
+  <a href="." aria-current="{!segment ? 'page' : undefined}">Home</a>
+  <a aria-current="{segment === 'book' ? 'page' : undefined}" href="book">Book us!</a>
+  <a aria-current="{segment === 'join' ? 'page' : undefined}" href="join">Join us!</a>
+  <a aria-current="{segment === 'committee' ? 'page' : undefined}" href="committee">Committee</a>
 
-  {#if user && user.userId}
+  {#if user.userId}
     <!-- Don't prefetch members since it causes cache invalidation issues (see issue #50) -->
-    <a aria-current="{segment === 'members' ? 'page' : undefined}" href="/members">Members</a>
-    <a href="/auth/logout" rel="external" class="split">Log out</a>
+    <a aria-current="{segment === 'members' ? 'page' : undefined}" href="members">Members</a>
+    <a href="auth/logout" class="split">Log out</a>
   {:else}
     <a aria-current="{segment === 'auth' ? 'page' : undefined}" class="split" href="/auth/login" rel="external">
       Log in

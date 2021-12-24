@@ -1,10 +1,9 @@
-import { Union, Literal, Undefined } from "runtypes";
 import crypto from "crypto";
-import dotenv from "dotenv";
-dotenv.config();
+import type { SapperRequest, SapperResponse } from "@sapper/server";
+import { Union, Literal, Undefined } from "runtypes";
 const CORRECT_SESSION_SECRET_HASH = crypto
   .createHash("sha512")
-  .update(Buffer.from(process.env["SESSION_SECRET"] as string))
+  .update(Buffer.from(process.env.SESSION_SECRET as string))
   .digest("hex");
 
 // TODO centralise this stuff!!
@@ -30,47 +29,57 @@ interface Session {
 
 const RequestableRole = Union(Literal("server"), Literal("current_user"));
 
-export function get({ headers, locals }: { headers: Record<string, string>, locals: { session: Session } }) {
+export function get(req: SapperRequest & { session: Session }, res: SapperResponse, _next: unknown) {
   try {
-    const mainRole = DefaultRole.Or(Undefined).check(locals.session.alternativeRole || locals.session.hasuraRole);
-    const requestedRole = DefaultRole.Or(Undefined).Or(RequestableRole).check(headers["x-hasura-role"]) || mainRole;
+    const mainRole = DefaultRole.Or(Undefined).check(req.session.alternativeRole || req.session.hasuraRole);
+    const requestedRole = DefaultRole.Or(Undefined).Or(RequestableRole).check(req.headers["x-hasura-role"]) || mainRole;
 
-    if (locals.session.userId && ["current_user", mainRole].includes(requestedRole)) {
-      return {
-        status: 200,
-        body: {
-          "X-Hasura-User-Id": locals.session.userId.toString(),
+    if (req.session.userId && ["current_user", mainRole].includes(requestedRole)) {
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+      });
+      res.end(
+        JSON.stringify({
+          "X-Hasura-User-Id": req.session.userId.toString(),
           "X-Hasura-Role": requestedRole,
-        }
-      };
+        }),
+      );
     } else if (!requestedRole) {
-      return {
-        status: 200,
-        body: {
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+      });
+      res.end(
+        JSON.stringify({
           "X-Hasura-Role": "anonymous",
-        },
-      };
-    } else if (requestedRole === "server" && headers["session-secret-hash"] === CORRECT_SESSION_SECRET_HASH) {
-      return {
-        status: 200,
-        body: {
+        }),
+      );
+    } else if (requestedRole === "server" && req.headers["session-secret-hash"] === CORRECT_SESSION_SECRET_HASH) {
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+      });
+      res.end(
+        JSON.stringify({
           "X-Hasura-Role": "server",
-        },
-      };
+        }),
+      );
     } else {
-      return {
-        status: 401,
-        body: {
+      res.writeHead(401, {
+        "Content-Type": "application/json",
+      });
+      res.end(
+        JSON.stringify({
           error: "Not authorized",
-        },
-      };
+        }),
+      );
     }
   } catch (e) {
-    return {
-      status: 401,
-      body: {
+    res.writeHead(401, {
+      "Content-Type": "application/json",
+    });
+    res.end(
+      JSON.stringify({
         error: "Invalid role in session",
-      },
-    };
+      }),
+    );
   }
 }

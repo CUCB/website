@@ -1,6 +1,6 @@
 <script lang="ts">
   import { themeName } from "../../view";
-  export let value: any = undefined,
+  export let value: any,
     select: HTMLSelectElement | undefined = undefined,
     disabled: boolean = false;
 </script>
@@ -75,7 +75,7 @@
     outline: 0;
   }
 
-  .dropdown-select > :global(option) {
+  :global(.dropdown-select > option) {
     margin: 3px;
     padding: 6px 8px;
     text-shadow: none;
@@ -121,7 +121,7 @@
     color: #ccc;
   }
 
-  .dropdown-dark .dropdown-select > :global(option) {
+  :global(.dropdown-dark .dropdown-select > option) {
     background: #444;
     text-shadow: 0 1px rgba(0, 0, 0, 0.4);
   }
@@ -144,7 +144,7 @@
       box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.2);
     }
 
-    .dropdown-default .dropdown-select > :global(option) {
+    :global(.dropdown-default .dropdown-select > option) {
       background: #444;
       text-shadow: 0 1px rgba(0, 0, 0, 0.4);
     }

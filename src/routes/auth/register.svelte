@@ -1,21 +1,16 @@
 <script context="module">
-  export async function load({ session }) {
+  export async function preload(_, session) {
     if (session.userId !== undefined) {
-      return {
-        status: 302,
-        redirect: "/members",
-      };
-    } else {
-      return {};
+      this.redirect(302, "/members");
     }
   }
 </script>
 
-<script lang="ts">
+<script>
   import { createValidityChecker, makeTitle, themeName, committee } from "../../view";
   import Mailto from "../../components/Mailto.svelte";
   import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
-  let fields: Record<string, HTMLInputElement> = {};
+  let fields = {};
   let checkValid = createValidityChecker();
 
   let firstName, lastName, username, password, passwordConfirm;
@@ -47,7 +42,7 @@
       },
     });
 
-    const isSuccessful = (status: number) => status >= 200 && status < 300;
+    const isSuccessful = (status) => status >= 200 && status < 300;
 
     if (isSuccessful(res.status)) {
       // Reload the page so the session is up-to-date
@@ -76,7 +71,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle('Create an account')}</title>
+  <title>{makeTitle("Create an account")}</title>
 </svelte:head>
 
 <h1>Create an account</h1>
@@ -100,9 +95,10 @@
       {/each}
     </ul>
   {/if}
-  <label>First name <input type="text" bind:value="{firstName}" required={true} data-test="first-name" /></label>
-  <label>Last name <input type="text" bind:value="{lastName}" required={true} data-test="last-name" /></label>
-  <label for="username">CRSid/Email address
+  <label>First name <input type="text" bind:value="{firstName}" required="true" data-test="first-name" /></label>
+  <label>Last name <input type="text" bind:value="{lastName}" required="true" data-test="last-name" /></label>
+  <label for="username"
+    >CRSid/Email address
     <input
       id="username"
       bind:this="{fields.username}"
@@ -111,27 +107,37 @@
       data-test="username"
       use:checkValid="{{ validityErrors: { patternMismatch: 'This should be either a CRSid or an email address' } }}"
       pattern="{regexString(CRSID_PATTERN)}|{regexString(EMAIL_PATTERN)}"
-      required={true}
+      required="true"
     />
   </label>
-  <label for="password">Password<input
+  <label for="password"
+    >Password<input
       type="password"
       bind:this="{fields.password}"
-      use:checkValid="{{ validityErrors: { tooShort: 'Password should be at least 8 characters long' }, bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
+      use:checkValid="{{
+        validityErrors: { tooShort: 'Password should be at least 8 characters long' },
+        bothEqual: { id: 'password', error: 'Password and password confirmation do not match' },
+      }}"
       bind:value="{password}"
       minlength="8"
       data-test="password"
-      required={true}
-    /></label>
-  <label for="password-confirm">Confirm password<input
+      required="true"
+    /></label
+  >
+  <label for="password-confirm"
+    >Confirm password<input
       id="password-confirm"
       bind:this="{fields.confirmPassword}"
-      use:checkValid="{{ validityErrors: { tooShort: 'Password should be at least 8 characters long' }, bothEqual: { id: 'password', error: 'Password and password confirmation do not match' } }}"
+      use:checkValid="{{
+        validityErrors: { tooShort: 'Password should be at least 8 characters long' },
+        bothEqual: { id: 'password', error: 'Password and password confirmation do not match' },
+      }}"
       type="password"
       bind:value="{passwordConfirm}"
       data-test="password-confirm"
-      required={true}
-    /></label>
+      required="true"
+    /></label
+  >
   <input type="submit" value="Register" />
 </form>
 <dl>

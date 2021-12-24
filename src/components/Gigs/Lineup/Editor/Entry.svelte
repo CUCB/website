@@ -6,7 +6,6 @@
 
   export let person;
   export let updateEntry;
-  // @ts-ignore
   let editAdminNotes = person.admin_notes || "";
   let showUnselectedInstruments = false;
 
@@ -17,7 +16,6 @@
     equipment: { name: "equip", value: person.equipment },
     driver: { name: "driver", value: person.driver },
     money_collector: { name: "money", value: person.money_collector, disabled: person.money_collector_notified },
-    money_collector_notified: undefined,
   };
   $: if (person.money_collector) {
     roles.money_collector_notified = { name: "money notified", value: person.money_collector_notified };
@@ -62,7 +60,7 @@
   [aria-checked="false"],
   [aria-pressed="false"] {
     text-decoration: line-through;
-    opacity: 0.63;
+    opacity: 0.75;
     &:hover {
       opacity: 1;
     }
@@ -73,7 +71,7 @@
     font-size: 1.5em;
   }
 
-  .icons > :global(*) {
+  :global(.icons > *) {
     margin: 0 0.5em;
   }
   .notes *::before {
@@ -231,7 +229,7 @@
     {:else}
       <div data-test="instruments-to-add">
         {#each unselectedInstruments as instrument}
-          <button on:click="{() => selectInstrument(instrument.id)}">{instrument.instrument.name}</button>
+          <button on:click="{selectInstrument(instrument.id)}">{instrument.instrument.name}</button>
         {:else}No instruments available to add{/each}
         <button on:click="{() => (showUnselectedInstruments = false)}" data-test="cancel-add-instruments">Cancel</button
         >

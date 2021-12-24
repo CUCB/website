@@ -1,8 +1,8 @@
-import { writable } from "svelte/store";
-import type { Writable } from "svelte/store";
+import { Writable, writable } from "svelte/store";
 import { Literal, Union } from "runtypes";
 import type { Static } from "runtypes";
 import { Map, List } from "immutable";
+// import type { Committee } from "./routes/_layout.svelte";
 
 const NAME = `Cambridge University Ceilidh Band`;
 export const makeTitle = (pageTitle?: string) => (pageTitle ? `${pageTitle} | ${NAME}` : NAME);
@@ -38,7 +38,7 @@ export const accentCss = (color) =>
   `<style>:root{--accent: #${color}; --accent_triple: ${colorTriple(color)};}</style>`;
 // @ts-ignore
 export const logoCss = (logo) => ((logo && hexToRgb(logo)) || "") && `<style>:root{--logo_color: #${logo};}</style>`;
-export const calendarStartDay: any /*: Writable<Day>*/ = writable("mon");
+export const calendarStartDay: Writable<Day> = writable("mon");
 export const themeName = writable("");
 
 // @ts-ignore
@@ -150,5 +150,3 @@ export const createValidityChecker = () => {
     };
   };
 };
-
-export const HCAPTCHA_SITE_KEY = import.meta.env.VITE_HCAPTCHA_SITE_KEY as string;
