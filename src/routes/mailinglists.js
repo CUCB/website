@@ -60,6 +60,12 @@ async function realpost(body) {
       client = new SMTPClient({
         host: process.env["EMAIL_HOST"],
         ssl: process.env["EMAIL_SSL"] === "true",
+        tls:
+          process.env["EMAIL_SSL"] === "true"
+            ? {
+                ciphers: "SSLv3",
+              }
+            : undefined,
         port: process.env["EMAIL_PORT"],
         user: process.env["EMAIL_USERNAME"],
         password: process.env["EMAIL_PASSWORD"],
