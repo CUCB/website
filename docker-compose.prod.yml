@@ -49,9 +49,14 @@ services:
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
-      EMAIL_POSTFIX_HOST: postfix
+      EMAIL_HOST: smtp.gmail.com
+      EMAIL_USERNAME: ${EMAIL_USERNAME}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
       VITE_HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
+      EMAIL_SSL: true
+      EMAIL_PORT: 587
+      HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
     volumes:
       - ./static:/usr/src/app/static
