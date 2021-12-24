@@ -46,9 +46,11 @@ export async function post(req, res, next) {
     };
 
     const client = new SMTPClient({
-      host: process.env.EMAIL_POSTFIX_HOST,
-      ssl: false,
-      port: process.env.EMAIL_POSTFIX_PORT,
+      host: process.env["EMAIL_HOST"],
+      ssl: process.env["EMAIL_SSL"] === "true",
+      port: parseInt(process.env["EMAIL_PORT"]),
+      user: process.env["EMAIL_USERNAME"],
+      password: process.env["EMAIL_PASSWORD"],
     });
 
     const enquiryInformation =
