@@ -6,7 +6,7 @@ const fs = require("fs");
 
 const stack = pulumi.getStack();
 
-const _default = new digitalocean.SshKey("ci-bootstrap", {
+const _default = new digitalocean.SshKey(`ci-bootstrap-${stack}`, {
   publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
 });
 
@@ -30,7 +30,7 @@ const webBlock = new digitalocean.Volume("website-block", {
 
 // Attach said block storage to said droplet
 const webBlockAttachment = new digitalocean.VolumeAttachment("website-block-attachment", {
-  // .apply(parseInt) because of https://github.com/pulumi/pulumi-terraform-bridge/issues/352 
+  // .apply(parseInt) because of https://github.com/pulumi/pulumi-terraform-bridge/issues/352
   dropletId: web.id.apply(parseInt),
   volumeId: webBlock.id,
 });
