@@ -47,7 +47,13 @@ export async function post(req, res, next) {
 
     const client = new SMTPClient({
       host: process.env["EMAIL_HOST"],
-      ssl: process.env["EMAIL_SSL"] === "true",
+      ssl: process.env["EMAIL_SSL"] !== "true" ? false : undefined,
+      tls:
+        process.env["EMAIL_SSL"] === "true"
+          ? {
+              ciphers: "SSLv3",
+            }
+          : undefined,
       port: parseInt(process.env["EMAIL_PORT"]),
       user: process.env["EMAIL_USERNAME"],
       password: process.env["EMAIL_PASSWORD"],
