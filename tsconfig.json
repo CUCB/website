@@ -1,27 +1,29 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "allowSyntheticDefaultImports": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "target": "es2018",
+    /**
+			svelte-preprocess cannot figure out whether you have a value or a type, so tell TypeScript
+			to enforce using \`import type\` instead of \`import\` for Types.
+			*/
     "importsNotUsedAsValues": "error",
     "isolatedModules": true,
-    "moduleResolution": "node",
+    /**
+			To have warnings/errors of the Svelte compiler at the correct position,
+			enable source maps by default.
+			*/
     "sourceMap": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "strictNullChecks": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "alwaysStrict": true,
-    "noImplicitThis": true,
-    "noImplicitAny": true,
-    // TODO raise an issue about this in the svelte repo
-    "strictFunctionTypes": false, // <- causes typeerror in Logo.svelte due to what appears to be dodgy inference when enabled
-    "baseUrl": "./",
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "allowJs": true,
+    "checkJs": true,
     "paths": {
+      "$app/*": [".svelte/dev/runtime/app/*", ".svelte/build/runtime/app/*"],
+      "$lib/*": ["src/lib/*"],
       "*": ["src/@customTypes/*"]
     }
   },
-  "include": ["src/**/*", "src/node_modules/**/*"],
-  "exclude": ["node_modules/*", "__sapper__/*", "static/*", "src/@customTypes"]
+  "include": ["src/**/*.js", "src/**/*.ts", "src/**/*.svelte"]
 }

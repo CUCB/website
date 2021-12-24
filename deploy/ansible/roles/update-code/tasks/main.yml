@@ -1,0 +1,11 @@
+- name: Clone the repository
+  git:
+    repo: ssh://git@github.com/cucb/website.git
+    dest: "{{ repo_root }}"
+    accept_hostkey: yes
+    key_file: ~/.ssh/deploy_pull
+    version: "{{ ci_commit_branch }}"
+
+- name: Install backup script dependencies
+  community.general.npm:
+    path: "{{ repo_root }}/deploy/js"

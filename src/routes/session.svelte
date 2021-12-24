@@ -1,5 +1,5 @@
 <script context="module">
-  import { makeTitle } from "../view.js";
+  import { makeTitle } from "../view";
   import CaptionedImage from "../components/CaptionedImage.svelte";
 </script>
 

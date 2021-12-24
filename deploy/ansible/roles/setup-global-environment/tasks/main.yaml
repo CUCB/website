@@ -1,0 +1,18 @@
+- name: Copy private key
+  copy:
+    src: "{{ playbook_dir }}/deploy_pull"
+    dest: ~/.ssh/deploy_pull
+    mode: "600"
+
+- name: Save docker variables to environment file
+  include_role:
+    name: create-variable
+  vars:
+    env_file: ~/.ssh/environment
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - { name: CI_COMMIT_BRANCH, value: "{{ ci_commit_branch }}" }
+    - { name: DEPLOY_REGISTRY, value: "{{ deploy_registry }}" }
+    - { name: DEPLOY_REGISTRY_USER, value: "{{ deploy_registry_user }}" }
+    - { name: DEPLOY_REGISTRY_PASSWORD, value: "{{ deploy_registry_password }}" }

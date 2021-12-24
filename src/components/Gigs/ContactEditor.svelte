@@ -34,6 +34,7 @@
       });
 
       dispatch("saved", {
+        // @ts-ignore
         contact: res.data[mutationDetails[1]],
       });
     } catch (e) {

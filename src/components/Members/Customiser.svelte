@@ -22,7 +22,7 @@
   import { HsvPicker } from "svelte-color-picker";
   import { onMount } from "svelte";
   import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
-  import { stores } from "@sapper/app";
+  import { session } from "$app/stores";
   import { Record, Map } from "immutable";
   import { String, Null, Literal, Union, Boolean } from "runtypes";
   import type { Static } from "runtypes";
@@ -42,7 +42,6 @@
   type ColoredLocalStorageProperty = `${ColorableProperty}_${ThemeColor}`;
   type LocalStorageProperty = ColoredLocalStorageProperty | "color" | "font" | "calendarStartDay" | "spinnyLogo";
 
-  let { session } = stores();
   let viewSettings = new ViewSettings();
   $: color = settings.color;
   $: themeName.set(settings.color);
@@ -208,10 +207,13 @@
             let value = settings[setting].get(color);
             if (value !== undefined) {
               localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(value));
+            } else {
+              localStorage.removeItem(`${prop}_${$session.userId}`);
             }
+          } else if (settings[prop] !== undefined) {
+            localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(settings[prop]));
           } else {
-            settings[prop] !== undefined &&
-              localStorage.setItem(`${prop}_${$session.userId}`, JSON.stringify(settings[prop]));
+            localStorage.removeItem(`${prop}_${$session.userId}`);
           }
         }
       }
@@ -234,15 +236,17 @@
 </script>
 
 <svelte:head>
-  <link rel="stylesheet" type="text/css" href="static/themes/color/{color}.css" />
-  <link rel="stylesheet" type="text/css" href="static/themes/font/{font}.css" />
-  {#if accent && accent !== 'null'}
-    {@html accentCss(accent)}
-  {/if}
-  {#if logo && logo !== 'null'}
-    {@html logoCss(logo)}
-  {/if}
+  <link rel="stylesheet" type="text/css" href="/static/themes/color/{color}.css" />
+  <link rel="stylesheet" type="text/css" href="/static/themes/font/{font}.css" />
 </svelte:head>
+<!-- It feels like these should go in svelte:head, but it seems at the moment (svelte 3.44.0), this doesn't like reactivity
+  but previous versions seemed to work-->
+{#if accent && accent !== "null"}
+  {@html accentCss(accent)}
+{/if}
+{#if logo && logo !== "null"}
+  {@html logoCss(logo)}
+{/if}
 {#if showSettings}
   <Popup
     on:close="{() => {
@@ -261,8 +265,8 @@
     </button>
     <button
       on:click="{() => (settings = settings.update('accent', (accents) => accents.remove(color)))}"
-      data-test="reset-accent-color"
-    >Reset accent colour</button>
+      data-test="reset-accent-color">Reset accent colour</button
+    >
     <button
       on:click="{() => (viewSettings = viewSettings.update('logoOpen', (x) => !x).set('accentOpen', false))}"
       disabled="{accentColor === null}"
@@ -272,8 +276,8 @@
     </button>
     <button
       on:click="{() => (settings = settings.update('logo', (logoColors) => logoColors.remove(color)))}"
-      data-test="reset-logo-color"
-    >Reset logo colour</button>
+      data-test="reset-logo-color">Reset logo colour</button
+    >
     <!-- svelte-ignore a11y-label-has-associated-control-->
     <label data-test="select-theme">
       Theme
@@ -285,8 +289,8 @@
     </label>
     <button
       on:click="{() => (selectedTheme ? (settings = settings.set('color', selectedTheme)) : {})}"
-      data-test="confirm-theme"
-    >Set theme</button>
+      data-test="confirm-theme">Set theme</button
+    >
     <label>
       Spinny logo
       <input
@@ -310,7 +314,8 @@
       </Select>
     </label>
     <button
-      on:click="{() => (selectedCalendarStartDay ? (settings = settings.set('calendarStartDay', selectedCalendarStartDay)) : {})}"
+      on:click="{() =>
+        selectedCalendarStartDay ? (settings = settings.set('calendarStartDay', selectedCalendarStartDay)) : {}}"
       data-test="confirm-calendar-day"
     >
       Set day

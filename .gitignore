@@ -1,6 +1,7 @@
 .DS_Store
-/node_modules/
-/src/node_modules/@sapper/
+.svelte
+build
+**/node_modules/
 yarn-error.log
 /cypress/screenshots/
 /cypress/videos/
@@ -9,3 +10,4 @@ yarn-error.log
 .env
 db_restore
 images/*
+.svelte-kit

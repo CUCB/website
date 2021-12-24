@@ -1,5 +1,5 @@
 {
-  "baseUrl": "http://localhost:4000",
+  "baseUrl": "http://localhost:3000",
   "video": true,
   "projectId": "u67py9",
   "defaultCommandTimeout": 4000,

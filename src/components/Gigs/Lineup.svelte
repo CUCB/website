@@ -57,7 +57,7 @@
 <div class="gig-lineup theme-{$themeName}">
   {#each people as person, i (person.user.id)}
     <div class="person-name" class:odd="{i % 2 === 1}">
-      <span> <a href="/members/users/{person.user.id}">{person.user.first}&#32;{person.user.last}</a> </span>
+      <span> <a href="/members/user/{person.user.id}">{person.user.first}&#32;{person.user.last}</a> </span>
     </div>
     <div class="person-instruments" class:odd="{i % 2 === 1}">
       {#each person.user_instruments as instrument (instrument.user_instrument_id)}

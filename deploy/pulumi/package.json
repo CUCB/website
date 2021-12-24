@@ -1,0 +1,9 @@
+{
+  "name": "cucb-website",
+  "main": "index.js",
+  "dependencies": {
+    "@pulumi/cloudflare": "^4.0.0",
+    "@pulumi/digitalocean": "^4.7.0",
+    "@pulumi/pulumi": "^3.15.0"
+  }
+}

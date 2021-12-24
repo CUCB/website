@@ -1,15 +1,15 @@
 <script context="module">
   import { makeClient, handleErrors } from "../../graphql/client";
   import { pastCommitteePictures } from "../../graphql/committee";
-  export async function preload({ query }) {
-    let { aprilfool } = query;
-    let client = makeClient(this.fetch);
+  export async function load({ page: { query }, fetch }) {
+    let aprilFools = query.get("aprilfool") !== undefined;
+    let client = makeClient(fetch);
     let res;
     try {
       res = await client.query({ query: pastCommitteePictures });
-      return { aprilFools: aprilfool !== undefined, committees: res.data.cucb_committees };
+      return { props: { aprilFools, committees: res.data.cucb_committees } };
     } catch (e) {
-      handleErrors.bind(this)(e);
+      return handleErrors(e);
     }
   }
 </script>
@@ -22,7 +22,7 @@
 </script>
 
 <style>
-  committee-members {
+  .members {
     margin-top: 0;
     display: flex;
     flex-wrap: wrap;
@@ -34,7 +34,7 @@
   hr {
     width: 70%;
   }
-  cucb-committee h3 {
+  h3 {
     text-align: center;
     font-size: 1.3em;
     padding-top: 0.5em;
@@ -42,7 +42,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle('History')}</title>
+  <title>{makeTitle("History")}</title>
 </svelte:head>
 <h1>A (very) brief history of the band</h1>
 
@@ -56,18 +56,18 @@ For contact details for the current committee
 .
 {#each committees as committee}
   <hr />
-  <cucb-committee>
-    <h3>{DateTime.fromISO(committee.started).year}/{(DateTime.fromISO(committee.started).year + 1).toString().slice(-2)}</h3>
-    <committee-members>
-      {#if aprilFools}
-        {#each committee.committee_members as person}
-          <Person {person} {aprilFools} />
-        {/each}
-      {:else}
-        {#each committee.committee_members.filter(person => !person.april_fools_only) as person}
-          <Person {person} />
-        {/each}
-      {/if}
-    </committee-members>
-  </cucb-committee>
+  <h3>
+    {DateTime.fromISO(committee.started).year}/{(DateTime.fromISO(committee.started).year + 1).toString().slice(-2)}
+  </h3>
+  <div class="members">
+    {#if aprilFools}
+      {#each committee.committee_members as person}
+        <Person person="{person}" aprilFools="{aprilFools}" />
+      {/each}
+    {:else}
+      {#each committee.committee_members.filter((person) => !person.april_fools_only) as person}
+        <Person person="{person}" />
+      {/each}
+    {/if}
+  </div>
 {/each}

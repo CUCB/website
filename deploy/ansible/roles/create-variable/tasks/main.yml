@@ -1,0 +1,15 @@
+- name: "Check if {{ name }} exists in env file"
+  lineinfile:
+    path: "{{ env_file }}"
+    regexp: "^{{ name }}="
+    state: absent
+  check_mode: yes
+  register: out
+
+- name: "Create variable {{ name }}"
+  lineinfile:
+    path: "{{ env_file }}"
+    regexp: "^{{ name }}="
+    line: "{{ name }}={{ value }}"
+    create: yes
+  when: not out.changed

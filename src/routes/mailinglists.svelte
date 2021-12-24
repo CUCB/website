@@ -89,7 +89,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle('Mailing Lists')}</title>
+  <title>{makeTitle("Mailing Lists")}</title>
   <noscript>
     {@html `<style` + `>.how-to {display: none}</` + `style>`}
   </noscript>

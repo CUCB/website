@@ -1,16 +1,21 @@
 <script context="module">
-  export async function preload(_, session) {
+  export async function load({ session }) {
     if (session.userId !== undefined) {
-      this.redirect(302, "/members");
+      return {
+        status: 302,
+        redirect: "/members",
+      };
+    } else {
+      return {};
     }
   }
 </script>
 
-<script>
+<script lang="ts">
   import { createValidityChecker, makeTitle, themeName, committee } from "../../view";
   import Mailto from "../../components/Mailto.svelte";
   import { EMAIL_PATTERN, CRSID_PATTERN } from "./_register";
-  let fields = {};
+  let fields: Record<string, HTMLInputElement> = {};
   let checkValid = createValidityChecker();
 
   let firstName, lastName, username, password, passwordConfirm;
@@ -42,7 +47,7 @@
       },
     });
 
-    const isSuccessful = (status) => status >= 200 && status < 300;
+    const isSuccessful = (status: number) => status >= 200 && status < 300;
 
     if (isSuccessful(res.status)) {
       // Reload the page so the session is up-to-date
@@ -95,8 +100,8 @@
       {/each}
     </ul>
   {/if}
-  <label>First name <input type="text" bind:value="{firstName}" required="true" data-test="first-name" /></label>
-  <label>Last name <input type="text" bind:value="{lastName}" required="true" data-test="last-name" /></label>
+  <label>First name <input type="text" bind:value="{firstName}" required={true} data-test="first-name" /></label>
+  <label>Last name <input type="text" bind:value="{lastName}" required={true} data-test="last-name" /></label>
   <label for="username">CRSid/Email address
     <input
       id="username"
@@ -106,7 +111,7 @@
       data-test="username"
       use:checkValid="{{ validityErrors: { patternMismatch: 'This should be either a CRSid or an email address' } }}"
       pattern="{regexString(CRSID_PATTERN)}|{regexString(EMAIL_PATTERN)}"
-      required="true"
+      required={true}
     />
   </label>
   <label for="password">Password<input
@@ -116,7 +121,7 @@
       bind:value="{password}"
       minlength="8"
       data-test="password"
-      required="true"
+      required={true}
     /></label>
   <label for="password-confirm">Confirm password<input
       id="password-confirm"
@@ -125,7 +130,7 @@
       type="password"
       bind:value="{passwordConfirm}"
       data-test="password-confirm"
-      required="true"
+      required={true}
     /></label>
   <input type="submit" value="Register" />
 </form>

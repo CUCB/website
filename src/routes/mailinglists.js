@@ -1,75 +1,114 @@
-import { makeClient } from "../graphql/client";
 import { SMTPClient } from "emailjs";
 import fetch from "node-fetch";
 import gql from "graphql-tag";
+import dotenv from "dotenv";
+import { makeGraphqlClient } from "../auth";
+dotenv.config();
 
-export async function post(req, res, next) {
-  const { name, email, lists, captchaKey } = req.body;
+export async function post({ body }) {
+  try {
+    const res = await realpost(body);
+    return { status: 500, body: "Something else went wrong", ...res };
+  } catch (e) {
+    console.error("Unhandled exception in POST /mailinglists");
+    console.error(e);
+    return { status: 500, body: "Something went wrong." };
+  }
+}
+async function realpost(body) {
+  const { name, email, lists, captchaKey } = Object.fromEntries(body.entries?.() || Object.entries(body));
   const hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
     },
-    body: `response=${captchaKey}&secret=${process.env.HCAPTCHA_SECRET}`,
-  }).then(res => res.json());
+    body: `response=${captchaKey}&secret=${process.env["HCAPTCHA_SECRET"]}`,
+  }).then((res) => res.json());
 
-  if (hcaptcha.success) {
-    let webmasters;
-    try {
-      let client = makeClient(fetch);
-      const webmasterRes = await client.query(gql`
+  let webmasters;
+  try {
+    let client = makeGraphqlClient();
+    const webmasterRes = await client.query({
+      query: gql`
         query CurrentSec {
           cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
             committee_members(
               order_by: { committee_position: { position: asc }, name: asc }
-              where: { committee_key: { _eq: "webmaster" } }
+              where: { committee_key: { name: { _eq: "webmaster" } } }
             ) {
               casual_name
               email
             }
           }
         }
-      `);
-      webmasters =
-        webmasterRes &&
-        webmasterRes.data &&
-        webmasterRes.data.cucb_committees[0] &&
-        webmasterRes.data.cucb_committees[0].committee_members;
-    } catch {
-      // We deal with not found anyway, don't worry about it
-    }
-    let webmaster = webmasters && webmasters[0];
-    webmaster = webmaster || {
-      casual_name: "Webmaster",
-      email: "webmaster@cucb.co.uk",
-    };
-
-    const client = new SMTPClient({
-      host: process.env.EMAIL_POSTFIX_HOST,
-      ssl: false,
-      port: process.env.EMAIL_POSTFIX_PORT,
+      `,
     });
+    webmasters = webmasterRes?.data?.cucb_committees?.[0]?.committee_members;
+  } catch (e) {
+    // We deal with not found anyway, don't worry about it
+    console.error("Couldn't retrieve webmaster's email address: " + e);
+    console.error(e);
+  }
+  const webmaster = webmasters?.[0] || {
+    casual_name: "Webmaster",
+    email: "webmaster@cucb.co.uk",
+  };
 
-    client.send(
-      {
-        from: `CUCB Website <${process.env.EMAIL_SEND_ADDRESS}>`,
-        to: `CUCB Webmaster <${webmaster.email}>`,
-        subject: `Request to join mailing lists`,
-        text: `${name}\n${email}\nWishes to join the following lists\n${JSON.parse(lists).map(list => `\t${list}\n`)}`,
-      },
-      (err, message) => {
-        // TODO process the error and feed back to the client
-        if (err) {
-          res.statusCode = 503;
-          res.end(
-            `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
-          );
-          console.error(err);
-        } else {
-          res.statusCode = 204;
-          res.end();
-        }
-      },
+  if (hcaptcha.success) {
+    let client;
+    try {
+      client = new SMTPClient({
+        host: process.env["EMAIL_POSTFIX_HOST"],
+        ssl: false,
+        port: process.env["EMAIL_POSTFIX_PORT"],
+      });
+    } catch (e) {
+      console.error("Failed to make SMTP client");
+      console.error(`Tried to connect to ${process.env.EMAIL_POSTFIX_HOST}:${process.env.EMAIL_POSTFIX_PORT}`);
+      return {
+        status: 500,
+        body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+      };
+    }
+
+    const emailPromise = new Promise((resolve, reject) =>
+      client.send(
+        {
+          from: `CUCB Website <${process.env["EMAIL_SEND_ADDRESS"]}>`,
+          to: `CUCB Webmaster <${webmaster.email}>`,
+          subject: `Request to join mailing lists`,
+          text: `${name}\n${email}\nWishes to join the following lists\n${JSON.parse(lists).map(
+            (list) => `\t${list}\n`,
+          )}`,
+        },
+        (err, message) => {
+          // TODO process the error and feed back to the client
+          if (err) {
+            console.error("Error sending mailing list email");
+            console.error(err);
+            reject({
+              status: 503,
+              body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+            });
+          } else {
+            resolve(null);
+          }
+        },
+      ),
     );
+
+    try {
+      await emailPromise;
+      return { status: 204, body: "" };
+    } catch (e) {
+      return e;
+    }
+  } else {
+    console.error("Failed to verify captcha response: " + captchaKey);
+    return {
+      status: 400,
+
+      body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+    };
   }
 }

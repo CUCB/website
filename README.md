@@ -28,6 +28,7 @@ The project uses the [cypress](https://cypress.io) testing framework. It is set 
 This has a really nice GUI to let you inspect tests and see exactly what cypress is doing. Start the server, and then run
 
 ```bash
+npx cypress install # this only needs to be run once
 npm run cy:open
 ```
 
@@ -71,7 +72,7 @@ where `<DB_DATA_NAME>` is the volume with `db_data_test` at the end of the name.
 
 ### SSR/Non SSR
 
-Sapper is awesome in doing server-side rendering, which really improves the user experience navigating the site, making pages load faster and stopping flashes as content loads sporadically. But this does cause some pain points when doing things like connecting to Hasura, which is quite different on the server (in `preload` functions) and on the client. See the [Auth](#Authentication/Authorization) section below on exactly how this should be done and more detail as to why.
+Sapper is awesome in doing server-side rendering, Which really improves the user experience navigating the site, making pages load faster and stopping flashes as content loads sporadically. But this does cause some pain points when doing things like connecting to Hasura, which is quite different on the server (in `preload` functions) and on the client. See the [Auth](#Authentication/Authorization) section below on exactly how this should be done and more detail as to why.
 
 ### Environment Variables
 
