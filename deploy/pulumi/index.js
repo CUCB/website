@@ -17,6 +17,8 @@ if (stack === "shared") {
   return;
 }
 
+const shared = new pulumi.StackReference("shared");
+
 // A droplet to host the site
 const web = new digitalocean.Droplet("website", {
   image: "ubuntu-20-04-x64",
@@ -24,7 +26,7 @@ const web = new digitalocean.Droplet("website", {
   size: "s-1vcpu-1gb",
   backups: true,
   name: `website-${stack}`,
-  sshKeys: [_default.fingerprint],
+  sshKeys: [shared.getOutput("fingerprint")],
 });
 
 // Block storage for a first tier backup (in addition to dropbox)

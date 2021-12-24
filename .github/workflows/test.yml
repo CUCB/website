@@ -134,10 +134,11 @@ jobs:
 
   pulumi:
     name: Create/update infrastructure
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - test
+    runs-on:
+      ubuntu-latest
+      #needs:
+      #      - build
+      #      - test
     outputs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
