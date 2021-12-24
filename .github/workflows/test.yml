@@ -21,6 +21,15 @@ jobs:
         run: |
           npm ci
           npm run svelte-check
+  unique_id:
+    name: "Generate unique ID for workflow run"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate unique id
+        id: unique_id
+        run: echo "::set-output name=id::$(uuidgen)"
+    outputs:
+      unique_id: ${{ steps.unique_id.outputs.id }}
   test:
     name: Cypress run
     runs-on: ubuntu-latest
@@ -33,6 +42,8 @@ jobs:
       matrix:
         # run 4 copies of the current job in parallel
         containers: [1, 2, 3, 4]
+    needs:
+      - unique_id
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -56,7 +67,8 @@ jobs:
           # See https://dev.to/digitaledawn/github-action-cypress-and-percy-parallelisation-setup-484a for percy setup
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_TOTAL: 4
-          PERCY_PARALLEL_NONCE: "${{ github.event_name }}-${{ github.sha }}"
+          # We need a uuid (as mentioned here https://github.com/actions/toolkit/issues/65#issuecomment-718134668) to uniquely identify re-runs)
+          PERCY_PARALLEL_NONCE: "${{ github.event_name }}-${{ github.sha }}-${{ needs.unique_id.outputs.unique_id }}"
           PERCY_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
       - name: Upload artifacts
