@@ -21,13 +21,13 @@
 
 - name: Create mount point directory
   file:
-    path: "{{ new_mount_point }}"
+    path: "/mnt/{{ new_mount_point }}"
     state: directory
 
 - name: Mount block storage to mount point
   mount:
-    path: "{{ new_mount_point }}"
-    state: present
+    path: "/mnt/{{ new_mount_point }}"
+    state: remounted
     opts: defaults,nofail,discard,noatime
     src: "{{ block_storage_scsi.files[0].path }}"
     fstype: ext4
