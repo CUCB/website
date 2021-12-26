@@ -38,3 +38,27 @@
     env_file: "{{ repo_root }}/.env"
     name: HCAPTCHA_SECRET
     value: "{{ hcaptcha_secret }}"
+
+- name: Create email username variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: EMAIL_USERNAME
+    value: "{{ email_username }}"
+
+- name: Create email password variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: EMAIL_PASSWORD
+    value: "{{ email_password }}"
+
+- name: Create email host variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: EMAIL_HOST
+    value: "{{ email_host }}"
