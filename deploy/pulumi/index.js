@@ -7,12 +7,12 @@ const fs = require("fs");
 const stack = pulumi.getStack();
 
 if (stack === "shared") {
-  const _default = new digitalocean.SshKey(`ci-bootstrap`, {
+  const sshKey = new digitalocean.SshKey(`ci-bootstrap`, {
     publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
   });
 
   module.exports = {
-    sshKeyFingerprint: _default.fingerprint,
+    sshKeyFingerprint: sshKey.fingerprint,
   };
   return;
 }
@@ -26,7 +26,7 @@ const web = new digitalocean.Droplet("website", {
   size: "s-1vcpu-1gb",
   backups: true,
   name: `website-${stack}`,
-  sshKeys: [shared.getOutput("fingerprint")],
+  sshKeys: [shared.getOutput("sshKeyFingerprint")],
 });
 
 // Block storage for a first tier backup (in addition to dropbox)
