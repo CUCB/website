@@ -5,6 +5,10 @@
     patterns: "*website*"
   register: block_storage_scsi
 
+- name: List scsi devices found
+  debug:
+    var: block_storage_scsi
+
 - name: Fail if block storage could not be identified
   fail:
     msg: Block storage location could not be identified
