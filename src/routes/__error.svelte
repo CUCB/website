@@ -40,6 +40,6 @@
 
 <img src="https://http.cat/{status}.jpg" alt="The HTTP Status Cat for status code {status}" />
 
-{#if error.stack}
+{#if dev && error.stack}
   <pre>{error.stack}</pre>
 {/if}

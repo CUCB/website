@@ -22,7 +22,7 @@ export class GraphQLClient {
   }
 
   // TODO type this better
-  async query<T>(args: { query: DocumentNode | string, variables?: Record<string, any> }): Promise<{ data: T }> {
+  async query<T>(args: { query: DocumentNode | string; variables?: Record<string, any> }): Promise<{ data: T }> {
     let query,
       variables = undefined;
     typeof args === "object" ? ({ query, variables } = args) : (query = args);
@@ -54,7 +54,7 @@ export class GraphQLClient {
   }
 
   // TODO better types here too
-  async mutate<T>(args: { mutation: DocumentNode | string, variables: Record<string, any> }): Promise<{ data: T }> {
+  async mutate<T>(args: { mutation: DocumentNode | string; variables: Record<string, any> }): Promise<{ data: T }> {
     let mutation,
       variables = undefined;
     typeof args === "object" ? ({ mutation, variables } = args) : (mutation = args);
@@ -108,12 +108,14 @@ export function handleErrors(
     } else if (code === "access-denied") {
       return { status: 403, error: "You're not supposed to be here!" };
     } else {
+      console.error(e);
       return {
         status: 500,
         error: `Something went wrong, "${code}" apparently. Let the webmaster know and they'll try and help you`,
       };
     }
   } else {
+    console.error(e);
     return {
       status: 500,
       error: `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`,
