@@ -35,12 +35,12 @@
     patterns: "website_*"
     file_type: directory
   register: block_storage_again
-  when: block_storage.matched == 0
+  when: block_storage.matched != 1 or block_storage_files.matched == 0
 
 - name: Fail if block storage could not be uniquely identified
   fail:
     msg: Block storage location could not be uniquely identified
-  when: block_storage.matched != 1 or (block_storage_again and block_storage_again.matched != 1)
+  when: block_storage.matched != 1 or block_storage_again.matched != 1
 
 - name: Create block storage variable
   include_role:
