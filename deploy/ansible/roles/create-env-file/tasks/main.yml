@@ -19,7 +19,7 @@
 
 - name: Mount block storage directory if not already done
   include_role:
-    name: create-variable
+    name: mount-block-storage
   when: block_storage.matched == 0
 
 - name: Lookup block storage directory if newly mounted
