@@ -3,12 +3,14 @@
     name: create-variable
   vars:
     env_file: "{{ repo_root }}/.env"
-    name: "{{ item }}"
+    name: "{{ secret_name }}"
     value: "{{ lookup('password', '/dev/null length=40') }}"
   loop:
     - PG_PASSWORD
     - SESSION_SECRET
     - HASURA_GRAPHQL_ADMIN_SECRET
+  loop_control:
+    loop_var: secret_name
 
 - name: Lookup block storage directory
   find:
@@ -19,7 +21,7 @@
 
 - name: Check if block storage contains files
   find:
-    paths: ["/mnt/{{ block_storage.files[0] }}"]
+    paths: ["{{ block_storage.files[0].path }}"]
     file_type: any
   register: block_storage_files
   when: block_storage.matched == 1
