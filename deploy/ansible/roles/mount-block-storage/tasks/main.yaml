@@ -27,7 +27,10 @@
 - name: Mount block storage to mount point
   mount:
     path: "/mnt/{{ new_mount_point }}"
-    state: remounted
+    state: present
     opts: defaults,nofail,discard,noatime
     src: "{{ block_storage_scsi.files[0].path }}"
     fstype: ext4
+
+- name: Refresh mount points
+  command: mount -a
