@@ -24,6 +24,7 @@ jobs:
           npm run svelte-check
   unique_id:
     name: "Generate unique ID for workflow run"
+    if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
       - name: Generate unique id
@@ -83,7 +84,8 @@ jobs:
             cypress/screenshots/**/*.png
 
   build:
-    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/pulumi-sveltekit-deployment' }}
+    if: ${{ false }}
+    # if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/pulumi-sveltekit-deployment' }}
     # needs:
     # - test
     # - svelte-check
@@ -110,7 +112,8 @@ jobs:
       IMAGE_NAME: sveltekit
 
   pulumi-preview:
-    if: ${{ github.ref != 'refs/heads/master' }}
+    if: ${{ false }}
+    # if: ${{ github.ref != 'refs/heads/master' }}
     name: Preview infrastructure updates
     runs-on: ubuntu-latest
     steps:

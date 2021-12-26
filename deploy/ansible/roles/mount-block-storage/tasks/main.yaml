@@ -3,6 +3,7 @@
   find:
     paths: ["/dev/disk/by-id"]
     patterns: "*website*"
+    file_type: link
   register: block_storage_scsi
 
 - name: List scsi devices found
