@@ -30,3 +30,4 @@
     state: present
     opts: defaults,nofail,discard,noatime
     src: "{{ block_storage_scsi.files[0].path }}"
+    fstype: ext4
