@@ -17,9 +17,22 @@
     file_type: directory
   register: block_storage
 
-- name: Fail if block storage could not be identified
+- name: Mount block storage directory if not already done
+  include_role:
+    name: create-variable
+  when: block_storage.matched == 0
+
+- name: Lookup block storage directory if newly mounted
+  find:
+    paths: ["/mnt"]
+    patterns: "website_*"
+    file_type: directory
+  register: block_storage
+  when: block_storage.matched == 0
+
+- name: Fail if block storage could not be uniquely identified
   fail:
-    msg: Block storage location could not be identified
+    msg: Block storage location could not be uniquely identified
   when: block_storage.matched != 1
 
 - name: Create block storage variable
