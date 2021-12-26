@@ -17,7 +17,7 @@
 
 - name: Create mount point variable
   set_fact:
-    new_mount_point: "{{ block_storage_scsi.files[0].path | regex_replace('.*\\(website.*\\)', '\\1') | regex_replace('-', '_') }}"
+    new_mount_point: "{{ block_storage_scsi.files[0].path | regex_replace('.*(website.*)', '\\1') | regex_replace('-', '_') }}"
 
 - name: Create mount point directory
   file:
