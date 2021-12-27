@@ -7,7 +7,7 @@ describe("homepage", () => {
   });
 
   it("has the correct favicon", () => {
-    cy.document().its("head").find('link[rel="icon"]').should("have.attr", "href").should("eq", "static/favicon.ico");
+    cy.document().its("head").find('link[rel="icon"]').should("have.attr", "href").should("eq", "/static/favicon.ico");
   });
 
   it("has the correct <h1>", () => {
@@ -66,7 +66,7 @@ describe("book us page", () => {
     cy.get("[data-test=hcaptcha] > iframe").then(($element) => {
       const $body = $element.contents().find("body");
       cy.wrap($body).find("#checkbox").click();
-      cy.wrap($body).find("#checkbox.checked");
+      cy.wrap($body).find("#checkbox[aria-checked=true]");
     });
     cy.get("[data-test='booking-send']").click();
     cy.contains("Your message has been sent to our secretary");

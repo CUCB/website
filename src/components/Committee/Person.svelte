@@ -1,7 +1,26 @@
-<script>
+<script lang="ts" context="module">
+  interface Person {
+    committee: {
+      pic_folder: string;
+    };
+    pic: string;
+    april_fools_dir: string | null;
+    email_obfus: string | null;
+    name: string;
+    position: {
+      name: string;
+    };
+    sub_position: string | null;
+    comments: string | null;
+  }
+</script>
+
+<script lang="ts">
   import Mailto from "../Mailto.svelte";
   import { themeName } from "../../view";
-  export let person, aprilFools, showEmail;
+  export let person: Person;
+  export let aprilFools = false;
+  export let showEmail = false;
   const basePath = `/images/committee/${person.committee.pic_folder}/`;
   const src =
     aprilFools && person.april_fools_dir

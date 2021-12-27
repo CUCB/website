@@ -1,15 +1,15 @@
 <script context="module">
   import { makeClient, handleErrors } from "../../graphql/client";
   import { currentCommitteePictures } from "../../graphql/committee";
-  export async function preload({ query }) {
-    let { aprilfool } = query;
-    let client = makeClient(this.fetch);
+  export async function load({ page: { query }, fetch, session }) {
+    const aprilFools = query.get("aprilfool") !== undefined;
+    const client = makeClient(fetch);
     let res;
     try {
       res = await client.query({ query: currentCommitteePictures });
-      return { aprilFools: aprilfool !== undefined, committee: res.data.cucb_committees[0].committee_members };
+      return { props: { aprilFools, committee: res.data.cucb_committees[0].committee_members } };
     } catch (e) {
-      handleErrors.bind(this)(e);
+      return handleErrors(e, session);
     }
   }
 </script>
@@ -21,7 +21,7 @@
 </script>
 
 <style>
-  cucb-committee {
+  div {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
@@ -29,18 +29,17 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle("Committee")}</title>
+  <title>{makeTitle('Committee')}</title>
 </svelte:head>
 <h1>Committee</h1>
 
 <p>
   Click on a name to email that person. (Previous committees can be found by
-  <a href="/committee/previous">clicking here</a>
-  .)
+  <a href="/committee/previous">clicking here</a>.)
 </p>
 
-<cucb-committee>
+<div>
   {#each committee as person}
-    <Person person="{person}" aprilFools="{aprilFools}" showEmail="true" />
+    <Person person="{person}" aprilFools="{aprilFools}" showEmail="{true}" />
   {/each}
-</cucb-committee>
+</div>

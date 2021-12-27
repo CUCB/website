@@ -1,5 +1,5 @@
 import { AttributePreferences, extractAttributes } from "../../graphql/gigs/lineups/users/attributes";
-import { LineupInstruments, LineupUserInstrument } from "../../graphql/gigs/lineups/users/instruments";
+import { LineupUserInstrument } from "../../graphql/gigs/lineups/users/instruments";
 import { LineupRoles } from "../../graphql/gigs/lineups/users/roles";
 import gql from "graphql-tag";
 import { Map } from "immutable";
@@ -26,14 +26,18 @@ export const FragmentGigLineup = gql`
           ...LineupUserInstrument
         }
       }
-      ...LineupInstruments
+      user_instruments {
+        approved
+        user_instrument {
+          ...LineupUserInstrument
+        }
+      }
       ...LineupAvailability
       user_notes
       admin_notes
     }
   }
   ${AttributePreferences}
-  ${LineupInstruments}
   ${LineupUserInstrument}
   ${LineupRoles}
   ${LineupAvailability}
@@ -124,14 +128,18 @@ export const AddUserToGig = gql`
           ...LineupUserInstrument
         }
       }
-      ...LineupInstruments
+      user_instruments {
+        approved
+        user_instrument {
+          ...LineupUserInstrument
+        }
+      }
       ...LineupAvailability
       user_notes
       admin_notes
     }
   }
   ${AttributePreferences}
-  ${LineupInstruments}
   ${LineupUserInstrument}
   ${LineupRoles}
   ${LineupAvailability}

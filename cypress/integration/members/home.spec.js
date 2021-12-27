@@ -133,6 +133,7 @@ describe("members' home page", () => {
       cy.get(".theme-dark").should("exist");
       cy.get(".theme-light").should("not.exist");
       cy.get("[data-test=icon-close]").click();
+      cy.get("[data-test=icon-close]").should("not.exist");
 
       cy.reload();
       cy.waitForFormInteractive();

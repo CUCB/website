@@ -1,11 +1,10 @@
-<svelte:options immutable />
-
 <script>
   import TooltipText from "../../../TooltipText.svelte";
   import InstrumentName from "../../InstrumentName.svelte";
 
   export let person;
   export let updateEntry;
+  // @ts-ignore
   let editAdminNotes = person.admin_notes || "";
   let showUnselectedInstruments = false;
 
@@ -16,6 +15,7 @@
     equipment: { name: "equip", value: person.equipment },
     driver: { name: "driver", value: person.driver },
     money_collector: { name: "money", value: person.money_collector, disabled: person.money_collector_notified },
+    money_collector_notified: undefined,
   };
   $: if (person.money_collector) {
     roles.money_collector_notified = { name: "money notified", value: person.money_collector_notified };
@@ -60,7 +60,7 @@
   [aria-checked="false"],
   [aria-pressed="false"] {
     text-decoration: line-through;
-    opacity: 0.75;
+    opacity: 0.63;
     &:hover {
       opacity: 1;
     }
@@ -71,7 +71,7 @@
     font-size: 1.5em;
   }
 
-  :global(.icons > *) {
+  .icons > :global(*) {
     margin: 0 0.5em;
   }
   .notes *::before {
@@ -149,27 +149,28 @@
   }
 </style>
 
+<svelte:options immutable />
 <div class="container" bind:this="{content}" data-test="member-{person.user.id}">
   <div class="name">
     {person.user.first}&#32;{person.user.last}&#32;
     {#if person.user.attributes.length > 0}
       <div data-test="attribute-icons" class="icons">
-        {#if person.user.attributes.includes("leader")}
+        {#if person.user.attributes.includes('leader')}
           <TooltipText data-test="icon-leader" content="{person.user.first} can lead">
             <i class="las la-music"></i>
           </TooltipText>
         {/if}
-        {#if person.user.attributes.includes("soundtech")}
+        {#if person.user.attributes.includes('soundtech')}
           <TooltipText data-test="icon-soundtech" content="{person.user.first} can tech">
             <i class="las la-tools"></i>
           </TooltipText>
         {/if}
-        {#if person.user.attributes.includes("driver")}
+        {#if person.user.attributes.includes('driver')}
           <TooltipText data-test="icon-driver" content="{person.user.first} can drive">
             <i class="las la-tachometer-alt"></i>
           </TooltipText>
         {/if}
-        {#if person.user.attributes.includes("car")}
+        {#if person.user.attributes.includes('car')}
           <TooltipText data-test="icon-car" content="{person.user.first} has a car">
             <i class="las la-car-side"></i>
           </TooltipText>
@@ -184,20 +185,20 @@
           data-test="instrument-yes"
           aria-checked="{instrument.approved ? 'true' : 'false'}"
           role="radio"
-          on:click="{() => updateEntry.instruments.setApproved(id, true)}">Yes</button
-        >
+          on:click="{() => updateEntry.instruments.setApproved(id, true)}"
+        >Yes</button>
         <button
           data-test="instrument-maybe"
           aria-checked="{instrument.approved === null ? 'true' : 'false'}"
           role="radio"
-          on:click="{() => updateEntry.instruments.setApproved(id, null)}">?</button
-        >
+          on:click="{() => updateEntry.instruments.setApproved(id, null)}"
+        >?</button>
         <button
           data-test="instrument-no"
           aria-checked="{instrument.approved === false ? 'true' : 'false'}"
           role="radio"
-          on:click="{() => updateEntry.instruments.setApproved(id, false)}">No</button
-        >
+          on:click="{() => updateEntry.instruments.setApproved(id, false)}"
+        >No</button>
         <div class="instrument-name">
           <InstrumentName userInstrument="{instrument.user_instrument}" />
         </div>
@@ -222,17 +223,19 @@
             disabled="{disabled}"
             aria-pressed="{value ? 'true' : 'false'}"
             on:click="{() => updateEntry.setRole(role, !value)}"
-            data-test="toggle-{role}">{name}</button
-          >
+            data-test="toggle-{role}"
+          >{name}</button>
         {/each}
       </div>
     {:else}
       <div data-test="instruments-to-add">
         {#each unselectedInstruments as instrument}
-          <button on:click="{selectInstrument(instrument.id)}">{instrument.instrument.name}</button>
+          <button on:click="{() => selectInstrument(instrument.id)}">{instrument.instrument.name}</button>
         {:else}No instruments available to add{/each}
-        <button on:click="{() => (showUnselectedInstruments = false)}" data-test="cancel-add-instruments">Cancel</button
-        >
+        <button
+          on:click="{() => (showUnselectedInstruments = false)}"
+          data-test="cancel-add-instruments"
+        >Cancel</button>
       </div>
     {/if}
   </div>

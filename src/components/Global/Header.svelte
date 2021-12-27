@@ -44,7 +44,7 @@
         "nav nav nav";
       grid-template-columns: 1fr 4fr minmax(0, 1fr);
     }
-    :global(#logo) {
+    header :global(#logo) {
       max-width: 150px;
       grid-area: logo;
     }
@@ -64,7 +64,7 @@
     flex: 150px 0 3;
   }
 
-  :global(#logo) {
+  header :global(#logo) {
     width: 100%;
   }
 
@@ -79,7 +79,7 @@
     user-select: none;
   }
 
-  :global(nav) {
+  header :global(nav) {
     grid-area: nav;
   }
 
@@ -132,7 +132,7 @@
     #logo-link {
       flex-basis: 100px;
     }
-    :global(#logo) {
+    header :global(#logo) {
       max-width: 100px;
     }
   }
@@ -184,7 +184,7 @@
   </a>
   {#if animate}
     <h1 id="title" in:fade><a href="/">Cambridge University Ceilidh Band</a></h1>
-    {#if user.userId && window && window.CSS && window.CSS.supports("color", "var(--primary)")}
+    {#if user.userId && window && window.CSS && window.CSS.supports('color', 'var(--primary)')}
       <button
         id="settingsToggle"
         in:fade
@@ -201,7 +201,8 @@
           class="las la-cog"
           style="transform:rotate({$cogRotation}deg)"
           on:mouseover="{() => cogRotation.update((x) => x + 60)}"
-          on:touchstart="{() => cogRotation.update((x) => x + 60)}"></i>
+          on:touchstart="{() => cogRotation.update((x) => x + 60)}"
+        ></i>
       </button>
     {/if}
   {:else}
@@ -211,7 +212,7 @@
     </noscript>
   {/if}
   <div class="button-background">
-    <button bind:this="{button}" on:click="{toggleNav}" id="navToggle">{navVisible ? "hide" : "menu"}</button>
+    <button bind:this="{button}" on:click="{toggleNav}" id="navToggle">{navVisible ? 'hide' : 'menu'}</button>
   </div>
   <Nav user="{user}" visible="{navVisible}" on:click="{() => (navVisible ? toggleNav() : undefined)}" />
 </header>

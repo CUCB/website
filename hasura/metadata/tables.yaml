@@ -234,6 +234,12 @@
         columns:
           - name
         filter: {}
+    - role: server
+      permission:
+        columns:
+          - id
+          - name
+        filter: {}
     - role: treasurer
       permission:
         columns:
@@ -375,6 +381,25 @@
           - position
           - sub_position
         filter: {}
+    - role: server
+      permission:
+        columns:
+          - april_fools_only
+          - hidden
+          - committee
+          - id
+          - lookup_name
+          - position
+          - april_fools_dir
+          - casual_name
+          - comments
+          - crsid
+          - email
+          - email_obfus
+          - name
+          - pic
+          - sub_position
+        filter: {}
     - role: treasurer
       permission:
         columns:
@@ -477,6 +502,13 @@
           - name
           - position
         filter: {}
+    - role: server
+      permission:
+        columns:
+          - id
+          - name
+          - position
+        filter: {}
     - role: treasurer
       permission:
         columns:
@@ -547,6 +579,12 @@
       permission:
         columns:
           - pic_folder
+          - started
+        filter: {}
+    - role: server
+      permission:
+        columns:
+          - id
           - started
         filter: {}
     - role: treasurer
@@ -2866,6 +2904,36 @@
 - table:
     schema: cucb
     name: session
+  insert_permissions:
+    - role: server
+      permission:
+        check: {}
+        columns:
+          - sid
+          - sess
+          - expire
+        backend_only: false
+  select_permissions:
+    - role: server
+      permission:
+        columns:
+          - sess
+          - expire
+          - sid
+        filter: {}
+  update_permissions:
+    - role: server
+      permission:
+        columns:
+          - sess
+          - expire
+          - sid
+        filter: {}
+        check: null
+  delete_permissions:
+    - role: server
+      permission:
+        filter: {}
 - table:
     schema: cucb
     name: session_tunes

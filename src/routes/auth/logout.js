@@ -1,11 +1,12 @@
-export async function post(req, res, next) {
-  if (req.session) {
-    req.session.destroy(() => {
-      res.statusCode = 204;
-      res.end();
-    });
+export async function get({ locals }) {
+  if (locals.session) {
+    const headers = await locals.session.destroy();
+    return { status: 302, headers: { ...headers, Location: "/" } };
   } else {
-    res.statusCode = 401;
-    res.end("Not logged in");
+    return { status: 302, headers: { Location: "/" } };
   }
+}
+
+export function post({ locals }) {
+  return get({ locals });
 }

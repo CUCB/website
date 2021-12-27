@@ -17,6 +17,7 @@ import "./commands";
 import tinycolor from "../deps/tinycolor";
 import chaiSorted from "chai-sorted";
 import { DateTime, Settings } from "luxon";
+import "@percy/cypress";
 
 Settings.defaultZoneName = "Europe/London";
 Cypress.DateTime = DateTime;

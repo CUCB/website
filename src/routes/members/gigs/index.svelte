@@ -2,12 +2,12 @@
   import { makeClient, handleErrors } from "../../../graphql/client";
   import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
 
-  export async function preload(_page, session) {
+  export async function load({ fetch, session }) {
     Settings.defaultZoneName = "Europe/London";
 
     let res_gig, res_signup, res_gig_2;
-    let preloadClient = makeClient(this.fetch);
-    let preloadClientCurrentUser = makeClient(this.fetch, { role: "current_user" });
+    let preloadClient = makeClient(fetch);
+    let preloadClientCurrentUser = makeClient(fetch, { role: "current_user" });
     try {
       res_gig = await preloadClient.query({
         query: QueryMultiGigDetails(session.hasuraRole),
@@ -51,14 +51,13 @@
         variables: { where: { allow_signups: { _eq: true } } },
       });
     } catch (e) {
-      handleErrors.bind(this)(e, session);
-      return;
+      return handleErrors(e, session);
     }
 
     if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {
       let gigs = res_gig.data.cucb_gigs;
-      // Sort the gigs pre render since the database can't sort by computed field
-      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date));
+      // Sort the gigs before rendering since the database can't sort by computed field
+      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
 
       let signup_dict = {};
       let signups = res_signup.data.cucb_gigs;
@@ -69,32 +68,33 @@
       let currentCalendarMonth = DateTime.local().toFormat("yyyy-LL");
 
       return {
-        gigs,
-        signupGigs: signup_dict,
-        userInstruments: res_signup.data.cucb_users_instruments,
-        calendarGigs: {
-          [currentCalendarMonth]: res_gig_2.data.cucb_gigs.sort(
-            (gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date),
-          ),
+        props: {
+          gigs,
+          signupGigs: signup_dict,
+          userInstruments: res_signup.data.cucb_users_instruments,
+          calendarGigs: {
+            [currentCalendarMonth]: res_gig_2.data.cucb_gigs.sort(
+              (gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
+            ),
+          },
+          currentCalendarMonth,
         },
-        currentCalendarMonth,
       };
     } else {
-      this.error(500, "Couldn't retrieve gig details");
-      return;
+      return { status: 500, error: "Couldn't retrieve gig details" };
     }
   }
 </script>
 
-<script>
+<script lang="ts">
   import { makeTitle, calendarStartDay, themeName } from "../../../view";
   import { client } from "../../../graphql/client";
-  import { stores } from "@sapper/app";
+  import { session } from "$app/stores";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
   import { DateTime, Settings } from "luxon";
   import { writable } from "svelte/store";
-  export let gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
+  export let gigs: any[], calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
   Settings.defaultZoneName = "Europe/London";
 
   $: reloadSignupGigs(gigs);
@@ -113,7 +113,6 @@
     signupGigs = Object.fromEntries([...Object.entries(signupGigs), ...newlyMerged]);
   }
   let allUpcoming = gigs;
-  let { session } = stores();
   let drafts = gigs.filter((gig) => gig.type.code === "draft");
   $: currentCalendarMonthLuxon = DateTime.fromFormat(currentCalendarMonth, "yyyy-LL");
   let displaying = "allUpcoming";
@@ -183,9 +182,10 @@
           order_by: { date: "asc" },
         },
       });
+      // @ts-ignore
       calendarGigs[newDate] = res_gig_2.data.cucb_gigs;
       calendarGigs[newDate] = calendarGigs[newDate].sort(
-        (gigA, gigB) => new Date(gigA.sort_date) - new Date(gigB.sort_date),
+        (gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
       );
     }
     currentCalendarMonth = newDate;
@@ -197,7 +197,7 @@
   $: gotoNextCalendarMonth = gotoDate(
     DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").plus({ months: 1 }).toFormat("yyyy-LL"),
   );
-  $: changeCalendarDate = async (event) => {
+  $: changeCalendarDate = async (event: CustomEvent<{ month?: number; year?: number }>) => {
     if (event.detail.month !== undefined) {
       await gotoDate(
         DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").set({ month: event.detail.month }).toFormat("yyyy-LL"),
@@ -285,7 +285,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle("Gigs")}</title>
+  <title>{makeTitle('Gigs')}</title>
 </svelte:head>
 <div class="heading">
   <div class="information">
@@ -305,11 +305,11 @@
     {#if drafts.length > 0}
       There are some drafts lying around:
       {#each drafts as gig}
-        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || "Unnamed draft"}</a>
+        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
         [created
-        {DateTime.fromISO(gig.posting_time).toFormat("HH:mm, dd/LL")}
+        {DateTime.fromISO(gig.posting_time).toFormat('HH:mm, dd/LL')}
         by
-        {(gig.user && gig.user.first) || "someone?"}],
+        {(gig.user && gig.user.first) || 'someone?'}],
       {/each}
       so please don't leave them here forever
     {/if}
@@ -326,7 +326,7 @@
     <p>Display:</p>
     <ul>
       <li>
-        {#if displaying === "allUpcoming"}
+        {#if displaying === 'allUpcoming'}
           All upcoming gigs (currently shown)
         {:else}
           <button class="link" on:click="{() => display('allUpcoming')}" data-test="gigview-all-upcoming">
@@ -335,7 +335,7 @@
         {/if}
       </li>
       <li>
-        {#if displaying === "byMonth"}
+        {#if displaying === 'byMonth'}
           Gigs by month (currently shown)
         {:else}
           <button class="link" on:click="{() => display('byMonth')}" data-test="gigview-by-month">
@@ -348,7 +348,7 @@
 </div>
 
 {#each gigs as gig (gig.id)}
-  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== "undefined"}
+  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== 'undefined'}
     <Summary gig="{gig}" signupGig="{signupGigs[gig.id]}" userInstruments="{userInstruments}" linkHeading="{true}" />
   {:else}
     <Summary gig="{gig}" userInstruments="{userInstruments}" linkHeading="{true}" />

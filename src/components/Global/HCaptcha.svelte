@@ -1,10 +1,11 @@
 <script lang="ts">
+  import { HCAPTCHA_SITE_KEY } from "../../view";
   import { createEventDispatcher, onMount } from "svelte";
+
   let dispatch = createEventDispatcher<{ verified: { key: string } }>();
   let callback = (key: string) => dispatch("verified", { key });
   let theme = "light";
   let captchaElement: HTMLElement;
-  let sitekey = process.env.HCAPTCHA_SITE_KEY;
 
   type HCaptchaRenderArgs = { theme?: string; sitekey?: string; callback: (key: string) => void };
   interface WithScript {
@@ -28,7 +29,13 @@
     } catch (e) {
       // Swallow error for old safari compatibility
     }
-    loadHCaptcha(() => (window as unknown as WithScript).hcaptcha.render(captchaElement, { theme, sitekey, callback }));
+    loadHCaptcha(() =>
+      ((window as unknown) as WithScript).hcaptcha.render(captchaElement, {
+        theme,
+        sitekey: HCAPTCHA_SITE_KEY,
+        callback,
+      }),
+    );
   });
 </script>
 

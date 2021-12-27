@@ -39,7 +39,7 @@ services:
     volumes:
       - ${BLOCK_STORAGE}/mail/mail.private:/etc/opendkim/domainkeys/mail.private
   sapper:
-    image: $DEPLOY_REGISTRY/cucb/website:slim
+    image: $DEPLOY_REGISTRY/cucb/sveltekit:slim
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
@@ -49,18 +49,14 @@ services:
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
       SESSION_SECRET: ${SESSION_SECRET}
-      EMAIL_HOST: smtp.gmail.com
-      EMAIL_USERNAME: ${EMAIL_USERNAME}
-      EMAIL_PASSWORD: ${EMAIL_PASSWORD}
+      EMAIL_POSTFIX_HOST: postfix
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
-      EMAIL_SSL: "true"
-      EMAIL_PORT: 587
-      HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
+      VITE_HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
     volumes:
       - ./static:/usr/src/app/static
     restart: always
-    command: "node __sapper__/build"
+    command: "node ./build"
     logging:
       driver: "json-file"
       options:
@@ -73,6 +69,7 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile.lib:/etc/caddy/Caddyfile.lib
       - ${BLOCK_STORAGE}/certs:/root/.caddy/certs
       - ./static/static:/srv/static
       - ${BLOCK_STORAGE}/images:/srv/images
