@@ -100,20 +100,16 @@
   </p>
   {#if !success}
     <form on:submit|preventDefault="{submit('start')}">
-      <label
-        >Email/CRSid
+      <label>Email/CRSid
         <input
           id="username"
           type="text"
           bind:value="{username}"
           data-test="username"
-          use:checkValid="{{
-            validityErrors: { patternMismatch: 'This should be either a CRSid or an email address' },
-          }}"
+          use:checkValid="{{ validityErrors: { patternMismatch: 'This should be either a CRSid or an email address' } }}"
           pattern="{regexString(CRSID_PATTERN)}|{regexString(EMAIL_PATTERN)}"
           required="{true}"
-        /></label
-      >
+        /></label>
       <input type="submit" value="Reset password" data-test="submit" />
     </form>
   {:else}
@@ -128,30 +124,24 @@
   <p>Please enter your chosen password below, and click the button to set your new password.</p>
   {#if !success}
     <form on:submit|preventDefault="{submit('complete')}">
-      <label
-        >Password<input
+      <label>Password<input
           type="password"
           data-test="password"
           bind:value="{password}"
           use:checkValid="{{ bothEqual: { id: 'password', error: 'Passwords do not match' } }}"
           required="{true}"
-        /></label
-      >
-      <label
-        >Confirm password<input
+        /></label>
+      <label>Confirm password<input
           type="password"
           data-test="password-confirm"
           bind:value="{passwordConfirm}"
           use:checkValid="{{ bothEqual: { id: 'password', error: 'Passwords do not match' } }}"
           required="{true}"
-        /></label
-      >
+        /></label>
       <input type="submit" value="Change password" data-test="submit" />
     </form>
   {:else}
-    <p>
-      Your password has been successfully reset. Please use the form below to log in with it.
-    </p>
+    <p>Your password has been successfully reset. Please use the form below to log in with it.</p>
     <LoginForm redirectTo="/members" />
   {/if}
 {:else}

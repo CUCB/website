@@ -241,10 +241,10 @@
 </svelte:head>
 <!-- It feels like these should go in svelte:head, but it seems at the moment (svelte 3.44.0), this doesn't like reactivity
   but previous versions seemed to work-->
-{#if accent && accent !== "null"}
+{#if accent && accent !== 'null'}
   {@html accentCss(accent)}
 {/if}
-{#if logo && logo !== "null"}
+{#if logo && logo !== 'null'}
   {@html logoCss(logo)}
 {/if}
 {#if showSettings}
@@ -265,8 +265,8 @@
     </button>
     <button
       on:click="{() => (settings = settings.update('accent', (accents) => accents.remove(color)))}"
-      data-test="reset-accent-color">Reset accent colour</button
-    >
+      data-test="reset-accent-color"
+    >Reset accent colour</button>
     <button
       on:click="{() => (viewSettings = viewSettings.update('logoOpen', (x) => !x).set('accentOpen', false))}"
       disabled="{accentColor === null}"
@@ -276,8 +276,8 @@
     </button>
     <button
       on:click="{() => (settings = settings.update('logo', (logoColors) => logoColors.remove(color)))}"
-      data-test="reset-logo-color">Reset logo colour</button
-    >
+      data-test="reset-logo-color"
+    >Reset logo colour</button>
     <!-- svelte-ignore a11y-label-has-associated-control-->
     <label data-test="select-theme">
       Theme
@@ -289,8 +289,8 @@
     </label>
     <button
       on:click="{() => (selectedTheme ? (settings = settings.set('color', selectedTheme)) : {})}"
-      data-test="confirm-theme">Set theme</button
-    >
+      data-test="confirm-theme"
+    >Set theme</button>
     <label>
       Spinny logo
       <input
@@ -314,8 +314,7 @@
       </Select>
     </label>
     <button
-      on:click="{() =>
-        selectedCalendarStartDay ? (settings = settings.set('calendarStartDay', selectedCalendarStartDay)) : {}}"
+      on:click="{() => (selectedCalendarStartDay ? (settings = settings.set('calendarStartDay', selectedCalendarStartDay)) : {})}"
       data-test="confirm-calendar-day"
     >
       Set day

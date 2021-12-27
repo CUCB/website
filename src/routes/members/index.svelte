@@ -23,20 +23,20 @@
 </script>
 
 <script>
-import GigSignup from "../../components/Gigs/Signup.svelte";
+  import GigSignup from "../../components/Gigs/Signup.svelte";
   import { makeTitle } from "../../view";
   import { session } from "$app/stores";
   export let gigSignups, userInstruments;
 </script>
 
 <svelte:head>
-  <title>{makeTitle("Members")}</title>
+  <title>{makeTitle('Members')}</title>
 </svelte:head>
 
 <h1>Members</h1>
 
 <h2>Gig signup</h2>
-{#if ["webmaster", "president", "secretary"].includes($session.hasuraRole)}
+{#if ['webmaster', 'president', 'secretary'].includes($session.hasuraRole)}
   <p>You're an important person. You can <a href="/members/gigs/signups">view the gig signup summary</a>.</p>
 {/if}
 {#each gigSignups as gig}

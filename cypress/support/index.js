@@ -45,8 +45,12 @@ const equalStroke = (_chai, utils) => {
     let objectColor = tinycolor(this._obj.css("stroke")).toHexString();
     this.assert(
       objectColor === tinycolor(options).toHexString(),
-      `expected #{this} to have stroke color "${tinycolor(options).toHexString()}". actual stroke color is "${objectColor}".`,
-      `expected #{this} to not have stroke color "${tinycolor(options).toHexString()}". actual stroke color is "${objectColor}".`,
+      `expected #{this} to have stroke color "${tinycolor(
+        options,
+      ).toHexString()}". actual stroke color is "${objectColor}".`,
+      `expected #{this} to not have stroke color "${tinycolor(
+        options,
+      ).toHexString()}". actual stroke color is "${objectColor}".`,
       this._obj,
     );
   }

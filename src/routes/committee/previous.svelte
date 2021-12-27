@@ -42,7 +42,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle("History")}</title>
+  <title>{makeTitle('History')}</title>
 </svelte:head>
 <h1>A (very) brief history of the band</h1>
 

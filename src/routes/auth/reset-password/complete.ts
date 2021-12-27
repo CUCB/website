@@ -19,8 +19,8 @@ export async function post(request: PostRequest): Promise<Response> {
       return { status: e.status, body: e.message };
     }
   } else if ("password" in body && String.check(body["password"])) {
-      return { status: 400, body: "Password is too short" };
+    return { status: 400, body: "Password is too short" };
   } else {
-      return { status: 400, body: "Missing field password in body" };
+    return { status: 400, body: "Missing field password in body" };
   }
 }

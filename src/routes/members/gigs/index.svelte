@@ -197,7 +197,7 @@
   $: gotoNextCalendarMonth = gotoDate(
     DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").plus({ months: 1 }).toFormat("yyyy-LL"),
   );
-  $: changeCalendarDate = async (event: CustomEvent<{month?: number, year?: number}>) => {
+  $: changeCalendarDate = async (event: CustomEvent<{ month?: number; year?: number }>) => {
     if (event.detail.month !== undefined) {
       await gotoDate(
         DateTime.fromFormat(currentCalendarMonth, "yyyy-LL").set({ month: event.detail.month }).toFormat("yyyy-LL"),
@@ -285,7 +285,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle("Gigs")}</title>
+  <title>{makeTitle('Gigs')}</title>
 </svelte:head>
 <div class="heading">
   <div class="information">
@@ -305,11 +305,11 @@
     {#if drafts.length > 0}
       There are some drafts lying around:
       {#each drafts as gig}
-        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || "Unnamed draft"}</a>
+        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
         [created
-        {DateTime.fromISO(gig.posting_time).toFormat("HH:mm, dd/LL")}
+        {DateTime.fromISO(gig.posting_time).toFormat('HH:mm, dd/LL')}
         by
-        {(gig.user && gig.user.first) || "someone?"}],
+        {(gig.user && gig.user.first) || 'someone?'}],
       {/each}
       so please don't leave them here forever
     {/if}
@@ -326,7 +326,7 @@
     <p>Display:</p>
     <ul>
       <li>
-        {#if displaying === "allUpcoming"}
+        {#if displaying === 'allUpcoming'}
           All upcoming gigs (currently shown)
         {:else}
           <button class="link" on:click="{() => display('allUpcoming')}" data-test="gigview-all-upcoming">
@@ -335,7 +335,7 @@
         {/if}
       </li>
       <li>
-        {#if displaying === "byMonth"}
+        {#if displaying === 'byMonth'}
           Gigs by month (currently shown)
         {:else}
           <button class="link" on:click="{() => display('byMonth')}" data-test="gigview-by-month">
@@ -348,7 +348,7 @@
 </div>
 
 {#each gigs as gig (gig.id)}
-  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== "undefined"}
+  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== 'undefined'}
     <Summary gig="{gig}" signupGig="{signupGigs[gig.id]}" userInstruments="{userInstruments}" linkHeading="{true}" />
   {:else}
     <Summary gig="{gig}" userInstruments="{userInstruments}" linkHeading="{true}" />

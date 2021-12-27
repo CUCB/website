@@ -32,8 +32,11 @@
 
 <p>
   On the other hand, if you like the idea of getting involved in the band and would be interested in
-  <a href="/join">joining us</a>, then you are warmly encouraged to <a href="/faqs/join">browse the information</a>
-  on the site, join our <a href="/mailinglists">mailing list</a> and come along to a rehearsal!
+  <a href="/join">joining us</a>, then you are warmly encouraged to
+  <a href="/faqs/join">browse the information</a>
+  on the site, join our
+  <a href="/mailinglists">mailing list</a>
+  and come along to a rehearsal!
 </p>
 
 <h2>Keep In Touch!</h2>

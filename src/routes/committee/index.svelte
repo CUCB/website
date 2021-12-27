@@ -2,7 +2,7 @@
   import { makeClient, handleErrors } from "../../graphql/client";
   import { currentCommitteePictures } from "../../graphql/committee";
   export async function load({ page: { query }, fetch, session }) {
-    const aprilFools = query.get("aprilfool") !== undefined; 
+    const aprilFools = query.get("aprilfool") !== undefined;
     const client = makeClient(fetch);
     let res;
     try {
@@ -40,6 +40,6 @@
 
 <div>
   {#each committee as person}
-    <Person {person} {aprilFools} showEmail={true} />
+    <Person person="{person}" aprilFools="{aprilFools}" showEmail="{true}" />
   {/each}
 </div>

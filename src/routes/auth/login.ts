@@ -10,7 +10,7 @@ const LoginBody = Record({
 // TODO import an accurate version of this from somewhere!
 type Session = any;
 
-export async function post(req: Request<{session: Session}>) {
+export async function post(req: Request<{ session: Session }>) {
   const body = Object.fromEntries(req.body.entries());
   if (LoginBody.guard(body)) {
     try {

@@ -19,13 +19,9 @@
   let initiated = false;
 
   const dispatch = createEventDispatcher();
-  const latLngFrom = map_link => {
+  const latLngFrom = (map_link) => {
     try {
-      return map_link
-        .split(/@/)[1]
-        .split(/,/)
-        .slice(0, 2)
-        .map(parseFloat);
+      return map_link.split(/@/)[1].split(/,/).slice(0, 2).map(parseFloat);
     } catch {
       return [];
     }

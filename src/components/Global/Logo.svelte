@@ -48,7 +48,7 @@
     : () => {
         // @ts-ignore
         if (window.Cypress) {
-            self.dispatchEvent(new CustomEvent("noRotate"));
+          self.dispatchEvent(new CustomEvent("noRotate"));
         }
       };
 </script>

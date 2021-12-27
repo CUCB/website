@@ -107,34 +107,27 @@
 {#if view === VIEWS.signupsOpen}
   <p>
     Showing all upcoming gigs.
-    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}"
-      >Show only upcoming gigs without a lineup</button
-    >
+    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}">Show only
+      upcoming gigs without a lineup</button>
     &#32;|
-    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}"
-      >Show all gigs since one month back</button
-    >
+    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}">Show all gigs since
+      one month back</button>
   </p>
 {:else if view === VIEWS.noLineup}
   <p>
     Showing upcoming gigs without a lineup.
-    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}"
-      >Show all upcoming gigs</button
-    >. &#32;|
-    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}"
-      >Show all gigs since one month back</button
-    >
+    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}">Show all upcoming gigs</button>.
+    &#32;|
+    <button class="link" data-test="show-past-month" on:click="{() => (view = VIEWS.sinceOneMonth)}">Show all gigs since
+      one month back</button>
   </p>
 {:else}
   <p>
     Showing all gigs since one month back.
-    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}"
-      >Show only upcoming gigs without a lineup</button
-    >
+    <button class="link" data-test="show-upcoming-no-lineup" on:click="{() => (view = VIEWS.noLineup)}">Show only
+      upcoming gigs without a lineup</button>
     &#32;|
-    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}"
-      >Show all upcoming gigs</button
-    >.
+    <button class="link" data-test="show-upcoming" on:click="{() => (view = VIEWS.signupsOpen)}">Show all upcoming gigs</button>.
   </p>
 {/if}
 <SignupAdmin gigs="{gigs}" />

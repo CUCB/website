@@ -5,9 +5,9 @@
   export async function load({ session }) {
     if (session.userId !== undefined) {
       return {
-          redirect: "/members",
-          status: 302
-      }
+        redirect: "/members",
+        status: 302,
+      };
     }
     return {};
   }

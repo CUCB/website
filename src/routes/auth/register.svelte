@@ -100,8 +100,8 @@
       {/each}
     </ul>
   {/if}
-  <label>First name <input type="text" bind:value="{firstName}" required={true} data-test="first-name" /></label>
-  <label>Last name <input type="text" bind:value="{lastName}" required={true} data-test="last-name" /></label>
+  <label>First name <input type="text" bind:value="{firstName}" required="{true}" data-test="first-name" /></label>
+  <label>Last name <input type="text" bind:value="{lastName}" required="{true}" data-test="last-name" /></label>
   <label for="username">CRSid/Email address
     <input
       id="username"
@@ -111,7 +111,7 @@
       data-test="username"
       use:checkValid="{{ validityErrors: { patternMismatch: 'This should be either a CRSid or an email address' } }}"
       pattern="{regexString(CRSID_PATTERN)}|{regexString(EMAIL_PATTERN)}"
-      required={true}
+      required="{true}"
     />
   </label>
   <label for="password">Password<input
@@ -121,7 +121,7 @@
       bind:value="{password}"
       minlength="8"
       data-test="password"
-      required={true}
+      required="{true}"
     /></label>
   <label for="password-confirm">Confirm password<input
       id="password-confirm"
@@ -130,7 +130,7 @@
       type="password"
       bind:value="{passwordConfirm}"
       data-test="password-confirm"
-      required={true}
+      required="{true}"
     /></label>
   <input type="submit" value="Register" />
 </form>

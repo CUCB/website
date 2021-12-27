@@ -1,19 +1,20 @@
 <script lang="ts" context="module">
-    interface Person {
-        committee: {
-            pic_folder: string;
-        };
-        pic: string;
-        april_fools_dir: string | null;
-        email_obfus: string | null;
-        name: string;
-        position: {
-            name: string;
-        }
-        sub_position: string | null;
-        comments: string | null;
-    }
+  interface Person {
+    committee: {
+      pic_folder: string;
+    };
+    pic: string;
+    april_fools_dir: string | null;
+    email_obfus: string | null;
+    name: string;
+    position: {
+      name: string;
+    };
+    sub_position: string | null;
+    comments: string | null;
+  }
 </script>
+
 <script lang="ts">
   import Mailto from "../Mailto.svelte";
   import { themeName } from "../../view";

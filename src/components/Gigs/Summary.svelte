@@ -226,19 +226,19 @@
       {:else}{gig.title}{/if}
       <div class="gig-icons">
         {#if gig.food_provided}
-          <TooltipText content="Food provided"
-            ><i class="las la-utensils" data-test="icon-food-provided"></i></TooltipText
-          >
+          <TooltipText content="Food provided">
+            <i class="las la-utensils" data-test="icon-food-provided"></i>
+          </TooltipText>
         {/if}
         {#if gig.admins_only}
-          <TooltipText content="Hidden from normal users"
-            ><i class="las la-eye-slash" data-test="icon-admins-only"></i></TooltipText
-          >
+          <TooltipText content="Hidden from normal users">
+            <i class="las la-eye-slash" data-test="icon-admins-only"></i>
+          </TooltipText>
         {/if}
-        {#if gig.type.code === "calendar"}
-          <TooltipText content="Calendar event"
-            ><i class="las la-calendar" data-test="icon-calendar-event"></i></TooltipText
-          >
+        {#if gig.type.code === 'calendar'}
+          <TooltipText content="Calendar event">
+            <i class="las la-calendar" data-test="icon-calendar-event"></i>
+          </TooltipText>
         {/if}
       </div>
     </h2>
@@ -250,13 +250,13 @@
         </a>
       </h3>
     {/if}
-    {#if displayLinks && ["webmaster", "president", "secretary", "treasurer", "gig_editor"].indexOf($session.hasuraRole) > -1}
+    {#if displayLinks && ['webmaster', 'president', 'secretary', 'treasurer', 'gig_editor'].indexOf($session.hasuraRole) > -1}
       <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
     {/if}
-    {#if displayLinks && ["webmaster", "president"].indexOf($session.hasuraRole) > -1 && gig.type.code === "gig"}
+    {#if displayLinks && ['webmaster', 'president'].indexOf($session.hasuraRole) > -1 && gig.type.code === 'gig'}
       <a href="/members/gigs/{gig.id}/edit-lineup" class="main-detail">Edit lineup</a>
     {/if}
-    {#if gig.type.code !== "calendar" && gig.date}
+    {#if gig.type.code !== 'calendar' && gig.date}
       <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
     {/if}
     {#if gig.allow_signups && signups}
@@ -267,9 +267,9 @@
         {#if gig.arrive_time}
           <p>
             <b>Arrive time:&nbsp;</b>
-            {#if date && arrive_time.hasSame(date, "day")}
+            {#if date && arrive_time.hasSame(date, 'day')}
               {@html formatTimeOnly(arrive_time)}
-            {:else if !date && finish_time && arrive_time.hasSame(finish_time, "day")}
+            {:else if !date && finish_time && arrive_time.hasSame(finish_time, 'day')}
               {@html formatTimeOnly(arrive_time)}
             {:else}
               {@html formatTimeWithDate(arrive_time)}
@@ -277,7 +277,7 @@
           </p>
         {/if}
         {#if gig.time}
-          <p><b>Start time:&nbsp;</b> {DateTime.fromISO(`2020-01-01T${gig.time}`).toFormat("HH:mm")}</p>
+          <p><b>Start time:&nbsp;</b> {DateTime.fromISO(`2020-01-01T${gig.time}`).toFormat('HH:mm')}</p>
         {/if}
         {#if finish_time}
           <p>
@@ -335,11 +335,11 @@
         {#if gig.advertise}<b>Public advert:&nbsp;</b>{:else}<b>Summary:&nbsp;</b>{/if}
         <blockquote>
           {@html gig.summary
-            .split("\n")
+            .split('\n')
             .map((p) => p.trim())
             .filter((p) => p.length)
             .map((p) => `<p>${p}</p>`)
-            .join("")}
+            .join('')}
         </blockquote>
       </div>
     {/if}
@@ -360,7 +360,7 @@
     {#if gig.finance}
       <div class="gig-finance main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</div>
     {/if}
-    {#if gig.gig_type === "gig_enquiry"}Quote date: {gig.quote_date}{/if}
+    {#if gig.gig_type === 'gig_enquiry'}Quote date: {gig.quote_date}{/if}
     {#if clients.length > 0}
       <p>
         <b>
@@ -385,7 +385,7 @@
     {#if gig.lineup.length > 0}
       <Lineup people="{gig.lineup}" />
     {/if}
-    {#if gig.type.code === "gig_cancelled" && linkHeading}
+    {#if gig.type.code === 'gig_cancelled' && linkHeading}
       <button class="cancelled-detail main-detail" on:click="{() => (showDetails = !showDetails)}">
         {#if !showDetails}Show full details{:else}Hide full details{/if}
       </button>

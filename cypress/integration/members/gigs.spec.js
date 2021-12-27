@@ -179,7 +179,8 @@ describe("gig summary", () => {
   });
 
   context("logged in as normal user", () => {
-    beforeEach(() => { // Changed from before to beforeEach as some tests were flaky
+    beforeEach(() => {
+      // Changed from before to beforeEach as some tests were flaky
       cy.login("cypress_user", "abc123");
       cy.visit(`/members/gigs/${gig.id}`);
     });
@@ -207,7 +208,6 @@ describe("gig summary", () => {
       cy.contains("deposit").should("not.exist");
       cy.contains("payment").should("not.exist");
     });
-
 
     it("shows a signup button", () => {
       cy.get(`[data-test='show-signup-${gig.id}']`).should("be.visible");

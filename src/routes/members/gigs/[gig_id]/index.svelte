@@ -69,4 +69,4 @@
 </svelte:head>
 
 <h1>Gigs</h1>
-<Summary gig="{gig}" {signupGig} signups="{signupSummary}" userInstruments="{userInstruments}" />
+<Summary gig="{gig}" signupGig="{signupGig}" signups="{signupSummary}" userInstruments="{userInstruments}" />

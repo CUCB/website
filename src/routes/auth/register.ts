@@ -15,7 +15,7 @@ type Session = {
   firstName?: string;
   lastName?: string;
 };
-type PostRequest = Request<{session: Session}> & { body: FormData };
+type PostRequest = Request<{ session: Session }> & { body: FormData };
 
 const RegisterBody = RuntypeRecord({
   username: String,

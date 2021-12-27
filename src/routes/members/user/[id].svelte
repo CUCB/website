@@ -183,9 +183,7 @@
 
 {#if user.bio}
   <figure>
-    <blockquote>
-      {user.bio}
-    </blockquote>
+    <blockquote>{user.bio}</blockquote>
     <figcaption>{user.first}</figcaption>
   </figure>
 {:else}
@@ -193,29 +191,34 @@
 {/if}
 
 <p>
-  Say hi to <b>{user.first} {user.last}</b>!
-  {user.first} joined the site {join_date} and
-  {#if login_date}
-    was last seen online in {login_date}.
-  {:else}
-    hasn't been seen in a long time.
-  {/if}
+  Say hi to
+  <b>{user.first} {user.last}</b>!
+  {user.first}
+  joined the site
+  {join_date}
+  and
+  {#if login_date}was last seen online in {login_date}.{:else}hasn't been seen in a long time.{/if}
 </p>
 
 <!-- TODO support the "[*] We don't always take ourselves too seriously." footnote where novelty instruments are used -->
 
 {#if gig_count > 0}
-  Since joining CUCB, {user.first} has played {gig_count}
-  {gig_count > 1 ? "gigs" : "gig"}, {#if gig_count > 1} most recently {/if} on
-  <a href="{gigLink(last_gig.gig.id)}">{last_gig_date}</a>. {#if gig_count > 1}The first one was back on the <a
-      href="{gigLink(first_gig.gig.id)}">{first_gig_date}</a
-    >.{/if}
+  Since joining CUCB,
+  {user.first}
+  has played
+  {gig_count}
+  {gig_count > 1 ? 'gigs' : 'gig'},
+  {#if gig_count > 1}most recently{/if}
+  on
+  <a href="{gigLink(last_gig.gig.id)}">{last_gig_date}</a>.
+  {#if gig_count > 1}The first one was back on the <a href="{gigLink(first_gig.gig.id)}">{first_gig_date}</a>.{/if}
 
   {#if instrument_count > 0}
-    {possessive(user.first)} instrument of choice would seem to be <b>{most_played_instrument}</b>, having played it in {percentage(
-      most_played_instrument[1],
-      instrument_gig_count,
-    )} of their gigs.
+    {possessive(user.first)}
+    instrument of choice would seem to be
+    <b>{most_played_instrument}</b>, having played it in
+    {percentage(most_played_instrument[1], instrument_gig_count)}
+    of their gigs.
     {#if instrument_count > 1}
       Apart from that, they have been known to play
       <b>
@@ -319,17 +322,11 @@
     <label for="has-folder">Has folder?</label>
     <div><input type="checkbox" id="has-folder" bind:checked="{has_folder}" /></div>
     <label for="is-driver">Driver?</label>
-    <div>
-      <input type="checkbox" id="is-driver" bind:checked="{is_driver}" />
-    </div>
+    <div><input type="checkbox" id="is-driver" bind:checked="{is_driver}" /></div>
     <label for="has-car">Has a car?</label>
-    <div>
-      <input type="checkbox" id="has-car" bind:checked="{has_car}" />
-    </div>
+    <div><input type="checkbox" id="has-car" bind:checked="{has_car}" /></div>
     <label for="can-tech">Can soundtech?</label>
-    <div>
-      <input type="checkbox" id="can-tech" bind:checked="{can_tech}" />
-    </div>
+    <div><input type="checkbox" id="can-tech" bind:checked="{can_tech}" /></div>
     <label for="can-lead">Can lead?</label>
     <div><input type="checkbox" id="can-lead" bind:checked="{can_lead}" /></div>
   </fieldset>

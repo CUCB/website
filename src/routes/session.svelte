@@ -29,11 +29,7 @@
   </li>
 </ul>
 
-<p>
-  Make sure you're on the
-  <a href="/mailinglists/">chat mailing list</a>
-  to get e-mails about sessions!
-</p>
+<p>Make sure you're on the <a href="/mailinglists/">chat mailing list</a> to get e-mails about sessions!</p>
 
 <p>
   It's a chance for a bit of informal music making - generally someone will start a tune and others will start to join

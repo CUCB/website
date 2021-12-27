@@ -6,7 +6,7 @@ import {
   UserWithUsername,
   HASHED_PASSWORDS,
 } from "../database/users";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 describe("login page", () => {
   before(() => {
@@ -406,23 +406,26 @@ describe("password reset form", () => {
         const email = emails[0];
         expect(email).to.be.sentTo("password.user0@cypress.io");
         expect(email.replyTo).to.contain("CUCB Webmaster <webmaster@cucb.co.uk>");
-        cy.visit(`/renderemail?id=${email.ID}`)
+        cy.visit(`/renderemail?id=${email.ID}`);
       });
-      cy.get("a").should("have.attr", "href").and("match", /^https:\/\/www.cucb.co.uk\/auth\/reset-password/).then(link => {
-          link = link.replace(/^https:\/\/www.cucb.co.uk/, Cypress.config().baseUrl)
-          const token = link.split(/=/)[1];
-          const decoded = jwt.verify(token, Cypress.env("SESSION_SECRET"));
-          expect(decoded.exp * 1000).to.be.greaterThan(Cypress.DateTime.local().ts)
-          expect(decoded.exp * 1000).to.be.lessThan(Cypress.DateTime.local().plus({ hours: 2 }).ts)
-          cy.visit(link);
+    cy.get("a")
+      .should("have.attr", "href")
+      .and("match", /^https:\/\/www.cucb.co.uk\/auth\/reset-password/)
+      .then((link) => {
+        link = link.replace(/^https:\/\/www.cucb.co.uk/, Cypress.config().baseUrl);
+        const token = link.split(/=/)[1];
+        const decoded = jwt.verify(token, Cypress.env("SESSION_SECRET"));
+        expect(decoded.exp * 1000).to.be.greaterThan(Cypress.DateTime.local().ts);
+        expect(decoded.exp * 1000).to.be.lessThan(Cypress.DateTime.local().plus({ hours: 2 }).ts);
+        cy.visit(link);
       });
-      cy.waitForFormInteractive();
-      cy.get("[data-test=password]").type("anewpassword");
-      cy.get("[data-test=password-confirm]").type("anewpassword");
-      cy.get("[data-test=submit]").click();
-      cy.get("[data-test=username]").type("pass2");
-      cy.get("[data-test=password]").type("anewpassword{enter}");
-      cy.url().should("match", /\/members/);
+    cy.waitForFormInteractive();
+    cy.get("[data-test=password]").type("anewpassword");
+    cy.get("[data-test=password-confirm]").type("anewpassword");
+    cy.get("[data-test=submit]").click();
+    cy.get("[data-test=username]").type("pass2");
+    cy.get("[data-test=password]").type("anewpassword{enter}");
+    cy.url().should("match", /\/members/);
   });
 
   // TODO check expired JWT, invalid JWT, mismatched passwords...
