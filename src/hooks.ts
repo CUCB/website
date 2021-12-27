@@ -4,6 +4,10 @@ import { makeGraphqlClient } from "./auth";
 import gql from "graphql-tag";
 import signature from "cookie-signature";
 import dotenv from "dotenv";
+// If we don't import Response somewhere, we get a "Response is not defined" error every time
+// we call fetch when server-side rendering, so we import it here.
+// @ts-ignore
+import { Response } from "isomorphic-fetch";
 
 dotenv.config();
 const SESSION_SECRET = process.env["SESSION_SECRET"];
