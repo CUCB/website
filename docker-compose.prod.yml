@@ -61,7 +61,7 @@ services:
     volumes:
       - ./static:/usr/src/app/static
     restart: always
-    command: "node ./build"
+    command: "npx svelte-kit preview --host"
     logging:
       driver: "json-file"
       options:
