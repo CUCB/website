@@ -21,15 +21,16 @@ jobs:
         run: |
           npm ci
           npm run svelte-check
-  unique_id:
-    name: "Generate unique ID for workflow run"
+  nonce:
     runs-on: ubuntu-latest
-    steps:
-      - name: Generate unique id
-        id: unique_id
-        run: echo "::set-output name=id::$(uuidgen)"
+    # persist job results to other jobs in the workflow
     outputs:
-      unique_id: ${{ steps.unique_id.outputs.id }}
+      result: ${{ steps.nonce.outputs.result }}
+    steps:
+      # persist step results to other steps in the job
+      - id: nonce
+        # adding a timestamp makes the nonce more unique for re-runs
+        run: echo "::set-output name=result::${{ github.run_id }}-$(date +%s)"
   test:
     name: Cypress run
     runs-on: ubuntu-latest
@@ -43,7 +44,7 @@ jobs:
         # run 4 copies of the current job in parallel
         containers: [1, 2, 3, 4]
     needs:
-      - unique_id
+      - nonce
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -67,8 +68,8 @@ jobs:
           # See https://dev.to/digitaledawn/github-action-cypress-and-percy-parallelisation-setup-484a for percy setup
           PERCY_TOKEN: ${{ secrets.PERCY_TOKEN }}
           PERCY_PARALLEL_TOTAL: 4
-          # We need a uuid (as mentioned here https://github.com/actions/toolkit/issues/65#issuecomment-718134668) to uniquely identify re-runs)
-          PERCY_PARALLEL_NONCE: "${{ github.event_name }}-${{ github.sha }}-${{ needs.unique_id.outputs.unique_id }}"
+          # Use the generated nonce to distinguish between runs (as shown in example here: https://docs.percy.io/docs/parallel-test-suites#github-actions)
+          PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
           PERCY_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
       - name: Upload artifacts
@@ -141,7 +142,7 @@ jobs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
       - name: Set env to develop
-        if: endsWith(github.ref, '/sveltekit-beta')
+        if: "!endsWith(github.ref, '/master')"
         run: echo "ENVIRONMENT=dev" >> $GITHUB_ENV
       - name: Set env to production
         if: endsWith(github.ref, '/master')

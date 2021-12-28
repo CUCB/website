@@ -19,10 +19,12 @@ if (stack === "shared") {
 
 const shared = new pulumi.StackReference("cucb/cucb-website/shared");
 
+const region = "lon1";
+
 // A droplet to host the site
 const web = new digitalocean.Droplet("website", {
   image: "ubuntu-20-04-x64",
-  region: "lon1",
+  region,
   size: "s-1vcpu-1gb",
   backups: true,
   name: `website-${stack}`,
@@ -31,7 +33,7 @@ const web = new digitalocean.Droplet("website", {
 
 // Block storage for a first tier backup (in addition to dropbox)
 const webBlock = new digitalocean.Volume("website-block", {
-  region: "lon1",
+  region,
   size: 5,
   initialFilesystemType: "ext4",
   description: "Volume for database backups and user uploads",
@@ -46,7 +48,13 @@ const webBlockAttachment = new digitalocean.VolumeAttachment("website-block-atta
 
 // Create a floating ip so we have somewhere to point dns to even if the droplet is destroyed
 const floatingIP = new digitalocean.FloatingIp("website-ip", {
-  region: web.region,
+  region,
+});
+
+// Assign it to the droplet separately so we don't recreate it if
+const floatingIPAssignment = new digitalocean.FloatingIpAssignment("website-ip-assignment", {
+  ipAddress: floatingIP.ipAddress,
+  // Use .apply(parseInt) as a workaround for https://github.com/pulumi/pulumi-digitalocean/issues/218
   dropletId: web.id.apply(parseInt),
 });
 
