@@ -22,7 +22,7 @@ module.exports = (on, config) => {
   config.env.PG_USER = config.env.PG_USER || process.env.PG_USER;
   (config.env.GRAPHQL_REMOTE = process.env.GRAPHQL_REMOTE || "http://localhost:8080"),
     (config.env.GRAPHQL_PATH = process.env.GRAPHQL_PATH || "/v1/graphql");
-  config.env.MAILHOG_HOST = "http://" + (process.env.EMAIL_POSTFIX_HOST || "localhost") + ":8025";
+  config.env.MAILHOG_HOST = "http://" + (process.env.EMAIL_HOST || "localhost") + ":8025";
   config.env.HASURA_GRAPHQL_ADMIN_SECRET = process.env.HASURA_GRAPHQL_ADMIN_SECRET || "myadminsecretkey";
   config.env.SESSION_SECRET = process.env.SESSION_SECRET || "somethingrandom";
 

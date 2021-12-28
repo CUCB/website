@@ -3,12 +3,14 @@
     name: create-variable
   vars:
     env_file: "{{ repo_root }}/.env"
-    name: "{{ item }}"
+    name: "{{ secret_name }}"
     value: "{{ lookup('password', '/dev/null length=40') }}"
   loop:
     - PG_PASSWORD
     - SESSION_SECRET
     - HASURA_GRAPHQL_ADMIN_SECRET
+  loop_control:
+    loop_var: secret_name
 
 - name: Lookup block storage directory
   find:
@@ -17,10 +19,30 @@
     file_type: directory
   register: block_storage
 
-- name: Fail if block storage could not be identified
+- name: Check if block storage contains files
+  find:
+    paths: ["{{ block_storage.files[0].path }}"]
+    file_type: any
+  register: block_storage_files
+  when: block_storage.matched == 1
+
+- name: Mount block storage directory if not already done
+  include_role:
+    name: mount-block-storage
+  when: block_storage.matched != 1 or block_storage_files.matched == 0
+
+- name: Lookup block storage directory if newly mounted
+  find:
+    paths: ["/mnt"]
+    patterns: "website_*"
+    file_type: directory
+  register: block_storage_again
+  when: block_storage.matched != 1 or block_storage_files.matched == 0
+
+- name: Fail if block storage could not be uniquely identified
   fail:
-    msg: Block storage location could not be identified
-  when: block_storage.matched != 1
+    msg: Block storage location could not be uniquely identified
+  when: block_storage.matched != 1 or ('matched' in block_storage_again and block_storage_again.matched != 1)
 
 - name: Create block storage variable
   include_role:
@@ -38,3 +60,27 @@
     env_file: "{{ repo_root }}/.env"
     name: HCAPTCHA_SECRET
     value: "{{ hcaptcha_secret }}"
+
+- name: Create email username variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: EMAIL_USERNAME
+    value: "{{ email_username }}"
+
+- name: Create email password variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: EMAIL_PASSWORD
+    value: "{{ email_password }}"
+
+- name: Create email host variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: EMAIL_HOST
+    value: "{{ email_host }}"

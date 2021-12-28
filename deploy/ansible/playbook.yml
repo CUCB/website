@@ -9,7 +9,7 @@
   tasks:
     - name: Configure and run server
       include_role:
-        name: "{{ item }}"
+        name: "{{ configuration_step }}"
       loop:
         - install-dependencies
         - setup-global-environment
@@ -19,3 +19,5 @@
         - configure-cron
         - download-documents
         - update-and-run-docker
+      loop_control:
+        loop_var: configuration_step

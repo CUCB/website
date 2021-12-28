@@ -7,12 +7,12 @@ const fs = require("fs");
 const stack = pulumi.getStack();
 
 if (stack === "shared") {
-  const _default = new digitalocean.SshKey(`ci-bootstrap`, {
+  const sshKey = new digitalocean.SshKey(`ci-bootstrap`, {
     publicKey: fs.readFileSync("ssh_keys/ci_login.pub", { encoding: "utf-8" }),
   });
 
   module.exports = {
-    sshKeyFingerprint: _default.fingerprint,
+    sshKeyFingerprint: sshKey.fingerprint,
   };
   return;
 }
@@ -26,7 +26,7 @@ const web = new digitalocean.Droplet("website", {
   size: "s-1vcpu-1gb",
   backups: true,
   name: `website-${stack}`,
-  sshKeys: [shared.getOutput("fingerprint")],
+  sshKeys: [shared.getOutput("sshKeyFingerprint")],
 });
 
 // Block storage for a first tier backup (in addition to dropbox)
@@ -68,16 +68,6 @@ if (stack === "prod") {
     type: "A",
     value: floatingIP.ipAddress,
     ttl: 1,
-    proxied: false,
-  });
-
-  const dkimRecord = new cloudflare.Record("dkim-record", {
-    name: "mail._domainkey",
-    zoneId: "4c380f78cda5910d99c725cb96fceebc",
-    type: "TXT",
-    value:
-      "v=DKIM1; h=sha256; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAywzbfSvCqwfIoSBwln0liR43+MFVL4HOgedGtvAiyfhOo1LTpllU0fkoI8IuJPjbEA1P6qWyp7e8gdVGjA4QwiXLEAXedZ+fNukmWODK8tbbR3/pZrFUEw1SIpktI8PX8ECryfNkCzHiU4sXMDZ9SIS2IPI7urBaRNWCvhlppnTHMc+MsFayaLPEVYqFYGDnqXRsIrNFHiI8n870ptEFlZc3VgADb1EG/vu1CRwjZJC0IkGiJI1Y2jp/uRKhWqiNdw0+NfjrzMGCervIgLTu9RhQkUyFvp7lIvYSqM2H90qpfcdy7sBnJMoaXk3uLWDq/Fua0tVY/NiPy0XE/pyuGwIDAQAB",
-    ttl: 3600,
     proxied: false,
   });
 } else {

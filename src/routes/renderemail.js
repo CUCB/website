@@ -4,9 +4,7 @@ dotenv.config();
 
 export async function get({ query }) {
   try {
-    const email = await fetch(
-      `http://${process.env["EMAIL_POSTFIX_HOST"]}:8025/api/v1/messages/${query.get("id")}/download`,
-    );
+    const email = await fetch(`http://${process.env["EMAIL_HOST"]}:8025/api/v1/messages/${query.get("id")}/download`);
     const parsed = await simpleParser(await email.text());
     return {
       status: 200,

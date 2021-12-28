@@ -58,13 +58,21 @@ async function realpost(body) {
     let client;
     try {
       client = new SMTPClient({
-        host: process.env["EMAIL_POSTFIX_HOST"],
-        ssl: false,
-        port: process.env["EMAIL_POSTFIX_PORT"],
+        host: process.env["EMAIL_HOST"],
+        ssl: process.env["EMAIL_SSL"] !== "true" ? false : undefined,
+        tls:
+          process.env["EMAIL_SSL"] === "true"
+            ? {
+                ciphers: "SSLv3",
+              }
+            : undefined,
+        port: parseInt(process.env["EMAIL_PORT"]),
+        user: process.env["EMAIL_USERNAME"],
+        password: process.env["EMAIL_PASSWORD"],
       });
     } catch (e) {
       console.error("Failed to make SMTP client");
-      console.error(`Tried to connect to ${process.env.EMAIL_POSTFIX_HOST}:${process.env.EMAIL_POSTFIX_PORT}`);
+      console.error(`Tried to connect to ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT}`);
       return {
         status: 500,
         body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,

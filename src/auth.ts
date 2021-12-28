@@ -153,7 +153,7 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
     try {
       let res = await client.mutate({
         mutation: gql`
-          mutation(
+          mutation (
             $username: String!
             $email: String!
             $saltedPassword: String!
@@ -216,9 +216,17 @@ export async function startPasswordReset({
   const payload: Static<typeof PasswordResetToken> = { id, email };
   const token = jwt.sign(payload, process.env["SESSION_SECRET"] as string, { expiresIn: "1 hour" });
   const emailClient = new SMTPClient({
-    host: process.env["EMAIL_POSTFIX_HOST"],
-    ssl: false,
-    port: JSON.parse(process.env["EMAIL_POSTFIX_PORT"] as string) as number,
+    host: process.env["EMAIL_HOST"],
+    ssl: process.env["EMAIL_SSL"] !== "true" ? false : undefined,
+    tls:
+      process.env["EMAIL_SSL"] === "true"
+        ? {
+            ciphers: "SSLv3",
+          }
+        : undefined,
+    port: JSON.parse(process.env["EMAIL_PORT"] as string) as number,
+    user: process.env["EMAIL_USERNAME"],
+    password: process.env["EMAIL_PASSWORD"],
   });
   const link = `https://www.cucb.co.uk/auth/reset-password?token=${token}`;
   const text = `A password reset has been requested for your account. To choose a new password, go to ${link}. If you have any problems, please get in touch with the webmaster by replying to this email.`;

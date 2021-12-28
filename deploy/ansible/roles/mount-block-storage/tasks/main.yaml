@@ -1,0 +1,36 @@
+# Based on https://docs.digitalocean.com/products/volumes/how-to/mount/
+- name: Find block storage
+  find:
+    paths: ["/dev/disk/by-id"]
+    patterns: "*website*"
+    file_type: link
+  register: block_storage_scsi
+
+- name: List scsi devices found
+  debug:
+    var: block_storage_scsi
+
+- name: Fail if block storage could not be identified
+  fail:
+    msg: Block storage location could not be identified
+  when: block_storage_scsi.matched != 1
+
+- name: Create mount point variable
+  set_fact:
+    new_mount_point: "{{ block_storage_scsi.files[0].path | regex_replace('.*(website.*)', '\\1') | regex_replace('-', '_') }}"
+
+- name: Create mount point directory
+  file:
+    path: "/mnt/{{ new_mount_point }}"
+    state: directory
+
+- name: Mount block storage to mount point
+  mount:
+    path: "/mnt/{{ new_mount_point }}"
+    state: present
+    opts: defaults,nofail,discard,noatime
+    src: "{{ block_storage_scsi.files[0].path }}"
+    fstype: ext4
+
+- name: Refresh mount points
+  command: mount -a

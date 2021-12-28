@@ -6,7 +6,7 @@
     "dev": "svelte-kit dev -p 3000 --host 0.0.0.0",
     "build": "svelte-kit build",
     "start": "svelte-kit preview",
-    "start:ci": "export NODE_ENV=test; svelte-kit preview -p 3000 --host 0.0.0.0",
+    "start:ci": "export NODE_ENV=test; node build",
     "test:ci:ff": "run-p --race start:ci cy:run:ci:ff",
     "test:ci:chrome": "run-p --race start:ci cy:run:ci:chrome",
     "cy:run:ci:chrome": "wait-for-it localhost:3000 -t 60 -- percy exec -- cypress run --record --key $CYPRESS_KEY --browser chrome",
@@ -44,7 +44,7 @@
     }
   },
   "dependencies": {
-    "@sveltejs/kit": "^1.0.0-next.202",
+    "@sveltejs/kit": "^1.0.0-next.203",
     "@sveltejs/adapter-node": "^1.0.0-next.56",
     "bcrypt": "^5.0.1",
     "body-scroll-lock": "^3.1.5",

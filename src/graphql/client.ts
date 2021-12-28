@@ -108,12 +108,14 @@ export function handleErrors(
     } else if (code === "access-denied") {
       return { status: 403, error: "You're not supposed to be here!" };
     } else {
+      console.error(e);
       return {
         status: 500,
         error: `Something went wrong, "${code}" apparently. Let the webmaster know and they'll try and help you`,
       };
     }
   } else {
+    console.error(e);
     return {
       status: 500,
       error: `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`,

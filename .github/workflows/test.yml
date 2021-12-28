@@ -97,7 +97,6 @@ jobs:
       - name: Build and tag image
         run: |
           echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
-          docker run -v "$PWD":/usr/src/app -w /usr/src/app node:12 npm install
           docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
@@ -134,11 +133,10 @@ jobs:
 
   pulumi:
     name: Create/update infrastructure
-    runs-on:
-      ubuntu-latest
-      #needs:
-      #      - build
-      #      - test
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test
     outputs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
@@ -170,7 +168,6 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
   deploy-ansible:
-    if: ${{ github.ref=='refs/heads/master' }}
     name: Deploy site to DigitalOcean using ansible
     runs-on: ubuntu-latest
     needs: pulumi
@@ -214,6 +211,9 @@ jobs:
             --extra-vars ${{ format('ci_commit_branch={0}', steps.extract_branch.outputs.branch) }}
             --extra-vars ${{ format('dropbox_access_token={0}', secrets.DROPBOX_ACCESS_TOKEN) }}
             --extra-vars ${{ format('hcaptcha_secret={0}', secrets.HCAPTCHA_SECRET) }}
+            --extra-vars ${{ format('email_username={0}', 'apikey') }}
+            --extra-vars ${{ format('email_password={0}', secrets.EMAIL_SENDGRID_PASSWORD) }}
+            --extra-vars ${{ format('email_host={0}', 'smtp.sendgrid.net') }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_DEPRECATION_WARNINGS: "false"
