@@ -305,6 +305,7 @@ describe("gig editor", () => {
 
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select(contacts[0].name);
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
+      cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
       cy.get(`[data-test=gig-edit-${gig.id}-clients-${contacts[0].id}-remove]`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains(contacts[0].name);
     });
