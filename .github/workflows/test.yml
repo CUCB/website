@@ -81,7 +81,7 @@ jobs:
             cypress/screenshots/**/*.png
 
   build:
-    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/pulumi-sveltekit-deployment' }}
+    if: ${{ github.ref=='refs/heads/master' }}
     needs:
       - test
       - svelte-check
@@ -144,7 +144,7 @@ jobs:
         if: endsWith(github.ref, '/sveltekit-beta')
         run: echo "ENVIRONMENT=dev" >> $GITHUB_ENV
       - name: Set env to production
-        if: endsWith(github.ref, '/master') || endsWith(github.ref, '/pulumi-sveltekit-deployment')
+        if: endsWith(github.ref, '/master')
         run: echo "ENVIRONMENT=prod" >> $GITHUB_ENV
       - name: Checkout Repo
         uses: actions/checkout@v2
