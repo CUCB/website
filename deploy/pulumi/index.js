@@ -52,7 +52,8 @@ const floatingIP = new digitalocean.FloatingIp("website-ip", {
 // Assign it to the droplet separately so we don't recreate it if
 const floatingIPAssignment = new digitalocean.FloatingIpAssignment("website-ip-assignment", {
   ipAddress: floatingIP.ipAddress,
-  dropletId: web.id,
+  // Use parseInt as a workaround for https://github.com/pulumi/pulumi-digitalocean/issues/218
+  dropletId: parseInt(web.id),
 });
 
 let domain;
