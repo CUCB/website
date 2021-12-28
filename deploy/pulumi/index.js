@@ -47,7 +47,12 @@ const webBlockAttachment = new digitalocean.VolumeAttachment("website-block-atta
 // Create a floating ip so we have somewhere to point dns to even if the droplet is destroyed
 const floatingIP = new digitalocean.FloatingIp("website-ip", {
   region: web.region,
-  dropletId: web.id.apply(parseInt),
+});
+
+// Assign it to the droplet separately so we don't recreate it if
+const floatingIPAssignment = new digitalocean.FloatingIpAssignment("website-ip-assignment", {
+  ipAddress: floatingIP.ipAddress,
+  dropletId: web.dropletId,
 });
 
 let domain;

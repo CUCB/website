@@ -81,7 +81,7 @@ jobs:
             cypress/screenshots/**/*.png
 
   build:
-    if: ${{ github.ref=='refs/heads/master' }}
+    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/bugfix/floating-ip-not-very-floaty'}}
     needs:
       - test
       - svelte-check
@@ -107,7 +107,7 @@ jobs:
       IMAGE_NAME: sveltekit
 
   pulumi-preview:
-    if: ${{ github.ref != 'refs/heads/master' }}
+    if: ${{ github.ref != 'refs/heads/master' || github.ref=='refs/heads/bugfix/floating-ip-not-very-floaty'}}
     name: Preview infrastructure updates
     runs-on: ubuntu-latest
     steps:
@@ -141,7 +141,7 @@ jobs:
       ip: ${{ steps.update.outputs.ip }}
     steps:
       - name: Set env to develop
-        if: endsWith(github.ref, '/sveltekit-beta')
+        if: endsWith(github.ref, '/bugfix/floating-ip-not-very-floaty')
         run: echo "ENVIRONMENT=dev" >> $GITHUB_ENV
       - name: Set env to production
         if: endsWith(github.ref, '/master')
