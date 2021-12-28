@@ -52,7 +52,7 @@ const floatingIP = new digitalocean.FloatingIp("website-ip", {
 // Assign it to the droplet separately so we don't recreate it if
 const floatingIPAssignment = new digitalocean.FloatingIpAssignment("website-ip-assignment", {
   ipAddress: floatingIP.ipAddress,
-  dropletId: web.dropletId,
+  dropletId: web.id,
 });
 
 let domain;
