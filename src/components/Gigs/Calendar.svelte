@@ -376,7 +376,7 @@
   <button on:click="{() => dispatchEvent('clickPrevious')}" class="left" data-test="gigcalendar-previous-month">
     Prev
   </button>
-  <h3>{displayedMonth.toFormat('LLLL yyyy')}</h3>
+  <h3 data-test="gigcalendar-displayed-date">{displayedMonth.toFormat("LLLL yyyy")}</h3>
   <div class="right">
     <button on:click="{() => (showSelection = !showSelection)}" title="Select month">
       <i class="las la-calendar"></i>
@@ -389,7 +389,7 @@
     <Select on:change="{changeMonth}">
       {#each selectableMonths() as month (month)}
         <option value="{month}" selected="{month === displayedMonth.month}">
-          {DateTime.local().set({ month }).toFormat('LLLL')}
+          {DateTime.local().set({ month }).toFormat("LLLL")}
         </option>
       {/each}
     </Select>
@@ -444,7 +444,7 @@
         class="gigtype-{item.code} theme-{$themeName} key-entry"
         class:admins-only="{item.admins_only}"
       >
-        {#if item.admins_only && item.code === 'gig'}Hidden Gig{:else}{item.title}{/if}
+        {#if item.admins_only && item.code === "gig"}Hidden Gig{:else}{item.title}{/if}
       </li>
     {:else}No gigs visible on calendar{/each}
   </ul>
