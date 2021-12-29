@@ -1,0 +1,22 @@
+table:
+  name: calendar_subscriptions
+  schema: cucb
+select_permissions:
+  - permission:
+      columns:
+        - calendar_type
+        - user_id
+        - last_accessed
+        - ip_address
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      columns:
+        - user_id
+        - calendar_type
+        - last_accessed
+        - ip_address
+      filter: {}
+    role: webmaster

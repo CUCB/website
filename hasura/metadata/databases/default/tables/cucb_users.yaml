@@ -1,0 +1,368 @@
+table:
+  name: users
+  schema: cucb
+object_relationships:
+  - name: admin_type
+    using:
+      manual_configuration:
+        column_mapping:
+          admin: id
+        insertion_order: null
+        remote_table:
+          name: auth_user_types
+          schema: cucb
+array_relationships:
+  - name: calendar_subscriptions
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: calendar_subscriptions
+          schema: cucb
+  - name: gig_lineups
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: gigs_lineups
+          schema: cucb
+  - name: user_instruments
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: users_instruments
+          schema: cucb
+  - name: user_prefs
+    using:
+      foreign_key_constraint_on:
+        column: user_id
+        table:
+          name: user_prefs
+          schema: cucb
+computed_fields:
+  - comment: ""
+    definition:
+      function:
+        name: user_prefs_or_default
+        schema: cucb
+    name: prefs
+insert_permissions:
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - email
+        - first
+        - join_date
+        - last
+        - salted_password
+        - username
+      set:
+        admin: "9"
+    role: server
+select_permissions:
+  - permission:
+      columns:
+        - bio
+        - bio_changed_date
+        - first
+        - join_date
+        - last
+        - last_login_date
+        - id
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - admin
+        - bio
+        - bio_changed_date
+        - dietaries
+        - email
+        - first
+        - gig_notes
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - location_info
+        - mobile_contact_info
+        - username
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      columns:
+        - admin
+        - bio
+        - bio_changed_date
+        - dietaries
+        - email
+        - first
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - location_info
+        - mobile_contact_info
+        - username
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - admin
+        - bio
+        - bio_changed_date
+        - dietaries
+        - email
+        - first
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - location_info
+        - mobile_contact_info
+        - username
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - admin
+        - email
+        - first
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - username
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+    role: music_only
+  - permission:
+      columns:
+        - admin
+        - bio
+        - bio_changed_date
+        - dietaries
+        - email
+        - first
+        - gig_notes
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - location_info
+        - mobile_contact_info
+        - username
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - admin
+        - bio
+        - bio_changed_date
+        - dietaries
+        - email
+        - first
+        - gig_notes
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - location_info
+        - mobile_contact_info
+        - username
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - email
+        - first
+        - id
+        - last
+        - salted_password
+        - username
+      filter: {}
+    role: server
+  - permission:
+      columns:
+        - admin
+        - bio
+        - bio_changed_date
+        - dietaries
+        - email
+        - first
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - location_info
+        - mobile_contact_info
+        - username
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - bio
+        - bio_changed_date
+        - first
+        - join_date
+        - last
+        - last_login_date
+        - id
+      filter: {}
+    role: user
+  - permission:
+      columns:
+        - admin
+        - bio
+        - bio_changed_date
+        - dietaries
+        - email
+        - first
+        - gig_notes
+        - id
+        - join_date
+        - last
+        - last_login_date
+        - location_info
+        - mobile_contact_info
+        - username
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - bio
+        - dietaries
+        - email
+        - first
+        - gig_notes
+        - last
+        - location_info
+        - mobile_contact_info
+        - salted_password
+        - username
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      check: null
+      columns:
+        - bio
+        - dietaries
+        - email
+        - first
+        - last
+        - location_info
+        - mobile_contact_info
+        - salted_password
+        - username
+      filter:
+        id:
+          _ne: X-Hasura-User-Id
+    role: equipment
+  - permission:
+      check: null
+      columns:
+        - bio
+        - dietaries
+        - email
+        - first
+        - last
+        - location_info
+        - mobile_contact_info
+        - salted_password
+        - username
+      filter:
+        id:
+          _ne: X-Hasura-User-Id
+    role: gig_editor
+  - permission:
+      check: null
+      columns:
+        - email
+        - first
+        - last
+        - salted_password
+      filter:
+        id:
+          _eq: X-Hasura-User-Id
+    role: music_only
+  - permission:
+      check: null
+      columns:
+        - bio
+        - dietaries
+        - email
+        - first
+        - last
+        - location_info
+        - mobile_contact_info
+        - salted_password
+        - username
+      filter:
+        id:
+          _ne: X-Hasura-User-Id
+    role: president
+  - permission:
+      check: null
+      columns:
+        - bio
+        - dietaries
+        - email
+        - first
+        - last
+        - location_info
+        - mobile_contact_info
+        - salted_password
+        - username
+      filter:
+        id:
+          _ne: X-Hasura-User-Id
+    role: secretary
+  - permission:
+      check: null
+      columns:
+        - last_login_date
+        - salted_password
+      filter: {}
+    role: server
+  - permission:
+      check: null
+      columns:
+        - bio
+        - dietaries
+        - email
+        - first
+        - last
+        - location_info
+        - mobile_contact_info
+        - salted_password
+        - username
+      filter:
+        id:
+          _ne: X-Hasura-User-Id
+    role: treasurer
+  - permission:
+      check: null
+      columns:
+        - admin
+        - bio
+        - dietaries
+        - email
+        - first
+        - last
+        - location_info
+        - mobile_contact_info
+        - salted_password
+        - username
+      filter:
+        id:
+          _ne: X-Hasura-User-Id
+    role: webmaster

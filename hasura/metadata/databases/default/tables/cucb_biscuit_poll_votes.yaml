@@ -1,0 +1,3 @@
+table:
+  name: biscuit_poll_votes
+  schema: cucb

@@ -1,0 +1,97 @@
+table:
+  name: instruments
+  schema: cucb
+object_relationships:
+  - name: parent
+    using:
+      foreign_key_constraint_on: parent_id
+array_relationships:
+  - name: children
+    using:
+      foreign_key_constraint_on:
+        column: parent_id
+        table:
+          name: instruments
+          schema: cucb
+select_permissions:
+  - permission:
+      columns:
+        - novelty
+        - parent_only
+        - id
+        - parent_id
+        - name
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - novelty
+        - parent_only
+        - id
+        - parent_id
+        - name
+      filter: {}
+    role: current_user
+  - permission:
+      columns:
+        - novelty
+        - parent_only
+        - id
+        - parent_id
+        - name
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - novelty
+        - parent_only
+        - id
+        - parent_id
+        - name
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - novelty
+        - parent_only
+        - id
+        - parent_id
+        - name
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - id
+        - name
+        - novelty
+        - parent_only
+        - parent_id
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - novelty
+        - parent_only
+        - id
+        - parent_id
+        - name
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - novelty
+        - parent_only
+        - id
+        - parent_id
+        - name
+      filter: {}
+    role: user
+  - permission:
+      columns:
+        - id
+        - name
+        - novelty
+        - parent_only
+        - parent_id
+      filter: {}
+    role: webmaster

@@ -1,0 +1,85 @@
+table:
+  name: songs
+  schema: cucb
+select_permissions:
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: music_only
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: user
+  - permission:
+      columns:
+        - id
+        - name
+        - filename
+        - tuneid
+        - new
+      filter: {}
+    role: webmaster

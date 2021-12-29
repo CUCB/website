@@ -1,0 +1,96 @@
+table:
+  name: user_prefs
+  schema: cucb
+object_relationships:
+  - name: pref_type
+    using:
+      foreign_key_constraint_on: pref_id
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+insert_permissions:
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - pref_id
+        - value
+      set:
+        user_id: x-hasura-User-Id
+    role: current_user
+select_permissions:
+  - permission:
+      columns:
+        - value
+        - pref_id
+        - user_id
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      columns:
+        - pref_id
+        - user_id
+        - value
+      filter:
+        pref_type:
+          name:
+            _like: attribute.%
+    role: equipment
+  - permission:
+      columns:
+        - pref_id
+        - user_id
+        - value
+      filter:
+        pref_type:
+          name:
+            _like: attribute.%
+    role: gig_editor
+  - permission:
+      columns:
+        - pref_id
+        - user_id
+        - value
+      filter:
+        pref_type:
+          name:
+            _like: attribute.%
+    role: president
+  - permission:
+      columns:
+        - pref_id
+        - user_id
+        - value
+      filter:
+        pref_type:
+          name:
+            _like: attribute.%
+    role: secretary
+  - permission:
+      columns:
+        - pref_id
+        - user_id
+        - value
+      filter:
+        pref_type:
+          name:
+            _like: attribute.%
+    role: treasurer
+  - permission:
+      columns:
+        - user_id
+        - pref_id
+        - value
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - value
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+    role: current_user
