@@ -812,8 +812,9 @@ INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES 
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (104, 'Cor Anglais', false, false, 92);
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (105, 'Pan Flute', false, false, 92);
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (106, 'eMelodeon', false, false, 99);
-INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (107, '', false, false, NULL);
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (108, 'Blade of grass', true, false, 65);
+INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (109, 'Stomp Box', true, false, 27);
+INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (110, 'Shawm', true, false, 92);
 
 --
 -- Data for Name: music_types; Type: TABLE DATA; Schema: cucb; Owner: cucb
