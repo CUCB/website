@@ -553,7 +553,8 @@ describe("gig editor", () => {
     });
 
     it("clears unwanted fields when saving calendar events", () => {
-      cy.get(`[data-test=gig-edit-${gig.id}-food-provided]`).check().uncheck().check();
+      cy.waitForFormInteractive();
+      cy.get(`[data-test=gig-edit-${gig.id}-food-provided]`).check();
       cy.get(`[data-test=gig-edit-${gig.id}-allow-signups]`).check();
       cy.get(`[data-test=gig-edit-${gig.id}-advertise]`).check();
       cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
@@ -565,6 +566,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=show-signup-${gig.id}]`).should("be.visible");
       cy.get(`[data-test=icon-food-provided]`).should("be.visible");
       cy.get(`[href='/members/gigs/${gig.id}/edit']`).click();
+      cy.waitForFormInteractive();
       cy.get(`[data-test=gig-edit-${gig.id}-type] [data-test=select-box]`).select("Calendar Dates");
       cy.get(`[data-test=gig-edit-${gig.id}-date]`).should("not.exist");
       cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-date]`).type("2021-01-01");
