@@ -410,8 +410,8 @@ describe("lineup editor", () => {
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=toggle-leader]`)
           .click()
           .should("have.attr", "aria-pressed", "true");
-        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).click();
-        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-approve]`).click();
+        cy.get(`[data-test=member-${signups[1].user.id}] [data-test=person-approve]`).click().should("not.exist");
+        cy.get(`[data-test=member-${signups[3].user.id}] [data-test=person-approve]`).click().should("not.exist");
         cy.get(`[data-test=member-${signups[1].user.id}] [data-test=toggle-equipment]`)
           .click()
           .should("have.attr", "aria-pressed", "true");

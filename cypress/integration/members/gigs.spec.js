@@ -434,6 +434,24 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-${signupGig.id}-signup-no]`).should("have.color", colors.negative);
       });
 
+      Cypress.Commands.add("selectPreviousMonth", () => {
+        cy.get(`[data-test=gigcalendar-displayed-date]`)
+          .invoke("text")
+          .then((month) => {
+            cy.get(`[data-test=gigcalendar-previous-month]`).click();
+            cy.get(`[data-test=gigcalendar-displayed-date]`).invoke("text").should("not.eq", month);
+          });
+      });
+
+      Cypress.Commands.add("selectNextMonth", () => {
+        cy.get(`[data-test=gigcalendar-displayed-date]`)
+          .invoke("text")
+          .then((month) => {
+            cy.get(`[data-test=gigcalendar-next-month]`).click();
+            cy.get(`[data-test=gigcalendar-displayed-date]`).invoke("text").should("not.eq", month);
+          });
+      });
+
       it("retains signup information when gig is hidden and then redisplayed", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
           .pipe(click)
@@ -449,9 +467,9 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
 
         cy.get(`[data-test=gigview-by-month]`).click();
-        cy.get(`[data-test=gigcalendar-previous-month]`).click();
-        cy.get(`[data-test=gigcalendar-next-month]`).click();
-        cy.get(`[data-test=gigcalendar-next-month]`).click();
+        cy.selectPreviousMonth();
+        cy.selectNextMonth();
+        cy.selectNextMonth();
 
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
@@ -459,7 +477,7 @@ describe("gig diary", () => {
 
         cy.visit("/members/gigs");
         cy.get(`[data-test=gigview-by-month]`).pipe(click).should("not.exist"); // Click it until link becomes text
-        cy.get(`[data-test=gigcalendar-next-month]`).click();
+        cy.selectNextMonth();
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
         cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
@@ -484,12 +502,12 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
         cy.get(`[data-test=gigview-by-month]`).pipe(click).should("not.exist");
         cy.intercept({ method: "POST", url: "/v1/graphql" }).as("fetchGigs");
-        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.selectPreviousMonth();
         cy.wait("@fetchGigs");
-        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.selectPreviousMonth();
         cy.wait("@fetchGigs");
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("be.visible");
-        cy.get(`[data-test=gigcalendar-previous-month]`).click();
+        cy.selectPreviousMonth();
         cy.wait("@fetchGigs");
         cy.contains(Cypress.DateTime.local().minus({ months: 3 }).toFormat("LLLL yyyy")).should("exist");
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");

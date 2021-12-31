@@ -111,6 +111,7 @@ describe("members' home page", () => {
     });
 
     it("preserves accents and logo colours for different themes", () => {
+      cy.intercept("POST", "/updatetheme").as("updateTheme");
       cy.get("[data-test=settings-cog]").click();
       cy.get("[data-test=select-theme] [data-test=select-box]").select("dark");
       cy.get("[data-test=confirm-theme]").click();
@@ -149,6 +150,7 @@ describe("members' home page", () => {
       cy.get(".theme-light").should("not.exist");
       cy.get("[data-test=icon-close]").click();
       cy.get("[data-test=icon-close]").should("not.exist");
+      cy.wait("@updateTheme");
 
       cy.reload();
       cy.waitForFormInteractive();
@@ -189,15 +191,18 @@ describe("members' home page", () => {
     });
 
     it("can enable and disable the spinny logo", () => {
+      cy.intercept("POST", "/updatetheme").as("updateTheme");
       cy.get("[data-test=settings-cog]").click();
       cy.get("[data-test=check-spinny-logo]").check();
       cy.get("[data-test=icon-close]").click();
       cy.assertLogoRotates();
+      cy.wait("@updateTheme");
 
       cy.get("[data-test=settings-cog]").click();
       cy.get("[data-test=check-spinny-logo]").uncheck();
       cy.get("[data-test=icon-close]").click();
       cy.assertLogoDoesntRotate();
+      cy.wait("@updateTheme");
 
       cy.reload();
       cy.waitForFormInteractive();
@@ -207,6 +212,7 @@ describe("members' home page", () => {
       cy.get("[data-test=check-spinny-logo]").check();
       cy.get("[data-test=icon-close]").click();
       cy.assertLogoRotates();
+      cy.wait("@updateTheme");
       cy.reload();
       cy.waitForFormInteractive();
       cy.assertLogoRotates();
@@ -216,6 +222,7 @@ describe("members' home page", () => {
       const LOGO = "#fc0000";
       const ACCENT_LIGHT = "#00fcf5";
       const ACCENT_DARK = "#3e7e7c";
+      cy.intercept("POST", "/updatetheme").as("updateTheme");
       cy.get("[data-test=settings-cog]").click();
 
       cy.get("[data-test=change-accent-color]").click();
@@ -233,6 +240,7 @@ describe("members' home page", () => {
       cy.get("[data-test=select-calendar-day] [data-test=select-box]").select("Tuesday");
       cy.get("[data-test=confirm-calendar-day]").click();
       cy.get("[data-test=icon-close]").click();
+      cy.wait("@updateTheme");
 
       cy.get("[data-test=settings-cog]").click();
       cy.get("[data-test=select-theme] [data-test=select-box]").select("dark");
@@ -247,6 +255,7 @@ describe("members' home page", () => {
       // it's an actual bug. My own (very brief) manual testing of this seems to
       // suggest it's fine and there isn't a problem with it.
       cy.get("[data-test=icon-close]").first().click();
+      cy.wait("@updateTheme");
 
       cy.get("[data-test=logo] path").should("not.have.stroke", LOGO);
 
@@ -265,6 +274,7 @@ describe("members' home page", () => {
       cy.get("[data-test=select-calendar-day] [data-test=select-box] option:selected").should("have.text", "Tuesday");
       cy.get("[data-test=confirm-theme]").click();
       cy.get("[data-test=icon-close]").click();
+      cy.wait("@updateTheme");
 
       cy.get("nav a").should("have.color", ACCENT_LIGHT);
       cy.get("[data-test=logo] path").should("have.stroke", LOGO);
