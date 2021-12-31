@@ -25,6 +25,17 @@ describe("members' home page", () => {
         lastName: "User",
       },
     });
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 2725552,
+        username: "shiny_colours",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 9,
+        email: "cypress.themetester@cypress.io",
+        firstName: "Cypress",
+        lastName: "ThemeTester",
+      },
+    });
   });
 
   it("gives 401 error when not logged in", () => {
@@ -44,7 +55,11 @@ describe("members' home page", () => {
 
   describe("theme editor", () => {
     beforeEach(() => {
-      cy.login("cypress_user", "abc123");
+      // Due to https://github.com/cypress-io/cypress/issues/17805, the session validation is essentially useless
+      // In one test, we log out through the UI, so if we re-run all the tests, it's a bit broken
+      // Also, we expect the colours to be the default when we log in, and this isn't necessarily true if the
+      // session gets preserved.
+      cy.loginWithoutCySession("shiny_colours", "abc123");
       cy.visit("/members");
     });
 
@@ -238,7 +253,7 @@ describe("members' home page", () => {
       cy.contains("Log out").click();
       cy.contains("Log in").click();
       cy.waitForFormInteractive(); // Needed because login link is rel='external' while we're migrating to allow access to the old site
-      cy.get("[data-test=username]").type("cypress_user");
+      cy.get("[data-test=username]").type("shiny_colours");
       cy.get("[data-test=password]").type("abc123");
       cy.get("[data-test=submit]").click();
 
@@ -306,10 +321,10 @@ describe("gig signup", () => {
 
   beforeEach(() => {
     cy.clock(Cypress.DateTime.fromISO("2020-07-07T02:00").valueOf());
-    cy.login("cypress_user", "abc123");
   });
 
   it("allows a user to sign up to a gig", () => {
+    cy.login("cypress_user", "abc123");
     cy.visit("/members");
     cy.get(`[data-test="gig-15274-signup-yes"]`).should("not.have.color", colors.positive);
     cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
@@ -382,6 +397,7 @@ describe("gig signup", () => {
     });
 
     it("links to user profile when editing instruments", () => {
+      cy.waitForFormInteractive();
       cy.intercept("POST", "/v1/graphql", {
         fixture: "gig/signup/yes.json",
       }).as("signup");

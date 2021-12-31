@@ -3,17 +3,39 @@ import "cypress-pipe";
 import { Email } from "./proxies";
 
 Cypress.Commands.add("login", (username, password, options) =>
-  cy.session([username, password], () => {
-    cy.request({
-      method: "POST",
-      url: "/auth/login", // baseUrl is prepended to url
-      form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
-      body: {
-        username,
-        password,
+  cy.session(
+    [username, password],
+    () => {
+      cy.request({
+        method: "POST",
+        url: "/auth/login", // baseUrl is prepended to url
+        form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
+        body: {
+          username,
+          password,
+        },
+        ...options,
+      });
+      cy.request({ method: "GET", url: "/auth/hook", headers: { "x-hasura-role": "current_user" } });
+    },
+    {
+      validate() {
+        cy.request({ method: "GET", url: "/auth/hook", headers: { "x-hasura-role": "current_user" } });
       },
-      ...options,
-    });
+    },
+  ),
+);
+
+Cypress.Commands.add("loginWithoutCySession", (username, password, options) =>
+  cy.request({
+    method: "POST",
+    url: "/auth/login", // baseUrl is prepended to url
+    form: true, // indicates the body should be form urlencoded and sets Content-Type: application/x-www-form-urlencoded headers
+    body: {
+      username,
+      password,
+    },
+    ...options,
   }),
 );
 
