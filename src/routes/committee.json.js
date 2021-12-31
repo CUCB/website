@@ -1,8 +1,8 @@
 import { currentCommittee } from "../graphql/committee";
-import fetch from "node-fetch";
+import fetch from "isomorphic-fetch";
 import { DateTime } from "luxon";
 import dotenv from "dotenv";
-import { makeClient } from "../graphql/client";
+import { GraphQLClient } from "../graphql/client";
 
 dotenv.config();
 let cached;
@@ -42,7 +42,7 @@ export let fallbackPeople = [
 ];
 
 export async function get() {
-  const client = makeClient(fetch, { domain: process.env["GRAPHQL_REMOTE"] });
+  const client = new GraphQLClient(fetch, { domain: process.env["GRAPHQL_REMOTE"] });
 
   // Return from cache if recent enough
   if (!retrieved || DateTime.local().diff(retrieved).hours > 0) {

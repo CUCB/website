@@ -1,6 +1,6 @@
 <script context="module">
   import { notLoggedIn } from "../../client-auth";
-  import { makeClient } from "../../graphql/client";
+  import { GraphQLClient } from "../../graphql/client";
   import { QueryPrefsLike } from "../../graphql/prefs";
   import { prefs } from "../../state";
 
@@ -8,7 +8,7 @@
     const loginFail = notLoggedIn(session);
     if (loginFail) return loginFail;
 
-    let clientCurrentUser = makeClient(fetch, {
+    let clientCurrentUser = new GraphQLClient(fetch, {
       role: "current_user",
     });
     let res = await clientCurrentUser.query({
@@ -27,7 +27,7 @@
 
       prefs.set(prefs_);
     }
-    return {}
+    return {};
   }
 </script>
 

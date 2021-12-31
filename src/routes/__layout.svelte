@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { makeClient } from "../graphql/client";
+  import { GraphQLClient } from "../graphql/client";
   import { fallbackPeople } from "./_committee";
   import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
   import type { Static } from "runtypes";
@@ -90,8 +90,8 @@
       settings.logo[color] = logo;
     }
 
-    client.set(makeClient(fetch));
-    clientCurrentUser.set(makeClient(fetch, { role: "current_user" }));
+    client.set(new GraphQLClient(fetch));
+    clientCurrentUser.set(new GraphQLClient(fetch, { role: "current_user" }));
 
     return { props: { settingsWithoutMaps: settings, committee } };
   };

@@ -31,10 +31,22 @@ export const fullDetails = gql`
       user_instruments(where: { approved: { _eq: true } }) {
         user_instrument {
           instrument {
+            id
             name
+            novelty
           }
         }
       }
+    }
+    user_instruments {
+      instrument {
+        id
+        name
+        novelty
+      }
+      id
+      deleted
+      nickname
     }
   }
   ${AttributePreferences}
@@ -88,11 +100,32 @@ export const otherUser = gql`
         user_instruments(where: { approved: { _eq: true } }) {
           user_instrument {
             instrument {
+              id
               name
+              novelty
             }
           }
         }
       }
+      user_instruments {
+        instrument {
+          id
+          name
+          novelty
+        }
+        id
+        deleted
+        nickname
+      }
+    }
+  }
+`;
+
+// A guard to check if a user has permissions to update instruments
+export const instrumentAdminGuard = gql`
+  mutation InstrumentAdminGuard {
+    update_cucb_users_instruments(where: { id: { _is_null: true } }) {
+      affected_rows
     }
   }
 `;

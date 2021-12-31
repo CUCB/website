@@ -86,11 +86,6 @@ export class GraphQLClient {
   }
 }
 
-// TODO kill this, should just use GraphQLClient constructor where this is called
-export function makeClient(fetch: Fetch, kwargs?: { role?: string }) {
-  return new GraphQLClient(fetch, kwargs);
-}
-
 export function handleErrors(
   e?: { graphQLErrors?: { extensions: { code: string } }[] },
   session?: { hasuraRole?: string },

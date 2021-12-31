@@ -89,7 +89,7 @@
     "@types/polka": "^0.5.2",
     "autoprefixer": "^10.2.6",
     "chai-sorted": "^0.2.0",
-    "cypress": "^7.5.0",
+    "cypress": "^9.2.0",
     "cypress-pipe": "^2.0.0",
     "hasura-cli": "^2.0.9",
     "mdsvex": "^0.9.7",

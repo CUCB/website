@@ -2,7 +2,7 @@
   import { extractAttributes } from "../../../../graphql/gigs/lineups/users/attributes";
   import { QueryGigLineup, AllUserNames } from "../../../../graphql/gigs/lineups";
   import { QueryGigType } from "../../../../graphql/gigs";
-  import { handleErrors, makeClient } from "../../../../graphql/client";
+  import { GraphQLClient, handleErrors } from "../../../../graphql/client";
   import { notLoggedIn } from "../../../../client-auth.js";
 
   export async function load({ page: { params }, session, fetch }) {
@@ -14,7 +14,7 @@
     let res, res_allPeople;
     let people, allPeople, title;
     try {
-      let preloadClient = makeClient(fetch);
+      let preloadClient = new GraphQLClient(fetch);
       let gigType = await preloadClient.query({
         query: QueryGigType,
         variables: { id: gig_id },
@@ -81,12 +81,15 @@
   let userSelectBox;
   let showPreview = false;
 
-  const wrap = (fn) => (userId) => async (...args) => {
-    let res = await fn({ client: $client, people: peopleStore, errors, gigId, userId }, ...args);
+  const wrap =
+    (fn) =>
+    (userId) =>
+    async (...args) => {
+      let res = await fn({ client: $client, people: peopleStore, errors, gigId, userId }, ...args);
 
-    peopleStore = res.people;
-    errors = res.errors;
-  };
+      peopleStore = res.people;
+      errors = res.errors;
+    };
 
   const addUser = async () => {
     await wrap(addUserUpdater)(null)(selectedUser);
@@ -257,8 +260,9 @@
 <hr />
 <p>
   <b>Warning: Do not use this link unless you really need to!</b>
-  <button on:click="{checkDestroyLineup}" data-test="destroy-lineup">Destroy all lineup information and lineup
-    applications</button>
+  <button on:click="{checkDestroyLineup}" data-test="destroy-lineup"
+    >Destroy all lineup information and lineup applications</button
+  >
 </p>
 <hr />
 {#if Object.entries(nope).length + Object.entries(unapproved).length}

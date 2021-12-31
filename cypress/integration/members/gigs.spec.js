@@ -310,12 +310,14 @@ describe("gig diary", () => {
     });
     cy.executeMutation(AddInstrument, {
       variables: {
+        userInstrumentId: 28474292,
         userId: 27250,
         instrumentId: 53,
       },
     });
     cy.executeMutation(AddInstrument, {
       variables: {
+        userInstrumentId: 28474293,
         userId: 27250,
         instrumentId: 20,
       },

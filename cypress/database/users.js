@@ -1,5 +1,5 @@
 export const CreateUser = `
-  mutation CreateUser($id: bigint, $username: String!, $email: String!, $saltedPassword: String!, $firstName: String!, $lastName: String!, $admin: Int!, $userInstruments: cucb_users_instruments_arr_rel_insert_input) {
+  mutation CreateUser($id: bigint, $username: String!, $email: String!, $saltedPassword: String!, $firstName: String!, $lastName: String!, $admin: Int!, $userInstruments: cucb_users_instruments_arr_rel_insert_input, $bio: String, $bioChangedDate: timestamptz, $userPrefs: cucb_user_prefs_arr_rel_insert_input) {
     insert_cucb_users(
       objects: [{
         id: $id,
@@ -10,6 +10,9 @@ export const CreateUser = `
         first: $firstName,
         last: $lastName,
         user_instruments: $userInstruments
+        bio: $bio,
+        bio_changed_date: $bioChangedDate,
+        user_prefs: $userPrefs,
       }],
       on_conflict: {
         constraint: cucb_users_id_key,
@@ -19,7 +22,9 @@ export const CreateUser = `
           email,
           salted_password,
           first,
-          last
+          last,
+          bio,
+          bio_changed_date,
         ]
       }) {
       affected_rows
@@ -39,7 +44,7 @@ export const OnConflictUser = {
 export const OnConflictUserPrefs = {
   constraint: "cucb_user_prefs_user_id_pref_id_key",
   update_columns: ["value"],
-}
+};
 
 export const AllAttributes = `
   query AllAttributes {

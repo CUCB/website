@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { SMTPClient } from "emailjs";
-import { makeClient } from "../src/graphql/client";
+import { GraphQLClient } from "../src/graphql/client";
 import gql from "graphql-tag";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
@@ -20,7 +20,7 @@ const SESSION_SECRET_HASH = crypto
 const SALT_ROUNDS = 10;
 
 export function makeGraphqlClient() {
-  return makeClient(fetch, {
+  return new GraphQLClient(fetch, {
     domain: process.env["GRAPHQL_REMOTE"],
     role: "server",
     headers: { "session-secret-hash": SESSION_SECRET_HASH },

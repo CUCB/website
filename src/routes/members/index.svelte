@@ -1,5 +1,5 @@
 <script context="module">
-  import { makeClient, handleErrors } from "../../graphql/client";
+  import { handleErrors, GraphQLClient } from "../../graphql/client";
   import { QueryGigSignup } from "../../graphql/gigs";
   import { notLoggedIn } from "../../client-auth.js";
 
@@ -7,7 +7,7 @@
     const loginError = notLoggedIn(session);
     if (loginError) return loginError;
 
-    const client = makeClient(fetch, {
+    const client = new GraphQLClient(fetch, {
       role: "current_user",
     });
     let res;
@@ -30,13 +30,13 @@
 </script>
 
 <svelte:head>
-  <title>{makeTitle('Members')}</title>
+  <title>{makeTitle("Members")}</title>
 </svelte:head>
 
 <h1>Members</h1>
 
 <h2>Gig signup</h2>
-{#if ['webmaster', 'president', 'secretary'].includes($session.hasuraRole)}
+{#if ["webmaster", "president", "secretary"].includes($session.hasuraRole)}
   <p>You're an important person. You can <a href="/members/gigs/signups">view the gig signup summary</a>.</p>
 {/if}
 {#each gigSignups as gig}

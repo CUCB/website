@@ -1,10 +1,25 @@
 import { CreateUser, HASHED_PASSWORDS } from "../database/users";
 import { AddCommittee } from "../database/committee";
 
-describe("homepage", () => {
-  before(() => {
-    cy.visit("/");
+function revisitBeforePage() {
+  // We want to stay on the same page, but since the sessions feature was introduced,
+  // we get redirected to about:blank between tests. Hitting back in the browser is
+  // generally much faster than doing a full page load, and we're not editing data
+  // so there's no benefit to repeatedly reloading the page in full.
+  cy.url().then((url) => {
+    if (url === "about:blank") {
+      cy.go("back");
+    }
   });
+}
+
+function visitOnce(url) {
+  before(() => cy.visit(url));
+  beforeEach(revisitBeforePage);
+}
+
+describe("homepage", () => {
+  visitOnce("/");
 
   it("has the correct favicon", () => {
     cy.document().its("head").find('link[rel="icon"]').should("have.attr", "href").should("eq", "/static/favicon.ico");
@@ -105,9 +120,7 @@ describe("book us page", () => {
 });
 
 describe("sessions page", () => {
-  before(() => {
-    cy.visit("/session");
-  });
+  visitOnce("/session");
 
   it("has a link to mailing lists", () => {
     cy.get("a").contains("mailing list").should("have.prop", "href").and("include", "/mailinglists");
@@ -125,7 +138,7 @@ describe("join page", () => {
 });
 
 describe("header", () => {
-  before(() => cy.visit("/"));
+  visitOnce("/");
 
   describe("navbar", () => {
     it("navigates to /book", () => {
@@ -223,7 +236,7 @@ describe("FAQs pages", () => {
   });
 
   describe("Booking FAQs", () => {
-    before(() => cy.visit("/faqs/book"));
+    visitOnce("/faqs/book");
 
     it("includes the title", () => {
       cy.contains("h1", "Frequently Asked Questions");
@@ -239,7 +252,7 @@ describe("FAQs pages", () => {
   });
 
   describe("Joining FAQs", () => {
-    before(() => cy.visit("/faqs/join"));
+    visitOnce("/faqs/join");
 
     it("includes the title", () => {
       cy.contains("h1", "Frequently Asked Questions");

@@ -1,9 +1,9 @@
 <script context="module">
-  import { makeClient, handleErrors } from "../../graphql/client";
+  import { handleErrors, GraphQLClient } from "../../graphql/client";
   import { pastCommitteePictures } from "../../graphql/committee";
   export async function load({ page: { query }, fetch }) {
     let aprilFools = query.get("aprilfool") !== undefined;
-    let client = makeClient(fetch);
+    let client = new GraphQLClient(fetch);
     let res;
     try {
       res = await client.query({ query: pastCommitteePictures });
@@ -42,7 +42,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle('History')}</title>
+  <title>{makeTitle("History")}</title>
 </svelte:head>
 <h1>A (very) brief history of the band</h1>
 

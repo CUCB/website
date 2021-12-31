@@ -1,7 +1,7 @@
 <script context="module">
   import { QueryGigDetails, QuerySingleGig, QuerySingleGigSignupSummary } from "../../../../graphql/gigs";
   import { notLoggedIn } from "../../../../client-auth";
-  import { makeClient, handleErrors } from "../../../../graphql/client";
+  import { handleErrors, GraphQLClient } from "../../../../graphql/client";
   import { writable } from "svelte/store";
 
   export async function load({ page: { params }, session, fetch }) {
@@ -10,8 +10,8 @@
     const loginFail = notLoggedIn(session);
     if (loginFail) return loginFail;
 
-    let client = makeClient(fetch);
-    let clientCurrentUser = makeClient(fetch, { role: "current_user" });
+    let client = new GraphQLClient(fetch);
+    let clientCurrentUser = new GraphQLClient(fetch, { role: "current_user" });
 
     let res_gig,
       res_signup,

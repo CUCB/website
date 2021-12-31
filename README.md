@@ -128,7 +128,7 @@ Since the session information is identified from a cookie, the cookie must be se
 
 Sapper provides [this.fetch](https://sapper.svelte.dev/docs#Preloading), which allows the server to make requests with the client's session. We just need to use `this.fetch` when connecting to Hasura.
 
-**To connect** import the `makeClient` function from `src/graphql/client.js` and call `makeClient(this.fetch)`, which will return the client.
+**To connect** import the `GraphQLClient` class from `src/graphql/client.ts` and call `new GraphQLClient(this.fetch)`, which will return the client.
 
 ### Updating stuff
 
