@@ -273,7 +273,7 @@
 <div data-test="gig-signup-{gig.id}" class="gig-signup theme-{$themeName}">
   <h3>
     {#if showLink}<a href="/members/gigs/{gig.id}">{gig.title}</a>{:else}{gig.title}{/if}
-    {#if date}<small> &nbsp;on {date.toFormat('cccc d') + suffix(date.day) + date.toFormat(' LLLL yyyy')} </small>{/if}
+    {#if date}<small> &nbsp;on {date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy")} </small>{/if}
   </h3>
   {#if gig.venue}
     <h4>
@@ -366,11 +366,11 @@
         <p>
           <TooltipText content="Notes specific to this particular gig">Notes for this gig:</TooltipText>
         </p>
-        <blockquote>{gig.lineup[0].user_notes || 'None'}</blockquote>
+        <blockquote>{gig.lineup[0].user_notes || "None"}</blockquote>
         <p>
           <TooltipText content="Persistent notes for all gigs you are signed up to">General notes:</TooltipText>
         </p>
-        <blockquote>{$userNotes || 'None'}</blockquote>
+        <blockquote>{$userNotes || "None"}</blockquote>
       </div>
     {/if}
     {#if edit}

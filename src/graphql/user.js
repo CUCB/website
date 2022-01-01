@@ -129,3 +129,52 @@ export const instrumentAdminGuard = gql`
     }
   }
 `;
+
+export const UpdateUserPrefs = gql`
+  mutation UpdateUserPrefs($prefs: [cucb_user_prefs_insert_input!]!) {
+    insert_cucb_user_prefs(
+      objects: $prefs
+      on_conflict: { constraint: cucb_user_prefs_user_id_pref_id_key, update_columns: value }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const UpdateUserDetails = gql`
+  mutation UpdateUserDetails(
+    $id: bigint!
+    $email: String!
+    $first: String!
+    $last: String!
+    $mobile_contact_info: String
+    $dietaries: String
+    $location_info: String
+  ) {
+    update_cucb_users_by_pk(
+      pk_columns: { id: $id }
+      _set: {
+        email: $email
+        first: $first
+        last: $last
+        mobile_contact_info: $mobile_contact_info
+        dietaries: $dietaries
+        location_info: $location_info
+      }
+    ) {
+      id
+      first
+      last
+      bio
+      bio_changed_date
+      last_login_date
+      join_date
+      mobile_contact_info
+      location_info
+      email
+      dietaries
+      ...AttributePreferences
+    }
+  }
+  ${AttributePreferences}
+`;

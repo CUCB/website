@@ -1,6 +1,13 @@
 <script lang="ts" context="module">
   import type { LoadInput, LoadOutput } from "@sveltejs/kit";
-  import { currentUser, adminDetails, otherUser, instrumentAdminGuard } from "../../../graphql/user";
+  import {
+    currentUser,
+    adminDetails,
+    otherUser,
+    instrumentAdminGuard,
+    UpdateUserDetails,
+    UpdateUserPrefs,
+  } from "../../../graphql/user";
   import { GraphQLClient, handleErrors } from "../../../graphql/client";
   import { makeTitle } from "../../../view";
 
@@ -134,6 +141,7 @@
       const userDetails = id === session.userId ? asCurrentUser : firstSuccess([asAdmin, asNormalUser]);
       const [res, permissions] = await userDetails;
       const allInstruments = (await client.query({ query: AllInstruments })).data.cucb_instruments;
+      const allPrefs = (await client.query({ query: AllPrefs })).data.cucb_user_pref_types;
 
       if (res.data.cucb_users_by_pk) {
         return {
@@ -143,6 +151,7 @@
             canEditInstruments: permissions === Edit.ALL,
             allInstruments,
             currentUser: id === session.userId,
+            allPrefs,
           },
         };
       } else {
@@ -158,18 +167,21 @@
   import Mailto from "../../../components/Mailto.svelte";
   import { DateTime } from "luxon";
   import type { DocumentNode } from "graphql/language/ast";
-  import { AllInstruments } from "../../../graphql/instruments";
+  import { AllInstruments, DeleteUserInstrument, RestoreDeletedUserInstrument } from "../../../graphql/instruments";
   import InstrumentSelector from "../../../components/Instruments/InstrumentSelector.svelte";
   import UserInstrumentEditor from "../../../components/Instruments/UserInstrumentEditor.svelte";
   import AutomaticProfile from "../../../components/Members/Users/AutomaticProfile.svelte";
   import { browser } from "$app/env";
+  import { fade } from "svelte/transition";
+  import { AllPrefs } from "../../../graphql/gigs/lineups/users/attributes";
 
   export let user: User;
   export let canEdit: boolean;
   export let canEditInstruments: boolean;
-  // TODO better type
   export let allInstruments: Instrument[];
   export let currentUser: boolean;
+  // TODO better type
+  export let allPrefs: unknown[];
   let graphqlClient: GraphQLClient = browser && new GraphQLClient(fetch, currentUser ? { role: "current_user" } : {});
 
   function displayMonth(date: string | null): string | null {
@@ -190,6 +202,7 @@
   let can_tech = user.prefs?.find((pref) => pref.pref_type.name == "attribute.soundtech")?.value;
   let newPassword = "";
   let newPasswordConfirm = "";
+  let message = "";
 
   enum EditInstrumentState {
     EditingExisting,
@@ -211,6 +224,26 @@
     editingInstrument = EditInstrumentState.NotEditing;
   }
 
+  function deleteInstrument(u_i_id: number) {
+    return async (_) => {
+      const res = await graphqlClient.mutate({ mutation: DeleteUserInstrument, variables: { id: u_i_id } });
+      const newInstrument = res.data.update_cucb_users_instruments_by_pk;
+      if (newInstrument) {
+        user.user_instruments[user.user_instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
+      } else {
+        user.user_instruments = user.user_instruments.filter((i) => i.id !== u_i_id);
+      }
+    };
+  }
+
+  function restoreDeletedInstrument(u_i_id: number) {
+    return async (_) => {
+      const res = await graphqlClient.mutate({ mutation: RestoreDeletedUserInstrument, variables: { id: u_i_id } });
+      const newInstrument = res.data.update_cucb_users_instruments_by_pk;
+      user.user_instruments[user.user_instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
+    };
+  }
+
   function editInstrument(u_i_id: number) {
     return (_) => {
       editingInstrument = EditInstrumentState.EditingExisting;
@@ -225,6 +258,7 @@
       nickname: null,
       id: null,
       instrument: allInstruments.find((i) => i.id === instr_id),
+      user_id: user.id,
     };
   }
 
@@ -245,6 +279,54 @@
     return instrument.nickname
       ? `"${instrument.nickname}" [${instrument.instrument.name}]`
       : instrument.instrument.name;
+  }
+
+  async function updateImportantInfo(e) {
+    let prefs = [
+      { name: "attribute.tshirt", value: has_polo },
+      { name: "attribute.folder", value: has_folder },
+      { name: "attribute.driver", value: is_driver },
+      { name: "attribute.car", value: has_car },
+      { name: "attribute.leader", value: can_lead },
+      { name: "attribute.soundtech", value: can_tech },
+    ];
+
+    let prefsIdsByName = {};
+    allPrefs.forEach((pref) => (prefsIdsByName[pref.name] = pref.id));
+
+    message = "Saving...";
+    // TODO handle errors
+    console.log(
+      await graphqlClient.mutate({
+        mutation: UpdateUserPrefs,
+        variables: {
+          prefs: prefs.map((pref) => ({ pref_id: prefsIdsByName[pref.name], user_id: user.id, value: pref.value })),
+        },
+      }),
+    );
+    // TODO handle updating password
+    const variables = {
+      id: user.id,
+      first: user.first,
+      last: user.last,
+      email: user.email,
+      mobile_contact_info: user.mobile_contact_info,
+      location_info: user.location_info,
+      dietaries: user.dietaries,
+    };
+    const res = await graphqlClient.mutate({ mutation: UpdateUserDetails, variables });
+    const updatedUser = res.data.update_cucb_users_by_pk;
+    if (updatedUser) {
+      user = { ...user, ...updatedUser };
+      has_polo = user.prefs?.find((pref) => pref.pref_type.name == "attribute.tshirt")?.value;
+      has_folder = user.prefs?.find((pref) => pref.pref_type.name == "attribute.folder")?.value;
+      is_driver = user.prefs?.find((pref) => pref.pref_type.name == "attribute.driver")?.value;
+      has_car = user.prefs?.find((pref) => pref.pref_type.name == "attribute.car")?.value;
+      can_lead = user.prefs?.find((pref) => pref.pref_type.name == "attribute.leader")?.value;
+      can_tech = user.prefs?.find((pref) => pref.pref_type.name == "attribute.soundtech")?.value;
+    }
+    message = "Saved details";
+    setTimeout(() => (message = ""), 2000);
   }
 </script>
 
@@ -308,6 +390,9 @@
     }
     outline-offset: 0.15em;
   }
+  .deleted-instrument {
+    text-decoration: line-through;
+  }
 </style>
 
 <svelte:head>
@@ -348,9 +433,14 @@
 
 {#if canEdit}
   <h3>Important Info</h3>
-  <div class="important-info">
+  <form class="important info" on:submit|preventDefault="{updateImportantInfo}">
+    <!-- TODO make this more prominent/not cause the form to move-->
+    {#if message}
+      <p transition:fade>{message}</p>
+    {/if}
     <fieldset class="key-info">
       <legend>Key Info</legend>
+      <!-- TODO nice validation stuff/some validation -->
       <label for="first-name">First Name(s)</label><input
         type="text"
         required
@@ -430,8 +520,8 @@
       <label for="can-lead">Can lead?</label>
       <div><input type="checkbox" id="can-lead" bind:checked="{can_lead}" /></div>
     </fieldset>
-    <button>Save changes</button>
-  </div>
+    <button type="submit">Save changes</button>
+  </form>
 {/if}
 {#if canEditInstruments}
   <h3>Edit instruments</h3>
@@ -448,13 +538,33 @@
   {:else if user.user_instruments?.length}
     <table>
       <thead><th>Instrument</th></thead>
-      {#each user.user_instruments as instrument (instrument.id)}
+      {#each user.user_instruments.filter((i) => !i.deleted) as instrument (instrument.id)}
         <tr data-test="user-instrument-{instrument.id}">
           <td data-test="name">{displayInstrumentName(instrument)}</td>
           <td
             ><button class="link" on:click="{editInstrument(instrument.id)}" data-test="edit-instrument-{instrument.id}"
               >Edit</button
-            >/<button class="link" data-test="delete-instrument-{instrument.id}">Delete</button></td
+            >/<button
+              class="link"
+              data-test="delete-instrument-{instrument.id}"
+              on:click="{deleteInstrument(instrument.id)}">Delete</button
+            ></td
+          >
+        </tr>
+      {/each}
+      {#if user.user_instruments.find((i) => i.deleted)}
+        <tr><td colspan="2">****</td></tr>
+      {/if}
+      {#each user.user_instruments.filter((i) => i.deleted) as instrument (instrument.id)}
+        <tr data-test="user-instrument-{instrument.id}">
+          <td data-test="name"><span class="deleted-instrument">{displayInstrumentName(instrument)}</span> (deleted)</td
+          >
+          <td
+            ><button
+              class="link"
+              data-test="delete-instrument-{instrument.id}"
+              on:click="{restoreDeletedInstrument(instrument.id)}">Restore</button
+            ></td
           >
         </tr>
       {/each}

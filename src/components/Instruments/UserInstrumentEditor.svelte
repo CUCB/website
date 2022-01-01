@@ -18,6 +18,7 @@
     instrument: {
       name: string;
     };
+    user_id: number;
   }
 
   let nickname = instrument.nickname || "";
@@ -29,13 +30,13 @@
   }
 
   async function updateExistingInstrument() {
-    const data = { id: instrument.id, nickname: nickname || null };
+    const data = { id: instrument.id, nickname: nickname.trim() || null };
     return (await client.mutate({ mutation: UpdateUserInstrument, variables: data })).data
       .update_cucb_users_instruments_by_pk;
   }
 
   async function createNewInstrument() {
-    const data = { instr_id: instrument.instr_id, nickname: nickname || null };
+    const data = { instr_id: instrument.instr_id, nickname: nickname.trim() || null, user_id: instrument.user_id };
     return await (
       await client.mutate({ mutation: CreateUserInstrument, variables: data })
     ).data.insert_cucb_users_instruments_one;
@@ -64,9 +65,12 @@
 <p>You're editing the information for this <em>{instrument.instrument.name}</em>.</p>
 
 <form on:submit|preventDefault="{saveChanges}">
-  <label for="nickname">
-    <input type="text" bind:value="{nickname}" id="nickname" />
-  </label>
-  <button data-test="save-instrument-details" class="link" type="submit">Save</button>
+  <label for="nickname"> Nickname (optional) </label>
+  <input type="text" bind:value="{nickname}" id="nickname" />
+  {#if instrument.id}
+    <button data-test="save-instrument-details" class="link" type="submit">Save</button>
+  {:else}
+    <button data-test="save-instrument-details" class="link" type="submit">Add instrument</button>
+  {/if}
   <button data-test="cancel-instrument-details" class="link" on:click="{cancel}">Cancel</button>
 </form>

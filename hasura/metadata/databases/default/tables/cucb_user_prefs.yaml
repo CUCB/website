@@ -18,6 +18,90 @@ insert_permissions:
       set:
         user_id: x-hasura-User-Id
     role: current_user
+  - permission:
+      backend_only: false
+      check:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+      columns:
+        - pref_id
+        - user_id
+        - value
+    role: equipment
+  - permission:
+      backend_only: false
+      check:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+      columns:
+        - pref_id
+        - user_id
+        - value
+    role: gig_editor
+  - permission:
+      backend_only: false
+      check:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+      columns:
+        - pref_id
+        - user_id
+        - value
+    role: president
+  - permission:
+      backend_only: false
+      check:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+      columns:
+        - pref_id
+        - user_id
+        - value
+    role: secretary
+  - permission:
+      backend_only: false
+      check:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+      columns:
+        - pref_id
+        - user_id
+        - value
+    role: treasurer
+  - permission:
+      backend_only: false
+      check:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+      columns:
+        - pref_id
+        - user_id
+        - value
+    role: webmaster
 select_permissions:
   - permission:
       columns:
@@ -94,3 +178,75 @@ update_permissions:
         user_id:
           _eq: X-Hasura-User-Id
     role: current_user
+  - permission:
+      check: {}
+      columns:
+        - value
+      filter:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+    role: equipment
+  - permission:
+      check: {}
+      columns:
+        - value
+      filter:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+    role: gig_editor
+  - permission:
+      check: {}
+      columns:
+        - value
+      filter:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+    role: president
+  - permission:
+      check: {}
+      columns:
+        - value
+      filter:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+    role: secretary
+  - permission:
+      check: {}
+      columns:
+        - value
+      filter:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+    role: treasurer
+  - permission:
+      check: {}
+      columns:
+        - value
+      filter:
+        _and:
+          - pref_type:
+              name:
+                _like: attribute.%
+          - user_id:
+              _ne: X-Hasura-User-Id
+    role: webmaster

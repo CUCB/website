@@ -220,3 +220,42 @@ update_permissions:
         - nickname
       filter: {}
     role: webmaster
+delete_permissions:
+  - permission:
+      filter:
+        _and:
+          - user_id:
+              _eq: X-Hasura-User-Id
+          - _not:
+              gigs_lineups_instruments:
+                gig_id:
+                  _is_null: false
+    role: current_user
+  - permission:
+      filter:
+        _not:
+          gigs_lineups_instruments:
+            gig_id:
+              _is_null: false
+    role: equipment
+  - permission:
+      filter:
+        _not:
+          gigs_lineups_instruments:
+            gig_id:
+              _is_null: false
+    role: president
+  - permission:
+      filter:
+        _not:
+          gigs_lineups_instruments:
+            gig_id:
+              _is_null: false
+    role: secretary
+  - permission:
+      filter:
+        _not:
+          gigs_lineups_instruments:
+            gig_id:
+              _is_null: false
+    role: webmaster
