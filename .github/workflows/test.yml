@@ -82,7 +82,7 @@ jobs:
             cypress/screenshots/**/*.png
 
   build:
-    if: ${{ github.ref=='refs/heads/master' }}
+    if: ${{ github.ref=='refs/heads/master' || github.ref='refs/heads/feature/user-editor' }}
     needs:
       - test
       - svelte-check
@@ -215,6 +215,7 @@ jobs:
             --extra-vars ${{ format('email_username={0}', 'apikey') }}
             --extra-vars ${{ format('email_password={0}', secrets.EMAIL_SENDGRID_PASSWORD) }}
             --extra-vars ${{ format('email_host={0}', 'smtp.sendgrid.net') }}
+            --extra-vars ${{ format('calendar_secret="{0}"', secrets.CALENDAR_SECRET) }}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_DEPRECATION_WARNINGS: "false"
