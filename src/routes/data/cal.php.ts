@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { ICalCalendar, ICalCalendarMethod } from "ical-generator";
+import icalPkg from "ical-generator";
 import {
   gigAdminGuard,
   MyGigsFrom,
@@ -15,6 +15,7 @@ import dotenv from "dotenv";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sortLineup } from "../../components/Gigs/_sort";
+const { ICalCalendar, ICalCalendarMethod } = icalPkg;
 
 dotenv.config();
 
