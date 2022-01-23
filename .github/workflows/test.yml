@@ -85,7 +85,7 @@ jobs:
     if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/user-editor' }}
     needs:
       - test
-      # - svelte-check
+      - svelte-check
     name: Build and push docker image for deploy
     runs-on: ubuntu-latest
     steps:
