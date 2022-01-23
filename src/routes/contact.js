@@ -1,4 +1,4 @@
-import { makeGraphqlClient } from "../auth";
+import { makeServerGraphqlClient } from "../auth";
 import { SMTPClient } from "emailjs";
 import escapeHtml from "escape-html";
 import fetch from "node-fetch";
@@ -30,7 +30,7 @@ export async function post({ body }) {
   if (hcaptcha.success) {
     let secretaries;
     try {
-      let client = makeGraphqlClient();
+      let client = makeServerGraphqlClient();
       const secretaryRes = await client.query({
         query: gql`
           query CurrentSec {

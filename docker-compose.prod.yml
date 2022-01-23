@@ -25,7 +25,7 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # use hasura cli console instead
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, websocket-log, query-log
       HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
-      HASURA_GRAPHQL_AUTH_HOOK: http://sapper:3000/auth/hook
+      HASURA_GRAPHQL_AUTH_HOOK: http://sveltekit:3000/auth/hook
     ports:
       - "8080:8080"
     logging:
@@ -38,7 +38,7 @@ services:
       DOMAIN: cucb.co.uk
     volumes:
       - ${BLOCK_STORAGE}/mail/mail.private:/etc/opendkim/domainkeys/mail.private
-  sapper:
+  sveltekit:
     image: $DEPLOY_REGISTRY/cucb/sveltekit:slim
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
@@ -58,6 +58,8 @@ services:
       EMAIL_PORT: 587
       HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
+    ports:
+      - "3001:3000"
     volumes:
       - ./static:/usr/src/app/static
     restart: always
@@ -69,6 +71,7 @@ services:
   caddy:
     image: caddy:latest
     restart: always
+    network_mode: host
     ports:
       - "80:80"
       - "443:443"

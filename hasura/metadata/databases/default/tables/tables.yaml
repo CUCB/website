@@ -5,6 +5,7 @@
 - "!include cucb_biscuit_poll_votes.yaml"
 - "!include cucb_biscuit_polls.yaml"
 - "!include cucb_calendar_subscriptions.yaml"
+- "!include cucb_calendar_subscriptions_types.yaml"
 - "!include cucb_captions.yaml"
 - "!include cucb_committee_keys.yaml"
 - "!include cucb_committee_members.yaml"

@@ -238,6 +238,7 @@ update_permissions:
       check: null
       columns:
         - bio
+        - bio_changed_date
         - dietaries
         - email
         - first
@@ -255,6 +256,7 @@ update_permissions:
       check: null
       columns:
         - bio
+        - bio_changed_date
         - dietaries
         - email
         - first
@@ -271,6 +273,7 @@ update_permissions:
       check: null
       columns:
         - bio
+        - bio_changed_date
         - dietaries
         - email
         - first
@@ -298,6 +301,7 @@ update_permissions:
       check: null
       columns:
         - bio
+        - bio_changed_date
         - dietaries
         - email
         - first
@@ -314,6 +318,7 @@ update_permissions:
       check: null
       columns:
         - bio
+        - bio_changed_date
         - dietaries
         - email
         - first
@@ -337,6 +342,7 @@ update_permissions:
       check: null
       columns:
         - bio
+        - bio_changed_date
         - dietaries
         - email
         - first
@@ -354,6 +360,7 @@ update_permissions:
       columns:
         - admin
         - bio
+        - bio_changed_date
         - dietaries
         - email
         - first

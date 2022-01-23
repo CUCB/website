@@ -1,15 +1,24 @@
 <script lang="ts" context="module">
   import type { LoadInput, LoadOutput } from "@sveltejs/kit";
   import {
-    currentUser,
-    adminDetails,
-    otherUser,
+    CurrentUser,
+    AdminDetails,
+    OtherUser,
     instrumentAdminGuard,
     UpdateUserDetails,
     UpdateUserPrefs,
+    UpdateBio,
+    GuardUpdateAdminStatus,
+    AllAdminStatuses,
+    UpdateUserAdminStatus,
   } from "../../../graphql/user";
   import { GraphQLClient, handleErrors } from "../../../graphql/client";
   import { makeTitle } from "../../../view";
+
+  export interface AdminStatus {
+    id: number;
+    title: string;
+  }
 
   export interface Instrument {
     id: number;
@@ -33,6 +42,10 @@
 
   export interface User {
     id: number;
+    admin_type?: {
+      id: number;
+      title: string;
+    };
     first: string;
     last: string;
     bio: string | null;
@@ -80,6 +93,12 @@
     user_instruments: UserInstrument[];
   }
 
+  export interface Pref {
+    id: number;
+    name: string;
+    default: boolean;
+  }
+
   function fulfilledFirst<T>(a: PromiseSettledResult<T>, b: PromiseSettledResult<T>): number {
     if (a.status == "fulfilled") {
       return b.status == "fulfilled" ? 0 : -1;
@@ -91,12 +110,36 @@
   // Ideally this wouldn't wait for the later promises if the earlier onces succeed, but Promise.allSettled is the nicest API
   // I could find to achieve what I wanted
   async function firstSuccess<T>(promises: Promise<T>[]): Promise<T | null> {
-    const bestResult = (await Promise.allSettled(promises)).sort(fulfilledFirst)?.[0];
-    if (bestResult.status == "fulfilled") {
-      return bestResult.value;
-    } else {
-      throw bestResult.reason;
-    }
+    let countComplete = 0;
+    let total = promises.length;
+    let promisesComplete = Array(total).map(() => false);
+    let firstResult: null | [T, number] = null;
+
+    return new Promise((resolve, reject) => {
+      for (let [p, i] of promises.map((promise, i) => [promise, i] as [Promise<T>, number])) {
+        p.then((result) => {
+          countComplete += 1;
+          if (promisesComplete.slice(0, i).filter((complete) => complete).length === i) {
+            resolve(result);
+          } else {
+            promisesComplete[i] = true;
+            if (!firstResult || firstResult[1] > i) {
+              firstResult = [result, i];
+            }
+
+            if (countComplete === total) {
+              resolve(firstResult[0]);
+            }
+          }
+        }).catch((failure) => {
+          countComplete += 1;
+          if (countComplete === total) {
+            // TODO this is non-deterministic as to which failure it returns, maybe it should be deterministic
+            reject(failure);
+          }
+        });
+      }
+    });
   }
 
   type UserByPk = { data: { cucb_users_by_pk: User } };
@@ -109,9 +152,9 @@
   }
 
   enum Edit {
-    ALL,
-    NOT_INSTRUMENTS,
-    NONE,
+    ALL = 0,
+    NOT_INSTRUMENTS = 1,
+    NONE = 2,
   }
 
   export async function load({ page: { params }, session, fetch }: LoadInput): Promise<LoadOutput> {
@@ -133,16 +176,35 @@
       .then(() => Edit.ALL)
       .catch(() => Edit.NOT_INSTRUMENTS);
 
-    const asAdmin = Promise.all([queryUserById(client, adminDetails, id), instrumentAdminPermissions]);
-    const asCurrentUser = queryUserById(clientCurrentUser, currentUser, id).then(fullPermissions);
-    const asNormalUser = queryUserById(client, otherUser, id).then(noPermissions);
+    const asAdmin = () => Promise.all([queryUserById(client, AdminDetails, id), instrumentAdminPermissions]);
+    const asCurrentUser = () => queryUserById(clientCurrentUser, CurrentUser, id).then(fullPermissions);
+    const asNormalUser = () => queryUserById(client, OtherUser, id).then(noPermissions);
 
     try {
-      const userDetails = id === session.userId ? asCurrentUser : firstSuccess([asAdmin, asNormalUser]);
-      const [res, permissions] = await userDetails;
-      const allInstruments = (await client.query({ query: AllInstruments })).data.cucb_instruments;
-      const allPrefs = (await client.query({ query: AllPrefs })).data.cucb_user_pref_types;
-
+      const userDetails = id === session.userId ? asCurrentUser() : firstSuccess([asAdmin(), asNormalUser()]);
+      const [
+        [res, permissions],
+        allInstruments,
+        allPrefs,
+        profilePictureUpdated,
+        canEditAdminStatus,
+        allAdminStatuses,
+      ] = await Promise.all([
+        userDetails,
+        client.query<{ cucb_instruments: unknown }>({ query: AllInstruments }).then((res) => res.data.cucb_instruments),
+        client
+          .query<{ cucb_user_pref_types: unknown }>({ query: AllPrefs })
+          .then((res) => res.data.cucb_user_pref_types),
+        fetch(`/members/images/users/${id}.jpg/modified`).then((res) => res.text()),
+        (id === session.userId ? clientCurrentUser : client)
+          .query({ query: GuardUpdateAdminStatus })
+          .then(() => true)
+          .catch(() => false),
+        client
+          .query<{ cucb_auth_user_types: unknown }>({ query: AllAdminStatuses })
+          .then((res) => res.data.cucb_auth_user_types)
+          .catch(() => []),
+      ]);
       if (res.data.cucb_users_by_pk) {
         return {
           props: {
@@ -152,6 +214,9 @@
             allInstruments,
             currentUser: id === session.userId,
             allPrefs,
+            profilePictureUpdated,
+            canEditAdminStatus,
+            allAdminStatuses,
           },
         };
       } else {
@@ -174,14 +239,19 @@
   import { browser } from "$app/env";
   import { fade } from "svelte/transition";
   import { AllPrefs } from "../../../graphql/gigs/lineups/users/attributes";
+  import ProfilePicture from "../../../components/Members/Users/ProfilePicture.svelte";
+  import Select from "../../../components/Forms/Select.svelte";
 
   export let user: User;
   export let canEdit: boolean;
   export let canEditInstruments: boolean;
+  export let canEditAdminStatus: boolean;
   export let allInstruments: Instrument[];
+  export let allAdminStatuses: AdminStatus[];
   export let currentUser: boolean;
   // TODO better type
-  export let allPrefs: unknown[];
+  export let allPrefs: Pref[];
+  export let profilePictureUpdated: string;
   let graphqlClient: GraphQLClient = browser && new GraphQLClient(fetch, currentUser ? { role: "current_user" } : {});
 
   function displayMonth(date: string | null): string | null {
@@ -203,6 +273,34 @@
   let newPassword = "";
   let newPasswordConfirm = "";
   let message = "";
+
+  let editedBio = user.bio;
+  let editingBio = false;
+
+  function startEditBio() {
+    editingBio = true;
+  }
+
+  async function saveBio() {
+    const res = await graphqlClient.mutate<{
+      update_cucb_users_by_pk: { bio: string | null; bio_changed_date: string | null };
+    }>({
+      mutation: UpdateBio,
+      variables: { id: user.id, bio: editedBio?.replace("\n", "").trim() || null },
+    });
+    const updatedBio = res.data.update_cucb_users_by_pk;
+    if (updatedBio) {
+      user = { ...user, ...updatedBio };
+      editingBio = false;
+    } else {
+      // TODO handle this error somehow
+    }
+  }
+
+  async function cancelEditBio() {
+    editedBio = user.bio;
+    editingBio = false;
+  }
 
   enum EditInstrumentState {
     EditingExisting,
@@ -226,7 +324,10 @@
 
   function deleteInstrument(u_i_id: number) {
     return async (_) => {
-      const res = await graphqlClient.mutate({ mutation: DeleteUserInstrument, variables: { id: u_i_id } });
+      const res = await graphqlClient.mutate<{ update_cucb_users_instruments_by_pk: UserInstrument }>({
+        mutation: DeleteUserInstrument,
+        variables: { id: u_i_id },
+      });
       const newInstrument = res.data.update_cucb_users_instruments_by_pk;
       if (newInstrument) {
         user.user_instruments[user.user_instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
@@ -238,7 +339,10 @@
 
   function restoreDeletedInstrument(u_i_id: number) {
     return async (_) => {
-      const res = await graphqlClient.mutate({ mutation: RestoreDeletedUserInstrument, variables: { id: u_i_id } });
+      const res = await graphqlClient.mutate<{ update_cucb_users_instruments_by_pk: UserInstrument }>({
+        mutation: RestoreDeletedUserInstrument,
+        variables: { id: u_i_id },
+      });
       const newInstrument = res.data.update_cucb_users_instruments_by_pk;
       user.user_instruments[user.user_instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
     };
@@ -260,6 +364,7 @@
       instrument: allInstruments.find((i) => i.id === instr_id),
       user_id: user.id,
     };
+    console.log(currentlyEditingDetails);
   }
 
   function completeEditInstrument(e) {
@@ -281,7 +386,7 @@
       : instrument.instrument.name;
   }
 
-  async function updateImportantInfo(e) {
+  async function updateImportantInfo(_e) {
     let prefs = [
       { name: "attribute.tshirt", value: has_polo },
       { name: "attribute.folder", value: has_folder },
@@ -296,14 +401,25 @@
 
     message = "Saving...";
     // TODO handle errors
-    console.log(
+    await graphqlClient.mutate({
+      mutation: UpdateUserPrefs,
+      variables: {
+        prefs: prefs.map((pref) => ({
+          pref_id: prefsIdsByName[pref.name],
+          user_id: currentUser ? undefined : user.id,
+          value: pref.value,
+        })),
+      },
+    });
+    if (canEditAdminStatus) {
       await graphqlClient.mutate({
-        mutation: UpdateUserPrefs,
+        mutation: UpdateUserAdminStatus,
         variables: {
-          prefs: prefs.map((pref) => ({ pref_id: prefsIdsByName[pref.name], user_id: user.id, value: pref.value })),
+          user_id: user.id,
+          admin: user.admin_type.id,
         },
-      }),
-    );
+      });
+    }
     // TODO handle updating password
     const variables = {
       id: user.id,
@@ -314,7 +430,10 @@
       location_info: user.location_info,
       dietaries: user.dietaries,
     };
-    const res = await graphqlClient.mutate({ mutation: UpdateUserDetails, variables });
+    const res = await graphqlClient.mutate<{ update_cucb_users_by_pk: User }>({
+      mutation: UpdateUserDetails,
+      variables,
+    });
     const updatedUser = res.data.update_cucb_users_by_pk;
     if (updatedUser) {
       user = { ...user, ...updatedUser };
@@ -332,11 +451,13 @@
 
 <style lang="scss">
   @import "../../../sass/themes.scss";
+  @function shadow($color) {
+    @return 0 0 5px $color;
+  }
   .bits-and-bobs {
     display: grid;
     grid-template-columns: max-content auto;
     justify-items: left;
-    /* flex-grow: 1; */
   }
   .bits-and-bobs label {
     padding-left: 0.5em;
@@ -393,6 +514,11 @@
   .deleted-instrument {
     text-decoration: line-through;
   }
+  img {
+    @include themeifyThemeElement($themes) {
+      box-shadow: shadow(themed("text"));
+    }
+  }
 </style>
 
 <svelte:head>
@@ -402,23 +528,32 @@
 {#if canEdit}
   <h2>Edit mini biography</h2>
 {/if}
-{#if user.bio}
-  <figure>
-    <blockquote>{user.bio}</blockquote>
-    <figcaption>{user.first}{displayBioMonth(user.bio_changed_date)}</figcaption>
-  </figure>
+{#if editingBio}
+  <textarea data-test="bio-content" bind:value="{editedBio}" maxlength="400" cols="60" rows="8"></textarea>
+  <button data-test="save-bio" on:click="{saveBio}">Save</button>
+  <button data-test="cancel-bio-edit" on:click="{cancelEditBio}">Cancel</button>
 {:else}
-  <blockquote class="empty">No bio written yet!</blockquote>
+  {#if user.bio}
+    <figure>
+      <blockquote data-test="bio-content">{user.bio}</blockquote>
+      <figcaption data-test="bio-name">{user.first}{displayBioMonth(user.bio_changed_date)}</figcaption>
+    </figure>
+  {:else}
+    <blockquote data-test="bio-empty" class="empty">No bio written yet!</blockquote>
+  {/if}
+  {#if canEdit}
+    <button data-test="edit-bio" on:click="{startEditBio}">Edit bio</button>
+  {/if}
 {/if}
 {#if canEdit}
   <h2>Automatic profile</h2>
 {/if}
 <AutomaticProfile user="{user}" />
 
-{#if user.mobile_contact_info}
-  <p><b>Mobile contact info:</b> {user.mobile_contact_info}</p>
+{#if canEdit && user.mobile_contact_info}
+  <p data-test="mobile-number"><b>Mobile contact info:</b> {user.mobile_contact_info}</p>
 {/if}
-{#if user.email}
+{#if canEdit && user.email}
   <p>
     <b>Email:</b>
     <Mailto person="{{ email_obfus: user.email }}" showEmail="{true}" />
@@ -428,12 +563,18 @@
   <p><b>Location info:</b> {user.location_info}</p>
 {/if}
 
-<h3>Profile Picture</h3>
-<img src="images/users/{user.id}.jpg" width="200" height="250" alt="{user.first} {user.last}" />
+<ProfilePicture user="{user}" canEdit="{canEdit}" lastUpdated="{profilePictureUpdated}" />
 
 {#if canEdit}
   <h3>Important Info</h3>
   <form class="important info" on:submit|preventDefault="{updateImportantInfo}">
+    {#if canEditAdminStatus}
+      <label for="admin-status">Admin status</label><Select id="admin-status" bind:value="{user.admin_type.id}">
+        {#each allAdminStatuses as status (status.id)}
+          <option value="{status.id}" selected="{status.id === user.admin_type.id}">{status.title}</option>
+        {/each}
+      </Select>
+    {/if}
     <!-- TODO make this more prominent/not cause the form to move-->
     {#if message}
       <p transition:fade>{message}</p>
@@ -495,7 +636,7 @@
         type="datetime-local"
         disabled
         id="last-login"
-        value="{user.last_login_date.toString().replace(/:\d{2}\.\d{6}\+.*/, '') || '?'}"
+        value="{user.last_login_date?.toString().replace(/:\d{2}\.\d{6}\+.*/, '') || '?'}"
       />
 
       <label for="join-date">Joined</label><input
@@ -520,7 +661,7 @@
       <label for="can-lead">Can lead?</label>
       <div><input type="checkbox" id="can-lead" bind:checked="{can_lead}" /></div>
     </fieldset>
-    <button type="submit">Save changes</button>
+    <button type="submit" data-test="save-user-details">Save changes</button>
   </form>
 {/if}
 {#if canEditInstruments}
@@ -529,12 +670,13 @@
     <UserInstrumentEditor
       instrument="{currentlyEditingDetails}"
       client="{graphqlClient}"
+      currentUser="{currentUser}"
       on:save="{completeEditInstrument}"
       on:cancel="{cancelEditInstrument}"
     />
   {:else if editingInstrument === EditInstrumentState.AddingNew}
     <InstrumentSelector allInstruments="{allInstruments}" on:select="{editNewInstrument}" />
-    <button class="link" on:click="{cancelAddInstrument}" data-test="add-instrument">Cancel</button>
+    <button on:click="{cancelAddInstrument}" data-test="add-instrument">Cancel</button>
   {:else if user.user_instruments?.length}
     <table>
       <thead><th>Instrument</th></thead>
@@ -542,12 +684,12 @@
         <tr data-test="user-instrument-{instrument.id}">
           <td data-test="name">{displayInstrumentName(instrument)}</td>
           <td
-            ><button class="link" on:click="{editInstrument(instrument.id)}" data-test="edit-instrument-{instrument.id}"
+            ><button on:click="{editInstrument(instrument.id)}" data-test="edit-instrument-{instrument.id}" class="link"
               >Edit</button
             >/<button
-              class="link"
               data-test="delete-instrument-{instrument.id}"
-              on:click="{deleteInstrument(instrument.id)}">Delete</button
+              on:click="{deleteInstrument(instrument.id)}"
+              class="link">Delete</button
             ></td
           >
         </tr>
@@ -560,18 +702,16 @@
           <td data-test="name"><span class="deleted-instrument">{displayInstrumentName(instrument)}</span> (deleted)</td
           >
           <td
-            ><button
-              class="link"
-              data-test="delete-instrument-{instrument.id}"
-              on:click="{restoreDeletedInstrument(instrument.id)}">Restore</button
+            ><button data-test="delete-instrument-{instrument.id}" on:click="{restoreDeletedInstrument(instrument.id)}"
+              >Restore</button
             ></td
           >
         </tr>
       {/each}
     </table>
-    <button class="link" on:click="{startAddInstrument}" data-test="add-instrument">Add new instrument</button>
+    <button on:click="{startAddInstrument}" data-test="add-instrument">Add new instrument</button>
   {:else}
     <p>No instruments found.</p>
-    <button class="link" on:click="{startAddInstrument}" data-test="add-instrument">Add new instrument</button>
+    <button on:click="{startAddInstrument}" data-test="add-instrument">Add new instrument</button>
   {/if}
 {/if}

@@ -44,12 +44,13 @@
     }
   },
   "dependencies": {
-    "@sveltejs/kit": "^1.0.0-next.203",
     "@sveltejs/adapter-node": "^1.0.0-next.56",
+    "@sveltejs/kit": "^1.0.0-next.203",
     "bcrypt": "^5.0.1",
     "body-scroll-lock": "^3.1.5",
     "cookie": "^0.4.1",
     "cookie-signature": "^1.1.0",
+    "cypress-plugin-tab": "^1.0.5",
     "dotenv": "^10.0.0",
     "emailjs": "^3.4.0",
     "escape-html": "^1.0.3",
@@ -58,6 +59,7 @@
     "graphql-tag": "^2.12.4",
     "http-proxy": "^1.18.1",
     "husky": "^6.0.0",
+    "ical-generator": "^3.1.1",
     "immutable": "^4.0.0-rc.12",
     "isomorphic-fetch": "^3.0.0",
     "jsonwebtoken": "^8.5.1",
@@ -65,11 +67,15 @@
     "mailparser": "^3.2.0",
     "md5": "^2.3.0",
     "node-fetch": "^3.1.0",
+    "photon-web": "^0.3.2",
     "runtypes": "^6.3.1",
     "svelte": "3.44.0",
     "svelte-color-picker": "^1.0.7",
+    "svelte-easy-crop": "^1.0.5",
     "tippy.js": "^6.3.1",
-    "typescript": "^4.3.4"
+    "trace-unhandled": "^2.0.1",
+    "typescript": "^4.3.4",
+    "vite-plugin-wasm-pack": "^0.1.9"
   },
   "devDependencies": {
     "@percy/cli": "^1.0.0-beta.52",

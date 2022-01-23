@@ -1,6 +1,16 @@
 table:
   name: calendar_subscriptions
   schema: cucb
+insert_permissions:
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - user_id
+        - ip_address
+        - last_accessed
+        - calendar_type
+    role: server
 select_permissions:
   - permission:
       columns:
@@ -15,8 +25,24 @@ select_permissions:
   - permission:
       columns:
         - user_id
+        - ip_address
+        - last_accessed
+        - calendar_type
+      filter: {}
+    role: server
+  - permission:
+      columns:
+        - user_id
         - calendar_type
         - last_accessed
         - ip_address
       filter: {}
     role: webmaster
+update_permissions:
+  - permission:
+      check: {}
+      columns:
+        - ip_address
+        - last_accessed
+      filter: {}
+    role: server

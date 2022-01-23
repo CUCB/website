@@ -1,13 +1,14 @@
 import { randomBytes } from "crypto";
 import * as cookie from "cookie";
-import { makeGraphqlClient } from "./auth";
+import { makeServerGraphqlClient } from "./auth";
 import gql from "graphql-tag";
 import signature from "cookie-signature";
 import dotenv from "dotenv";
+import jwt from "jsonwebtoken";
+import "trace-unhandled/register";
 // If we don't import Response somewhere, we get a "Response is not defined" error every time
 // we call fetch when server-side rendering, so we import it here.
 // @ts-ignore
-import { Response } from "isomorphic-fetch";
 
 dotenv.config();
 const SESSION_SECRET = process.env["SESSION_SECRET"];
@@ -25,7 +26,7 @@ export async function handle({ request, resolve }) {
     sessionId = signature.unsign(cookies["connect.sid"], SESSION_SECRET);
   }
   if (sessionId) {
-    const client = makeGraphqlClient();
+    const client = makeServerGraphqlClient();
     session = (
       await client.query({
         query: gql`
@@ -38,6 +39,7 @@ export async function handle({ request, resolve }) {
         variables: { sid: sessionId },
       })
     )?.data?.cucb_session[0];
+  } else {
   }
 
   const setCookie =
@@ -72,8 +74,38 @@ async function sessionFromHeaders(headers) {
   let sessionId = false;
   if (cookies["connect.sid"]) {
     sessionId = signature.unsign(cookies["connect.sid"], SESSION_SECRET);
+  } else {
+    // Allow JWTs to access the site so the calendar endpoints can make graphql queries
+    if (headers.authorization && headers.authorization.startsWith("Bearer ")) {
+      try {
+        const token = jwt.verify(headers.authorization.slice("Bearer ".length), SESSION_SECRET);
+        const client = makeServerGraphqlClient();
+        const hasuraRole = (
+          await client.query({
+            query: gql`
+              query UserRole($id: bigint!) {
+                cucb_users_by_pk(id: $id) {
+                  admin_type {
+                    hasura_role
+                  }
+                }
+              }
+            `,
+            variables: { id: parseInt(token.userId) },
+          })
+        )?.data?.cucb_users_by_pk?.admin_type.hasura_role;
+        if (hasuraRole) {
+          session = { userId: parseInt(token.userId), hasuraRole };
+        }
+
+        // TODO possible error handling/logging
+      } catch (e) {
+        return { body: e };
+        // TODO maybe handle errors like we do for password reset?
+      }
+    }
   }
-  const client = makeGraphqlClient();
+  const client = makeServerGraphqlClient();
   if (sessionId) {
     const sessions = (
       await client.query({
@@ -188,7 +220,7 @@ async function sessionFromHeaders(headers) {
       },
       async destroy() {
         if (sessionId) {
-          const client = makeGraphqlClient();
+          const client = makeServerGraphqlClient();
           session = (
             await client.mutate({
               mutation: gql`

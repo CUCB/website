@@ -7,6 +7,10 @@
   export async function load({ page: { params }, session, fetch }) {
     let { gig_id } = params;
 
+    if (isNaN(parseInt(gig_id))) {
+      return;
+    }
+
     const loginFail = notLoggedIn(session);
     if (loginFail) return loginFail;
 

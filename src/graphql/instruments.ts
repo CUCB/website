@@ -44,6 +44,20 @@ export const CreateUserInstrument = gql`
   }
 `;
 
+export const CreateCurrentUserInstrument = gql`
+  mutation CreateCurrentUserInstrument($instr_id: bigint!, $nickname: String) {
+    insert_cucb_users_instruments_one(object: { instr_id: $instr_id, nickname: $nickname }) {
+      id
+      instr_id
+      nickname
+      instrument {
+        id
+        name
+      }
+    }
+  }
+`;
+
 export const DeleteUserInstrument = gql`
   mutation DeleteUserInstrument($id: bigint!) {
     delete_cucb_users_instruments(

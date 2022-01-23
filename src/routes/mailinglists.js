@@ -2,7 +2,7 @@ import { SMTPClient } from "emailjs";
 import fetch from "node-fetch";
 import gql from "graphql-tag";
 import dotenv from "dotenv";
-import { makeGraphqlClient } from "../auth";
+import { makeServerGraphqlClient } from "../auth";
 dotenv.config();
 
 export async function post({ body }) {
@@ -27,7 +27,7 @@ async function realpost(body) {
 
   let webmasters;
   try {
-    let client = makeGraphqlClient();
+    let client = makeServerGraphqlClient();
     const webmasterRes = await client.query({
       query: gql`
         query CurrentSec {

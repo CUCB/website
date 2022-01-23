@@ -24,11 +24,12 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # use `npm run hasura:console` instead, it persists changes via migrations
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_AUTH_HOOK: http://sapper:3000/auth/hook
+      HASURA_GRAPHQL_AUTH_HOOK: http://sveltekit:3000/auth/hook
     ports:
       - "8080:8080"
-  sapper:
-    image: node:14
+  sveltekit:
+    image: node:16
+    user: node:node
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
@@ -49,6 +50,7 @@ services:
       - node_modules_2:/home/node/app/node_modules/
     restart: always
     ports:
+      - "127.0.0.1:3001:3000"
       - "24678:24678"
     command: >
       bash -c "cd /home/node/app; npm install; npm run watch:dev"
@@ -56,6 +58,7 @@ services:
   caddy:
     image: caddy:latest
     restart: always
+    network_mode: host
     ports:
       - "3000:3000"
     volumes:

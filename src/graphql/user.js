@@ -52,7 +52,7 @@ export const fullDetails = gql`
   ${AttributePreferences}
 `;
 
-export const currentUser = gql`
+export const CurrentUser = gql`
   query CurrentUser($id: bigint!) {
     cucb_users_by_pk(id: $id) {
       ...FullUserDetails
@@ -61,7 +61,7 @@ export const currentUser = gql`
   ${fullDetails}
 `;
 
-export const adminDetails = gql`
+export const AdminDetails = gql`
   query AdminDetails($id: bigint!) {
     cucb_users_by_pk(id: $id) {
       ...FullUserDetails
@@ -74,7 +74,7 @@ export const adminDetails = gql`
   ${fullDetails}
 `;
 
-export const otherUser = gql`
+export const OtherUser = gql`
   query OtherUser($id: bigint!) {
     cucb_users_by_pk(id: $id) {
       id
@@ -177,4 +177,52 @@ export const UpdateUserDetails = gql`
     }
   }
   ${AttributePreferences}
+`;
+
+export const UpdateBio = gql`
+  mutation UpdateBio($id: bigint!, $bio: String) {
+    update_cucb_users_by_pk(pk_columns: { id: $id }, _set: { bio: $bio, bio_changed_date: "now()" }) {
+      bio
+      bio_changed_date
+    }
+  }
+`;
+
+export const GuardUpdateBio = gql`
+  mutation GuardUpdateBio {
+    update_cucb_users(
+      where: { id: { _is_null: true } }
+      _set: { bio: "Any bio we like really, this won't actually mutate anything" }
+    ) {
+      affected_rows
+    }
+  }
+`;
+
+export const GuardUpdateAdminStatus = gql`
+  mutation GuardUpdateAdminStatus {
+    update_cucb_users(where: { id: { _is_null: true } }, _set: { admin: 1 }) {
+      affected_rows
+    }
+  }
+`;
+
+export const AllAdminStatuses = gql`
+  query AllAdminStatuses {
+    cucb_auth_user_types(where: { hasura_role: { _nin: ["anonymous"] } }) {
+      id
+      title
+    }
+  }
+`;
+
+export const UpdateUserAdminStatus = gql`
+  mutation UpdateUserAdminStatus($user_id: bigint!, $admin: Int!) {
+    update_cucb_users_by_pk(pk_columns: { id: $user_id }, _set: { admin: $admin }) {
+      admin_type {
+        id
+        title
+      }
+    }
+  }
 `;

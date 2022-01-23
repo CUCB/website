@@ -5,11 +5,11 @@
   // TODO parameterise client so we use current user/admin client correctly
   import type { GraphQLClient } from "../../graphql/client";
   import { createEventDispatcher } from "svelte";
-  import { CreateUserInstrument, UpdateUserInstrument } from "../../graphql/instruments";
+  import { CreateCurrentUserInstrument, CreateUserInstrument, UpdateUserInstrument } from "../../graphql/instruments";
 
   export let client: GraphQLClient;
   export let instrument: UserInstrument;
-  console.log(instrument);
+  export let currentUser: boolean;
 
   interface UserInstrument {
     id?: number;
@@ -30,16 +30,25 @@
   }
 
   async function updateExistingInstrument() {
-    const data = { id: instrument.id, nickname: nickname.trim() || null };
-    return (await client.mutate({ mutation: UpdateUserInstrument, variables: data })).data
-      .update_cucb_users_instruments_by_pk;
+    const variables = { id: instrument.id, nickname: nickname.trim() || null };
+    return (
+      await client.mutate<{ update_cucb_users_instruments_by_pk: unknown }>({
+        mutation: UpdateUserInstrument,
+        variables,
+      })
+    ).data.update_cucb_users_instruments_by_pk;
   }
 
   async function createNewInstrument() {
-    const data = { instr_id: instrument.instr_id, nickname: nickname.trim() || null, user_id: instrument.user_id };
-    return await (
-      await client.mutate({ mutation: CreateUserInstrument, variables: data })
-    ).data.insert_cucb_users_instruments_one;
+    const variables = {
+      instr_id: instrument.instr_id,
+      nickname: nickname.trim() || null,
+      user_id: currentUser ? undefined : instrument.user_id,
+    };
+    console.log(currentUser);
+    let mutation = currentUser ? CreateCurrentUserInstrument : CreateUserInstrument;
+    return (await client.mutate<{ insert_cucb_users_instruments_one: unknown }>({ mutation, variables })).data
+      .insert_cucb_users_instruments_one;
   }
 
   async function saveChanges() {

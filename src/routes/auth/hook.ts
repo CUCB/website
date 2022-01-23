@@ -57,6 +57,17 @@ export function get({ headers, locals }: { headers: Record<string, string>; loca
           "X-Hasura-Role": "server",
         },
       };
+    } else if (
+      headers["session-secret-hash"] === CORRECT_SESSION_SECRET_HASH &&
+      typeof headers["x-hasura-user-id"] !== "undefined"
+    ) {
+      return {
+        status: 200,
+        body: {
+          "X-Hasura-User-Id": headers["x-hasura-user-id"],
+          "X-Hasura-Role": headers["x-hasura-role"],
+        },
+      };
     } else {
       return {
         status: 401,

@@ -1,6 +1,6 @@
 # CUCB Website
 
-This is the new rewrite of the CUCB website, which uses [sapper](https://sapper.svelte.dev) to do the frontend, and [hasura](https://hasura.io/) for the backend.
+This is the new rewrite of the CUCB website, which uses [SvelteKit](https://kit.svelte.dev) to do the frontend, and [hasura](https://hasura.io/) for the backend.
 
 ## Dependencies
 

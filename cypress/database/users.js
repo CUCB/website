@@ -1,5 +1,5 @@
 export const CreateUser = `
-  mutation CreateUser($id: bigint, $username: String!, $email: String!, $saltedPassword: String!, $firstName: String!, $lastName: String!, $admin: Int!, $userInstruments: cucb_users_instruments_arr_rel_insert_input, $bio: String, $bioChangedDate: timestamptz, $userPrefs: cucb_user_prefs_arr_rel_insert_input) {
+  mutation CreateUser($id: bigint, $username: String!, $email: String!, $saltedPassword: String!, $firstName: String!, $lastName: String!, $admin: Int!, $userInstruments: cucb_users_instruments_arr_rel_insert_input, $bio: String, $bioChangedDate: timestamptz, $userPrefs: cucb_user_prefs_arr_rel_insert_input, $joinDate: timestamptz, $lastLoginDate: timestamptz, $mobileContactInfo: String) {
     insert_cucb_users(
       objects: [{
         id: $id,
@@ -13,6 +13,9 @@ export const CreateUser = `
         bio: $bio,
         bio_changed_date: $bioChangedDate,
         user_prefs: $userPrefs,
+        join_date: $joinDate,
+        last_login_date: $lastLoginDate,
+        mobile_contact_info: $mobileContactInfo,
       }],
       on_conflict: {
         constraint: cucb_users_id_key,
@@ -25,6 +28,8 @@ export const CreateUser = `
           last,
           bio,
           bio_changed_date,
+          join_date,
+          last_login_date,
         ]
       }) {
       affected_rows
@@ -131,5 +136,21 @@ export const UserWithUsername = `
         cucb_users(where: { username: { _eq: $username } }) {
             id
         }
+    }
+`;
+
+export const DeleteBiography = `
+    mutation DeleteBiography($userId: bigint!) {
+      update_cucb_users_by_pk(pk_columns: { id: $userId }, _set: { bio: null }) {
+        id
+      }
+    }
+`;
+
+export const SetJoinAndLoginDate = `
+    mutation SetJoinAndLoginDate($userId: bigint!, $joinDate: timestamptz, $lastLoginDate: timestamptz) {
+      update_cucb_users_by_pk(pk_columns: { id: $userId }, _set: { join_date: $joinDate, last_login_date: $lastLoginDate }) {
+        id
+      }
     }
 `;

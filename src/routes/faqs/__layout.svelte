@@ -17,14 +17,14 @@
 <h1>Frequently Asked Questions</h1>
 We've collected a few questions people commonly ask here for you to have a look through at your own leisure! There are sections
 on
-<a href="/faqs/book" sapper:noscroll>booking us</a>
+<a href="/faqs/book" sveltekit:noscroll>booking us</a>
 {#if !loggedIn}
   &nbsp;and
-  <a href="/faqs/join" sapper:noscroll>joining us</a>
+  <a href="/faqs/join" sveltekit:noscroll>joining us</a>
 {:else},
-  <a href="/faqs/join" sapper:noscroll>joining us</a>
+  <a href="/faqs/join" sveltekit:noscroll>joining us</a>
   and
-  <a href="/faqs/members" sapper:noscroll>information for members</a>
+  <a href="/faqs/members" sveltekit:noscroll>information for members</a>
 {/if}
 depending on what you're interested in!
 <br />

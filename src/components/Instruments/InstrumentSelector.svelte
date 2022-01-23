@@ -6,7 +6,7 @@
   export let allInstruments: Instrument[];
 
   let parents = allInstruments.filter((i) => i.parent_id === null);
-  let instrumentsByParent = {};
+  let instrumentsByParent: Record<number, Instrument[]> = {};
   parents.forEach((i) => (instrumentsByParent[i.id] = []));
   allInstruments.filter((i) => i.parent_id !== null).forEach((i) => instrumentsByParent[i.parent_id].push(i));
 

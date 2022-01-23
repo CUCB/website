@@ -6,7 +6,7 @@ import gql from "graphql-tag";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { Static, Record, Number, String } from "runtypes";
+import { Static, Record as RuntypeRecord, Number, String } from "runtypes";
 
 dotenv.config();
 if (typeof process.env["SESSION_SECRET"] === "undefined") {
@@ -19,11 +19,11 @@ const SESSION_SECRET_HASH = crypto
   .digest("hex");
 const SALT_ROUNDS = 10;
 
-export function makeGraphqlClient() {
+export function makeServerGraphqlClient(params: { role?: string; headers?: Record<string, string> } = {}) {
   return new GraphQLClient(fetch, {
     domain: process.env["GRAPHQL_REMOTE"],
-    role: "server",
-    headers: { "session-secret-hash": SESSION_SECRET_HASH },
+    role: params.role || "server",
+    headers: { ...(params.headers || {}), "session-secret-hash": SESSION_SECRET_HASH },
   });
 }
 
@@ -71,7 +71,7 @@ type SessionData = {
 
 export const login: (details: LoginData) => Promise<SessionData> = async ({ username, password }) => {
   username = username.toLowerCase().trim();
-  let client = makeGraphqlClient();
+  let client = makeServerGraphqlClient();
   let res;
   try {
     res = await client.query({
@@ -133,7 +133,7 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
   firstName,
   lastName,
 }) => {
-  let client = makeGraphqlClient();
+  let client = makeServerGraphqlClient();
   let emailSearch = await client.query({
     query: gql`
       query SearchList042($email: String!) {
@@ -197,7 +197,7 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
   }
 };
 
-const PasswordResetToken = Record({
+const PasswordResetToken = RuntypeRecord({
   id: Number,
   email: String,
 });
@@ -270,7 +270,7 @@ export async function completePasswordReset({ password, token }: { password: str
   }
 
   if (PasswordResetToken.guard(decoded)) {
-    const client = makeGraphqlClient();
+    const client = makeServerGraphqlClient();
     try {
       let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
       // Discard password before we accidentally do anything stupid

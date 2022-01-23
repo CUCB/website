@@ -54,7 +54,7 @@
   }
 
   const join_date = user.join_date ? `in ${displayMonth(user.join_date)}` : "before records began";
-  const login_date = `in ${displayMonth(user.last_login_date)}`;
+  const login_date = user.last_login_date && `in ${displayMonth(user.last_login_date)}`;
 
   const last_gig = [...user.gig_lineups].reverse().find((x) => x.gig.date != null);
   const last_gig_date = displayDate(last_gig?.gig.date);

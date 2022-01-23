@@ -1,7 +1,7 @@
 import type { Request, Response } from "@sveltejs/kit";
 import { Record, String } from "runtypes";
 import { CRSID_PATTERN, EMAIL_PATTERN } from "../_register";
-import { makeGraphqlClient, startPasswordReset } from "../../../auth";
+import { makeServerGraphqlClient, startPasswordReset } from "../../../auth";
 import gql from "graphql-tag";
 
 type PostRequest = Request & { body: FormData };
@@ -37,7 +37,7 @@ const UserByUsername = gql`
 export async function post(request: PostRequest): Promise<Response> {
   let body = Object.fromEntries(request.body.entries());
   if (Body.guard(body)) {
-    let client = makeGraphqlClient();
+    let client = makeServerGraphqlClient();
     const userCheck = await client.query<UserEmail>({
       query: UserByUsername,
       variables: { username: body.username.toLowerCase() },
