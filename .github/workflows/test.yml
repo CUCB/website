@@ -2,6 +2,7 @@ name: Build/Test/Deploy
 
 on:
   push:
+  workflow_dispatch:
 
 jobs:
   svelte-check:
