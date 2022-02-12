@@ -1,3 +1,5 @@
+/// <reference types="Cypress" />
+
 import {
   onConflictVenue,
   CreateGig,
@@ -517,3 +519,57 @@ describe("gig diary", () => {
     });
   });
 });
+
+describe("iCal files", () => {
+  let gig = gigForSummary;
+  before(() => {
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 27250,
+        username: "cypress_user",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 9,
+        email: "cypress.user@cypress.io",
+        firstName: "Cypress",
+        lastName: "User",
+      },
+    });
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 32747,
+        username: "cypress",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 1,
+        email: "cy@press.io",
+        firstName: "Cypress",
+        lastName: "Webmaster",
+      },
+    });
+    cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
+    cy.executeMutation(CreateGig, { variables: gig });
+  });
+
+  it("can be generated per-gig", () => {
+    cy.login("cypress", "abc123");
+    cy.visit(`/members/gigs/${gig.id}`);
+    cy.contains("Download iCal").then((link) => {
+      const linksTo = link.attr("href");
+      console.log(`${Cypress.config().baseUrl.replace(/\/$/, "")}${linksTo}`);
+      cy.request(Cypress.config().baseUrl.replace(/\/?$/, linksTo)).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const vevent = comp.getFirstSubcomponent("vevent");
+        const event = new ICAL.Event(vevent);
+        const tz = comp.getFirstProperty("timezone-id").getFirstValue();
+        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
+        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
+        expect(event.summary).to.eq(`GIG: Gig of excitement`);
+        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
+        expect(startDate.equals(Cypress.DateTime.fromISO(gig.arriveTime))).to.be.true;
+        expect(endDate.equals(Cypress.DateTime.fromISO(gig.finishTime))).to.be.true;
+      });
+    });
+  });
+});
+
+import ICAL from "ical.js";

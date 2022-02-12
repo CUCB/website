@@ -26,9 +26,13 @@ const SESSION_SECRET_HASH = crypto
 
 const CALENDAR_SECRET = process.env["CALENDAR_SECRET"];
 
+function applyTimezone(date: string): string {
+  return DateTime.fromISO(date).setZone("Europe/London").toISO({ includeOffset: false });
+}
+
 function startEndTimes(gig) {
-  let start = gig.arrive_time;
-  let end = gig.finish_time;
+  let start = applyTimezone(gig.arrive_time);
+  let end = applyTimezone(gig.finish_time);
   if (start === end || end === null || start === null) {
     // Either an all day event, or we don't have both start and finish times, so make it appear as an all day event
     start = gig.date;
@@ -65,7 +69,7 @@ function testAuthLink(query) {
 
 class GigCalendar {
   baseUrl: string;
-  calendar: ICalCalendar;
+  calendar: typeof ICalCalendar;
   // TODO does the secret actually want to be stored in the code??
   constructor(name: string, description: string, baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -84,7 +88,7 @@ class GigCalendar {
   addGig(gig) {
     const { start, end } = startEndTimes(gig);
     let description = `[Correct as of ${DateTime.local().toHTTP()}.]`;
-    let times = [`| Time: ${DateTime.fromISO(gig.time).toLocaleString(DateTime.TIME_24_SIMPLE) || ""}`.trim()];
+    const times = [`| Time: ${DateTime.fromISO(gig.time).toLocaleString(DateTime.TIME_24_SIMPLE) || ""}`.trim()];
     if (gig.arrive_time) {
       times.push(`Arrive ${DateTime.fromISO(gig.arrive_time).toLocaleString(DateTime.TIME_24_SIMPLE)}`);
     }
@@ -199,9 +203,11 @@ export async function allGigs(client: GraphQLClient, uid: number, ipAddress: str
   // TODO factor out some of this since it's basically identical to mygigs
   const calendar = new GigCalendar(
     `CUCB: ${fullName}'s Gig Feed`,
-    `Auto-generated CUCB gig feed, generated for the${
-      hidden ? " privileged" : ""
-    } user ${fullName} of all upcoming (and very recent) CUCB gigs. Notice that depending on how you use this calendar, it might not sync, sync maybe daily [Google URL feed], or sync more frequently. [This description retrieved ${DateTime.local().toHTTP()}.]`,
+    `Auto-generated CUCB gig feed, generated for the\
+    ${hidden ? " privileged" : ""} user ${fullName} of all upcoming \
+    (and very recent) CUCB gigs. Notice that depending on how you use this \
+    calendar, it might not sync, sync maybe daily [Google URL feed], or sync \
+    more frequently. [This description retrieved ${DateTime.local().toHTTP()}.]`,
     baseUrl,
   );
   for (let gig of resUserGigs.data.cucb_gigs) {
@@ -247,9 +253,11 @@ export async function myGigs(client: GraphQLClient, uid: number, ipAddress: stri
 
   const calendar = new GigCalendar(
     `CUCB: ${fullName}'s Gig Feed`,
-    `Auto-generated CUCB gig feed, generated for the${
-      hidden ? " privileged" : ""
-    } user ${fullName} of all upcoming (and very recent) CUCB gigs they're performing in. Notice that depending on how you use this calendar, it might not sync, sync maybe daily [Google URL feed], or sync more frequently. [This description retrieved ${DateTime.local().toHTTP()}.]`,
+    `Auto-generated CUCB gig feed, generated for the\
+    ${hidden ? " privileged" : ""} user ${fullName} of all upcoming (and very recent) \
+    CUCB gigs they're performing in. Notice that depending on how you use this calendar, \
+    it might not sync, sync maybe daily [Google URL feed], or sync more frequently. \
+    [This description retrieved ${DateTime.local().toHTTP()}.]`,
     baseUrl,
   );
   for (let gig of user.gig_lineups.map((g) => g.gig)) {
@@ -289,20 +297,36 @@ export async function singleGig(client: GraphQLClient, gig_id: number, baseUrl: 
   return calendar.generate();
 }
 
+export function calendarUrl(params: URLSearchParams): string {
+  return `/data/cal.php?${params.toString()}`;
+}
+
 export function gigCalendarUrl(id: number, user_id: number): string {
-  return `/data/cal.php?type=gig&gig=${id}&_cal_uid=${user_id}&_cal_auth=${authFor({
+  const params = new URLSearchParams({
     type: "gig",
-    gig: id,
-    uid: user_id,
-  })}`;
+    gig: id.toString(),
+    _cal_uid: user_id.toString(),
+    _cal_auth: authFor({ type: "gig", gig: id, uid: user_id }),
+  });
+  return calendarUrl(params);
 }
 
 export function allgigsCalendarUrl(user_id: number): string {
-  return `/data/cal.php?type=allgigs&_cal_uid=${user_id}&_cal_auth=${authFor({ type: "allgigs", uid: user_id })}`;
+  const params = new URLSearchParams({
+    type: "allgigs",
+    _cal_uid: user_id.toString(),
+    _cal_auth: authFor({ type: "allgigs", uid: user_id }),
+  });
+  return calendarUrl(params);
 }
 
 export function mygigsCalendarUrl(user_id: number): string {
-  return `/data/cal.php?type=mygigs&_cal_uid=${user_id}&_cal_auth=${authFor({ type: "mygigs", uid: user_id })}`;
+  const params = new URLSearchParams({
+    type: "mygigs",
+    _cal_uid: user_id.toString(),
+    _cal_auth: authFor({ type: "mygigs", uid: user_id }),
+  });
+  return calendarUrl(params);
 }
 
 export async function get({ query, headers }) {
