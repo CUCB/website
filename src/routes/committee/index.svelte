@@ -2,7 +2,7 @@
   import { makeClient, handleErrors } from "../../graphql/client";
   import { currentCommitteePictures } from "../../graphql/committee";
   export async function load({ page: { query }, fetch, session }) {
-    const aprilFools = query.get("aprilfool") !== undefined;
+    const aprilFools = query.get("aprilfool") !== null;
     const client = makeClient(fetch);
     let res;
     try {
@@ -29,7 +29,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle('Committee')}</title>
+  <title>{makeTitle("Committee")}</title>
 </svelte:head>
 <h1>Committee</h1>
 

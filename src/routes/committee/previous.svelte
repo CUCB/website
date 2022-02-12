@@ -2,24 +2,55 @@
   import { handleErrors, GraphQLClient } from "../../graphql/client";
   import { pastCommitteePictures } from "../../graphql/committee";
   import type { LoadInput, LoadOutput } from "@sveltejs/kit";
-  export async function load({ page: { query }, fetch }: LoadInput): Promise<LoadOutput> {
+  import { DateTime } from "luxon";
+
+  interface Committee<DateOrString> {
+    started: DateOrString;
+    committee_members: CommitteeMember[];
+  }
+
+  interface CommitteeMember {
+    name: string;
+    pic: string | null;
+    sub_position: string | null;
+    comments: string | null;
+    email_obfus: string;
+    april_fools_dir: string | null;
+    april_fools_only: boolean;
+    committee_key: {
+      name: string;
+    };
+    committee: {
+      pic_folder: string;
+    };
+    position: {
+      name: string;
+    };
+  }
+
+  function parseStartedDate(committee: Committee<string>): Committee<DateTime> {
+    return { ...committee, started: DateTime.fromISO(committee.started) };
+  }
+
+  export async function load({
+    page: { query },
+    fetch,
+  }: LoadInput): Promise<LoadOutput<{ committees: Committee<DateTime>[]; aprilFools: boolean }>> {
     let aprilFools = query.get("aprilfool") !== null;
     let client = new GraphQLClient(fetch);
-    let res;
     try {
-      res = await client.query({ query: pastCommitteePictures });
-      return { props: { aprilFools, committees: res.data.cucb_committees } };
+      let res = await client.query<{ cucb_committees: Committee<string>[] }>({ query: pastCommitteePictures });
+      return { props: { aprilFools, committees: res.data.cucb_committees.map(parseStartedDate) } };
     } catch (e) {
       return handleErrors(e);
     }
   }
 </script>
 
-<script>
-  import { makeTitle } from "../../view";
+<script lang="ts">
+  import { committee, makeTitle } from "../../view";
   import Person from "../../components/Committee/Person.svelte";
-  import { DateTime } from "luxon";
-  export let committees, aprilFools;
+  export let committees: Committee<DateTime>[], aprilFools: boolean;
 </script>
 
 <style>
@@ -58,7 +89,7 @@ For contact details for the current committee
 {#each committees as committee}
   <hr />
   <h3>
-    {DateTime.fromISO(committee.started).year}/{(DateTime.fromISO(committee.started).year + 1).toString().slice(-2)}
+    {committee.started.year}/{(committee.started.year + 1).toString().slice(-2)}
   </h3>
   <div class="members">
     {#if aprilFools}
