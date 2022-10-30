@@ -166,7 +166,7 @@ describe("password verification", () => {
       failOnStatusCode: false,
       form: true,
     })
-      .its("status")
+      .its("body.status")
       .should("eq", 401);
   });
 });

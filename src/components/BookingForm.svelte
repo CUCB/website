@@ -18,7 +18,7 @@
 
   const dispatch = createEventDispatcher();
 
-  let onCaptchaVerified = e => {
+  let onCaptchaVerified = (e) => {
     captchaKey = e.detail.key;
   };
 
@@ -47,13 +47,13 @@
       },
     });
 
-    const isSuccessful = status => status >= 200 && status < 300;
+    const isSuccessful = (status) => status >= 200 && status < 300;
 
     if (isSuccessful(res.status)) {
       success = true;
     } else {
       success = false;
-      error = await res.text();
+      error = (await res.json()).message;
     }
     submitted = true;
     dispatch("complete");
@@ -91,7 +91,8 @@
     }
   }
 
-  input:invalid, textarea:invalid {
+  input:invalid,
+  textarea:invalid {
     box-shadow: none;
     &:focus {
       box-shadow: 0px 0px 4px 1px var(--accent);

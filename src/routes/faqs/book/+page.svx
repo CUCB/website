@@ -1,0 +1,53 @@
+<script>
+    import { makeTitle, committee } from "../../../view";
+    import Mailto from "../../../components/Mailto.svelte";
+</script>
+
+<svelte:head>
+    <title>{makeTitle("Book us | FAQs")}</title>
+</svelte:head>
+
+## Book us
+
+For more information, have a look at our <a href="/docs/standard-gig-policy.pdf" rel="external">Standard Gig Policy</a>, and if you have any questions e-mail <Mailto person={$committee.secretary}>the Secretary</Mailto> or use the [online contact form](/book).
+
+### How do you pronounce ceilidh?
+
+Think "Kaylee"! (Or /ˈkeɪli/ if you can read IPA!) This is a Scottish spelling; there's also an Irish word _céilí_.
+
+### What's the difference between a _ceilidh_ and a _barn dance_?
+
+Most of these terms don't have a hard-and-fast definition. However, a ceilidh mainly contains traditional Irish and Scottish dances whereas a barn dance is generally more English dances, and notably has square dances. CUCB callers perform a variety of these depending on their personal preferences and the event. Often, in modern usage, these terms are used fairly interchangeably. (See [this page](http://www.webfeet.org/eceilidh/Overview.html) for another attempt to explain things.)
+
+### What kind of events do you play at?
+
+We regularly play at a variety of events in and around Cambridge, including May Balls and other University events, charity fundraisers, wedding receptions, birthday parties, seasonal parties, Burns' Night ceilidhs, festivals and summer schools. Whatever your event, we can add an extra something special.
+
+### What should I expect from my ceilidh?
+
+We will provide a full line-up of musicians (usually around 5-8), all the amplification equipment required and an experienced caller to take you through the dances. See also:
+
+### How long is a ceilidh?
+
+The band will play for up to 3 hours, with a break in the middle to allow you to get your breath back. A normal gig is around 2 hours in length with a 15-20 min break in the middle.
+
+### Can I provide my own caller?
+
+If you let us know at the time of booking, we will be happy to work with other professional callers. (Please note that once you book a ceilidh we may immediately book a caller for it, so do let us know straight away if you plan to find your own!)
+
+### How far will you travel?
+
+The band generally only takes gigs less than a 30 minute drive from Cambridge; however if you have a special request please let us know.
+
+### Can I listen to the band before I book you?
+
+Check out our front page to see public gig dates, or email the secretary. However, please be aware that we cannot guarantee a particular line-up for your event as we are a large band and operate a rotating policy based on people's availability.
+
+### Who are the band?
+
+CUCB is a student society, and most of our members are current students, or ex-students living in Cambridge. We have about 60 active performers (people in the band have played gigs over the last year) at the moment.
+
+### Do you do special requests?
+
+The band tries its best to accommodate requests; however some things are not possible for a student band. Please simply let us know when you ask for a quote if you have anything specific in mind and we will let you know what we can do!
+

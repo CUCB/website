@@ -1,9 +1,13 @@
-<script>
-  export let redirectTo;
+<script lang="ts">
+  export let redirectTo, form;
+  import { browser } from "$app/environment";
+  import { enhance } from "$app/forms";
+  import { Result } from "postcss";
 
-  let username = "";
+  let username = form?.username || "";
   let password = "";
   let error;
+  console.log(form);
 
   let updateProps = [
     "accent_light",
@@ -16,64 +20,53 @@
     "spinnyLogo",
     "calendarStartDay",
   ];
-  const updateSessionTheme = userId => {
-    let theme = new URLSearchParams();
-    for (let prop of updateProps) {
-      let value = localStorage.getItem(`${prop}_${userId}`);
-      if (value) theme.append(prop, value);
+
+  $: theme = browser ? themeFromLocalStorage() : null;
+  $: themeString = JSON.stringify(theme);
+
+  const themeFromLocalStorage = () => {
+    let res = {};
+    let regexp = new RegExp(`^(?<prop>${updateProps.map((name) => `${name}`).join("|")})_(?<userId>[0-9]+)$`);
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      const match = key.match(regexp);
+      if (match) {
+        const { prop } = match.groups;
+        const userId = parseInt(match.groups.userId);
+        const newEntry = { [prop]: localStorage.getItem(key) };
+        res[userId] = userId in res ? { ...res[userId], ...newEntry } : newEntry;
+      }
     }
-    return fetch("/updatetheme", {
-      method: "POST",
-      body: theme,
-      headers: {
-        "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
-      },
-    });
+    return Object.keys(res).length > 0 ? res : null;
   };
-
-  async function submit() {
-    const body = new URLSearchParams();
-    body.append("username", username);
-    body.append("password", password);
-
-    let res = await fetch("/auth/login", {
-      method: "post",
-      body,
-      headers: {
-        "Content-type": "application/x-www-form-urlencoded;charset=UTF-8",
-      },
-    });
-
-    const isSuccessful = status => status >= 200 && status < 300;
-
-    if (isSuccessful(res.status)) {
-      // Set theme from localstorage
-      await updateSessionTheme(await res.text());
-      // Reload the page so the session is up-to-date
-      window.location.href = redirectTo;
-    } else {
-      error = await res.text();
-    }
-  }
 </script>
 
 <h1>Sign in</h1>
-<form method="POST" action="/auth/login" on:submit|preventDefault="{submit}">
+<form
+  method="POST"
+  action="/auth/login"
+  use:enhance="{() => {
+    return async ({ result, update }) => {
+      if (result.type === 'redirect') {
+        window.location.href = result.location;
+      } else {
+        await update();
+      }
+    };
+  }}"
+>
+  {#if form?.message}<p class="error" data-test="errors">{form?.message}</p>{/if}
+  <input type="hidden" value="{themeString}" name="theme" />
   <label>
     Username
-    <input type="text" bind:value="{username}" data-test="username" />
+    <input type="text" bind:value="{username}" data-test="username" name="username" />
   </label>
   <label>
     Password
-    <input type="password" bind:value="{password}" data-test="password" />
+    <input type="password" bind:value="{password}" data-test="password" name="password" />
   </label>
   <input type="submit" value="Login" data-test="submit" />
 </form>
 Don't have an account already?
 <a href="/auth/register" data-test="register">Click here</a>
 to sign up to the website.
-<ul data-test="errors">
-  {#if error}
-    <li>{error}</li>
-  {/if}
-</ul>

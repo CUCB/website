@@ -1,12 +1,12 @@
+<svelte:options immutable />
+
 <script lang="ts">
   import { draw } from "svelte/transition";
   import { onMount } from "svelte";
   import { tweened } from "svelte/motion";
   import { sineInOut } from "svelte/easing";
-  import { getStores } from "$app/stores";
   import { themeName } from "../../view";
   let rotation = tweened(0, { easing: sineInOut, duration: 250 });
-  let { session } = getStores();
   let self: SVGSVGElement;
   export let id: string;
   export let enableSpin: boolean;
@@ -81,10 +81,10 @@
   }
 </style>
 
-<svelte:options immutable />
 <div id="{id}" role="presentation">
   <div id="logo2" class="theme-{$themeName}">
     {#if animate}
+      <!-- TODO this used to use sessino for something -->
       <svg
         xmlns="http://www.w3.org/2000/svg"
         id="svg-logo"
@@ -93,7 +93,7 @@
         on:mouseout="{triggerDerotation}"
         data-test="logo"
         bind:this="{self}"
-        style="{$session.userId ? `transform:rotate(${$rotation}deg)` : ''}"
+        style="transform:rotate({$rotation}deg)"
       >
         <title>CUCB Logo</title>
         <g>
