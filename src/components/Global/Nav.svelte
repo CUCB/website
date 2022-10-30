@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/stores";
   import { themeName } from "../../view";
-  $: segment = $page.path.split("/")[1];
+  $: segment = $page.url.pathname.split("/")[1];
   export let user: any;
   export let visible: boolean;
 

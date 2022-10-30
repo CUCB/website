@@ -1,6 +1,7 @@
 import { writable } from "svelte/store";
 import type { Writable } from "svelte/store";
 import type { DocumentNode } from "graphql/language/ast";
+import { error } from "@sveltejs/kit";
 
 const path = `/v1/graphql`;
 
@@ -101,24 +102,21 @@ export function handleErrors(
     const code = e.graphQLErrors[0].extensions.code;
     if (code === "validation-failed") {
       if (session && session.hasuraRole) {
-        return { status: 403, error: "You're not supposed to be here!" };
+        throw error(403, "You're not supposed to be here!");
       } else {
-        return { status: 401, error: "Not logged in" };
+        throw error(401, "Not logged in");
       }
     } else if (code === "access-denied") {
-      return { status: 403, error: "You're not supposed to be here!" };
+      throw error(403, "You're not supposed to be here!");
     } else {
       console.error(e);
-      return {
-        status: 500,
-        error: `Something went wrong, "${code}" apparently. Let the webmaster know and they'll try and help you`,
-      };
+      throw error(
+        500,
+        `Something went wrong, "${code}" apparently. Let the webmaster know and they'll try and help you`,
+      );
     }
   } else {
     console.error(e);
-    return {
-      status: 500,
-      error: `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`,
-    };
+    throw error(500, `Something went wrong, "${e}" apparently. Let the webmaster know and they'll try and help you`);
   }
 }

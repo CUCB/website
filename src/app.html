@@ -4,8 +4,9 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta name="theme-color" content="#333333" />
-    <script> var exports = {}; </script>
-
+    <script>
+      var exports = {};
+    </script>
 
     <link rel="stylesheet" href="/static/global.css" />
     <link rel="manifest" href="/static/manifest.json" crossorigin="use-credentials" />
@@ -15,10 +16,10 @@
 
     <!-- This contains the contents of the <svelte:head> component, if
 	     the current page has one -->
-    %svelte.head%
+    %sveltekit.head%
   </head>
 
-  <body>
-    <div id="svelte">%svelte.body%</div>
+  <body data-sveltekit-prefetch>
+    <div>%sveltekit.body%</div>
   </body>
 </html>
