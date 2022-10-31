@@ -19,7 +19,7 @@ export class GraphQLClient {
     this.fetch = fetch;
     this.role = kwargs?.role;
     this.domain = kwargs?.domain;
-    this.headers = kwargs?.headers;
+    this.headers = kwargs?.headers || {};
   }
 
   // TODO type this better
@@ -44,7 +44,6 @@ export class GraphQLClient {
           query: typeof query === "string" ? query : query.loc.source.body,
           variables,
         }),
-        credentials: "include",
       },
     );
     let res2 = await res.json();
@@ -95,7 +94,7 @@ export function makeClient(fetch: Fetch, kwargs?: { role?: string }) {
 export function handleErrors(
   e?: { graphQLErrors?: { extensions: { code: string } }[] },
   session?: { hasuraRole?: string },
-): { status: number; error: string } | undefined {
+): void {
   if (!e) {
     return;
   } else if (e.graphQLErrors && e.graphQLErrors[0]) {

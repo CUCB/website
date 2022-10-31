@@ -2,11 +2,9 @@
   export let redirectTo, form;
   import { browser } from "$app/environment";
   import { enhance } from "$app/forms";
-  import { Result } from "postcss";
 
   let username = form?.username || "";
   let password = "";
-  let error;
   console.log(form);
 
   let updateProps = [

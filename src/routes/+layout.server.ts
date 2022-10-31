@@ -1,9 +1,7 @@
-import { makeClient } from "../graphql/client";
 import { fallbackPeople } from "./_committee";
 import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
 import type { Static } from "runtypes";
 import { Day } from "../view";
-import { client, clientCurrentUser } from "../graphql/client";
 import type { LayoutServerLoad } from "./$types";
 
 type ThemeColor = Static<typeof ThemeColor>;
@@ -40,7 +38,7 @@ function fromSessionTheme(session: { theme?: any } | null, name: string): string
   }
 }
 
-export const load: LayoutServerLoad = async function ({ request, url, fetch, locals, cookies }) {
+export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
   let committee = {};
   let session = { ...locals.session, save: undefined, destroy: undefined };
 
@@ -91,9 +89,6 @@ export const load: LayoutServerLoad = async function ({ request, url, fetch, loc
   if (HexValue.guard(logo)) {
     settings.logo[color] = logo;
   }
-
-  client.set(makeClient(fetch));
-  clientCurrentUser.set(makeClient(fetch, { role: "current_user" }));
 
   return { settingsWithoutMaps: settings, committee, session };
 };

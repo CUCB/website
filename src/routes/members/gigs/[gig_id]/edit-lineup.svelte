@@ -3,13 +3,12 @@
   import { QueryGigLineup, AllUserNames } from "../../../../graphql/gigs/lineups";
   import { QueryGigType } from "../../../../graphql/gigs";
   import { handleErrors, makeClient } from "../../../../graphql/client";
-  import { notLoggedIn } from "../../../../client-auth.js";
+  import { assertLoggedIn } from "../../../../client-auth.js";
 
   export async function load({ page: { params }, session, fetch }) {
     let { gig_id } = params;
 
-    const loginFail = notLoggedIn(session);
-    if (loginFail) return loginFail;
+    assertLoggedIn(session);
 
     let res, res_allPeople;
     let people, allPeople, title;
@@ -81,12 +80,15 @@
   let userSelectBox;
   let showPreview = false;
 
-  const wrap = (fn) => (userId) => async (...args) => {
-    let res = await fn({ client: $client, people: peopleStore, errors, gigId, userId }, ...args);
+  const wrap =
+    (fn) =>
+    (userId) =>
+    async (...args) => {
+      let res = await fn({ client: $client, people: peopleStore, errors, gigId, userId }, ...args);
 
-    peopleStore = res.people;
-    errors = res.errors;
-  };
+      peopleStore = res.people;
+      errors = res.errors;
+    };
 
   const addUser = async () => {
     await wrap(addUserUpdater)(null)(selectedUser);
@@ -257,8 +259,9 @@
 <hr />
 <p>
   <b>Warning: Do not use this link unless you really need to!</b>
-  <button on:click="{checkDestroyLineup}" data-test="destroy-lineup">Destroy all lineup information and lineup
-    applications</button>
+  <button on:click="{checkDestroyLineup}" data-test="destroy-lineup"
+    >Destroy all lineup information and lineup applications</button
+  >
 </p>
 <hr />
 {#if Object.entries(nope).length + Object.entries(unapproved).length}
