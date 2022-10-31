@@ -207,7 +207,7 @@
   {user.first}
   has played
   {gig_count}
-  {gig_count > 1 ? 'gigs' : 'gig'},
+  {gig_count > 1 ? "gigs" : "gig"},
   {#if gig_count > 1}most recently{/if}
   on
   <a href="{gigLink(last_gig.gig.id)}">{last_gig_date}</a>.
@@ -223,7 +223,8 @@
       Apart from that, they have been known to play
       <b>
         {#each other_instruments as instrument, i}
-          {other_instruments[0]}
+          <!-- TODO test this, why the fuck haven't the tests caught this being set to other_instruments[0]???? -->
+          {instrument}
           {#if i < other_instruments.length - 1}/{/if}
         {/each}
       </b>

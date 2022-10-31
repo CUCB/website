@@ -1,9 +1,8 @@
 <script>
-  export let status;
-  export let error;
-  // import MembersNav from "../components/Members/Nav.svelte";
   import { page } from "$app/stores";
   import { dev } from "$app/environment";
+  import MembersNav from "../components/Members/Nav.svelte";
+  export let data;
 </script>
 
 <style>
@@ -16,19 +15,15 @@
 </style>
 
 <svelte:head>
-  <title>{status}</title>
+  <title>{$page.status}</title>
 </svelte:head>
 
-<!-- {#if $session && $session.userId && $page.path.match(/^\/members\//)}
+{#if data.session?.userId && $page.url.pathname.match(/^\/members\//)}
   <MembersNav />
-{/if} -->
+{/if}
 
-<h1>Oh Noes! {$page.error.status}</h1>
+<h1>Oh Noes! {$page.status}</h1>
 
 <p>The error was: <i>{$page.error.message}</i></p>
 
-<img src="https://http.cat/{status}.jpg" alt="The HTTP Status Cat for status code {$page.error.status}" />
-
-{#if dev && $page.error.stack}
-  <pre>{$page.error.stack}</pre>
-{/if}
+<img src="https://http.cat/{$page.status}.jpg" alt="The HTTP Status Cat for status code {$page.status}" />
