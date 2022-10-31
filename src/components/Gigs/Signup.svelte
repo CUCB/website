@@ -10,11 +10,10 @@
   import TooltipText from "../TooltipText.svelte";
   import { clientCurrentUser } from "../../graphql/client";
   import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
-  import { session } from "$app/stores";
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
-  export let gig, userInstruments;
+  export let gig, userInstruments, user;
   export let showLink = true;
   let edit = false;
   Settings.defaultZoneName = "Europe/London";
@@ -91,7 +90,7 @@
             user_available,
             user_only_if_necessary,
             user_notes: null,
-            user_id: $session.userId,
+            user_id: user.userId,
             user_instruments: [],
             user: returning[0].user,
           },
@@ -273,7 +272,7 @@
 <div data-test="gig-signup-{gig.id}" class="gig-signup theme-{$themeName}">
   <h3>
     {#if showLink}<a href="/members/gigs/{gig.id}">{gig.title}</a>{:else}{gig.title}{/if}
-    {#if date}<small> &nbsp;on {date.toFormat('cccc d') + suffix(date.day) + date.toFormat(' LLLL yyyy')} </small>{/if}
+    {#if date}<small> &nbsp;on {date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy")} </small>{/if}
   </h3>
   {#if gig.venue}
     <h4>
@@ -366,11 +365,11 @@
         <p>
           <TooltipText content="Notes specific to this particular gig">Notes for this gig:</TooltipText>
         </p>
-        <blockquote>{gig.lineup[0].user_notes || 'None'}</blockquote>
+        <blockquote>{gig.lineup[0].user_notes || "None"}</blockquote>
         <p>
           <TooltipText content="Persistent notes for all gigs you are signed up to">General notes:</TooltipText>
         </p>
-        <blockquote>{$userNotes || 'None'}</blockquote>
+        <blockquote>{$userNotes || "None"}</blockquote>
       </div>
     {/if}
     {#if edit}

@@ -205,6 +205,19 @@ async function sessionFromHeaders(cookies) {
   };
 }
 
+export async function handleFetch({ event, request, fetch }) {
+  if (request.url.startsWith("http://graphql-engine:8080/")) {
+    request.headers.set("cookie", event.request.headers.get("cookie"));
+  }
+
+  for (const [header, value] of event.request.headers) {
+    if (["cookie", "authorization", "host"].includes(header)) continue;
+    request.headers.set(header, value);
+  }
+
+  return fetch(request);
+}
+
 export async function getSession({ locals }) {
   return { ...locals.session, save: undefined, destroy: undefined };
 }

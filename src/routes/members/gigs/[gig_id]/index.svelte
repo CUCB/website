@@ -1,14 +1,13 @@
 <script context="module">
   import { QueryGigDetails, QuerySingleGig, QuerySingleGigSignupSummary } from "../../../../graphql/gigs";
-  import { notLoggedIn } from "../../../../client-auth";
+  import { assertLoggedIn } from "../../../../client-auth";
   import { makeClient, handleErrors } from "../../../../graphql/client";
   import { writable } from "svelte/store";
 
   export async function load({ page: { params }, session, fetch }) {
     let { gig_id } = params;
 
-    const loginFail = notLoggedIn(session);
-    if (loginFail) return loginFail;
+    assertLoggedIn(session);
 
     let client = makeClient(fetch);
     let clientCurrentUser = makeClient(fetch, { role: "current_user" });

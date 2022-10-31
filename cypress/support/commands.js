@@ -2,7 +2,7 @@ import "@percy/cypress";
 import "cypress-pipe";
 import { Email } from "./proxies";
 
-Cypress.Commands.add("login", (username, password, options) =>
+Cypress.Commands.add("login", (username, password, options) => {
   cy.request({
     method: "POST",
     url: "/auth/login", // baseUrl is prepended to url
@@ -12,8 +12,11 @@ Cypress.Commands.add("login", (username, password, options) =>
       password,
     },
     ...options,
-  }),
-);
+  })
+    .its("body")
+    .its("type")
+    .should("not.equal", "error");
+});
 
 Cypress.Commands.add("executeMutation", (mutation, params) =>
   cy
