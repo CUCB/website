@@ -215,7 +215,6 @@ describe("gig editor", () => {
     });
 
     it("detects unsaved changes", () => {
-      cy.waitForFormInteractive();
       cy.get(`[data-test=gig-edit-${gig.id}-title]`).click().type("modified title", { delay: 0 });
       cy.contains("unsaved changes").should("be.visible");
       cy.get(`[data-test=gig-edit-${gig.id}-title]`).clear().type(gig.title, { delay: 0 });

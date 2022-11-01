@@ -92,12 +92,10 @@ export function makeClient(fetch: Fetch, kwargs?: { role?: string }) {
 }
 
 export function handleErrors(
-  e?: { graphQLErrors?: { extensions: { code: string } }[] },
+  e: { graphQLErrors?: { extensions: { code: string } }[] },
   session?: { hasuraRole?: string },
-): void {
-  if (!e) {
-    return;
-  } else if (e.graphQLErrors && e.graphQLErrors[0]) {
+): never {
+  if (e.graphQLErrors && e.graphQLErrors[0]) {
     const code = e.graphQLErrors[0].extensions.code;
     if (code === "validation-failed") {
       if (session && session.hasuraRole) {

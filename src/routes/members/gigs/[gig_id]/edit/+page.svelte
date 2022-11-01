@@ -1,92 +1,8 @@
-<script context="module">
-  import {
-    QueryEditGigDetails,
-    QueryVenues,
-    QueryGigTypes,
-    UpdateGig,
-    QueryContacts,
-    UpsertGigContact,
-    RemoveGigContact,
-  } from "../../../../graphql/gigs";
-  import { assertLoggedIn } from "../../../../client-auth";
-  import { makeClient, handleErrors, client as graphqlClient } from "../../../../graphql/client";
-
-  function sortVenues(venues) {
-    return venues.sort(
-      (a, b) => (a.name || "").localeCompare(b.name || "") || (a.subvenue || "").localeCompare(b.subvenue || ""),
-    );
-  }
-
-  function sortContacts(contacts) {
-    contacts.sort((a, b) => {
-      a = a.contact ? a.contact : a;
-      b = b.contact ? b.contact : b;
-      a = { name: a.name && a.name.toLowerCase(), organization: a.organization && a.organization.toLowerCase() };
-      b = { name: b.name && b.name.toLowerCase(), organization: b.organization && b.organization.toLowerCase() };
-      return a.name < b.name
-        ? -1
-        : b.name < a.name
-        ? 1
-        : a.organization < b.organization
-        ? -1
-        : b.organization < a.organization
-        ? 1
-        : 0;
-    });
-  }
-
-  export async function load({ page: { params }, fetch, session }) {
-    let { gig_id } = params;
-
-    assertLoggedIn(session);
-
-    let client = makeClient(fetch);
-
-    let res_gig, res_venues, res_gigTypes, res_contacts;
-    let gig, venues, gigTypes, allContacts;
-    try {
-      res_gig = await client.query({
-        query: QueryEditGigDetails,
-        variables: { gig_id },
-      });
-      res_venues = await client.query({
-        query: QueryVenues,
-      });
-      res_gigTypes = await client.query({
-        query: QueryGigTypes,
-      });
-      res_contacts = await client.query({
-        query: QueryContacts,
-      });
-    } catch (e) {
-      return handleErrors(e, session);
-    }
-
-    if (res_gig && res_gig.data && res_gig.data.cucb_gigs_by_pk) {
-      gig = res_gig.data.cucb_gigs_by_pk;
-      venues = res_venues.data.cucb_gig_venues;
-      gigTypes = res_gigTypes.data.cucb_gig_types;
-      allContacts = res_contacts.data.cucb_contacts;
-      sortVenues(venues);
-      sortContacts(gig.contacts);
-    } else {
-      return { status: 404, error: "Gig not found" };
-    }
-
-    return {
-      props: {
-        ...gig,
-        lastSaved: gig,
-        venues,
-        gigTypes,
-        allContacts,
-      },
-    };
-  }
-</script>
-
-<script>
-  export let title,
+<script lang="ts">
+  import type { PageData } from "./$types";
+  export let data: PageData;
+  let {
+    title,
     date,
     time,
     posting_time,
@@ -114,19 +30,23 @@
     finance_deposit_received,
     finance_payment_received,
     finance_caller_paid,
-    quote_date;
-  import { makeTitle, themeName, createValidityChecker } from "../../../../view";
-  import Select from "../../../../components/Forms/Select.svelte";
-  import VenueEditor from "../../../../components/Gigs/VenueEditor.svelte";
-  import ContactEditor from "../../../../components/Gigs/ContactEditor.svelte";
-  import Summary from "../../../../components/Gigs/Summary.svelte";
+    quote_date,
+    session,
+  } = data;
+  import { makeTitle, themeName, createValidityChecker } from "../../../../../view";
+  import { UpdateGig, UpsertGigContact, RemoveGigContact } from "../../../../../graphql/gigs";
+  import Select from "../../../../../components/Forms/Select.svelte";
+  import VenueEditor from "../../../../../components/Gigs/VenueEditor.svelte";
+  import ContactEditor from "../../../../../components/Gigs/ContactEditor.svelte";
+  import Summary from "../../../../../components/Gigs/Summary.svelte";
   import Fuse from "fuse.js";
   import { tick } from "svelte";
   import { tweened } from "svelte/motion"; // TODO move the messages to their own component (#34)
   import { fade } from "svelte/transition";
-  import { session } from "$app/stores";
-  import SearchBox from "../../../../components/SearchBox.svelte";
+  import SearchBox from "../../../../../components/SearchBox.svelte";
   import { DateTime, Settings } from "luxon";
+  import { client as graphqlClient } from "../../../../../graphql/client";
+  import { sortContacts, sortVenues } from "./sort";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   let checkValid = createValidityChecker();
@@ -346,14 +266,14 @@
           finance_caller_paid,
         },
       });
-      if (res && res.data && res.data.update_cucb_gigs_by_pk) {
+      if (res?.data?.update_cucb_gigs_by_pk) {
         window.clearTimeout(runningTimer);
         recentlySavedOpacity.set(0, { duration: 50 });
         runningTimer = window.setTimeout(recentlySavedTimer, 2000);
         recentlySavedOpacity.set(1);
         lastSaved = { ...res.data.update_cucb_gigs_by_pk };
       }
-      editing_user = { id: $session.userId, first: $session.firstName, last: $session.lastName };
+      editing_user = { id: session.userId, first: session.firstName, last: session.lastName };
       editing_time = DateTime.local().toISO();
     } catch (e) {
       // Oh shit
@@ -570,7 +490,7 @@
 </script>
 
 <style lang="scss">
-  @import "../../../../sass/themes.scss";
+  @import "../../../../../sass/themes.scss";
 
   h3 {
     font-size: 1.3em;
