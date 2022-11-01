@@ -395,5 +395,5 @@
   <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
     Show summary
   </button>
-  <Signup bind:gig="{$signupGig}" userInstruments="{userInstruments}" showLink="{false}" />
+  <Signup bind:gig="{$signupGig}" userInstruments="{userInstruments}" showLink="{false}" user="{session}" />
 {/if}

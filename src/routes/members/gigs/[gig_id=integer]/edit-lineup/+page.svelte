@@ -1,79 +1,24 @@
-<script context="module">
-  import { extractAttributes } from "../../../../graphql/gigs/lineups/users/attributes";
-  import { QueryGigLineup, AllUserNames } from "../../../../graphql/gigs/lineups";
-  import { QueryGigType } from "../../../../graphql/gigs";
-  import { handleErrors, makeClient } from "../../../../graphql/client";
-  import { assertLoggedIn } from "../../../../client-auth.js";
-
-  export async function load({ page: { params }, session, fetch }) {
-    let { gig_id } = params;
-
-    assertLoggedIn(session);
-
-    let res, res_allPeople;
-    let people, allPeople, title;
-    try {
-      let preloadClient = makeClient(fetch);
-      let gigType = await preloadClient.query({
-        query: QueryGigType,
-        variables: { id: gig_id },
-      });
-      if (gigType && gigType.data && gigType.data.cucb_gigs_by_pk && gigType.data.cucb_gigs_by_pk.type.code === "gig") {
-        res = await preloadClient.query({
-          query: QueryGigLineup,
-          variables: { gig_id },
-        });
-        res_allPeople = await preloadClient.query({
-          query: AllUserNames,
-        });
-        title = gigType.data.cucb_gigs_by_pk.title;
-      }
-    } catch (e) {
-      return handleErrors(e, session);
-    }
-
-    if (res && res.data && res.data.cucb_gigs_by_pk) {
-      people = res.data.cucb_gigs_by_pk.lineup;
-      allPeople = res_allPeople.data.cucb_users;
-    } else {
-      return { status: 404, error: "Gig not found" };
-    }
-
-    let personLookup = {};
-    for (let person of people) {
-      person.user.attributes = extractAttributes(person.user);
-      person.user.prefs = undefined;
-
-      let user_instruments = {};
-      for (let instrument of person.user_instruments) {
-        user_instruments[instrument.user_instrument.id] = instrument;
-      }
-      person.user_instruments = user_instruments;
-      personLookup[person.user.id] = person;
-    }
-
-    return { props: { people: personLookup, gigId: gig_id, allPeople, title } };
-  }
-</script>
-
-<script>
-  import Select from "../../../../components/Forms/Select.svelte";
-  import Editor from "../../../../components/Gigs/Lineup/Editor/Editor.svelte";
-  import { setInstrumentApproved, addInstrument } from "../../../../graphql/gigs/lineups/users/instruments";
-  import { setRole } from "../../../../graphql/gigs/lineups/users/roles";
+<script lang="ts">
+  import Select from "../../../../../components/Forms/Select.svelte";
+  import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
+  import { setInstrumentApproved, addInstrument } from "../../../../../graphql/gigs/lineups/users/instruments";
+  import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
   import {
     setApproved,
     setAdminNotes,
     addUser as addUserUpdater,
     destroyLineupInformation,
-  } from "../../../../graphql/gigs/lineups";
-  import { client } from "../../../../graphql/client";
+  } from "../../../../../graphql/gigs/lineups";
+  import { client } from "../../../../../graphql/client";
   import { Map } from "immutable";
   import Fuse from "fuse.js";
-  import SearchBox from "../../../../components/SearchBox.svelte";
-  import { makeTitle, themeName } from "../../../../view";
-  import Lineup from "../../../../components/Gigs/Lineup.svelte";
-  export let people, gigId, allPeople, searchText, title;
+  import SearchBox from "../../../../../components/SearchBox.svelte";
+  import { makeTitle, themeName } from "../../../../../view";
+  import Lineup from "../../../../../components/Gigs/Lineup.svelte";
+  import type { PageData } from "./$types";
+  export let data: PageData;
+  let { people, gigId, allPeople, title } = data;
+  let searchText = "";
   let peopleStore = Map(people);
   let errors = [];
   let selectedUser = undefined;
@@ -156,7 +101,7 @@
 </script>
 
 <style lang="scss">
-  @import "../../../../sass/themes.scss";
+  @import "../../../../../sass/themes.scss";
   .add-person {
     display: flex;
     align-items: center;
