@@ -1,0 +1,33 @@
+table:
+  name: session
+  schema: cucb
+insert_permissions:
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - sid
+        - sess
+        - expire
+    role: server
+select_permissions:
+  - permission:
+      columns:
+        - sess
+        - expire
+        - sid
+      filter: {}
+    role: server
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - sess
+        - expire
+        - sid
+      filter: {}
+    role: server
+delete_permissions:
+  - permission:
+      filter: {}
+    role: server

@@ -2,6 +2,7 @@ import sveltePreprocess from "svelte-preprocess";
 import node from "@sveltejs/adapter-node";
 import { mdsvex } from "mdsvex";
 import autoprefixer from "autoprefixer";
+
 const preprocessors = sveltePreprocess({
   scss: {
     includePaths: ["src"],

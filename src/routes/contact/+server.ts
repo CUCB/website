@@ -1,14 +1,15 @@
-import { makeGraphqlClient } from "../../auth";
 import { SMTPClient } from "emailjs";
 import escapeHtml from "escape-html";
-import fetch from "node-fetch";
 import gql from "graphql-tag";
 import dotenv from "dotenv";
 import type { RequestHandler } from "./$types";
 import { error } from "@sveltejs/kit";
+import { GraphQLClient } from "../../graphql/client";
+import fetch from "node-fetch";
+import { makeServerGraphqlClient } from "../../auth";
 dotenv.config();
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, fetch: handlerFetch }) => {
   const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(
     await request.formData(),
   );
@@ -32,7 +33,7 @@ export const POST: RequestHandler = async ({ request }) => {
   if (hcaptcha.success) {
     let secretaries;
     try {
-      let client = makeGraphqlClient();
+      let client = makeServerGraphqlClient();
       const secretaryRes = await client.query({
         query: gql`
           query CurrentSec {

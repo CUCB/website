@@ -1,0 +1,203 @@
+table:
+  name: gigs_lineups_instruments
+  schema: cucb
+object_relationships:
+  - name: gigs_lineup
+    using:
+      manual_configuration:
+        column_mapping:
+          gig_id: gig_id
+          user_id: user_id
+        insertion_order: null
+        remote_table:
+          name: gigs_lineups
+          schema: cucb
+  - name: user_instrument
+    using:
+      foreign_key_constraint_on: user_instrument_id
+insert_permissions:
+  - permission:
+      backend_only: false
+      check:
+        _and:
+          - gigs_lineup:
+              gig:
+                _and:
+                  - allow_signups:
+                      _eq: true
+                  - admins_only:
+                      _eq: false
+          - user_instrument:
+              user_id:
+                _eq: X-Hasura-User-Id
+      columns:
+        - gig_id
+        - user_instrument_id
+      set:
+        user_id: x-hasura-User-Id
+    role: current_user
+  - permission:
+      check: {}
+      columns:
+        - approved
+        - gig_id
+        - user_id
+        - user_instrument_id
+    role: president
+  - permission:
+      check: {}
+      columns:
+        - approved
+        - gig_id
+        - user_id
+        - user_instrument_id
+    role: secretary
+  - permission:
+      check: {}
+      columns:
+        - approved
+        - gig_id
+        - user_id
+        - user_instrument_id
+    role: webmaster
+select_permissions:
+  - permission:
+      columns:
+        - gig_id
+        - user_id
+        - user_instrument_id
+        - approved
+      filter:
+        _and:
+          - approved:
+              _eq: true
+    role: blue_gig
+  - permission:
+      columns:
+        - approved
+        - gig_id
+        - user_id
+        - user_instrument_id
+      filter:
+        _and:
+          - gigs_lineup:
+              gig:
+                _and:
+                  - allow_signups:
+                      _eq: true
+                  - admins_only:
+                      _eq: false
+          - user_instrument:
+              user_id:
+                _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      columns:
+        - gig_id
+        - user_id
+        - user_instrument_id
+        - approved
+      filter:
+        _and:
+          - approved:
+              _eq: true
+    role: equipment
+  - permission:
+      columns:
+        - gig_id
+        - user_id
+        - user_instrument_id
+        - approved
+      filter:
+        _and:
+          - approved:
+              _eq: true
+    role: gig_editor
+  - permission:
+      columns:
+        - approved
+        - gig_id
+        - user_id
+        - user_instrument_id
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - approved
+        - gig_id
+        - user_id
+        - user_instrument_id
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - gig_id
+        - user_id
+        - user_instrument_id
+        - approved
+      filter:
+        _and:
+          - approved:
+              _eq: true
+    role: treasurer
+  - permission:
+      columns:
+        - gig_id
+        - user_id
+        - user_instrument_id
+        - approved
+      filter:
+        _and:
+          - approved:
+              _eq: true
+          - gigs_lineup:
+              gig:
+                admins_only:
+                  _eq: false
+    role: user
+  - permission:
+      columns:
+        - approved
+        - gig_id
+        - user_id
+        - user_instrument_id
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - approved
+      filter: {}
+    role: president
+  - permission:
+      check: null
+      columns:
+        - approved
+      filter: {}
+    role: webmaster
+delete_permissions:
+  - permission:
+      filter:
+        _and:
+          - gigs_lineup:
+              gig:
+                _and:
+                  - allow_signups:
+                      _eq: true
+                  - admins_only:
+                      _eq: false
+          - _or:
+              - approved:
+                  _eq: false
+              - approved:
+                  _is_null: true
+          - user_id:
+              _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      filter: {}
+    role: president
+  - permission:
+      filter: {}
+    role: webmaster

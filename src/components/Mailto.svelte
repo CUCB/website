@@ -17,7 +17,7 @@
   });
 </script>
 
-<a href="{mailto}" data-test="{`email_${person?.committee_key?.name}`}">
+<a href="{mailto}" data-test="{person?.committee_key?.name ? `email_${person?.committee_key?.name}` : `email`}">
   {#if showEmail}
     {@html email_display}
   {:else}

@@ -1,4 +1,6 @@
-reverse_proxy /v1/graphql graphql-engine:8080
+# error /* "Maintenance" 503
+
+reverse_proxy /v1/graphql 127.0.0.1:8080
 
 @hasura {
 	path /hasura
@@ -8,7 +10,7 @@ reverse_proxy /v1/graphql graphql-engine:8080
 route @hasura {
 	# add a /hasura endpoint for CLI connection if necessary
 	uri strip_prefix /hasura
-	reverse_proxy * graphql-engine:8080
+	reverse_proxy * 127.0.0.1:8080
 }
 
 root /* /srv
@@ -24,7 +26,7 @@ file_server /docs/*
 	not path /docs/*
 }
 
-reverse_proxy @sveltekit sveltekit:3000
+reverse_proxy @sveltekit 127.0.0.1:3001
 
 @notAuth {
 	not path /auth/*
@@ -32,3 +34,15 @@ reverse_proxy @sveltekit sveltekit:3000
 
 # disable gzip for auth API since fetch doesn't like it
 encode @notAuth gzip
+
+handle_errors {
+	@maintenance expression {http.error.status_code} == 502
+	rewrite @maintenance /503
+	# rewrite * /503.html
+	# root /* /srv/static
+	# file_server
+	rewrite * /{http.error.status_code}
+	reverse_proxy https://http.cat {
+		header_up Host http.cat
+	}
+}

@@ -102,9 +102,9 @@ export const SignupDetails = `
 `;
 
 export const AddInstrument = `
-  mutation AddInstrument($instrumentId: bigint!, $nickname: String, $userId: bigint) {
+  mutation AddInstrument($instrumentId: bigint!, $nickname: String, $userId: bigint!, $userInstrumentId: bigint!) {
     insert_cucb_users_instruments(
-      objects: { instr_id: $instrumentId, nickname: $nickname, user_id: $userId }
+      objects: { instr_id: $instrumentId, nickname: $nickname, user_id: $userId, id: $userInstrumentId }
       on_conflict: { constraint: cucb_users_instruments_id_key, update_columns: nickname }
     ) {
       affected_rows
@@ -285,4 +285,4 @@ export const ClearLineupForGig = `
             affected_rows
         }
     }
-`
+`;

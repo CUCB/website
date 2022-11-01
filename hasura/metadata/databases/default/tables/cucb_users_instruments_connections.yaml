@@ -1,0 +1,107 @@
+table:
+  name: users_instruments_connections
+  schema: cucb
+object_relationships:
+  - name: connection_type
+    using:
+      foreign_key_constraint_on: conn_id
+  - name: users_instrument
+    using:
+      foreign_key_constraint_on: user_instrument_id
+insert_permissions:
+  - permission:
+      backend_only: false
+      check:
+        users_instrument:
+          user_id:
+            _eq: X-Hasura-User-Id
+      columns:
+        - conn_id
+        - user_instrument_id
+    role: current_user
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - conn_id
+        - user_instrument_id
+    role: equipment
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - conn_id
+        - user_instrument_id
+    role: president
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - conn_id
+        - user_instrument_id
+    role: secretary
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - conn_id
+        - user_instrument_id
+    role: webmaster
+select_permissions:
+  - permission:
+      columns:
+        - conn_id
+        - id
+        - user_instrument_id
+      filter:
+        users_instrument:
+          user_id:
+            _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      columns:
+        - id
+        - user_instrument_id
+        - conn_id
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - id
+        - user_instrument_id
+        - conn_id
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - id
+        - user_instrument_id
+        - conn_id
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - id
+        - user_instrument_id
+        - conn_id
+      filter: {}
+    role: webmaster
+delete_permissions:
+  - permission:
+      filter:
+        users_instrument:
+          user_id:
+            _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      filter: {}
+    role: equipment
+  - permission:
+      filter: {}
+    role: president
+  - permission:
+      filter: {}
+    role: secretary
+  - permission:
+      filter: {}
+    role: webmaster

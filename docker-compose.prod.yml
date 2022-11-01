@@ -13,7 +13,7 @@ services:
       options:
         max-size: "50m"
   graphql-engine:
-    image: hasura/graphql-engine:v1.3.3.cli-migrations-v2
+    image: hasura/graphql-engine:v2.1.1.cli-migrations-v3
     volumes:
       - ./hasura/migrations:/hasura-migrations
       - ./hasura/metadata:/hasura-metadata
@@ -58,7 +58,8 @@ services:
       EMAIL_PORT: 587
       HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
-      ORIGIN: "https://www.cucb.co.uk"
+    ports:
+      - "3001:3000"
     volumes:
       - ./static:/usr/src/app/static
     restart: always
@@ -70,6 +71,7 @@ services:
   caddy:
     image: caddy:latest
     restart: always
+    network_mode: host
     ports:
       - "80:80"
       - "443:443"

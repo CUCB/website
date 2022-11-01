@@ -53,6 +53,14 @@ export function GET({ request, locals }: { headers: Record<string, string>; loca
       return json({
         "X-Hasura-Role": "server",
       });
+      // } else if (
+      //   request.headers.get("session-secret-hash") === CORRECT_SESSION_SECRET_HASH &&
+      //   request.headers.get("x-hasura-user-id") !== null
+      // ) {
+      //   return json({
+      //     "X-Hasura-User-Id": request.headers.get("x-hasura-user-id"),
+      //     "X-Hasura-Role": request.headers.get("x-hasura-role"),
+      //   });
     } else {
       return json(
         {

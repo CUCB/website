@@ -1,6 +1,6 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { makeClient } from "../../graphql/client";
+  import { GraphQLClient } from "../../graphql/client";
   import type { Fetch } from "../../graphql/client";
   import { CreateVenue, UpdateVenue } from "../../graphql/gigs";
 
@@ -56,7 +56,7 @@
       longitude: longitude === "" ? null : longitude,
     };
 
-    let client = makeClient(fetch as Fetch);
+    let client = new GraphQLClient(fetch as Fetch);
     let mutationDetails;
     if (id !== null && id !== undefined) {
       mutationDetails = [UpdateVenue, "update_cucb_gig_venues_by_pk"];
@@ -142,7 +142,7 @@
   <div class="buttons">
     <input type="submit" value="Save venue" data-test="venue-editor-save" on:click="{saveVenue}" /><button
       on:click="{() => dispatch('cancel')}"
-      data-test="venue-editor-cancel"
-    >Cancel</button>
+      data-test="venue-editor-cancel">Cancel</button
+    >
   </div>
 </form>

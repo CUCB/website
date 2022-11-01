@@ -1,9 +1,9 @@
-import { makeClient, handleErrors } from "../../graphql/client";
+import { GraphQLClient, handleErrors } from "../../graphql/client";
 import { currentCommitteePictures } from "../../graphql/committee";
 export async function load({ url, fetch, parent }) {
   const { session } = await parent();
   const aprilFools = url.searchParams.get("aprilfool") !== null;
-  const client = makeClient(fetch);
+  const client = new GraphQLClient(fetch);
   let res;
   try {
     res = await client.query({ query: currentCommitteePictures });

@@ -6,7 +6,6 @@ yarn-error.log
 /cypress/screenshots/
 /cypress/videos/
 /cypress/fixtures/example.json
-/__sapper__/
 .env
 db_restore
 images/*

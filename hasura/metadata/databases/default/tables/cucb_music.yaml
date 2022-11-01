@@ -1,0 +1,94 @@
+table:
+  name: music
+  schema: cucb
+select_permissions:
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: music_only
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: user
+  - permission:
+      columns:
+        - id
+        - title
+        - filename
+        - type
+        - current
+        - show_tune
+      filter: {}
+    role: webmaster

@@ -1,4 +1,4 @@
-import { handleErrors, makeClient } from "../../../../graphql/client";
+import { GraphQLClient, handleErrors } from "../../../../graphql/client";
 import { assertLoggedIn } from "../../../../client-auth.js";
 import { QueryAllGigSignupSummary } from "../../../../graphql/gigs";
 import { DateTime, Settings } from "luxon";
@@ -11,7 +11,7 @@ export const load: PageLoad = async ({ fetch, parent }) => {
   const { session } = await parent();
   assertLoggedIn(session);
 
-  let client = makeClient(fetch);
+  let client = new GraphQLClient(fetch);
 
   let res: { data: { since: { gig: Gig }[]; signupsOpen: Gig[] } };
   try {
