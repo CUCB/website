@@ -26,4 +26,4 @@ export const DeleteUserInstruments = `
             affected_rows
         }
     }
-`
+`;

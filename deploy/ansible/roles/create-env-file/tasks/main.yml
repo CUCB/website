@@ -84,3 +84,11 @@
     env_file: "{{ repo_root }}/.env"
     name: EMAIL_HOST
     value: "{{ email_host }}"
+
+- name: Create calendar secret variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: CALENDAR_SECRET
+    value: "{{ calendar_secret }}"

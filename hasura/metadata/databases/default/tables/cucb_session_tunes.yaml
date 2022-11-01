@@ -1,0 +1,192 @@
+table:
+  name: session_tunes
+  schema: cucb
+insert_permissions:
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - contributor_notes
+        - filename
+        - hidden
+        - other_notes
+        - title
+        - touched
+        - type
+      set:
+        contributor: x-hasura-User-Id
+    role: current_user
+select_permissions:
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: blue_gig
+  - permission:
+      columns:
+        - hidden
+        - contributed_date
+        - touched
+        - contributor
+        - id
+        - type
+        - contributor_notes
+        - other_notes
+        - filename
+        - title
+      filter:
+        contributor:
+          _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: equipment
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: gig_editor
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: music_only
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: president
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: secretary
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: treasurer
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter:
+        hidden:
+          _ne: true
+    role: user
+  - permission:
+      columns:
+        - contributed_date
+        - contributor
+        - contributor_notes
+        - filename
+        - hidden
+        - id
+        - other_notes
+        - title
+        - touched
+        - type
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - contributor_notes
+        - hidden
+        - id
+        - title
+        - touched
+        - type
+      filter:
+        contributor:
+          _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      check: null
+      columns:
+        - hidden
+        - other_notes
+        - title
+        - type
+      filter: {}
+    role: webmaster

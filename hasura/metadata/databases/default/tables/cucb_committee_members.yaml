@@ -1,0 +1,193 @@
+table:
+  name: committee_members
+  schema: cucb
+object_relationships:
+  - name: committeeByCommittee
+    using:
+      foreign_key_constraint_on: committee
+  - name: committee_key
+    using:
+      foreign_key_constraint_on: lookup_name
+  - name: committee_position
+    using:
+      foreign_key_constraint_on: position
+select_permissions:
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: anonymous
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: music_only
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - april_fools_only
+        - hidden
+        - committee
+        - id
+        - lookup_name
+        - position
+        - april_fools_dir
+        - casual_name
+        - comments
+        - crsid
+        - email
+        - email_obfus
+        - name
+        - pic
+        - sub_position
+      filter: {}
+    role: server
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: user
+  - permission:
+      columns:
+        - april_fools_dir
+        - april_fools_only
+        - casual_name
+        - comments
+        - committee
+        - email_obfus
+        - id
+        - lookup_name
+        - name
+        - pic
+        - position
+        - sub_position
+      filter: {}
+    role: webmaster

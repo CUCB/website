@@ -18,10 +18,11 @@ import tinycolor from "../deps/tinycolor";
 import chaiSorted from "chai-sorted";
 import { DateTime, Settings } from "luxon";
 import "@percy/cypress";
+import "cypress-plugin-tab";
 
 Settings.defaultZoneName = "Europe/London";
-Cypress.DateTime = DateTime;
 
+Cypress.DateTime = DateTime;
 chai.use(chaiSorted);
 
 const equalColor = (_chai, utils) => {

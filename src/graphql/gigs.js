@@ -82,6 +82,7 @@ const FragmentGigFinancials = gql`
   }
 `;
 
+// TODO should this instead be clever with hasura to establish whether a user has permissions?
 export const QueryGigDetails = (role) => {
   if (["webmaster", "president", "secretary", "treasurer"].includes(role)) {
     return gql`

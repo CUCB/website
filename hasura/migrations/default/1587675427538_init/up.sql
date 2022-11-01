@@ -615,7 +615,7 @@ INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (7, 
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (8, 'Music Only', 'ADMIN_STATUS_MUSIC_ONLY', 'music_only');
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (9, 'Normal User', 'ADMIN_STATUS_NONE', 'user');
 INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (11, 'General Member', 'ADMIN_STATUS_GENERAL_MEMBER', 'general_member');
-INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (10, 'Non Member', 'ADMIN_STATUS_NO_AUTH', 'no_auth');
+INSERT INTO cucb.auth_user_types (id, title, php_title, hasura_role) VALUES (10, 'Non Member', 'ADMIN_STATUS_NO_AUTH', 'anonymous');
 
 --
 -- Data for Name: calendar_subscriptions; Type: TABLE DATA; Schema: cucb; Owner: cucb
@@ -812,8 +812,9 @@ INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES 
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (104, 'Cor Anglais', false, false, 92);
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (105, 'Pan Flute', false, false, 92);
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (106, 'eMelodeon', false, false, 99);
-INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (107, '', false, false, NULL);
 INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (108, 'Blade of grass', true, false, 65);
+INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (109, 'Stomp Box', true, false, 27);
+INSERT INTO cucb.instruments (id, name, novelty, parent_only, parent_id) VALUES (110, 'Shawm', true, false, 92);
 
 --
 -- Data for Name: music_types; Type: TABLE DATA; Schema: cucb; Owner: cucb

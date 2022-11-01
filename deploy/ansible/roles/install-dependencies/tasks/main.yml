@@ -1,3 +1,8 @@
+- name: Configure nullmailer domain
+  copy:
+    dest: /etc/mailname
+    content: cucb.co.uk
+
 - name: Install dependencies
   apt:
     name:
@@ -9,23 +14,13 @@
       - cronic
       - git
       - cockpit
+      - nullmailer
     update_cache: yes
 
-- debconf:
-    name: postfix
-    question: postfix/mailname
-    vtype: string
-    value: "{{ email_domain_name }}"
-
-- debconf:
-    name: postfix
-    question: postfix/main_mailer_type
-    vtype: string
-    value: Internet Site
-
-- name: Install postfix
-  apt:
-    name: postfix
+- name: Configure nullmailer SMTP settings
+  copy:
+    dest: /etc/nullmailer/remotes
+    content: "{{ email_host }} smtp --auth-login --user={{ email_username }} --pass={{ email_password }}"
 
 - name: Install Python Dropbox sdk
   pip:

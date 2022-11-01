@@ -1,0 +1,172 @@
+table:
+  name: contacts
+  schema: cucb
+object_relationships:
+  - name: user
+    using:
+      foreign_key_constraint_on: user_id
+array_relationships:
+  - name: gigs_contacts
+    using:
+      foreign_key_constraint_on:
+        column: contact_id
+        table:
+          name: gigs_contacts
+          schema: cucb
+insert_permissions:
+  - permission:
+      check: {}
+      columns:
+        - caller
+        - email
+        - name
+        - notes
+        - organization
+        - user_id
+    role: president
+  - permission:
+      check: {}
+      columns:
+        - caller
+        - email
+        - name
+        - notes
+        - organization
+        - user_id
+    role: secretary
+  - permission:
+      check: {}
+      columns:
+        - caller
+        - email
+        - name
+        - notes
+        - organization
+        - user_id
+    role: webmaster
+select_permissions:
+  - permission:
+      columns:
+        - caller
+        - id
+        - name
+        - organization
+        - user_id
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - caller
+        - id
+        - user_id
+        - notes
+        - email
+        - name
+        - organization
+      filter:
+        user_id:
+          _eq: X-Hasura-User-Id
+    role: current_user
+  - permission:
+      columns:
+        - caller
+        - id
+        - name
+        - organization
+        - user_id
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - caller
+        - id
+        - name
+        - organization
+        - user_id
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - caller
+        - id
+        - user_id
+        - notes
+        - email
+        - name
+        - organization
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - caller
+        - id
+        - user_id
+        - notes
+        - email
+        - name
+        - organization
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - caller
+        - id
+        - name
+        - organization
+        - user_id
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - id
+        - name
+        - user_id
+      filter:
+        caller:
+          _eq: true
+    role: user
+  - permission:
+      columns:
+        - caller
+        - id
+        - user_id
+        - notes
+        - email
+        - name
+        - organization
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - caller
+        - email
+        - name
+        - notes
+        - organization
+        - user_id
+      filter: {}
+    role: president
+  - permission:
+      check: null
+      columns:
+        - caller
+        - email
+        - name
+        - notes
+        - organization
+        - user_id
+      filter: {}
+    role: secretary
+  - permission:
+      check: null
+      columns:
+        - caller
+        - email
+        - name
+        - notes
+        - organization
+        - user_id
+      filter: {}
+    role: webmaster

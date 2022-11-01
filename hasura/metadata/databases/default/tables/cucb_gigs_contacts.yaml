@@ -1,0 +1,221 @@
+table:
+  name: gigs_contacts
+  schema: cucb
+object_relationships:
+  - name: contact
+    using:
+      foreign_key_constraint_on: contact_id
+  - name: gig
+    using:
+      foreign_key_constraint_on: gig_id
+insert_permissions:
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - calling
+        - client
+        - contact_id
+        - gig_id
+        - notes
+    role: equipment
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - calling
+        - client
+        - contact_id
+        - gig_id
+        - notes
+    role: gig_editor
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - calling
+        - client
+        - contact_id
+        - gig_id
+        - notes
+    role: president
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - calling
+        - client
+        - contact_id
+        - gig_id
+        - notes
+    role: secretary
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - calling
+        - client
+        - contact_id
+        - gig_id
+        - notes
+    role: treasurer
+  - permission:
+      backend_only: false
+      check: {}
+      columns:
+        - calling
+        - client
+        - contact_id
+        - gig_id
+        - notes
+    role: webmaster
+select_permissions:
+  - permission:
+      columns:
+        - gig_id
+        - contact_id
+        - notes
+        - calling
+        - client
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - calling
+        - contact_id
+        - gig_id
+      filter:
+        calling:
+          _eq: true
+    role: current_user
+  - permission:
+      columns:
+        - gig_id
+        - contact_id
+        - notes
+        - calling
+        - client
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - gig_id
+        - contact_id
+        - notes
+        - calling
+        - client
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - gig_id
+        - contact_id
+        - notes
+        - calling
+        - client
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - gig_id
+        - contact_id
+        - notes
+        - calling
+        - client
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - gig_id
+        - contact_id
+        - notes
+        - calling
+        - client
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - calling
+        - contact_id
+        - gig_id
+      filter:
+        calling:
+          _eq: true
+    role: user
+  - permission:
+      columns:
+        - gig_id
+        - contact_id
+        - notes
+        - calling
+        - client
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: {}
+      columns:
+        - calling
+        - client
+        - notes
+      filter: {}
+    role: equipment
+  - permission:
+      check: {}
+      columns:
+        - calling
+        - client
+        - notes
+      filter: {}
+    role: gig_editor
+  - permission:
+      check: {}
+      columns:
+        - calling
+        - client
+        - notes
+      filter: {}
+    role: president
+  - permission:
+      check: {}
+      columns:
+        - calling
+        - client
+        - notes
+      filter: {}
+    role: secretary
+  - permission:
+      check: {}
+      columns:
+        - calling
+        - client
+        - notes
+      filter: {}
+    role: treasurer
+  - permission:
+      check: {}
+      columns:
+        - calling
+        - client
+        - notes
+      filter: {}
+    role: webmaster
+delete_permissions:
+  - permission:
+      filter: {}
+    role: equipment
+  - permission:
+      filter: {}
+    role: gig_editor
+  - permission:
+      filter: {}
+    role: president
+  - permission:
+      filter: {}
+    role: secretary
+  - permission:
+      filter: {}
+    role: treasurer
+  - permission:
+      filter: {}
+    role: webmaster

@@ -12,7 +12,15 @@ export const AttributePreferences = gql`
   }
 `;
 
-export const extractAttributes = query_data =>
-  query_data.prefs
-    .filter(pref => pref.value)
-    .map(pref => pref.pref_type.name.slice("attribute.".length));
+export const AllPrefs = gql`
+  query AllPrefs {
+    cucb_user_pref_types {
+      id
+      name
+      default
+    }
+  }
+`;
+
+export const extractAttributes = (query_data) =>
+  query_data.prefs.filter((pref) => pref.value).map((pref) => pref.pref_type.name.slice("attribute.".length));

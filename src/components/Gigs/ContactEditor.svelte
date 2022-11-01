@@ -1,6 +1,6 @@
 <script>
   import { createEventDispatcher } from "svelte";
-  import { makeClient } from "../../graphql/client";
+  import { GraphQLClient } from "../../graphql/client";
   import { CreateContact, UpdateContact } from "../../graphql/gigs";
   export let id, name, organization, email, caller, notes;
 
@@ -19,7 +19,7 @@
       notes: (notes && notes.trim()) || null,
     };
 
-    let client = makeClient(fetch);
+    let client = new GraphQLClient(fetch);
     let mutationDetails;
     if (id !== null && id !== undefined) {
       mutationDetails = [UpdateContact, "update_cucb_contacts_by_pk"];
@@ -75,7 +75,7 @@
   <label> Notes <input type="text" bind:value="{notes}" data-test="contact-editor-notes" /> </label>
   <div class="buttons">
     <input type="submit" value="Save contact" data-test="contact-editor-save" /><button
-      on:click="{() => dispatch('cancel')}"
-    >Cancel</button>
+      on:click="{() => dispatch('cancel')}">Cancel</button
+    >
   </div>
 </form>

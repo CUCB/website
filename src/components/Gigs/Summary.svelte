@@ -177,6 +177,16 @@
     text-decoration: none;
   }
 
+  .gigtype-kit h2 {
+    grid-template-columns: auto 1fr auto;
+  }
+  .gigtype-kit h2::before {
+    content: "Kit Hire:";
+    margin-right: 0.25em;
+    font-style: bold;
+    text-decoration: none;
+  }
+
   .gigtype-gig_cancelled:not(.details-visible) > :not(.main-detail) {
     display: none;
   }
@@ -256,6 +266,7 @@
     {#if displayLinks && ["webmaster", "president"].indexOf(session.hasuraRole) > -1 && gig.type.code === "gig"}
       <a href="/members/gigs/{gig.id}/edit-lineup" class="main-detail">Edit lineup</a>
     {/if}
+    <a href="/members/gigs/{gig.id}/calendar" rel="external" target="_blank">Download iCal</a>
     {#if gig.type.code !== "calendar" && gig.date}
       <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
     {/if}

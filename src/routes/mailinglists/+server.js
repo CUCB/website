@@ -1,21 +1,24 @@
 import { SMTPClient } from "emailjs";
-import fetch from "node-fetch";
 import gql from "graphql-tag";
 import dotenv from "dotenv";
-import { makeGraphqlClient } from "../../auth";
+import { error } from "@sveltejs/kit";
 dotenv.config();
 
-export async function post({ body }) {
+export async function POST({ body, fetch }) {
   try {
-    const res = await realpost(body);
-    return { status: 500, body: "Something else went wrong", ...res };
+    return await realpost(body, fetch);
   } catch (e) {
-    console.error("Unhandled exception in POST /mailinglists");
-    console.error(e);
-    return { status: 500, body: "Something went wrong." };
+    if (e.code) {
+      throw e;
+    } else {
+      console.error("Unhandled exception in POST /mailinglists");
+      console.error(e);
+      throw error(500, "Something went wrong.");
+    }
   }
 }
-async function realpost(body) {
+
+async function realpost(body, fetch) {
   const { name, email, lists, captchaKey } = Object.fromEntries(body.entries?.() || Object.entries(body));
   const hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
@@ -27,7 +30,7 @@ async function realpost(body) {
 
   let webmasters;
   try {
-    let client = makeGraphqlClient();
+    let client = new GraphQLClient(fetch);
     const webmasterRes = await client.query({
       query: gql`
         query CurrentSec {
@@ -73,10 +76,10 @@ async function realpost(body) {
     } catch (e) {
       console.error("Failed to make SMTP client");
       console.error(`Tried to connect to ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT}`);
-      return {
-        status: 500,
-        body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
-      };
+      throw error(
+        500,
+        `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+      );
     }
 
     const emailPromise = new Promise((resolve, reject) =>
@@ -94,10 +97,12 @@ async function realpost(body) {
           if (err) {
             console.error("Error sending mailing list email");
             console.error(err);
-            reject({
-              status: 503,
-              body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
-            });
+            reject(
+              error(
+                503,
+                `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+              ),
+            );
           } else {
             resolve(null);
           }
@@ -105,18 +110,13 @@ async function realpost(body) {
       ),
     );
 
-    try {
-      await emailPromise;
-      return { status: 204, body: "" };
-    } catch (e) {
-      return e;
-    }
+    await emailPromise;
+    return new Response("");
   } else {
     console.error("Failed to verify captcha response: " + captchaKey);
-    return {
-      status: 400,
-
-      body: `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
-    };
+    throw error(
+      400,
+      `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+    );
   }
 }

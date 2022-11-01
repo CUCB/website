@@ -1,6 +1,6 @@
 import { QueryEditGigDetails, QueryVenues, QueryGigTypes, QueryContacts } from "../../../../../graphql/gigs";
 import { assertLoggedIn } from "../../../../../client-auth";
-import { makeClient, handleErrors } from "../../../../../graphql/client";
+import { GraphQLClient, handleErrors } from "../../../../../graphql/client";
 import { error } from "@sveltejs/kit";
 import { sortContacts, sortVenues } from "./sort";
 
@@ -10,7 +10,7 @@ export async function load({ params, fetch, parent }) {
   const { session } = await parent();
   assertLoggedIn(session);
 
-  let client = makeClient(fetch);
+  let client = new GraphQLClient(fetch);
 
   let res_gig, res_venues, res_gigTypes, res_contacts;
   let gig, venues, gigTypes, allContacts;

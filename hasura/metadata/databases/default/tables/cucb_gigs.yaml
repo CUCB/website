@@ -1,0 +1,636 @@
+table:
+  name: gigs
+  schema: cucb
+object_relationships:
+  - name: editing_user_obj
+    using:
+      foreign_key_constraint_on: editing_user
+  - name: gig_type
+    using:
+      foreign_key_constraint_on: type
+  - name: posting_user_obj
+    using:
+      foreign_key_constraint_on: posting_user
+  - name: venue
+    using:
+      foreign_key_constraint_on: venue_id
+array_relationships:
+  - name: contacts
+    using:
+      foreign_key_constraint_on:
+        column: gig_id
+        table:
+          name: gigs_contacts
+          schema: cucb
+  - name: lineup
+    using:
+      foreign_key_constraint_on:
+        column: gig_id
+        table:
+          name: gigs_lineups
+          schema: cucb
+computed_fields:
+  - comment: ""
+    definition:
+      function:
+        name: gig_time_or_arrive_time
+        schema: cucb
+    name: sort_date
+insert_permissions:
+  - permission:
+      check: {}
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      set:
+        editing_user: x-hasura-User-Id
+        posting_user: x-hasura-User-Id
+    role: equipment
+  - permission:
+      check: {}
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      set:
+        editing_user: x-hasura-User-Id
+        posting_user: x-hasura-User-Id
+    role: gig_editor
+  - permission:
+      check: {}
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      set:
+        editing_user: x-hasura-User-Id
+        posting_user: x-hasura-User-Id
+    role: president
+  - permission:
+      check: {}
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      set:
+        editing_user: x-hasura-User-Id
+        posting_user: x-hasura-User-Id
+    role: secretary
+  - permission:
+      check: {}
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      set:
+        editing_user: x-hasura-User-Id
+        posting_user: x-hasura-User-Id
+    role: treasurer
+  - permission:
+      check: {}
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      set:
+        editing_user: x-hasura-User-Id
+        posting_user: x-hasura-User-Id
+    role: webmaster
+select_permissions:
+  - permission:
+      columns:
+        - date
+        - finish_time
+        - summary
+        - time
+        - title
+      computed_fields:
+        - sort_date
+      filter:
+        _and:
+          - admins_only:
+              _eq: false
+          - advertise:
+              _eq: true
+    role: anonymous
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finish_time
+        - food_provided
+        - id
+        - notes_band
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finish_time
+        - food_provided
+        - id
+        - notes_band
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter:
+        admins_only:
+          _eq: false
+    role: current_user
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - editing_time
+        - editing_user
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - id
+        - notes_admin
+        - notes_band
+        - posting_time
+        - posting_user
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - editing_time
+        - editing_user
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - id
+        - notes_admin
+        - notes_band
+        - posting_time
+        - posting_user
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - date
+        - finish_time
+        - summary
+        - time
+        - title
+      computed_fields:
+        - sort_date
+      filter:
+        _and:
+          - admins_only:
+              _eq: false
+          - advertise:
+              _eq: true
+    role: music_only
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - editing_time
+        - editing_user
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - id
+        - notes_admin
+        - notes_band
+        - posting_time
+        - posting_user
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - editing_time
+        - editing_user
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - id
+        - notes_admin
+        - notes_band
+        - posting_time
+        - posting_user
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - editing_time
+        - editing_user
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - id
+        - notes_admin
+        - notes_band
+        - posting_time
+        - posting_user
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finish_time
+        - food_provided
+        - id
+        - notes_band
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter:
+        admins_only:
+          _eq: false
+    role: user
+  - permission:
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - editing_time
+        - editing_user
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - id
+        - notes_admin
+        - notes_band
+        - posting_time
+        - posting_user
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      computed_fields:
+        - sort_date
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      filter: {}
+      set:
+        editing_user: x-hasura-User-Id
+    role: equipment
+  - permission:
+      check: null
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      filter: {}
+      set:
+        editing_user: x-hasura-User-Id
+    role: gig_editor
+  - permission:
+      check: null
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      filter: {}
+      set:
+        editing_user: x-hasura-User-Id
+    role: president
+  - permission:
+      check: null
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      filter: {}
+      set:
+        editing_user: x-hasura-User-Id
+    role: secretary
+  - permission:
+      check: null
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      filter: {}
+      set:
+        editing_user: x-hasura-User-Id
+    role: treasurer
+  - permission:
+      check: null
+      columns:
+        - admins_only
+        - advertise
+        - allow_signups
+        - arrive_time
+        - date
+        - finance
+        - finance_caller_paid
+        - finance_deposit_received
+        - finance_payment_received
+        - finish_time
+        - food_provided
+        - notes_admin
+        - notes_band
+        - quote_date
+        - summary
+        - time
+        - title
+        - type
+        - venue_id
+      filter: {}
+      set:
+        editing_user: x-hasura-User-Id
+    role: webmaster
+delete_permissions:
+  - permission:
+      filter: {}
+    role: secretary
+  - permission:
+      filter: {}
+    role: webmaster

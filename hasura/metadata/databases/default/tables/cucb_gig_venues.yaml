@@ -1,0 +1,247 @@
+table:
+  name: gig_venues
+  schema: cucb
+array_relationships:
+  - name: gigs
+    using:
+      foreign_key_constraint_on:
+        column: venue_id
+        table:
+          name: gigs
+          schema: cucb
+insert_permissions:
+  - permission:
+      check: {}
+      columns:
+        - address
+        - distance_miles
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - notes_admin
+        - notes_band
+        - postcode
+        - subvenue
+    role: secretary
+  - permission:
+      check: {}
+      columns:
+        - address
+        - distance_miles
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - notes_admin
+        - notes_band
+        - postcode
+        - subvenue
+    role: webmaster
+select_permissions:
+  - permission:
+      columns:
+        - address
+        - distance_miles
+        - id
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter:
+        _and:
+          - gigs:
+              admins_only:
+                _eq: false
+          - gigs:
+              advertise:
+                _eq: true
+    role: anonymous
+  - permission:
+      columns:
+        - address
+        - distance_miles
+        - id
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - notes_band
+        - postcode
+        - subvenue
+      filter: {}
+    role: blue_gig
+  - permission:
+      columns:
+        - address
+        - distance_miles
+        - id
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - notes_band
+        - postcode
+        - subvenue
+      filter: {}
+    role: current_user
+  - permission:
+      columns:
+        - latitude
+        - longitude
+        - distance_miles
+        - id
+        - notes_admin
+        - notes_band
+        - address
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter: {}
+    role: equipment
+  - permission:
+      columns:
+        - latitude
+        - longitude
+        - distance_miles
+        - id
+        - notes_admin
+        - notes_band
+        - address
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter: {}
+    role: gig_editor
+  - permission:
+      columns:
+        - address
+        - distance_miles
+        - id
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter:
+        gigs:
+          advertise:
+            _eq: true
+    role: music_only
+  - permission:
+      columns:
+        - latitude
+        - longitude
+        - distance_miles
+        - id
+        - notes_admin
+        - notes_band
+        - address
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter: {}
+    role: president
+  - permission:
+      columns:
+        - latitude
+        - longitude
+        - distance_miles
+        - id
+        - notes_admin
+        - notes_band
+        - address
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter: {}
+    role: secretary
+  - permission:
+      columns:
+        - latitude
+        - longitude
+        - distance_miles
+        - id
+        - notes_admin
+        - notes_band
+        - address
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter: {}
+    role: treasurer
+  - permission:
+      columns:
+        - address
+        - distance_miles
+        - id
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - notes_band
+        - postcode
+        - subvenue
+      filter: {}
+    role: user
+  - permission:
+      columns:
+        - latitude
+        - longitude
+        - distance_miles
+        - id
+        - notes_admin
+        - notes_band
+        - address
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter: {}
+    role: webmaster
+update_permissions:
+  - permission:
+      check: null
+      columns:
+        - address
+        - distance_miles
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - notes_admin
+        - notes_band
+        - postcode
+        - subvenue
+      filter: {}
+    role: secretary
+  - permission:
+      check: null
+      columns:
+        - address
+        - distance_miles
+        - latitude
+        - longitude
+        - map_link
+        - name
+        - notes_admin
+        - notes_band
+        - postcode
+        - subvenue
+      filter: {}
+    role: webmaster
+delete_permissions:
+  - permission:
+      filter: {}
+    role: secretary
+  - permission:
+      filter: {}
+    role: webmaster
