@@ -83,7 +83,7 @@ jobs:
             cypress/screenshots/**/*.png
 
   build:
-    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/user-editor' }}
+    if: ${{ github.ref=='refs/heads/master' || github.ref=='refs/heads/feature/sveltekit-rc' }}
     needs:
       - test
       - svelte-check

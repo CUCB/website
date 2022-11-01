@@ -1,13 +1,13 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
 
-  import type { User } from "../../../routes/members/user/[id].svelte";
+  import type { User } from "../../../routes/members/user/[id=integer]/types";
   import { themeName } from "../../../view";
   import MinSizeCropper from "../../MinSizeCropper.svelte";
   import { getCroppedImg } from "./canvasUtils";
   import type photonTy from "photon-web";
   import type { PhotonImage as PhotonImageTy } from "photon-web";
-  import { browser } from "$app/env";
+  import { browser } from "$app/environment";
 
   export let user: User;
   export let canEdit: boolean;
