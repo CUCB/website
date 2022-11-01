@@ -1,62 +1,13 @@
-<script context="module" lang="ts">
-  import { handleErrors, makeClient } from "../../../graphql/client";
-  import { assertLoggedIn } from "../../../client-auth.js";
-  import { QueryAllGigSignupSummary } from "../../../graphql/gigs";
-  import { DateTime, Settings } from "luxon";
-
-  export interface User {
-    id: number;
-    first: string;
-    last: string;
-    gig_notes: string | null;
-  }
-  export interface LineupEntry {
-    approved: boolean | null;
-    user: User;
-    user_available: boolean | null;
-    user_only_if_necessary: boolean | null;
-    user_notes: string | null;
-  }
-  export interface Gig {
-    id: number;
-    date: string;
-    sort_date: string;
-    lineup: LineupEntry[];
-    title: string;
-  }
-
-  export async function load({ fetch, session }) {
-    Settings.defaultZoneName = "Europe/London";
-
-    assertLoggedIn(session);
-
-    let client = makeClient(fetch);
-
-    let res: { data: { since: { gig: Gig }[]; signupsOpen: Gig[] } };
-    try {
-      res = await client.query({
-        query: QueryAllGigSignupSummary,
-        variables: { since: DateTime.local().minus({ months: 1 }) },
-      });
-    } catch (e) {
-      return handleErrors(e, session);
-    }
-
-    return {
-      props: {
-        sinceOneMonth: res.data.since.map((x) => x.gig),
-        signupsOpen: res.data.signupsOpen,
-      },
-    };
-  }
-</script>
-
 <script lang="ts">
   Settings.defaultZoneName = "Europe/London";
-  import SignupAdmin from "../../../components/Gigs/Lineup/SignupAdmin.svelte";
+  import SignupAdmin from "../../../../components/Gigs/Lineup/SignupAdmin.svelte";
   import { List, Map } from "immutable";
+  import { DateTime, Settings } from "luxon";
+  import type { Gig, LineupEntry } from "./types";
+  import type { PageData } from "./$types";
 
-  export let sinceOneMonth: Gig[], signupsOpen: Gig[];
+  export let data: PageData;
+  let { sinceOneMonth, signupsOpen } = data;
   $: noLineup = signupsOpen.filter(hasNoLineup);
   $: futureGigs = sinceOneMonth.filter(isInFuture);
   $: signupsOpenOrLineupSelectedForFuture = List(

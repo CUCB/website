@@ -1,3 +1,5 @@
+<svelte:options immutable="{true}" />
+
 <script lang="ts" context="module">
   declare global {
     interface String {
@@ -29,7 +31,7 @@
   import TooltipText from "../../TooltipText.svelte";
   import { DateTime } from "luxon";
   import { List, Map } from "immutable";
-  import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups.svelte";
+  import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups/+page.svelte";
   export let gigs: Gig[] = [];
   gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
   let sortedBy = null;
@@ -222,9 +224,8 @@
   }
 </style>
 
-<svelte:options immutable="{true}" />
 <svelte:head>
-  <title>{makeTitle('Gig signups')}</title>
+  <title>{makeTitle("Gig signups")}</title>
 </svelte:head>
 
 <table class="table theme-{$themeName}">
@@ -237,7 +238,8 @@
             on:click="{() => availabilitySort(gig)}"
             data-test="gig-title-{gig.id}"
             aria-selected="{sortedBy === gig.id ? true : false}"
-          ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat('dd LLL')}&#32;{gig.title}</div></button>
+            ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat("dd LLL")}&#32;{gig.title}</div></button
+          >
         </th>
       {/each}
     </tr>
@@ -250,7 +252,11 @@
           <td class="person {signupStatus(gig)} {lineupStatus(gig)}">
             {#if signupStatus(gig) || lineupStatus(gig)}
               <TooltipText
-                content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${gig.title}${statusText(gig) ? `\n${statusText(gig)}` : ''}${gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``}${gig?.signup?.user?.gig_notes ? `\nGeneral notes: ${gig.signup.user.gig_notes}` : ``}`}"
+                content="{`${person.first} ${person.last}${lineupText(gig) ? ` (${lineupText(gig)})` : ''}\n${
+                  gig.title
+                }${statusText(gig) ? `\n${statusText(gig)}` : ''}${
+                  gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``
+                }${gig?.signup?.user?.gig_notes ? `\nGeneral notes: ${gig.signup.user.gig_notes}` : ``}`}"
                 data-test="signup-details-{person.id}-{gig.id}"
               >
                 <div style="width:100%; height: 100%">

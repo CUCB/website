@@ -1,100 +1,14 @@
-<script context="module">
-  import { makeClient, handleErrors } from "../../../graphql/client";
-  import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
-
-  export async function load({ fetch, session }) {
-    Settings.defaultZoneName = "Europe/London";
-
-    let res_gig, res_signup, res_gig_2;
-    let preloadClient = makeClient(fetch);
-    let preloadClientCurrentUser = makeClient(fetch, { role: "current_user" });
-    try {
-      res_gig = await preloadClient.query({
-        query: QueryMultiGigDetails(session.hasuraRole),
-        variables: {
-          where: {
-            _or: [{ date: { _gte: "now()" } }, { arrive_time: { _gte: "now()" } }, { finish_time: { _gte: "now()" } }],
-          },
-          order_by: [{ date: "asc" }, { arrive_time: "asc" }],
-        },
-      });
-      res_gig_2 = await preloadClient.query({
-        query: QueryMultiGigDetails(session.hasuraRole),
-        variables: {
-          where: {
-            _or: [
-              {
-                date: {
-                  _gte: DateTime.local().startOf("month").toISO(),
-                  _lte: DateTime.local().endOf("month").toISO(),
-                },
-              },
-              {
-                arrive_time: {
-                  _gte: DateTime.local().startOf("month").toISO(),
-                  _lte: DateTime.local().endOf("month").toISO(),
-                },
-              },
-              {
-                finish_time: {
-                  _gte: DateTime.local().startOf("month").toISO(),
-                  _lte: DateTime.local().endOf("month").toISO(),
-                },
-              },
-            ],
-          },
-          order_by: { date: "asc" },
-        },
-      });
-      res_signup = await preloadClientCurrentUser.query({
-        query: QueryMultiGigSignup,
-        variables: { where: { allow_signups: { _eq: true } } },
-      });
-    } catch (e) {
-      return handleErrors(e, session);
-    }
-
-    if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {
-      let gigs = res_gig.data.cucb_gigs;
-      // Sort the gigs before rendering since the database can't sort by computed field
-      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
-
-      let signup_dict = {};
-      let signups = res_signup.data.cucb_gigs;
-      for (let gig of signups) {
-        signup_dict[gig.id] = gig;
-      }
-
-      let currentCalendarMonth = DateTime.local().toFormat("yyyy-LL");
-
-      return {
-        props: {
-          gigs,
-          signupGigs: signup_dict,
-          userInstruments: res_signup.data.cucb_users_instruments,
-          calendarGigs: {
-            [currentCalendarMonth]: res_gig_2.data.cucb_gigs.sort(
-              (gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
-            ),
-          },
-          currentCalendarMonth,
-        },
-      };
-    } else {
-      return { status: 500, error: "Couldn't retrieve gig details" };
-    }
-  }
-</script>
-
 <script lang="ts">
   import { makeTitle, calendarStartDay, themeName } from "../../../view";
   import { client } from "../../../graphql/client";
-  import { session } from "$app/stores";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
   import { DateTime, Settings } from "luxon";
   import { writable } from "svelte/store";
-  export let gigs: any[], calendarGigs, currentCalendarMonth, userInstruments, signupGigs;
+  import type { PageData } from "./$types";
+  import { QueryMultiGigDetails } from "../../../graphql/gigs";
+  export let data: PageData;
+  let { gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs, session } = data;
   Settings.defaultZoneName = "Europe/London";
 
   $: reloadSignupGigs(gigs);
@@ -155,7 +69,7 @@
   let gotoDate = (newDate) => async () => {
     if (!(newDate in calendarGigs)) {
       let res_gig_2 = await $client.query({
-        query: QueryMultiGigDetails($session.hasuraRole),
+        query: QueryMultiGigDetails(session.hasuraRole),
         variables: {
           where: {
             _or: [
@@ -285,7 +199,7 @@
 </style>
 
 <svelte:head>
-  <title>{makeTitle('Gigs')}</title>
+  <title>{makeTitle("Gigs")}</title>
 </svelte:head>
 <div class="heading">
   <div class="information">
@@ -305,11 +219,11 @@
     {#if drafts.length > 0}
       There are some drafts lying around:
       {#each drafts as gig}
-        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || 'Unnamed draft'}</a>
+        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || "Unnamed draft"}</a>
         [created
-        {DateTime.fromISO(gig.posting_time).toFormat('HH:mm, dd/LL')}
+        {DateTime.fromISO(gig.posting_time).toFormat("HH:mm, dd/LL")}
         by
-        {(gig.user && gig.user.first) || 'someone?'}],
+        {(gig.user && gig.user.first) || "someone?"}],
       {/each}
       so please don't leave them here forever
     {/if}
@@ -326,7 +240,7 @@
     <p>Display:</p>
     <ul>
       <li>
-        {#if displaying === 'allUpcoming'}
+        {#if displaying === "allUpcoming"}
           All upcoming gigs (currently shown)
         {:else}
           <button class="link" on:click="{() => display('allUpcoming')}" data-test="gigview-all-upcoming">
@@ -335,7 +249,7 @@
         {/if}
       </li>
       <li>
-        {#if displaying === 'byMonth'}
+        {#if displaying === "byMonth"}
           Gigs by month (currently shown)
         {:else}
           <button class="link" on:click="{() => display('byMonth')}" data-test="gigview-by-month">
@@ -348,9 +262,15 @@
 </div>
 
 {#each gigs as gig (gig.id)}
-  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== 'undefined'}
-    <Summary gig="{gig}" signupGig="{signupGigs[gig.id]}" userInstruments="{userInstruments}" linkHeading="{true}" />
+  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== "undefined"}
+    <Summary
+      gig="{gig}"
+      signupGig="{signupGigs[gig.id]}"
+      userInstruments="{userInstruments}"
+      linkHeading="{true}"
+      session="{session}"
+    />
   {:else}
-    <Summary gig="{gig}" userInstruments="{userInstruments}" linkHeading="{true}" />
+    <Summary gig="{gig}" userInstruments="{userInstruments}" linkHeading="{true}" session="{session}" />
   {/if}
 {:else}No gigs to display{/each}
