@@ -219,7 +219,7 @@ describe("User page", () => {
       loginAs(Role.user);
       cy.visit("/members/user");
     });
-    it.only("can add new instruments", () => {});
+    it("can add new instruments", () => {});
 
     it("can hard delete an instrument that's never been used", () => {});
 

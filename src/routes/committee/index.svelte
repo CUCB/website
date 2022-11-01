@@ -2,7 +2,7 @@
   import { handleErrors, GraphQLClient } from "../../graphql/client";
   import { currentCommitteePictures } from "../../graphql/committee";
   export async function load({ page: { query }, fetch, session }) {
-    const aprilFools = query.get("aprilfool") !== undefined;
+    const aprilFools = query.get("aprilfool") !== null;
     const client = new GraphQLClient(fetch);
     let res;
     try {
