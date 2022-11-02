@@ -9,5 +9,7 @@ yarn-error.log
 /cypress/fixtures/example.json
 .env
 db_restore
-images/*
+# .gitignore is really annoyingly painful with this: https://stackoverflow.com/a/14731573
+images/users/*
+!images/users/none.jpg
 .svelte-kit
