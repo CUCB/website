@@ -161,7 +161,7 @@
       : instrument.instrument.name;
   }
 
-  async function updateImportantInfo(_e) {
+  async function updateImportantInfo(_e: Event) {
     let prefs = [
       { name: "attribute.tshirt", value: has_polo },
       { name: "attribute.folder", value: has_folder },
@@ -384,7 +384,7 @@
 
 {#if canEdit}
   <h3>Important Info</h3>
-  <form class="important info" on:submit|preventDefault="{updateImportantInfo}">
+  <form class="important-info" on:submit|preventDefault="{updateImportantInfo}">
     {#if canEditAdminStatus}
       <label for="admin-status">Admin status</label><Select id="admin-status" bind:value="{user.admin_type.id}">
         {#each allAdminStatuses as status (status.id)}

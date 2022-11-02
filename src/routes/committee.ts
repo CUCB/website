@@ -1,4 +1,6 @@
-export let fallbackPeople = [
+import type { CommitteeMember } from "./layout.types";
+
+export let fallbackPeople: CommitteeMember[] = [
   {
     name: "The President",
     casual_name: "The President",

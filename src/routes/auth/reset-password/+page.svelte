@@ -7,7 +7,7 @@
   const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
   const checkValid = createValidityChecker();
 
-  export let data;
+  export let data, form;
   let { validToken, token } = { validToken: data.valid, token: data.token };
 
   let username: string | undefined;
@@ -115,7 +115,7 @@
     </form>
   {:else}
     <p>Your password has been successfully reset. Please use the form below to log in with it.</p>
-    <LoginForm redirectTo="/members" />
+    <LoginForm form="{form}" redirectTo="/members" />
   {/if}
 {:else}
   <!-- TODO better error messages based on what actually went wrong -->

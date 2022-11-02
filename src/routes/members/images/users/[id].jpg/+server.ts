@@ -1,5 +1,5 @@
 import type { RequestHandler } from "./$types";
-import { readFile, writeFile, rename } from "fs/promises";
+import { readFile, writeFile, rename, rm } from "fs/promises";
 import { makeServerGraphqlClient } from "../../../../../auth";
 import { GuardUpdateBio } from "../../../../../graphql/user";
 import { error } from "@sveltejs/kit";
@@ -33,7 +33,7 @@ export const GET: RequestHandler = async ({ locals, params: { id } }) => {
 
 export const POST: RequestHandler = async ({ locals, params: { id }, request }) => {
   if (!locals.session.userId) {
-    return { status: 401, body: "Not logged in" };
+    throw error(401, "Not logged in");
   } else {
     if (id != locals.session.userId) {
       const client = makeServerGraphqlClient({
@@ -43,7 +43,7 @@ export const POST: RequestHandler = async ({ locals, params: { id }, request }) 
       try {
         client.mutate({ mutation: GuardUpdateBio, variables: { userId: id } });
       } catch (e) {
-        return { status: 403, body: "You can only upload a profile picture for yourself" };
+        throw error(403, "You can only upload a profile picture for yourself");
       }
     }
 
@@ -53,5 +53,20 @@ export const POST: RequestHandler = async ({ locals, params: { id }, request }) 
     await rename(`${image_path(id)}.tmp`, image_path(id));
 
     return new Response();
+  }
+};
+
+export const DELETE: RequestHandler = async ({ locals, params: { id } }) => {
+  if (!locals.session.userId) {
+    throw error(401, "Not logged in");
+  } else if (locals.session.userId != id) {
+    throw error(403, "You can only remove your own profile picture");
+  } else {
+    try {
+      await rm(image_path(id));
+      return new Response();
+    } catch (e) {
+      throw error(404, "You don't have a profile picture uploaded");
+    }
   }
 };

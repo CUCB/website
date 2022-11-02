@@ -47,6 +47,7 @@
   import { DateTime, Settings } from "luxon";
   import { client as graphqlClient } from "../../../../../graphql/client";
   import { sortContacts, sortVenues } from "./sort";
+  import type { Gig, GigContact } from "./types";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   let checkValid = createValidityChecker();
@@ -72,7 +73,16 @@
   let arrive_time_time = (arrive_time && DateTime.fromISO(arrive_time).toFormat("HH:mm")) || null;
   let finish_time_date = (finish_time && DateTime.fromISO(finish_time).toFormat("yyyy-LL-dd")) || null;
   let finish_time_time = (finish_time && DateTime.fromISO(finish_time).toFormat("HH:mm")) || null;
-  let fields = {};
+  let fields = {
+    finish_time_date: null,
+    finish_time_time: null,
+    arrive_time_time: null,
+    arrive_time_date: null,
+    quote_date: null,
+    time: null,
+    end_date: null,
+    start_date: null,
+  };
   $: timingWarnings = [
     arrive_time &&
       date &&
@@ -241,7 +251,7 @@
       }
     }
     try {
-      let res = await $graphqlClient.mutate({
+      let res = await $graphqlClient.mutate<{ update_cucb_gigs_by_pk: Gig }>({
         mutation: UpdateGig,
         variables: {
           id,
@@ -309,7 +319,7 @@
       is_client = (existingContact || false) && existingContact.client;
     }
     try {
-      let res = await $graphqlClient.mutate({
+      let res = await $graphqlClient.mutate<{ insert_cucb_gigs_contacts_one: GigContact }>({
         mutation: UpsertGigContact,
         variables: {
           gig_id: id,
@@ -318,7 +328,7 @@
           calling: is_calling,
         },
       });
-      if (res && res.data && res.data.insert_cucb_gigs_contacts_one) {
+      if (res?.data?.insert_cucb_gigs_contacts_one) {
         if (existingContact) {
           existingContact.client = res.data.insert_cucb_gigs_contacts_one.client;
           existingContact.calling = res.data.insert_cucb_gigs_contacts_one.calling;
@@ -352,7 +362,7 @@
         calling = false;
       }
       try {
-        let res = await $graphqlClient.mutate({
+        let res = await $graphqlClient.mutate<{ insert_cucb_gigs_contacts_one: GigContact }>({
           mutation: UpsertGigContact,
           variables: {
             gig_id: id,
@@ -361,7 +371,7 @@
             calling,
           },
         });
-        if (res && res.data && res.data.insert_cucb_gigs_contacts_one) {
+        if (res?.data?.insert_cucb_gigs_contacts_one) {
           existingContact.client = res.data.insert_cucb_gigs_contacts_one.client;
           existingContact.calling = res.data.insert_cucb_gigs_contacts_one.calling;
           contacts = contacts;
@@ -623,7 +633,7 @@
   <button class="gig-preview" on:click="{() => (previewSummary = false)}" data-test="gig-edit-{id}-hide-preview"
     >Hide gig preview</button
   >
-  <Summary gig="{summaryGig}" displayLinks="{false}" />
+  <Summary gig="{summaryGig}" displayLinks="{false}" session="{session}" />
   <!-- TODO show public advert when that's implemented (#35) -->
 {:else}
   <button class="gig-preview" on:click="{() => (previewSummary = true)}" data-test="gig-edit-{id}-show-preview"

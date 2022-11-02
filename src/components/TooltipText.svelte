@@ -3,15 +3,15 @@
   import type { Instance } from "tippy.js";
   import "tippy.js/dist/tippy.css";
   import { onDestroy, onMount } from "svelte";
-  import escapeHtml from "escape-html";
+  import { escape } from "html-escaper";
   import { themeName } from "../view";
   export let content;
 
   function makeid(length: number): string {
-    var result = "";
-    var characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    var charactersLength = characters.length;
-    for (var i = 0; i < length; i++) {
+    let result = "";
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * charactersLength));
     }
     return result;
@@ -21,7 +21,7 @@
 
   onMount(() => {
     tooltip = tippy(`#tooltip-${id}`, {
-      content: `<div data-test="tooltip">${escapeHtml(content).replace(/\n/g, "<br/>")}</div>`,
+      content: `<div data-test="tooltip">${escape(content).replace(/\n/g, "<br/>")}</div>`,
       allowHTML: true,
       theme: "cucb",
     });

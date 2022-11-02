@@ -132,6 +132,7 @@
 {#if status === Status.NotUploading}
   <img
     class="theme-{$themeName}"
+    data-test="profile-picture-{user.id}"
     src="/members/images/users/{user.id}.jpg?srcmod={lastUpdated}"
     width="200"
     height="250"

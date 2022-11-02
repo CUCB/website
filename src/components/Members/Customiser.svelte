@@ -2,6 +2,7 @@
   import type { Day } from "../../view";
   export const ThemeColor = Union(Literal("default"), Literal("light"), Literal("dark"));
   export const HexValue = String.withConstraint((s) => s.match(/^[A-F0-9]{6}$/i) !== null);
+
   const BLACK = HexValue.check("000000");
   type HexValue = Static<typeof HexValue>;
   type ThemeColor = Static<typeof ThemeColor>;

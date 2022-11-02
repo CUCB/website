@@ -28,6 +28,7 @@ declare global {
       toggleLineupRole(name: string): void;
       toggleLineupRole(userId: number, name: string): void;
       approveLineupPerson(userId: number): void;
+      waitForFormInteractive(): void;
     }
   }
 }

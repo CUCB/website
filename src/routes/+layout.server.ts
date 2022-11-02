@@ -1,29 +1,10 @@
-import { fallbackPeople } from "./_committee";
+import { fallbackPeople } from "./committee";
 import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
-import type { Static } from "runtypes";
 import { Day } from "../view";
 import type { LayoutServerLoad } from "./$types";
-
-type ThemeColor = Static<typeof ThemeColor>;
-type HexValue = Static<typeof HexValue>;
-interface ThemedProperty {
-  default?: HexValue;
-  light?: HexValue;
-  dark?: HexValue;
-}
-
-export interface CommitteeMember {
-  name: string;
-  casual_name: string;
-  email_obfus: string;
-  committee_key: { name: string; __typename: string };
-  __typename: string;
-}
-export interface Committee {
-  president: CommitteeMember;
-  secretary: CommitteeMember;
-  webmaster: CommitteeMember;
-}
+import { CommitteeRT } from "./layout.types";
+import type { Static } from "runtypes";
+import type { ThemedProperty, Committee } from "./layout.types";
 
 // TODO improve typing
 function fromSessionTheme(session: { theme?: any } | null, name: string): string | undefined {
@@ -39,7 +20,7 @@ function fromSessionTheme(session: { theme?: any } | null, name: string): string
 }
 
 export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
-  let committee = {};
+  const downloadedCommittee = {};
   let session = { ...locals.session, save: undefined, destroy: undefined };
 
   try {
@@ -47,7 +28,7 @@ export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
 
     for (let person of res.committee) {
       // @ts-ignore
-      committee[person.committee_key.name] = {
+      downloadedCommittee[person.committee_key.name] = {
         ...person,
       };
     }
@@ -55,18 +36,14 @@ export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
     // Swallow error, we can generate generic committee details instead
   }
 
-  let fallbackCommittee = {};
-  for (let person of fallbackPeople) {
-    // @ts-ignore
-    fallbackCommittee[person.committee_key.name] = {
-      ...person,
-    };
-  }
+  const fallbackCommittee: Committee = CommitteeRT.check(
+    Object.fromEntries(fallbackPeople.map((person) => [person.committee_key.name, person])),
+  );
 
-  committee = { ...fallbackCommittee, ...committee };
+  const committee = { ...fallbackCommittee, ...downloadedCommittee };
 
   let query = url.searchParams;
-  let color: ThemeColor;
+  let color: Static<typeof ThemeColor>;
   try {
     color = ThemeColor.check(query.get("color") || fromSessionTheme(session, "color"));
   } catch {

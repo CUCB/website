@@ -1,10 +1,9 @@
 import { SMTPClient } from "emailjs";
-import escapeHtml from "escape-html";
+import { escape as escapeHtml } from "html-escaper";
 import gql from "graphql-tag";
 import dotenv from "dotenv";
 import type { RequestHandler } from "./$types";
 import { error } from "@sveltejs/kit";
-import { GraphQLClient } from "../../graphql/client";
 import fetch from "node-fetch";
 import { makeServerGraphqlClient } from "../../auth";
 dotenv.config();

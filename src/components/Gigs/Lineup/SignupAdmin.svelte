@@ -12,8 +12,8 @@
     if (this.length == 0) {
       return hash;
     }
-    for (var i = 0; i < this.length; i++) {
-      var char = this.charCodeAt(i);
+    for (let i = 0; i < this.length; i++) {
+      const char = this.charCodeAt(i);
       hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32bit integer
     }
@@ -31,7 +31,7 @@
   import TooltipText from "../../TooltipText.svelte";
   import { DateTime } from "luxon";
   import { List, Map } from "immutable";
-  import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups/+page.svelte";
+  import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups/types";
   export let gigs: Gig[] = [];
   gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
   let sortedBy = null;

@@ -1,8 +1,8 @@
 <script lang="ts">
   import GigSignup from "../../components/Gigs/Signup.svelte";
   import { makeTitle } from "../../view";
-  import type { PageLoad } from "./$types";
-  export let data: PageLoad;
+  import type { PageData } from "./$types";
+  export let data: PageData;
   let { gigSignups, userInstruments, session } = data;
 </script>
 
