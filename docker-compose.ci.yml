@@ -11,10 +11,12 @@ services:
       - "8080:8080"
   cypress:
     image: node:16.14
+    user: root
     network_mode: host
-    volumes:
-      - .:/usr/src/app
+   volumes:
+      - .:/root/site
+      - node_modules_test:/root/site/node_modules/
     environment:
       PG_PASSWORD: postgrespassword
     command: >
-      bash -c "chown -R /usr/src/app && cd /usr/src/app; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run start:ci"
+      bash -c "cd /root/site; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run start:ci"
