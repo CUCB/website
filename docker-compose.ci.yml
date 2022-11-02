@@ -14,7 +14,8 @@ services:
       context: .
       dockerfile: ci.Dockerfile
     user: node:node
-    network_mode: host
+    ports:
+      - "3000:3000"
     environment:
       PG_PASSWORD: postgrespassword
     command: >
