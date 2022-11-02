@@ -21,7 +21,7 @@ function visitOnce(url) {
 describe("homepage", () => {
   visitOnce("/");
 
-  it.only("has the correct favicon", () => {
+  it("has the correct favicon", () => {
     cy.document()
       .its("head")
       .find('link[rel="icon"]')

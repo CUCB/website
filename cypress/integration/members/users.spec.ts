@@ -95,7 +95,7 @@ interface InsertableUser {
 }
 
 function loginAs(user: User): void {
-  cy.login(user.username, user.password);
+  cy.loginWithoutCySession(user.username, user.password);
 }
 
 function urlFor(user?: User): string {
@@ -243,6 +243,14 @@ describe("User page", () => {
 
   describe("manual biography", () => {
     it("can be modified, deleted and added", () => {
+      populateInstrumentIds().then(() => {
+        populateAttributeIds().then(() => {
+          insertUser(userWithFullInfo);
+          for (let user in Role) {
+            insertUser(Role[user]);
+          }
+        });
+      });
       loginAs(Role.user);
       cy.request({ method: "DELETE", url: `/members/images/users/2834914.jpg`, failOnStatusCode: false });
       cy.visit("/members/user");
@@ -317,13 +325,13 @@ describe("User page", () => {
 
   describe("automatic biography", () => {
     describe("basic details", () => {
-      before(() => {
+      beforeEach(() => {
         cy.executeMutation(SetJoinAndLoginDate, {
           variables: { userId: userWithFullInfo.id, joinDate: null, lastLoginDate: null },
         });
+        loginAs(Role.user);
+        cy.visit(urlFor(userWithFullInfo));
       });
-
-      visitOnceAs(urlFor(userWithFullInfo), Role.user);
 
       it("contains the user's name, when they joined and logged in", () => {
         cy.contains(`${userWithFullInfo.firstName} ${userWithFullInfo.lastName}`);
