@@ -4,8 +4,9 @@ import { GraphQLClient, handleErrors } from "../../../../../graphql/client";
 import { error } from "@sveltejs/kit";
 import { sortContacts, sortVenues } from "./sort";
 import type { Contact, Gig, GigType, Venue } from "./types";
+import type { PageLoad } from "./$types";
 
-export async function load({ params, fetch, parent }) {
+export const load: PageLoad = async ({ params, fetch, parent }) => {
   let { gig_id } = params;
 
   const { session } = await parent();
@@ -51,4 +52,4 @@ export async function load({ params, fetch, parent }) {
     gigTypes,
     allContacts,
   };
-}
+};
