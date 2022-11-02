@@ -45,6 +45,16 @@ services:
       EMAIL_SSL: "false"
     command: >
       bash -c "cd /root/site; npm install; chmod a+x wait-for-it.sh; npm run test"
+  caddy:
+    image: caddy:latest
+    restart: always
+    network_mode: host
+    volumes:
+      - ./Caddyfile.dev:/etc/caddy/Caddyfile
+      - ./Caddyfile.lib:/etc/caddy/Caddyfile.lib
+      - ./static/static:/srv/static
+      - ./images:/srv/images
+      - ./docs:/srv/docs
   mailhog:
     image: mailhog/mailhog
     ports:
