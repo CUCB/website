@@ -15,7 +15,7 @@ services:
       dockerfile: ci.Dockerfile
     user: node:node
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3001:3000"
     environment:
       PG_PASSWORD: postgrespassword
     command: >
