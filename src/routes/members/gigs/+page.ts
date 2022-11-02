@@ -5,12 +5,32 @@ import { handleErrors, client, clientCurrentUser } from "../../../graphql/client
 import { QueryMultiGigDetails, QueryMultiGigSignup } from "../../../graphql/gigs";
 import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async ({ fetch, parent }) => {
+interface GigQueryRes {
+  data: {
+    cucb_gigs: Gig[];
+    cucb_users_instruments: UserInstrument[];
+  };
+}
+
+interface Gig {
+  id: number;
+  sort_date: string;
+  user: {
+    first: string;
+  };
+  posting_time: string;
+  title: string;
+  type: { code: string };
+}
+
+interface UserInstrument {}
+
+export const load: PageLoad = async ({ parent }) => {
   Settings.defaultZoneName = "Europe/London";
 
   const { session } = await parent();
 
-  let res_gig, res_signup, res_gig_2;
+  let res_gig: GigQueryRes, res_signup: GigQueryRes, res_gig_2;
   try {
     res_gig = await get(client).query({
       query: QueryMultiGigDetails(session.hasuraRole),

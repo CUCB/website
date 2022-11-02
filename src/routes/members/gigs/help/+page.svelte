@@ -1,22 +1,11 @@
-<script context="module">
-  import { notLoggedIn } from "../../../client-auth";
-  export async function load({ fetch, session, page: { host } }) {
-    const loginFail = notLoggedIn(session);
-    if (loginFail) return loginFail;
-    let calendarLinks = await (await fetch("/members/gigs/calendar/links")).json();
-
-    const canEditGigs = ["webmaster", "president", "secretary", "treasurer"].includes(session.hasuraRole);
-    const scheme = host == "localhost" || host.startsWith("localhost:") ? "http" : "https";
-    return { props: { canEditGigs, calendarLinks, scheme, host } };
-  }
-</script>
-
 <script lang="ts">
-  import { themeName } from "../../../view";
+  import { themeName } from "../../../../view";
   import tippy from "tippy.js";
   import "tippy.js/dist/tippy.css";
   import { onMount } from "svelte";
-  export let canEditGigs: boolean, calendarLinks: CalendarLinks, scheme: string, host: string;
+  import type { PageData } from "./$types";
+  export let data: PageData;
+  let { canEditGigs, calendarLinks, scheme, host } = data;
   let allCalendarTippy, myCalendarTippy;
   onMount(() => {
     const args = {
@@ -51,9 +40,8 @@
 </script>
 
 <style lang="scss">
-  @import "../../../sass/themes.scss";
+  @import "../../../../sass/themes.scss";
   table,
-  th,
   td {
     border: 1px solid black;
   }
@@ -82,14 +70,8 @@
     transform: translateX(-50%);
     z-index: 10;
     border-radius: 5px;
-    // font-size: 1.2rem;
     width: 150px;
     box-shadow: 0 0 4px var(--form_color);
-  }
-  @media only screen and (min-width: 80em) {
-    .temporary-message {
-      //   top: -1em;
-    }
   }
 </style>
 

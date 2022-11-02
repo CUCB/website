@@ -3,6 +3,7 @@ import { assertLoggedIn } from "../../../../../client-auth";
 import { GraphQLClient, handleErrors } from "../../../../../graphql/client";
 import { error } from "@sveltejs/kit";
 import { sortContacts, sortVenues } from "./sort";
+import type { Contact, Gig, GigType, Venue } from "./types";
 
 export async function load({ params, fetch, parent }) {
   let { gig_id } = params;
@@ -12,8 +13,8 @@ export async function load({ params, fetch, parent }) {
 
   let client = new GraphQLClient(fetch);
 
-  let res_gig, res_venues, res_gigTypes, res_contacts;
-  let gig, venues, gigTypes, allContacts;
+  let res_gig, res_venues, res_gigTypes, res_contacts: { data: { cucb_contacts: Contact[] } };
+  let gig: Gig, venues: Venue[], gigTypes: GigType[], allContacts: Contact[];
   try {
     res_gig = await client.query({
       query: QueryEditGigDetails,
@@ -32,7 +33,7 @@ export async function load({ params, fetch, parent }) {
     return handleErrors(e, session);
   }
 
-  if (res_gig && res_gig.data && res_gig.data.cucb_gigs_by_pk) {
+  if (res_gig?.data?.cucb_gigs_by_pk) {
     gig = res_gig.data.cucb_gigs_by_pk;
     venues = res_venues.data.cucb_gig_venues;
     gigTypes = res_gigTypes.data.cucb_gig_types;

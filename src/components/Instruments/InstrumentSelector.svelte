@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Instrument } from "../../routes/members/user/[id=integer]/+page.svelte";
+  import type { Instrument } from "../../routes/members/user/[id=integer]/types";
 
   import { createEventDispatcher } from "svelte";
 

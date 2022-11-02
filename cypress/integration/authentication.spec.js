@@ -424,7 +424,9 @@ describe("password reset form", () => {
     cy.get("[data-test=password-confirm]").type("anewpassword");
     cy.get("[data-test=submit]").click();
     cy.get("[data-test=username]").type("pass2");
-    cy.get("[data-test=password]").type("anewpassword{enter}");
+    cy.get("[data-test=password]").type("anewpasswor{enter}");
+    cy.contains("Incorrect username or password").should("be.visible");
+    cy.get("[data-test=password]").clear().type("anewpassword{enter}");
     cy.url().should("match", /\/members/);
   });
 

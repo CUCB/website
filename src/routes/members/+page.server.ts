@@ -1,9 +1,9 @@
 import { GraphQLClient, handleErrors } from "../../graphql/client";
 import { QueryGigSignup } from "../../graphql/gigs";
 import { assertLoggedIn } from "../../client-auth.js";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 
-export const load: PageLoad = async ({ parent, fetch, cookies }) => {
+export const load: PageServerLoad = async ({ parent, fetch, cookies }) => {
   const { session } = await parent();
   assertLoggedIn(session);
 

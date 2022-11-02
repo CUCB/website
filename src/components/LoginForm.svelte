@@ -1,11 +1,10 @@
 <script lang="ts">
   export let redirectTo, form;
   import { browser } from "$app/environment";
-  import { enhance } from "$app/forms";
+  import { applyAction, enhance } from "$app/forms";
 
   let username = form?.username || "";
   let password = "";
-  console.log(form);
 
   let updateProps = [
     "accent_light",
@@ -40,21 +39,24 @@
 </script>
 
 <h1>Sign in</h1>
+<!-- TODO how should this action work -->
 <form
   method="POST"
   action="/auth/login"
   use:enhance="{() => {
-    return async ({ result, update }) => {
+    return async ({ result }) => {
       if (result.type === 'redirect') {
         window.location.href = result.location;
       } else {
-        await update();
+        // Apply the action so that the form updates regardless of what page we originate from
+        await applyAction(result);
       }
     };
   }}"
 >
   {#if form?.message}<p class="error" data-test="errors">{form?.message}</p>{/if}
   <input type="hidden" value="{themeString}" name="theme" />
+  <input type="hidden" value="{redirectTo}" name="redirectTo" />
   <label>
     Username
     <input type="text" bind:value="{username}" data-test="username" name="username" />

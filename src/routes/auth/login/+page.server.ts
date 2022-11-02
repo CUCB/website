@@ -9,6 +9,7 @@ const LoginBody = Record({
   username: NonEmptyString,
   password: NonEmptyString,
   theme: Optional(String),
+  redirectTo: Optional(String),
 });
 
 export const actions: Actions = {
@@ -40,7 +41,7 @@ export const actions: Actions = {
         }
         throw error(e.status, e.message);
       }
-      throw redirect(303, "/members");
+      throw redirect(303, body.redirectTo || "/members");
     } else {
       return invalid(400, { username: body.username, message: "Missing username or password" });
     }

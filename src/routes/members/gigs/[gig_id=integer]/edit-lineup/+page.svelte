@@ -95,7 +95,7 @@
 
   const checkDestroyLineup = async () => {
     if (confirm("Are you sure you wish to delete all lineup information?")) {
-      await wrap(destroyLineupInformation)()();
+      await wrap(destroyLineupInformation)(null)();
     }
   };
 </script>

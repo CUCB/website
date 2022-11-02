@@ -6,15 +6,69 @@ import { assertLoggedIn } from "../../../../../client-auth.js";
 import type { PageLoad } from "./$types";
 import { get } from "svelte/store";
 import { error } from "@sveltejs/kit";
+import type { Instrument, UserInstrument } from "../../../user/[id=integer]/types";
+
+interface UserName {
+  id: number;
+  first: string;
+  last: string;
+}
+
+interface PersonQuery {
+  user: {
+    id: number;
+    first: string;
+    last: string;
+    prefs: {
+      pref_type: {
+        name: string;
+      };
+      value: boolean;
+    }[];
+  };
+  user_available: boolean | null;
+  user_only_if_necessary: boolean | null;
+  approved: boolean | null;
+  user_instruments: LineupInstrument[];
+  leader: boolean;
+  equipment: boolean;
+  money_collector: boolean;
+  money_collector_notified: boolean;
+}
+
+interface Person {
+  user: {
+    first: string;
+    last: string;
+    id: number;
+    attributes: string[];
+  };
+  user_available: boolean | null;
+  user_only_if_necessary: boolean | null;
+  approved: boolean | null;
+  user_instruments: Record<number, LineupInstrument>;
+  leader: boolean;
+  equipment: boolean;
+  money_collector: boolean;
+  money_collector_notified: boolean;
+}
+
+interface GigTypeRes {
+  type: {
+    code: string;
+    id: number;
+  };
+  title: string;
+}
 
 export const load: PageLoad = async ({ params: { gig_id }, parent }) => {
   const { session } = await parent();
   assertLoggedIn(session);
 
   let res, res_allPeople;
-  let people, allPeople, title: string;
+  let people: PersonQuery[], allPeople: UserName[], title: string;
   try {
-    let gigType = await get(client).query({
+    let gigType = await get(client).query<{ cucb_gigs_by_pk: GigTypeRes }>({
       query: QueryGigType,
       variables: { id: gig_id },
     });
@@ -39,18 +93,27 @@ export const load: PageLoad = async ({ params: { gig_id }, parent }) => {
     throw error(404, "Gig not found");
   }
 
-  let personLookup: Record<number, unknown> = {};
+  let personLookup: Record<number, Person> = {};
   for (let person of people) {
-    person.user.attributes = extractAttributes(person.user);
-    person.user.prefs = undefined;
-
-    let user_instruments = {};
-    for (let instrument of person.user_instruments) {
-      user_instruments[instrument.user_instrument.id] = instrument;
-    }
-    person.user_instruments = user_instruments;
-    personLookup[person.user.id] = person;
+    personLookup[person.user.id] = {
+      ...person,
+      user: {
+        ...person.user,
+        attributes: extractAttributes(person.user),
+      },
+      user_instruments: userInstrumentsById(person.user_instruments),
+    };
   }
 
   return { people: personLookup, gigId: gig_id, allPeople, title };
 };
+
+interface LineupInstrument {
+  user_instrument: UserInstrument;
+  instrument: Instrument;
+  approved: boolean | null;
+}
+
+function userInstrumentsById(instrument_list: LineupInstrument[]): Record<number, LineupInstrument> {
+  return Object.fromEntries(instrument_list.map((instrument) => [instrument.user_instrument.id, instrument]));
+}

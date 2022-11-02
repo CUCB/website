@@ -9,6 +9,7 @@
   import { Map } from "immutable";
   import type Popup from "../components/Popup.svelte";
   import type { LayoutData } from "./$types";
+  import type { Committee, HexValue, ThemeColor, ThemedProperty } from "./layout.types";
 
   export let data: LayoutData;
   export let committee: Committee = data.committee;

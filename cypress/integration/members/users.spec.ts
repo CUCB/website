@@ -9,6 +9,7 @@ import {
   OnConflictUserPrefs,
   SetJoinAndLoginDate,
 } from "../../database/users";
+import crypto from "crypto";
 
 const userWithFullInfo: User = {
   id: 282947,
@@ -243,6 +244,7 @@ describe("User page", () => {
   describe("manual biography", () => {
     it("can be modified, deleted and added", () => {
       loginAs(Role.user);
+      cy.request({ method: "DELETE", url: `/members/images/users/2834914.jpg`, failOnStatusCode: false });
       cy.visit("/members/user");
 
       cy.get('blockquote[data-test="bio-content"]').should("contain.text", Role.user.bio);
@@ -280,6 +282,36 @@ describe("User page", () => {
         "contain.text",
         "A new biography, after I deleted the last one.",
       );
+
+      cy.contains("Upload new picture").click();
+      cy.get("input[type=file]").selectFile("cypress/DSC_0141.JPG");
+      cy.get('[data-testid="cropper"]').trigger("wheel", {
+        deltaY: -120.666666,
+        wheelDelta: 120,
+        wheelDeltaX: 0,
+        wheelDeltaY: 120,
+        bubbles: true,
+      });
+      cy.get("[data-testid=cropper]").then((elem) => {
+        const bound = elem[0].getBoundingClientRect();
+        cy.get('[data-testid="cropper"]')
+          .trigger("mousedown")
+          .trigger("mousemove", { clientX: 190 + bound.left, clientY: 250 + bound.top })
+          .trigger("mouseup");
+      });
+
+      cy.get("button").contains("Upload").click();
+      cy.get(`[data-test="profile-picture-2834914"]`).should("be.visible");
+      cy.get(`[data-test="profile-picture-2834914"]`).then((elem) => {
+        const url = elem[0].src;
+        cy.readFile("cypress/2834914.jpg").then((snapshot) => {
+          cy.request(url).then((newlyUploaded) => {
+            const snapshotHash = crypto.createHash("sha1").update(snapshot).digest("hex");
+            const newlyUploadedHash = crypto.createHash("sha1").update(newlyUploaded.body).digest("hex");
+            expect(snapshotHash).to.equal(newlyUploadedHash);
+          });
+        });
+      });
     });
   });
 
