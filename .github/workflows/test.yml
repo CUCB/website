@@ -31,7 +31,7 @@ jobs:
       # persist step results to other steps in the job
       - id: nonce
         # adding a timestamp makes the nonce more unique for re-runs
-        run: echo "::set-output name=result::${{ github.run_id }}-$(date +%s)"
+        run: echo "result=${{ github.run_id }}-$(date +%s)" >> $GITHUB_OUTPUT
   test:
     name: Cypress run
     runs-on: ubuntu-latest

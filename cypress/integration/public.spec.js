@@ -21,8 +21,15 @@ function visitOnce(url) {
 describe("homepage", () => {
   visitOnce("/");
 
-  it("has the correct favicon", () => {
-    cy.document().its("head").find('link[rel="icon"]').should("have.attr", "href").should("eq", "/static/favicon.ico");
+  it.only("has the correct favicon", () => {
+    cy.document()
+      .its("head")
+      .find('link[rel="icon"]')
+      .should("have.attr", "href")
+      .should((href) => {
+        const url = new URL(href);
+        expect(url.pathname).to.eq("/static/favicon.ico");
+      });
   });
 
   it("has the correct <h1>", () => {
