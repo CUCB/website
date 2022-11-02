@@ -13,7 +13,7 @@ services:
     image: node:16.14
     user: root
     network_mode: host
-   volumes:
+    volumes:
       - .:/root/site
       - node_modules_test:/root/site/node_modules/
     environment:
