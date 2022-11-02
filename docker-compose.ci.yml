@@ -11,6 +11,7 @@ services:
       - "8080:8080"
   cypress:
     build:
+      context: .
       dockerfile: ci.Dockerfile
     user: node:node
     network_mode: host
