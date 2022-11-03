@@ -55,7 +55,7 @@ jobs:
           record: true
           parallel: true
           group: "Linux/Chrome"
-          start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=cypress
+          start: docker-compose -f docker-compose.test.yml -f docker-compose.ci.yml up --exit-code-from=sveltekit
           wait-on: "http://localhost:3001"
           wait-on-timeout: 240
           command-prefix: "percy exec -- npx"
