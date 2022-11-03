@@ -1,0 +1,12 @@
+cypress/
+node_modules/
+.svelte-kit/
+build/
+.github/
+.cache/
+.idea/
+.husky/
+.vscode/
+docker-compose*
+*Dockerfile
+.env

@@ -9,7 +9,7 @@ services:
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
     ports:
       - "8080:8080"
-  cypress:
+  sveltekit:
     build:
       context: .
       dockerfile: ci.Dockerfile
@@ -19,4 +19,4 @@ services:
     environment:
       PG_PASSWORD: postgrespassword
     command: >
-      bash -c "cd /home/node/app; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run start:ci"
+      bash -c "cd /home/node/app; npm ci; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run start:ci"

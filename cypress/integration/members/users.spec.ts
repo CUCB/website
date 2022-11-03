@@ -95,7 +95,7 @@ interface InsertableUser {
 }
 
 function loginAs(user: User): void {
-  cy.login(user.username, user.password);
+  cy.loginWithoutCySession(user.username, user.password, {});
 }
 
 function urlFor(user?: User): string {
