@@ -1,10 +1,10 @@
 # This stage installs the runtime dependencies.
-FROM mhart/alpine-node:15 AS build-runtime
+FROM node:16.14-alpine AS build-runtime
 WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 RUN npm ci --production --unsafe-perm
 
-FROM mhart/alpine-node:15 AS build-app
+FROM node:16.14-alpine AS build-app
 WORKDIR /usr/src/app
 COPY package*.json ./
 COPY --from=build-runtime /usr/src/app/node_modules ./node_modules
@@ -17,9 +17,10 @@ COPY *.js ./
 COPY *.json ./
 COPY build.env ./.env
 RUN echo "SESSION_SECRET=somethingreallynotsecret" >> .env
+RUN npx svelte-kit sync
 RUN npm run build
 
-FROM mhart/alpine-node:slim-15 AS app
+FROM node:16.14-alpine AS app
 WORKDIR /usr/src/app
 # Copy package.json to ensure "type":"module" is set
 COPY --from=build-app /usr/src/app/package.json ./

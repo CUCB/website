@@ -20,14 +20,21 @@ services:
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       ## uncomment next line to set an admin secret
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_AUTH_HOOK: http://cypress:3000/auth/hook
+      HASURA_GRAPHQL_AUTH_HOOK: http://sveltekit:3000/auth/hook
       HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
-  cypress:
-    image: cypress/base:10
-    volumes:
-      - .:/root/site
-      - node_modules_test:/root/site/node_modules/
-      - cypress_cache_test:/root/.cache/Cypress
+    ports:
+      - "8080:8080"
+  sveltekit:
+    build:
+      context: .
+      dockerfile: ci.Dockerfile
+    user: node:node
+    # volumes:
+    #   - .:/home/node/app
+    #   - node_modules_test:/home/node/app/node_modules/
+    #   - cypress_cache_test:/home/node/app/.cache/Cypress
+    ports:
+      - "127.0.0.1:3001:3000"
     environment:
       GRAPHQL_REMOTE: http://graphql-engine:8080
       GRAPHQL_PATH: /v1/graphql
@@ -44,7 +51,8 @@ services:
       EMAIL_PORT: 1025
       EMAIL_SSL: "false"
     command: >
-      bash -c "cd /root/site; npm install; chmod a+x wait-for-it.sh; npm run test"
+      bash -c "cd /home/node/app; npm ci; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run start:ci"
+
   caddy:
     image: caddy:latest
     restart: always
