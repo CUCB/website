@@ -92,4 +92,5 @@ if (stack === "prod") {
 
 module.exports = {
   ip: domain.value,
+  domain_name: domain.hostname,
 };

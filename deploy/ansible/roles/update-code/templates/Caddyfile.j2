@@ -1,4 +1,6 @@
-dev.cucb.co.uk {
+{{ domain_name }} {
+	{% if domain_name == 'dev.cucb.co.uk' %}
 	tls /root/.caddy/certs/dev.cucb.co.uk.crt /root/.caddy/certs/dev.cucb.co.uk.key
+	{% endif %}
 	import ./Caddyfile.lib
 }

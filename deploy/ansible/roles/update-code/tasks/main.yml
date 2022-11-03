@@ -9,3 +9,8 @@
 - name: Install backup script dependencies
   community.general.npm:
     path: "{{ repo_root }}/deploy/js"
+
+- name: Template out new Caddyfile
+  template:
+    src: "Caddyfile.j2"
+    dest: "{{ repo_root }}/Caddyfile"
