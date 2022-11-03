@@ -6,7 +6,12 @@ import {
   GuardUpdateAdminStatus,
   AllAdminStatuses,
 } from "../../../../graphql/user";
-import { GraphQLClient, handleErrors } from "../../../../graphql/client";
+import {
+  GraphQLClient,
+  handleErrors,
+  client as clientStore,
+  clientCurrentUser as clientCurrentUserStore,
+} from "../../../../graphql/client";
 import type { PageLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import { AllInstruments } from "../../../../graphql/instruments";
@@ -14,6 +19,7 @@ import { AllPrefs } from "../../../../graphql/gigs/lineups/users/attributes";
 import type { DocumentNode } from "graphql/language/ast";
 import type { AdminStatus, Instrument, Pref, User } from "./types";
 import { assertLoggedIn } from "../../../../client-auth";
+import { get } from "svelte/store";
 
 function fulfilledFirst<T>(a: PromiseSettledResult<T>, b: PromiseSettledResult<T>): number {
   if (a.status == "fulfilled") {
@@ -30,28 +36,38 @@ async function firstSuccess<T>(promises: Promise<T>[]): Promise<T | null> {
   let total = promises.length;
   let promisesComplete = Array(total).map(() => false);
   let firstResult: null | [T, number] = null;
+  let lastFailure: null | T = null;
 
   return new Promise((resolve, reject) => {
     for (let [p, i] of promises.map((promise, i) => [promise, i] as [Promise<T>, number])) {
       p.then((result) => {
         countComplete += 1;
-        if (promisesComplete.slice(0, i).filter((complete) => complete).length === i) {
+
+        if (promisesComplete.findIndex((complete) => !complete) === i) {
           resolve(result);
         } else {
           promisesComplete[i] = true;
           if (!firstResult || firstResult[1] > i) {
             firstResult = [result, i];
           }
-
-          if (countComplete === total) {
-            resolve(firstResult[0]);
-          }
         }
       }).catch((failure) => {
         countComplete += 1;
+        promisesComplete[i] = true;
+        const lastPromiseNotCompleted = (promisesComplete.findIndex((complete) => !complete) + 1 || total + 1) - 1;
+
+        if (i + 1 === total) {
+          lastFailure = failure;
+        }
+
         if (countComplete === total) {
-          // TODO this is non-deterministic as to which failure it returns, maybe it should be deterministic
-          reject(failure);
+          if (firstResult) {
+            resolve(firstResult[0]);
+          } else {
+            reject(lastFailure);
+          }
+        } else if (firstResult && lastPromiseNotCompleted > firstResult[1]) {
+          resolve(firstResult[0]);
         }
       });
     }
@@ -77,10 +93,8 @@ export const load: PageLoad = async ({ params: { id }, parent, fetch }) => {
   const { session } = await parent();
   assertLoggedIn(session);
 
-  const client = new GraphQLClient(fetch);
-  const clientCurrentUser = new GraphQLClient(fetch, {
-    role: "current_user",
-  });
+  const client = get(clientStore);
+  const clientCurrentUser = get(clientCurrentUserStore);
 
   function fullPermissions<T>(x: T): [T, Edit] {
     return [x, Edit.ALL];
