@@ -329,8 +329,6 @@ describe("User page", () => {
         cy.executeMutation(SetJoinAndLoginDate, {
           variables: { userId: userWithFullInfo.id, joinDate: null, lastLoginDate: null },
         });
-        // loginAs(Role.user);
-        // cy.visit(urlFor(userWithFullInfo));
       });
 
       visitOnceAs(urlFor(userWithFullInfo), Role.user);

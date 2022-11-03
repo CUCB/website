@@ -12,7 +12,7 @@ let NONE = null;
 
 export const GET: RequestHandler = async ({ locals, params: { id } }) => {
   if (!locals.session.userId) {
-    return { status: 401, body: "Not logged in" };
+    throw error(401, "Not logged in");
   } else {
     try {
       const file = await readFile(image_path(id));
