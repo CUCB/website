@@ -95,7 +95,7 @@ interface InsertableUser {
 }
 
 function loginAs(user: User): void {
-  cy.loginWithoutCySession(user.username, user.password);
+  cy.login(user.username, user.password);
 }
 
 function urlFor(user?: User): string {
@@ -329,9 +329,11 @@ describe("User page", () => {
         cy.executeMutation(SetJoinAndLoginDate, {
           variables: { userId: userWithFullInfo.id, joinDate: null, lastLoginDate: null },
         });
-        loginAs(Role.user);
-        cy.visit(urlFor(userWithFullInfo));
+        // loginAs(Role.user);
+        // cy.visit(urlFor(userWithFullInfo));
       });
+
+      visitOnceAs(urlFor(userWithFullInfo), Role.user);
 
       it("contains the user's name, when they joined and logged in", () => {
         cy.contains(`${userWithFullInfo.firstName} ${userWithFullInfo.lastName}`);
