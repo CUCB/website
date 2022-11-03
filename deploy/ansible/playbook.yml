@@ -6,6 +6,7 @@
     docker_compose_files:
       - docker-compose.prod.yml
     email_domain_name: dev.cucb.co.uk # TODO make this dynamic
+    domain_name: dev.cucb.co.uk
   tasks:
     - name: Configure and run server
       include_role:

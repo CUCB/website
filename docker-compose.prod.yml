@@ -32,12 +32,6 @@ services:
       driver: "json-file"
       options:
         max-size: "50m"
-  postfix:
-    image: davidepedranz/docker-send-only-postfix:latest
-    environment:
-      DOMAIN: cucb.co.uk
-    volumes:
-      - ${BLOCK_STORAGE}/mail/mail.private:/etc/opendkim/domainkeys/mail.private
   sveltekit:
     image: $DEPLOY_REGISTRY/cucb/sveltekit:slim
     environment:
