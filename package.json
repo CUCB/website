@@ -79,7 +79,7 @@
     "vite-plugin-wasm-pack": "^0.1.12"
   },
   "devDependencies": {
-    "@percy/cli": "^1.0.0-beta.52",
+    "@percy/cli": "^1.13.0",
     "@percy/cypress": "^3.1.0",
     "@rollup/plugin-wasm": "^6.0.1",
     "@types/bcrypt": "^5.0.0",
