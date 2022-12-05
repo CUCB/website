@@ -1,15 +1,10 @@
 import jwt from "jsonwebtoken";
-import { Number, Record, String } from "runtypes";
 import dotenv from "dotenv";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
+import { PasswordResetToken } from "../../../../../auth";
 
 dotenv.config();
-
-const PasswordResetToken = Record({
-  id: Number,
-  email: String,
-});
 
 export const GET: RequestHandler = async ({ params }) => {
   try {

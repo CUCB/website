@@ -198,10 +198,14 @@ function insertUser(user: User): void {
 describe("User page", () => {
   before(() => {
     populateInstrumentIds().then(() => {
+      cy.log("populated instruments");
       populateAttributeIds().then(() => {
+        cy.log("populated attributes");
         insertUser(userWithFullInfo);
+        cy.log("inserted blah");
         for (let user in Role) {
           insertUser(Role[user]);
+          cy.log(`inserted ${user}`);
         }
       });
     });
@@ -252,12 +256,11 @@ describe("User page", () => {
         });
       });
       loginAs(Role.user);
-      cy.request({ method: "DELETE", url: `/members/images/users/2834914.jpg`, failOnStatusCode: false });
-      cy.visit("/members/user");
+      cy.request({ method: "DELETE", url: `/members/images/users/${Role.user.id}.jpg`, failOnStatusCode: false });
+      cy.visit(`/members/user/${Role.user.id}`);
 
       cy.get('blockquote[data-test="bio-content"]').should("contain.text", Role.user.bio);
       cy.get('[data-test="bio-name"]').should("include.text", Role.user.firstName).and("include.text", "July 2020");
-
       cy.waitForFormInteractive();
 
       cy.get('[data-test="edit-bio"]').click();

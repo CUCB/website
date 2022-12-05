@@ -1,17 +1,17 @@
 <script lang="ts" context="module">
   interface Person {
     committee: {
-      pic_folder: string;
+      picFolder?: string;
     };
-    pic: string;
-    april_fools_dir: string | null;
-    email_obfus: string | null;
+    pic?: string;
+    aprilFoolsDir?: string;
+    emailObfus?: string;
     name: string;
     position: {
       name: string;
     };
-    sub_position: string | null;
-    comments: string | null;
+    subPosition?: string;
+    comments?: string;
   }
 </script>
 
@@ -21,11 +21,12 @@
   export let person: Person;
   export let aprilFools = false;
   export let showEmail = false;
-  const basePath = `/images/committee/${person.committee.pic_folder}/`;
+  const basePath = person.committee.picFolder ?? `/images/committee/${person.committee.picFolder}/`;
   const src =
-    aprilFools && person.april_fools_dir
-      ? `${basePath}${person.april_fools_dir}/${person.pic}`
-      : `${basePath}${person.pic}`;
+    basePath ??
+    (aprilFools && person.aprilFoolsDir
+      ? `${basePath}${person.aprilFoolsDir}/${person.pic}`
+      : `${basePath}${person.pic}`);
 </script>
 
 <style lang="scss">
@@ -77,7 +78,7 @@
   {/if}
   <person-details>
     <span class="name">
-      {#if person.email_obfus && showEmail}
+      {#if person.emailObfus && showEmail}
         <Mailto person="{person}">
           {@html person.name}
         </Mailto>

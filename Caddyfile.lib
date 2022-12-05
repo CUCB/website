@@ -35,14 +35,14 @@ reverse_proxy @sveltekit 127.0.0.1:3001
 # disable gzip for auth API since fetch doesn't like it
 encode @notAuth gzip
 
-handle_errors {
-	@maintenance expression {http.error.status_code} == 502
-	rewrite @maintenance /503
-	# rewrite * /503.html
-	# root /* /srv/static
-	# file_server
-	rewrite * /{http.error.status_code}
-	reverse_proxy https://http.cat {
-		header_up Host http.cat
-	}
-}
+# handle_errors {
+# 	@maintenance expression {http.error.status_code} == 502
+# 	rewrite @maintenance /503
+# 	# rewrite * /503.html
+# 	# root /* /srv/static
+# 	# file_server
+# 	rewrite * /{http.error.status_code}
+# 	reverse_proxy https://http.cat {
+# 		header_up Host http.cat
+# 	}
+# }

@@ -2,11 +2,13 @@ import { SMTPClient } from "emailjs";
 import gql from "graphql-tag";
 import dotenv from "dotenv";
 import { error } from "@sveltejs/kit";
+import fetch from "node-fetch";
 dotenv.config();
 
-export async function POST({ body, fetch }) {
+// TODO make sure I'm tested
+export async function POST({ request }) {
   try {
-    return await realpost(body, fetch);
+    return await realpost(request, fetch);
   } catch (e) {
     if (e.code) {
       throw e;
@@ -18,8 +20,8 @@ export async function POST({ body, fetch }) {
   }
 }
 
-async function realpost(body, fetch) {
-  const { name, email, lists, captchaKey } = Object.fromEntries(body.entries?.() || Object.entries(body));
+async function realpost(request, fetch) {
+  const { name, email, lists, captchaKey } = Object.fromEntries(await request.formData());
   const hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
     headers: {

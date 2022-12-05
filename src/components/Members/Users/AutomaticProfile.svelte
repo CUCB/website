@@ -7,7 +7,7 @@
     return `${Math.round((a / b) * 100)}%`;
   }
 
-  function gigLink(id: number): string {
+  function gigLink(id: string): string {
     return `/members/gigs/${id}`;
   }
 
@@ -15,19 +15,26 @@
     return name + (name.endsWith("s") ? "'" : "'s");
   }
 
-  function displayMonth(date: string | null): string | null {
+  function displayMonth(date: Date | null): string | null {
     if (date == null) return null;
-    const luxonDate = DateTime.fromISO(date);
+    const luxonDate = DateTime.fromJSDate(date);
     return luxonDate.toFormat("MMMM yyyy");
   }
 
-  function ordinal(n) {
-    var s = ["th", "st", "nd", "rd"];
-    var v = n % 100;
+  function ordinal(n: number): string {
+    const s = ["th", "st", "nd", "rd"];
+    const v = n % 100;
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
 
-  function displayDate(date: string | null): string | null {
+  function displayDate(date: Date | null): string | null {
+    if (date == null) return null;
+    const luxonDate = DateTime.fromJSDate(date);
+    const day = luxonDate.day;
+    return `${ordinal(day)} ${luxonDate.toFormat("MMMM yyyy")}`;
+  }
+
+  function displayDateString(date: string | undefined): string | null {
     if (date == null) return null;
     const luxonDate = DateTime.fromISO(date);
     const day = luxonDate.day;
@@ -45,7 +52,7 @@
       idCounts.set(instrument.id, (currentCount || 0) + 1);
     }
 
-    const result = [];
+    const result: [Instrument, number][] = [];
     for (let [id, count] of idCounts) {
       const instrument = instrumentsById.get(id);
       result.push([instrument, count]);
@@ -53,19 +60,19 @@
     return result;
   }
 
-  const join_date = user.join_date ? `in ${displayMonth(user.join_date)}` : "before records began";
-  const login_date = user.last_login_date && `in ${displayMonth(user.last_login_date)}`;
+  const join_date = user.joinDate ? `in ${displayMonth(user.joinDate)}` : "before records began";
+  const login_date = user.lastLoginDate && `in ${displayMonth(user.lastLoginDate)}`;
 
-  const last_gig = [...user.gig_lineups].reverse().find((x) => x.gig.date != null);
-  const last_gig_date = displayDate(last_gig?.gig.date);
-  const first_gig = user.gig_lineups?.[0];
-  const first_gig_date = displayDate(first_gig?.gig.date);
-  const gig_count = user.gig_lineups.length;
-  const instrument_gig_count = user.gig_lineups.filter((gig) => gig.user_instruments.length > 0).length;
+  const last_gig = [...user.gigLineups].reverse().find((x) => x.gig.date != null);
+  const last_gig_date = displayDateString(last_gig?.gig.date);
+  const first_gig = user.gigLineups?.[0];
+  const first_gig_date = displayDateString(first_gig?.gig.date);
+  const gig_count = user.gigLineups.length;
+  const instrument_gig_count = user.gigLineups.filter((gig) => gig.userInstruments.length > 0).length;
 
-  const gig_instruments = user.gig_lineups
-    .flatMap((x) => x.user_instruments)
-    .map((instr) => instr.user_instrument.instrument);
+  const gig_instruments = user.gigLineups
+    .flatMap((x) => x.userInstruments)
+    .map((instr) => instr.userInstrument.instrument);
   const counted_instruments: { instrument: Instrument; count: number }[] = countInstruments(gig_instruments).map(
     ([instrument, count]) => ({ instrument, count }),
   );

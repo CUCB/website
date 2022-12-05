@@ -62,6 +62,12 @@ export const AllAttributes = `
 
 export const DeleteUsers = `
     mutation DeleteUsers($ids: [bigint!]!) {
+        delete_cucb_gigs_lineups_instruments(where: {user_id: {_in: $ids}}) {
+            affected_rows
+        }
+        delete_cucb_gigs_lineups(where: {user_id: {_in: $ids}}) {
+            affected_rows
+        }
         delete_cucb_users_instruments(where: {user_id: {_in: $ids}}) {
             affected_rows
         }

@@ -1,5 +1,5 @@
 import type { PageLoad } from "./$types";
-import { Number } from "runtypes";
+import { String } from "runtypes";
 import { redirect } from "@sveltejs/kit";
 
 type PreloadProps =
@@ -20,7 +20,7 @@ export const load: PageLoad<PreloadProps> = async ({ url, fetch, parent }) => {
     const res = await fetch(`/auth/reset-password/verify/${token}`);
     if (isSuccessful(res.status)) {
       const body = await res.json();
-      if (Number.guard(body.id)) {
+      if (String.guard(body.id)) {
         return { valid: true, token };
       } else {
         return { valid: false, token: undefined };

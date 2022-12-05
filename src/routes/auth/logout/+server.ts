@@ -3,7 +3,7 @@ import { redirect } from "@sveltejs/kit";
 export const GET = async ({ locals, cookies }) => {
   if (locals.session) {
     const cookie = await locals.session.destroy();
-    cookies.delete(cookie);
+    cookies.delete(...cookie);
   }
   throw redirect(302, "/");
 };
