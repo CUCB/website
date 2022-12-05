@@ -1,83 +1,90 @@
 export interface AdminStatus {
-  id: number;
+  id: string;
   title: string;
 }
 
 export interface Instrument {
-  id: number;
+  id: string;
   name: string;
   novelty: boolean;
-  parent_id: number | null;
+}
+
+export interface AggregateInstrument {
+  id: string;
+  name: string;
+  novelty: boolean;
   parent_only: boolean;
-  users_instruments_aggregate: {
-    aggregate: {
-      count: number;
-    };
-  };
+  count: number;
 }
 
 export interface UserInstrument {
   instrument: Instrument;
   deleted: boolean;
-  nickname: string | null;
-  id: number;
+  nickname?: string;
+  id: string;
 }
 
 export interface User {
-  id: number;
-  admin_type?: {
-    id: number;
+  id: string;
+  adminType?: {
+    id: string;
     title: string;
   };
   first: string;
   last: string;
-  bio: string | null;
-  bio_changed_date: string | null;
-  last_login_date: string | null;
-  join_date: string | null;
-  mobile_contact_info?: string | null;
-  location_info?: string | null;
-  email: string | null;
-  dietaries: string | null;
-  prefs: [
-    {
-      pref_type: {
-        id: number;
+  bio?: string;
+  bioChangedDate?: Date;
+  lastLoginDate?: Date;
+  joinDate?: Date;
+  mobileContactInfo?: string;
+  locationInfo?: string;
+  email?: string;
+  dietaries?: string;
+  prefs: {
+    pref_type: {
+      id: string;
+      name: string;
+    };
+    value: boolean;
+  }[];
+  gigLineups: {
+    gig: {
+      id: string;
+      title: string;
+      date?: string;
+      venue?: {
         name: string;
+        subvenue?: string;
       };
-      value: boolean;
-    },
-  ];
-  user_prefs: [
-    {
-      pref_id: number;
-    },
-  ];
-  gig_lineups: [
-    {
-      gig: {
-        id: number;
-        title: string;
-        date: string | null;
-        venue: {
-          name: string;
-          subvenue: string | null;
-        };
+    };
+    userInstruments: {
+      userInstrument: {
+        instrument: Instrument;
       };
-      user_instruments: [
-        {
-          user_instrument: {
-            instrument: Instrument;
-          };
-        },
-      ];
-    },
-  ];
-  user_instruments: UserInstrument[];
+    }[];
+  }[];
+  instruments: UserInstrument[];
 }
 
 export interface Pref {
-  id: number;
+  id: string;
   name: string;
   default: boolean;
+}
+
+export interface AuthUserType {
+  id: string;
+  title: string;
+}
+
+export interface LoadOutput {
+  user: User;
+  canEdit: boolean;
+  canEditInstruments: boolean;
+  allInstruments: AggregateInstrument[];
+  currentUser: boolean;
+  allPrefs: Pref[];
+  profilePictureUpdated: string;
+  canEditAdminStatus: boolean;
+  allAdminStatuses: AuthUserType[];
 }

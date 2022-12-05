@@ -16,6 +16,9 @@ import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import { sortLineup } from "../../../components/Gigs/_sort";
 import { error } from "@sveltejs/kit";
+import orm from "$lib/database";
+import { CalendarSubscription } from "$lib/entities/CalendarSubscription";
+import { CalendarSubscriptionType } from "$lib/entities/CalendarSubscriptionType";
 const { ICalCalendar, ICalCalendarMethod } = icalPkg;
 
 dotenv.config();
@@ -150,16 +153,6 @@ class GigCalendar {
   }
 }
 
-export function makeServerGraphqlClient() {
-  return new GraphQLClient(fetch, {
-    domain: process.env["GRAPHQL_REMOTE"],
-    role: "server",
-    headers: { "session-secret-hash": SESSION_SECRET_HASH },
-  });
-}
-
-const serverClient = makeServerGraphqlClient();
-
 // TODO de-duplicate these functions, they're blindly copied and pasted from the user profile page
 // TODO use these more widely too, they improve performance as we don't wait for the first query to fail before trying the next
 function fulfilledFirst<T>(a: PromiseSettledResult<T>, b: PromiseSettledResult<T>): number {
@@ -200,9 +193,12 @@ export async function allGigs(client: GraphQLClient, uid: number, ipAddress: str
     console.trace(e);
     throw handleErrors(e);
   }
-  const update = serverClient.mutate({
-    mutation: UpdateLastCalendarAccess,
-    variables: { calendar_type: "allgigs", ip_address: ipAddress, user_id: uid },
+  const em = orm.em.fork();
+  const update = em.upsert(CalendarSubscription, {
+    calendarType: "allgigs" as unknown as CalendarSubscriptionType,
+    ipAddress,
+    user: uid.toString(),
+    lastAccessed: "now()" as unknown as Date,
   });
   const user = resUserGigs.data.cucb_users_by_pk;
   const fullName = `${user.first} ${user.last}`;
@@ -251,9 +247,12 @@ export async function myGigs(client: GraphQLClient, uid: number, ipAddress: stri
     console.trace(e);
     throw handleErrors(e);
   }
-  const update = serverClient.mutate({
-    mutation: UpdateLastCalendarAccess,
-    variables: { calendar_type: "mygigs", ip_address: ipAddress, user_id: uid },
+  const em = orm.em.fork();
+  const update = em.upsert(CalendarSubscription, {
+    calendarType: "mygigs" as unknown as CalendarSubscriptionType,
+    ipAddress,
+    user: uid.toString(),
+    lastAccessed: "now()" as unknown as Date,
   });
   const user = resUserGigs.data.cucb_users_by_pk;
   const fullName = `${user.first} ${user.last}`;

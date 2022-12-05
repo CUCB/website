@@ -57,8 +57,8 @@ services:
       - "127.0.0.1:3001:3000"
       - "24678:24678"
     command: >
-      bash -c "cd /home/node/app; npm install; npm run build; npm run start -- --host 0.0.0.0 --port 3000"
-  #      bash -c "cd /home/node/app; npm install; npm run watch:dev"
+      bash -c "cd /home/node/app; npm install; npm run watch:dev"
+  #      bash -c "cd /home/node/app; npm install; npm run build; npm run start -- --host 0.0.0.0 --port 3000"
   caddy:
     image: caddy:latest
     restart: always

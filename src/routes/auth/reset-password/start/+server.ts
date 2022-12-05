@@ -2,8 +2,10 @@ import type { RequestHandler } from "@sveltejs/kit";
 import { error } from "@sveltejs/kit";
 import { Record, String } from "runtypes";
 import { CRSID_PATTERN, EMAIL_PATTERN } from "../../_register";
-import { makeServerGraphqlClient, startPasswordReset } from "../../../../auth";
+import { startPasswordReset } from "../../../../auth";
 import gql from "graphql-tag";
+import { User } from "$lib/entities/User";
+import orm from "$lib/database";
 
 type PostRequest = Request & { body: FormData };
 
@@ -38,14 +40,11 @@ const UserByUsername = gql`
 export const POST: RequestHandler = async ({ request }) => {
   const body = Object.fromEntries(await request.formData());
   if (Body.guard(body)) {
-    const client = makeServerGraphqlClient();
-    const userCheck = await client.query<UserEmail>({
-      query: UserByUsername,
-      variables: { username: body.username.toLowerCase() },
-    });
-    if (userCheck.data.cucb_users.length > 0) {
+    const userRepository = orm.em.fork().getRepository(User);
+    const user = await userRepository.findOne({ username: body.username.toLowerCase() });
+    if (user) {
       try {
-        await startPasswordReset(userCheck.data.cucb_users[0]);
+        await startPasswordReset(user);
         return new Response("", { status: 204 });
       } catch (e) {
         throw error(e.status, e.message);

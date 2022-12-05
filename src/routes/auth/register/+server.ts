@@ -15,7 +15,7 @@ const RegisterBody = RuntypeRecord({
   lastName: String,
 });
 
-export async function POST({ request, cookies }) {
+export async function POST({ request, cookies, locals }) {
   const body = Object.fromEntries(await request.formData());
   let checkedBody;
   try {
@@ -44,16 +44,21 @@ export async function POST({ request, cookies }) {
       try {
         const loginResult = await createAccount({ firstName, lastName, username, email, password });
 
-        request.locals.session.userId = loginResult.id.toString();
-        request.locals.session.hasuraRole = loginResult.admin_type.hasura_role;
-        request.locals.session.firstName = loginResult.first;
-        request.locals.session.lastName = loginResult.last;
-        const cookie = await request.locals.session.save();
+        locals.session.userId = loginResult.id.toString();
+        locals.session.hasuraRole = loginResult.adminType.hasura_role;
+        locals.session.firstName = loginResult.first;
+        locals.session.lastName = loginResult.last;
+        const cookie = await locals.session.save();
         cookies.set(...cookie);
-        return new Response(request.locals.session.userId);
+        return new Response(locals.session.userId);
       } catch (e) {
-        let { message, status } = e;
-        throw error(status, message);
+        if (e.message) {
+          let { message, status } = e;
+          throw error(status, message);
+        } else {
+          console.trace(e);
+          throw error(500, "Internal error");
+        }
       }
     } else {
       throw error(400, "Password must be at least 8 characters long");

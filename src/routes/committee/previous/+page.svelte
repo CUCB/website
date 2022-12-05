@@ -1,9 +1,14 @@
 <script lang="ts">
-  import { makeTitle } from "../../../view";
+  import { committee, makeTitle } from "../../../view";
   import Person from "../../../components/Committee/Person.svelte";
   import type { PageData } from "./$types";
+  import { DateTime } from "luxon";
   export let data: PageData;
-  let { committees, aprilFools } = data;
+  let { aprilFools } = data;
+  let committees = data.committees.map((committee) => ({
+    ...committee,
+    started: DateTime.fromJSDate(committee.started),
+  }));
 </script>
 
 <style>
@@ -46,11 +51,11 @@ For contact details for the current committee
   </h3>
   <div class="members">
     {#if aprilFools}
-      {#each committee.committee_members as person}
+      {#each committee.members as person}
         <Person person="{person}" aprilFools="{aprilFools}" />
       {/each}
     {:else}
-      {#each committee.committee_members.filter((person) => !person.april_fools_only) as person}
+      {#each committee.members.filter((person) => !person.aprilFoolsOnly) as person}
         <Person person="{person}" />
       {/each}
     {/if}

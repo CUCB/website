@@ -1,12 +1,13 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { SMTPClient } from "emailjs";
-import { GraphQLClient } from "../src/graphql/client";
-import gql from "graphql-tag";
-import fetch from "node-fetch";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
-import { Static, Record as RuntypeRecord, Number, String } from "runtypes";
+import { Record as RuntypeRecord, String } from "runtypes";
+import type { Static } from "runtypes";
+import orm from "$lib/database";
+import { User } from "./lib/entities/User";
+import { List042 } from "./lib/entities/List042";
 
 dotenv.config();
 if (typeof process.env["SESSION_SECRET"] === "undefined") {
@@ -18,14 +19,6 @@ const SESSION_SECRET_HASH = crypto
   .update(Buffer.from(process.env["SESSION_SECRET"] as string))
   .digest("hex");
 const SALT_ROUNDS = 10;
-
-export function makeServerGraphqlClient(params: { role?: string; headers?: Record<string, string> } = {}) {
-  return new GraphQLClient(fetch, {
-    domain: process.env["GRAPHQL_REMOTE"],
-    role: params.role || "server",
-    headers: { ...(params.headers || {}), "session-secret-hash": SESSION_SECRET_HASH },
-  });
-}
 
 const errors = {
   INCORRECT_USERNAME_OR_PASSWORD: {
@@ -63,55 +56,42 @@ interface LoginData {
 type SessionData = {
   first: string;
   last: string;
-  admin_type: {
-    hasura_role: string;
+  adminType: {
+    hasuraRole: string;
   };
-  user_id: number;
+  user_id: string;
 };
 
 export const login: (details: LoginData) => Promise<SessionData> = async ({ username, password }) => {
   username = username.toLowerCase().trim();
-  let client = makeServerGraphqlClient();
-  let res;
+
   try {
-    res = await client.query({
-      query: gql`
-        query SaltedPassword($username: String!) {
-          cucb_users(where: { username: { _eq: $username } }) {
-            salted_password
-            first
-            last
-            admin_type {
-              hasura_role
-            }
-            user_id: id
-          }
+    const userRepository = orm.em.fork().getRepository(User);
+    const user = await userRepository.findOne({ username });
+    if (user) {
+      if (user.saltedPassword) {
+        let hashedPassword = user.saltedPassword.replace("2y$", "2b$");
+        let passwordCorrect = await bcrypt.compare(password, hashedPassword);
+
+        if (passwordCorrect) {
+          let { first, last, adminType, id } = user;
+          // TODO test last login date works
+          await userRepository.nativeUpdate({ id }, { lastLoginDate: new Date() });
+          return { first, last, adminType, user_id: id };
+        } else {
+          throw errors.INCORRECT_USERNAME_OR_PASSWORD;
         }
-      `,
-      variables: { username },
-    });
-  } catch (e) {
-    console.error(e);
-    throw { status: 500, message: e.message || "Internal server error" };
-  }
-
-  if (res && res.data) {
-    if (res.data.cucb_users && res.data.cucb_users.length > 0) {
-      let user = res.data.cucb_users[0];
-      let hashedPassword = user.salted_password.replace("$2y$", "$2b$");
-      let passwordCorrect = await bcrypt.compare(password, hashedPassword);
-
-      if (passwordCorrect) {
-        return { ...user, salted_password: undefined };
       } else {
-        throw errors.INCORRECT_USERNAME_OR_PASSWORD;
+        // TODO cope with this scenario - it should ask user to reset their password
+        console.error("User does not have a pasword set");
+        throw errors.INTERNAL_ERROR;
       }
-    } else if (res.data.cucb_users.length === 0) {
-      throw errors.INCORRECT_USERNAME_OR_PASSWORD;
     } else {
-      throw errors.INTERNAL_ERROR;
+      throw errors.INCORRECT_USERNAME_OR_PASSWORD;
     }
-  } else {
+  } catch (e) {
+    console.trace(e);
+    if (e.status) throw e;
     throw errors.INTERNAL_ERROR;
   }
 };
@@ -124,71 +104,39 @@ interface CreateAccountDetails {
   lastName: string;
 }
 
-type NewAccount = any;
+type NewAccount = { first: string; last: string; adminType: { hasuraRole: string }; id: string };
 
-export const createAccount: (details: CreateAccountDetails) => NewAccount = async ({
+export const createAccount: (details: CreateAccountDetails) => Promise<NewAccount> = async ({
   username,
   password,
   email,
   firstName,
   lastName,
 }) => {
-  let client = makeServerGraphqlClient();
-  let emailSearch = await client.query({
-    query: gql`
-      query SearchList042($email: String!) {
-        cucb_list042(where: { email: { _ilike: $email } }) {
-          email
-        }
-      }
-    `,
-    variables: { email: mysql_real_escape_string(email) },
-  });
-  if (emailSearch?.data?.cucb_list042.length > 0) {
+  const userRepository = orm.em.fork().getRepository(User);
+  const list042Repository = orm.em.fork().getRepository(List042);
+  if (await list042Repository.findOne({ email: { $ilike: mysql_real_escape_string(email) } })) {
     username = username.toLowerCase();
     email = email.toLowerCase();
-    let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    const saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
     // Discard password before we accidentally do anything stupid
     password = "";
     try {
-      let res = await client.mutate({
-        mutation: gql`
-          mutation (
-            $username: String!
-            $email: String!
-            $saltedPassword: String!
-            $firstName: String!
-            $lastName: String!
-          ) {
-            insert_cucb_users_one(
-              object: {
-                username: $username
-                salted_password: $saltedPassword
-                first: $firstName
-                last: $lastName
-                email: $email
-              }
-            ) {
-              first
-              last
-              admin_type {
-                hasura_role
-              }
-              id
-            }
-          }
-        `,
-        variables: { username, email, saltedPassword, firstName, lastName },
+      const user = userRepository.create({
+        username,
+        saltedPassword,
+        first: firstName,
+        last: lastName,
+        email,
       });
-      if (res?.data?.insert_cucb_users_one) {
-        return res.data.insert_cucb_users_one;
-      } else {
-        throw errors.INTERNAL_ERROR;
-      }
+      await userRepository.persistAndFlush(user);
+      const { first, last, adminType, id } = user;
+      return { first, last, adminType, id };
     } catch (e) {
-      if (e.message.match(/unique/i)) {
+      if (e.detail.match(/already exists/i)) {
         throw errors.ACCOUNT_ALREADY_EXISTS;
       } else {
+        console.trace(e);
         throw errors.INTERNAL_ERROR;
       }
     }
@@ -197,8 +145,8 @@ export const createAccount: (details: CreateAccountDetails) => NewAccount = asyn
   }
 };
 
-const PasswordResetToken = RuntypeRecord({
-  id: Number,
+export const PasswordResetToken = RuntypeRecord({
+  id: String,
   email: String,
 });
 
@@ -208,7 +156,7 @@ export async function startPasswordReset({
   last,
   email,
 }: {
-  id: number;
+  id: string;
   first: string;
   last: string;
   email: string;
@@ -269,26 +217,19 @@ export async function completePasswordReset({ password, token }: { password: str
     }
   }
 
+  const saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+  // Discard password before we accidentally do anything stupid
+  password = "";
   if (PasswordResetToken.guard(decoded)) {
-    const client = makeServerGraphqlClient();
     try {
-      let saltedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-      // Discard password before we accidentally do anything stupid
-      password = "";
-      await client.mutate({
-        mutation: gql`
-          mutation UpdateUserPassword($id: bigint!, $saltedPassword: String!) {
-            update_cucb_users_by_pk(pk_columns: { id: $id }, _set: { salted_password: $saltedPassword }) {
-              id
-            }
-          }
-        `,
-        variables: { id: decoded.id, saltedPassword },
-      });
+      const userRepository = orm.em.fork().getRepository(User);
+      await userRepository.nativeUpdate({ id: decoded.id }, { saltedPassword });
     } catch (e) {
-      console.error(`GraphQL error trying to update user's password: ${e}`);
+      console.trace(e);
       throw errors.INTERNAL_ERROR;
     }
+  } else {
+    console.trace(decoded);
   }
 }
 

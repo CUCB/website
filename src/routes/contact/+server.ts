@@ -1,25 +1,29 @@
 import { SMTPClient } from "emailjs";
 import { escape as escapeHtml } from "html-escaper";
-import gql from "graphql-tag";
 import dotenv from "dotenv";
 import type { RequestHandler } from "./$types";
 import { error } from "@sveltejs/kit";
 import fetch from "node-fetch";
-import { makeServerGraphqlClient } from "../../auth";
+import { Committee } from "$lib/entities/Committee";
+import orm from "$lib/database";
+import { LoadStrategy } from "@mikro-orm/core";
 dotenv.config();
 
-export const POST: RequestHandler = async ({ request, fetch: handlerFetch }) => {
+export const POST: RequestHandler = async ({ request }) => {
   const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(
     await request.formData(),
   );
   let hcaptcha;
+  const body = new URLSearchParams();
+  body.append("response", captchaKey.toString());
+  body.append("secret", process.env["HCAPTCHA_SECRET"]);
   try {
     hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
       },
-      body: `response=${captchaKey}&secret=${process.env["HCAPTCHA_SECRET"]}`,
+      body,
     }).then((res) => res.json());
   } catch (e) {
     console.error(e);
@@ -32,31 +36,24 @@ export const POST: RequestHandler = async ({ request, fetch: handlerFetch }) => 
   if (hcaptcha.success) {
     let secretaries;
     try {
-      let client = makeServerGraphqlClient();
-      const secretaryRes = await client.query({
-        query: gql`
-          query CurrentSec {
-            cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
-              committee_members(
-                order_by: { committee_position: { position: asc }, name: asc }
-                where: { committee_key: { name: { _eq: "secretary" } } }
-              ) {
-                casual_name
-                email
-              }
-            }
-          }
-        `,
-      });
-      secretaries = secretaryRes?.data?.cucb_committees?.[0]?.committee_members;
+      const committeeRepository = orm.em.fork().getRepository(Committee);
+      secretaries = await committeeRepository
+        .findOne(
+          { started: { $lte: "now()" }, members: { lookupName: { name: "secretary" } } },
+          {
+            fields: ["members.casualName", "members.email", "members.lookupName", "members.lookupName.name"],
+            strategy: LoadStrategy.JOINED,
+          },
+        )
+        .then((committee) => committee?.members?.toArray());
     } catch (e) {
       // We deal with not found anyway, don't worry about it
       console.error("Failed to find secretary email");
       console.error(e);
     }
-    const secretary = secretaries?.[0] || {
-      casual_name: "Secretary",
-      email: "secretary@cucb.co.uk",
+    const secretary = {
+      casualName: secretaries?.[0].casualName || "Secretary",
+      email: secretaries?.[0].email || "secretary@cucb.co.uk",
     };
 
     const client = new SMTPClient({
@@ -86,7 +83,7 @@ export const POST: RequestHandler = async ({ request, fetch: handlerFetch }) => 
           to: `CUCB Secretary <${secretary.email}>`,
           subject: `${name} — Online Enquiry`,
           text: `Hello ${
-            secretary.casual_name
+            secretary.casualName
           }!\n\nYou have been sent the following enquiry by ${name} (${email}).\n\n${enquiryInformation}Message:\n\n\n-----------------------\n\n${escapeHtml(
             message,
           )}\n\n-----------------------\n\nMany thanks!\n`,

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, tick } from "svelte";
+  import { tick } from "svelte";
 
   import type { User } from "../../../routes/members/user/[id=integer]/types";
   import { themeName } from "../../../view";
@@ -8,6 +8,7 @@
   import type photonTy from "photon-web";
   import type { PhotonImage as PhotonImageTy } from "photon-web";
   import { browser } from "$app/environment";
+  import { Null, String } from "runtypes";
 
   export let user: User;
   export let canEdit: boolean;
@@ -20,8 +21,8 @@
   }
 
   let status = Status.NotUploading;
-  let sizeGuard;
-  let image;
+  let sizeGuard: HTMLImageElement;
+  let image: string | undefined | null;
   let pixelCrop: { x: number; y: number; width: number; height: number };
   let message = "";
   let button: HTMLButtonElement;
@@ -30,7 +31,9 @@
   // photon-web only runs in the browser, so dynamically import it when the page loads
   let init: typeof photonTy;
   let PhotonImage: typeof PhotonImageTy;
-  let resize;
+  let resize:
+    | ((image: PhotonImageTy, width: number, height: number, samplingFilter: number) => PhotonImageTy)
+    | undefined;
 
   $: browser &&
     import("photon-web").then((photon) => {
@@ -45,18 +48,21 @@
     image = null;
   }
 
-  async function onFileSelected(e) {
+  async function onFileSelected(e: Event & { currentTarget: EventTarget & HTMLInputElement }) {
     message = "Loading, please wait...";
     await tick();
-    let imageFile = e.target.files[0];
-    let reader = new FileReader();
-    reader.onload = async (e) => {
-      image = e.target.result;
-    };
-    reader.readAsDataURL(imageFile);
+    // TODO consider using runtypes here to make TS happy
+    let imageFile = e.target?.files?.[0];
+    if (imageFile) {
+      let reader = new FileReader();
+      reader.onload = async (e) => {
+        image = String.Or(Null).check(e.target?.result);
+      };
+      reader.readAsDataURL(imageFile);
+    }
   }
 
-  async function continueFileSelected(e) {
+  async function continueFileSelected(_: Event) {
     // TODO just accept the image if it's already 200x250, don't ask them to crop it
     if (sizeGuard.naturalWidth < 200 || sizeGuard.naturalHeight < 250) {
       console.error("Image is too small, retry!");
@@ -67,9 +73,12 @@
       const ctx = canvas.getContext("2d");
       canvas.width = sizeGuard.naturalWidth;
       canvas.height = sizeGuard.naturalHeight;
-      ctx.drawImage(sizeGuard, 0, 0);
+      ctx?.drawImage(sizeGuard, 0, 0);
       const data = canvas.toDataURL("image/jpeg");
-      await fetch(`/members/images/users/${user.id}.jpg`, { method: "POST", body: data });
+      const updated = await fetch(`/members/images/users/${user.id}.jpg`, { method: "POST", body: data });
+      if (updated.status % 100 != 2) {
+        throw `Oh shit: ${await updated.text()}`;
+      }
       lastUpdated = await (await fetch(`/members/images/users/${user.id}.jpg/modified`)).text();
       await fetch(`/members/images/users/${user.id}.jpg?srcmod=${lastUpdated}`).then(cancelUpload);
       return;
@@ -85,7 +94,7 @@
     message = "";
   }
 
-  function updateCrop(e) {
+  function updateCrop(e: CustomEvent<{ pixels: { x: number; y: number; width: number; height: number } }>) {
     pixelCrop = e.detail.pixels;
   }
 
@@ -97,7 +106,7 @@
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
       const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
+      ctx?.drawImage(img, 0, 0);
 
       let croppedImageBase64 = canvas.toDataURL("image/jpeg");
 
@@ -107,15 +116,17 @@
     };
   }
 
-  async function completeCrop(e) {
+  async function completeCrop(_: Event) {
     message = "Uploading file, please wait...";
     await tick();
     const croppedImageBase64 = await getCroppedImg(image, pixelCrop);
     await init("/photon_web_bg.wasm");
     let photonImg = PhotonImage.new_from_base64(croppedImageBase64.split(",")[1]);
-    photonImg = resize(photonImg, 200, 250, 4);
-    let pngData = photonImg.get_base64();
-    uploadPng(pngData);
+    if (resize) {
+      photonImg = resize(photonImg, 200, 250, 4);
+      let pngData = photonImg.get_base64();
+      uploadPng(pngData);
+    }
   }
 </script>
 

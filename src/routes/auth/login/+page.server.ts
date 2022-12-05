@@ -24,7 +24,7 @@ export const actions: Actions = {
         loginResult = await login(body);
 
         locals.session.userId = loginResult.user_id.toString();
-        locals.session.hasuraRole = loginResult.admin_type.hasura_role;
+        locals.session.hasuraRole = loginResult.adminType.hasuraRole;
         locals.session.firstName = loginResult.first;
         locals.session.lastName = loginResult.last;
 

@@ -20,7 +20,7 @@
   async function submit() {
     error = undefined;
     if (!captchaKey) {
-      error = "Please complete captcha";
+      error = { message: "Please complete captcha" };
       return;
     }
     const body = new URLSearchParams();
@@ -49,7 +49,7 @@
       success = true;
     } else {
       success = false;
-      error = await res.text();
+      error = await res.json();
     }
     submitted = true;
   }
@@ -141,7 +141,7 @@
   {#if error}
     <span class="error theme-{$themeName}">An error occured.</span>
     &ldquo;
-    {@html error}
+    {@html error.message}
     &rdquo;
   {/if}
 </section>

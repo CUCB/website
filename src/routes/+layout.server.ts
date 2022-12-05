@@ -27,8 +27,7 @@ export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
     const res = await fetch("/committee.json").then((r) => r.json());
 
     for (let person of res.committee) {
-      // @ts-ignore
-      downloadedCommittee[person.committee_key.name] = {
+      downloadedCommittee[person.lookupName.name] = {
         ...person,
       };
     }
@@ -37,7 +36,7 @@ export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
   }
 
   const fallbackCommittee: Committee = CommitteeRT.check(
-    Object.fromEntries(fallbackPeople.map((person) => [person.committee_key.name, person])),
+    Object.fromEntries(fallbackPeople.map((person) => [person.lookupName.name, person])),
   );
 
   const committee = { ...fallbackCommittee, ...downloadedCommittee };

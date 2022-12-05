@@ -29,13 +29,13 @@
   } = data;
   let graphqlClient: GraphQLClient = browser && new GraphQLClient(fetch, currentUser ? { role: "current_user" } : {});
 
-  function displayMonth(date: string | null): string | null {
+  function displayMonth(date: Date | null): string | null {
     if (date == null) return null;
-    const luxonDate = DateTime.fromISO(date);
+    const luxonDate = DateTime.fromJSDate(date);
     return luxonDate.toFormat("MMMM yyyy");
   }
 
-  function displayBioMonth(date: string | null): string {
+  function displayBioMonth(date: Date | null): string {
     return date ? `, ${displayMonth(date)}` : ``;
   }
 
@@ -65,7 +65,8 @@
     });
     const updatedBio = res.data.update_cucb_users_by_pk;
     if (updatedBio) {
-      user = { ...user, ...updatedBio };
+      const bioChangedDate = DateTime.fromISO(updatedBio.bio_changed_date).toJSDate();
+      user = { ...user, ...updatedBio, bioChangedDate };
       editingBio = false;
     } else {
       // TODO handle this error somehow
@@ -83,7 +84,7 @@
     NotEditing,
   }
   let editingInstrument = EditInstrumentState.NotEditing;
-  let currentlyEditingDetails = null;
+  let currentlyEditingDetails: UserInstrument | undefined;
   // TODO remove the additional layer of function, it's stupid and inconsistent
   function startAddInstrument() {
     editingInstrument = EditInstrumentState.AddingNew;
@@ -97,39 +98,39 @@
     editingInstrument = EditInstrumentState.NotEditing;
   }
 
-  function deleteInstrument(u_i_id: number) {
-    return async (_) => {
+  function deleteInstrument(u_i_id: string) {
+    return async (_: Event) => {
       const res = await graphqlClient.mutate<{ update_cucb_users_instruments_by_pk: UserInstrument }>({
         mutation: DeleteUserInstrument,
         variables: { id: u_i_id },
       });
       const newInstrument = res.data.update_cucb_users_instruments_by_pk;
       if (newInstrument) {
-        user.user_instruments[user.user_instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
+        user.instruments[user.instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
       } else {
-        user.user_instruments = user.user_instruments.filter((i) => i.id !== u_i_id);
+        user.instruments = user.instruments.filter((i) => i.id !== u_i_id);
       }
     };
   }
 
-  function restoreDeletedInstrument(u_i_id: number) {
-    return async (_) => {
+  function restoreDeletedInstrument(u_i_id: string) {
+    return async (_: Event) => {
       const res = await graphqlClient.mutate<{ update_cucb_users_instruments_by_pk: UserInstrument }>({
         mutation: RestoreDeletedUserInstrument,
         variables: { id: u_i_id },
       });
       const newInstrument = res.data.update_cucb_users_instruments_by_pk;
-      user.user_instruments[user.user_instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
+      user.instruments[user.instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
     };
   }
 
-  function editInstrument(u_i_id: number) {
-    return (_) => {
+  function editInstrument(u_i_id: string) {
+    return async (_: Event) => {
       editingInstrument = EditInstrumentState.EditingExisting;
-      currentlyEditingDetails = user.user_instruments.find((ui) => ui.id === u_i_id);
+      currentlyEditingDetails = user.instruments.find((ui) => ui.id === u_i_id);
     };
   }
-  function editNewInstrument(e) {
+  function editNewInstrument(e: CustomEvent<{ id: string }>) {
     const instr_id = e.detail.id;
     editingInstrument = EditInstrumentState.EditingExisting;
     currentlyEditingDetails = {
@@ -144,13 +145,13 @@
 
   function completeEditInstrument(e) {
     const instrument = e.detail.instrument;
-    const matchingInstrumentIndex = user.user_instruments.findIndex((ui) => ui.id === instrument.id);
+    const matchingInstrumentIndex = user.instruments.findIndex((ui) => ui.id === instrument.id);
     if (matchingInstrumentIndex > -1) {
-      user.user_instruments[matchingInstrumentIndex] = instrument;
+      user.instruments[matchingInstrumentIndex] = instrument;
     } else {
-      user.user_instruments.push(instrument);
+      user.instruments.push(instrument);
       // Trigger reactivity
-      user.user_instruments = user.user_instruments;
+      user.instruments = user.instruments;
     }
     editingInstrument = EditInstrumentState.NotEditing;
   }
@@ -191,7 +192,7 @@
         mutation: UpdateUserAdminStatus,
         variables: {
           user_id: user.id,
-          admin: user.admin_type.id,
+          admin: user.adminType.id,
         },
       });
     }
@@ -201,8 +202,8 @@
       first: user.first,
       last: user.last,
       email: user.email,
-      mobile_contact_info: user.mobile_contact_info,
-      location_info: user.location_info,
+      mobile_contact_info: user.mobileContactInfo,
+      location_info: user.locationInfo,
       dietaries: user.dietaries,
     };
     const res = await graphqlClient.mutate<{ update_cucb_users_by_pk: User }>({
@@ -304,47 +305,6 @@
   <h2>Edit mini biography</h2>
 {/if}
 
-<!-- <p>
-  Say hi to
-  <b>{user.first} {user.last}</b>!
-  {user.first}
-  joined the site
-  {join_date}
-  and
-  {#if login_date}was last seen online in {login_date}.{:else}hasn't been seen in a long time.{/if}
-</p> -->
-
-<!-- TODO support the "[*] We don't always take ourselves too seriously." footnote where novelty instruments are used -->
-
-<!-- {#if gig_count > 0}
-  Since joining CUCB,
-  {user.first}
-  has played
-  {gig_count}
-  {gig_count > 1 ? "gigs" : "gig"},
-  {#if gig_count > 1}most recently{/if}
-  on
-  <a href="{gigLink(last_gig.gig.id)}">{last_gig_date}</a>.
-  {#if gig_count > 1}The first one was back on the <a href="{gigLink(first_gig.gig.id)}">{first_gig_date}</a>.{/if}
-
-  {#if instrument_count > 0}
-    {possessive(user.first)}
-    instrument of choice would seem to be
-    <b>{most_played_instrument}</b>, having played it in
-    {percentage(most_played_instrument[1], instrument_gig_count)}
-    of their gigs.
-    {#if instrument_count > 1}
-      Apart from that, they have been known to play
-      <b>
-          <!-- TODO test this, why the fuck haven't the tests caught this being set to other_instruments[0]????
-        {#each other_instruments as instrument, i}
-          {instrument}
-          {#if i < other_instruments.length - 1}/{/if}
-        {/each}
-      </b>
-    {/if}
-  {/if}
-{/if} -->
 {#if editingBio}
   <textarea data-test="bio-content" bind:value="{editedBio}" maxlength="400" cols="60" rows="8"></textarea>
   <button data-test="save-bio" on:click="{saveBio}">Save</button>
@@ -353,7 +313,7 @@
   {#if user.bio}
     <figure>
       <blockquote data-test="bio-content">{user.bio}</blockquote>
-      <figcaption data-test="bio-name">{user.first}{displayBioMonth(user.bio_changed_date)}</figcaption>
+      <figcaption data-test="bio-name">{user.first}{displayBioMonth(user.bioChangedDate)}</figcaption>
     </figure>
   {:else}
     <blockquote data-test="bio-empty" class="empty">No bio written yet!</blockquote>
@@ -367,17 +327,17 @@
 {/if}
 <AutomaticProfile user="{user}" />
 
-{#if canEdit && user.mobile_contact_info}
-  <p data-test="mobile-number"><b>Mobile contact info:</b> {user.mobile_contact_info}</p>
+{#if canEdit && user.mobileContactInfo}
+  <p data-test="mobile-number"><b>Mobile contact info:</b> {user.mobileContactInfo}</p>
 {/if}
 {#if canEdit && user.email}
   <p>
     <b>Email:</b>
-    <Mailto person="{{ email_obfus: user.email }}" showEmail="{true}" />
+    <Mailto person="{{ emailObfus: user.email }}" showEmail="{true}" />
   </p>
 {/if}
-{#if user.location_info}
-  <p><b>Location info:</b> {user.location_info}</p>
+{#if user.locationInfo}
+  <p><b>Location info:</b> {user.locationInfo}</p>
 {/if}
 
 <ProfilePicture user="{user}" canEdit="{canEdit}" lastUpdated="{profilePictureUpdated}" />
@@ -386,9 +346,9 @@
   <h3>Important Info</h3>
   <form class="important-info" on:submit|preventDefault="{updateImportantInfo}">
     {#if canEditAdminStatus}
-      <label for="admin-status">Admin status</label><Select id="admin-status" bind:value="{user.admin_type.id}">
+      <label for="admin-status">Admin status</label><Select id="admin-status" bind:value="{user.adminType.id}">
         {#each allAdminStatuses as status (status.id)}
-          <option value="{status.id}" selected="{status.id === user.admin_type.id}">{status.title}</option>
+          <option value="{status.id}" selected="{status.id === user.adminType.id}">{status.title}</option>
         {/each}
       </Select>
     {/if}
@@ -416,12 +376,12 @@
       <label for="mobile">Mobile Contact Info</label><input
         type="text"
         id="mobile"
-        bind:value="{user.mobile_contact_info}"
+        bind:value="{user.mobileContactInfo}"
       />
       <label for="location">Location Info</label><input
         type="text"
         id="location"
-        bind:value="{user.location_info}"
+        bind:value="{user.locationInfo}"
         placeholder="Helpful for gig pickups!"
       />
       <label for="dietaries">Dietary Requirements (if none, enter 'None')</label><input
@@ -449,18 +409,20 @@
         required="{newPassword.length > 0}"
         bind:value="{newPasswordConfirm}"
       />
+      <!-- TODO fix the regex replacement-->
       <label for="last-login">Last Login</label><input
         type="datetime-local"
         disabled
         id="last-login"
-        value="{user.last_login_date?.toString().replace(/:\d{2}\.\d{6}\+.*/, '') || '?'}"
+        value="{user.lastLoginDate?.toString().replace(/:\d{2}\.\d{6}\+.*/, '') || '?'}"
       />
 
+      <!-- TODO fix the regex replacement-->
       <label for="join-date">Joined</label><input
-        type="{user.join_date ? 'date' : 'text'}"
+        type="{user.joinDate ? 'date' : 'text'}"
         disabled
         id="join-date"
-        value="{user.join_date?.toString().replace(/:\d{2}\.\d{6}\+.*/, '') || '?'}"
+        value="{user.joinDate?.toString().replace(/:\d{2}\.\d{6}\+.*/, '') || '?'}"
       />
     </fieldset>
     <fieldset class="bits-and-bobs">
@@ -494,10 +456,10 @@
   {:else if editingInstrument === EditInstrumentState.AddingNew}
     <InstrumentSelector allInstruments="{allInstruments}" on:select="{editNewInstrument}" />
     <button on:click="{cancelAddInstrument}" data-test="add-instrument">Cancel</button>
-  {:else if user.user_instruments?.length}
+  {:else if user.instruments?.length}
     <table>
       <thead><th>Instrument</th></thead>
-      {#each user.user_instruments.filter((i) => !i.deleted) as instrument (instrument.id)}
+      {#each user.instruments.filter((i) => !i.deleted) as instrument (instrument.id)}
         <tr data-test="user-instrument-{instrument.id}">
           <td data-test="name">{displayInstrumentName(instrument)}</td>
           <td
@@ -511,10 +473,10 @@
           >
         </tr>
       {/each}
-      {#if user.user_instruments.find((i) => i.deleted)}
+      {#if user.instruments.find((i) => i.deleted)}
         <tr><td colspan="2">****</td></tr>
       {/if}
-      {#each user.user_instruments.filter((i) => i.deleted) as instrument (instrument.id)}
+      {#each user.instruments.filter((i) => i.deleted) as instrument (instrument.id)}
         <tr data-test="user-instrument-{instrument.id}">
           <td data-test="name"><span class="deleted-instrument">{displayInstrumentName(instrument)}</span> (deleted)</td
           >
