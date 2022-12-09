@@ -1,5 +1,4 @@
 import { Collection, Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import type { DateTime } from "luxon";
 import { CommitteeMember } from "./CommitteeMember";
 
 @Entity({ schema: "cucb", tableName: "committees" })
@@ -11,7 +10,7 @@ export class Committee {
   started!: Date;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  picFolder?: string;
+  pic_folder?: string;
 
   @OneToMany({ entity: () => CommitteeMember, mappedBy: "committee", index: "idx_17360_committee" })
   members = new Collection<CommitteeMember>(this);

@@ -40,9 +40,9 @@ export const POST: RequestHandler = async ({ request }) => {
       const committeeRepository = orm.em.fork().getRepository(Committee);
       secretaries = await committeeRepository
         .findOne(
-          { started: { $lte: "now()" }, members: { lookupName: { name: "secretary" } } },
+          { started: { $lte: "now()" }, members: { lookup_name: { name: "secretary" } } },
           {
-            fields: ["members.casualName", "members.email", "members.lookupName", "members.lookupName.name"],
+            fields: ["members.casual_name", "members.email", "members.lookup_name", "members.lookup_name.name"],
             strategy: LoadStrategy.JOINED,
           },
         )
@@ -53,7 +53,7 @@ export const POST: RequestHandler = async ({ request }) => {
       console.error(e);
     }
     const secretary = {
-      casualName: secretaries?.[0].casualName || "Secretary",
+      casualName: secretaries?.[0].casual_name || "Secretary",
       email: secretaries?.[0].email || "secretary@cucb.co.uk",
     };
 

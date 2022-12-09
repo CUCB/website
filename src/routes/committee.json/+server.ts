@@ -18,8 +18,8 @@ export async function GET() {
         { started: { $lte: "now()" } },
         {
           orderBy: { started: QueryOrder.DESC },
-          fields: [{ members: ["name", "casualName", "emailObfus", "lookupName", { lookupName: ["name"] }] }],
-          populate: ["members.lookupName"],
+          fields: [{ members: ["name", "casual_name", "email_obfus", "lookup_name", { lookup_name: ["name"] }] }],
+          populate: ["members.lookup_name"],
         },
       );
 

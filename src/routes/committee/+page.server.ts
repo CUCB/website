@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ url }) => {
   const committee = await committeeRepository
     .findOne(
       { started: { $lte: "now()" } },
-      { orderBy: { started: QueryOrder.DESC }, populate: ["members.position", "members.lookupName"] },
+      { orderBy: { started: QueryOrder.DESC }, populate: ["members.position", "members.lookup_name"] },
     )
     .then((c) => c?.members.toArray());
   const aprilFools = url.searchParams.get("aprilfool") !== null;

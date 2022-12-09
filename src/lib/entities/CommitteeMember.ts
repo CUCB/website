@@ -5,7 +5,7 @@ import { Committee } from "./Committee";
 
 @Entity({ schema: "cucb", tableName: "committee_members" })
 export class CommitteeMember {
-  [OptionalProps]?: "aprilFoolsOnly" | "hidden";
+  [OptionalProps]?: "april_fools_only" | "hidden";
 
   @PrimaryKey({ columnType: "int8", type: "int8" })
   id!: string;
@@ -17,7 +17,7 @@ export class CommitteeMember {
   name!: string;
 
   @Property({ length: 255, type: "varchar" })
-  casualName!: string;
+  casual_name!: string;
 
   @Property({ length: 10, nullable: true, type: "varchar" })
   crsid?: string;
@@ -26,7 +26,7 @@ export class CommitteeMember {
   email?: string;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  emailObfus?: string;
+  email_obfus?: string;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
   pic?: string;
@@ -34,11 +34,11 @@ export class CommitteeMember {
   @ManyToOne({ entity: () => Committee, fieldName: "committee", index: "idx_17360_committee" })
   committee!: Committee;
 
-  @ManyToOne({ entity: () => CommitteeKey, fieldName: "lookup_name", index: "idx_17360_lookup_name" })
-  lookupName!: CommitteeKey;
+  @ManyToOne({ entity: () => CommitteeKey, index: "idx_17360_lookup_name" })
+  lookup_name!: CommitteeKey;
 
   @Property({ default: false, type: "boolean" })
-  aprilFoolsOnly: boolean = false;
+  april_fools_only: boolean = false;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
   comments?: string;
@@ -47,8 +47,8 @@ export class CommitteeMember {
   hidden: boolean = false;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  aprilFoolsDir?: string;
+  april_fools_dir?: string;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  subPosition?: string;
+  sub_position?: string;
 }
