@@ -34,7 +34,7 @@ export class CommitteeMember {
   @ManyToOne({ entity: () => Committee, fieldName: "committee", index: "idx_17360_committee" })
   committee!: Committee;
 
-  @ManyToOne({ entity: () => CommitteeKey, index: "idx_17360_lookup_name" })
+  @ManyToOne({ entity: () => CommitteeKey, fieldName: "lookup_name", index: "idx_17360_lookup_name" })
   lookup_name!: CommitteeKey;
 
   @Property({ default: false, type: "boolean" })

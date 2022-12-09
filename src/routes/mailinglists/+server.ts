@@ -1,15 +1,19 @@
-import { SMTPClient } from "emailjs";
-import gql from "graphql-tag";
+import { Message, SMTPClient } from "emailjs";
 import dotenv from "dotenv";
 import { error } from "@sveltejs/kit";
 import fetch from "node-fetch";
 import { env } from "$env/dynamic/private";
+import { Committee } from "$lib/entities/Committee";
+import type { RequestEvent } from "./$types";
+import orm from "$lib/database";
+import { PopulateHint } from "@mikro-orm/core";
+import { Boolean, Record, Array, String } from "runtypes";
 dotenv.config();
 
 // TODO make sure I'm tested
-export async function POST({ request }) {
+export const POST = async ({ request }: RequestEvent): Promise<Response> => {
   try {
-    return await realpost(request, fetch);
+    return await realpost(request);
   } catch (e) {
     if (e.code) {
       throw e;
@@ -19,9 +23,11 @@ export async function POST({ request }) {
       throw error(500, "Something went wrong.");
     }
   }
-}
+};
 
-async function realpost(request, fetch) {
+const HcaptchaResponse = Record({ success: Boolean });
+
+async function realpost(request: Request) {
   const { name, email, lists, captchaKey } = Object.fromEntries(await request.formData());
   const hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
     method: "POST",
@@ -29,27 +35,23 @@ async function realpost(request, fetch) {
       "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
     },
     body: `response=${captchaKey}&secret=${env["HCAPTCHA_SECRET"]}`,
-  }).then((res) => res.json());
+  })
+    .then((res) => res.json())
+    .then(HcaptchaResponse.check);
 
   let webmasters;
   try {
-    let client = new GraphQLClient(fetch);
-    const webmasterRes = await client.query({
-      query: gql`
-        query CurrentSec {
-          cucb_committees(limit: 1, order_by: { started: desc }, where: { started: { _lte: "now()" } }) {
-            committee_members(
-              order_by: { committee_position: { position: asc }, name: asc }
-              where: { committee_key: { name: { _eq: "webmaster" } } }
-            ) {
-              casual_name
-              email
-            }
-          }
-        }
-      `,
-    });
-    webmasters = webmasterRes?.data?.cucb_committees?.[0]?.committee_members;
+    // TODO make sure queries like this actually pick the latest committee, but not future committees
+    const committeeRepository = orm.em.fork().getRepository(Committee);
+    const committee = await committeeRepository.findOne(
+      { started: { $lte: "now()" }, members: { lookup_name: { name: { $eq: "webmaster" } } } },
+      {
+        orderBy: { started: "DESC" },
+        populate: ["members", "members.lookup_name", "members.lookup_name.name"],
+        populateWhere: PopulateHint.INFER,
+      },
+    );
+    webmasters = committee?.members.toArray();
   } catch (e) {
     // We deal with not found anyway, don't worry about it
     console.error("Couldn't retrieve webmaster's email address: " + e);
@@ -59,9 +61,10 @@ async function realpost(request, fetch) {
     casual_name: "Webmaster",
     email: "webmaster@cucb.co.uk",
   };
+  console.log(webmaster);
 
   if (hcaptcha.success) {
-    let client;
+    let client: SMTPClient;
     try {
       client = new SMTPClient({
         host: env["EMAIL_HOST"],
@@ -87,14 +90,16 @@ async function realpost(request, fetch) {
 
     const emailPromise = new Promise((resolve, reject) =>
       client.send(
-        {
+        new Message({
           from: `CUCB Website <${env["EMAIL_SEND_ADDRESS"]}>`,
           to: `CUCB Webmaster <${webmaster.email}>`,
           subject: `Request to join mailing lists`,
-          text: `${name}\n${email}\nWishes to join the following lists\n${JSON.parse(lists).map(
-            (list) => `\t${list}\n`,
-          )}`,
-        },
+          // TODO move the Array(String).check earlier
+          text: `${name}\n${email}\nWishes to join the following lists\n${Array(String)
+            .check(JSON.parse(lists.toString()))
+            .map((list) => `\t${list}`)
+            .join(",\n")}`,
+        }),
         (err, message) => {
           // TODO process the error and feed back to the client
           if (err) {
