@@ -5,15 +5,17 @@ import jwt from "jsonwebtoken";
 import { error } from "@sveltejs/kit";
 // If we don't import Response somewhere, we get a "Response is not defined" error every time
 // we call fetch when server-side rendering, so we import it here.
+// TODO is this needed now
 // @ts-ignore
 import type { Response } from "isomorphic-fetch";
 import type { Cookies } from "@sveltejs/kit";
 import { Session } from "./lib/entities/Session";
 import orm from "./lib/database";
 import { User } from "./lib/entities/User";
+import { env } from "$env/dynamic/private";
 
 dotenv.config();
-const SESSION_SECRET = process.env["SESSION_SECRET"];
+const SESSION_SECRET = env["SESSION_SECRET"];
 if (!SESSION_SECRET) {
   console.error("SESSION_SECRET must be set in .env");
   process.exit(1);
@@ -170,7 +172,7 @@ async function sessionFromHeaders(cookies, request: Request) {
 }
 
 export async function handleFetch({ event, request, fetch }) {
-  if (request.url.startsWith("http://graphql-engine:8080/")) {
+  if (request.url.startsWith(env["GRAPHQL_REMOTE"])) {
     request.headers.set("cookie", event.request.headers.get("cookie"));
     request.headers.set("authorization", event.request.headers.get("authorization"));
     for (const [header, value] of event.request.headers) {

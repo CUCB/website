@@ -389,7 +389,7 @@ describe("password reset form", () => {
     });
   });
   it("can't be accessed by logged in users", () => {
-    cy.login("cypress_user", "abc123");
+    cy.loginWithoutCySession("cypress_user", "abc123");
     cy.visit("/auth/reset-password");
     cy.url().should("contain", "/members").and("not.contain", "/auth");
   });

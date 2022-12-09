@@ -2,10 +2,11 @@ import { Union, Literal, Undefined, Null } from "runtypes";
 import crypto from "crypto";
 import dotenv from "dotenv";
 import { json } from "@sveltejs/kit";
+import { env } from "$env/dynamic/private";
 dotenv.config();
 const CORRECT_SESSION_SECRET_HASH = crypto
   .createHash("sha512")
-  .update(Buffer.from(process.env["SESSION_SECRET"] as string))
+  .update(Buffer.from(env["SESSION_SECRET"] as string))
   .digest("hex");
 
 // TODO centralise this stuff!!

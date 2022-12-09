@@ -8,15 +8,16 @@ import type { Static } from "runtypes";
 import orm from "$lib/database";
 import { User } from "./lib/entities/User";
 import { List042 } from "./lib/entities/List042";
+import { env } from "$env/dynamic/private";
 
 dotenv.config();
-if (typeof process.env["SESSION_SECRET"] === "undefined") {
+if (typeof env["SESSION_SECRET"] === "undefined") {
   console.error("Error: SESSION_SECRET must be defined in .env before running the server");
   process.exit(1);
 }
 const SESSION_SECRET_HASH = crypto
   .createHash("sha512")
-  .update(Buffer.from(process.env["SESSION_SECRET"] as string))
+  .update(Buffer.from(env["SESSION_SECRET"] as string))
   .digest("hex");
 const SALT_ROUNDS = 10;
 
@@ -162,19 +163,19 @@ export async function startPasswordReset({
   email: string;
 }): Promise<void> {
   const payload: Static<typeof PasswordResetToken> = { id, email };
-  const token = jwt.sign(payload, process.env["SESSION_SECRET"] as string, { expiresIn: "1 hour" });
+  const token = jwt.sign(payload, env["SESSION_SECRET"] as string, { expiresIn: "1 hour" });
   const emailClient = new SMTPClient({
-    host: process.env["EMAIL_HOST"],
-    ssl: process.env["EMAIL_SSL"] !== "true" ? false : undefined,
+    host: env["EMAIL_HOST"],
+    ssl: env["EMAIL_SSL"] !== "true" ? false : undefined,
     tls:
-      process.env["EMAIL_SSL"] === "true"
+      env["EMAIL_SSL"] === "true"
         ? {
             ciphers: "SSLv3",
           }
         : undefined,
-    port: JSON.parse(process.env["EMAIL_PORT"] as string) as number,
-    user: process.env["EMAIL_USERNAME"],
-    password: process.env["EMAIL_PASSWORD"],
+    port: JSON.parse(env["EMAIL_PORT"] as string) as number,
+    user: env["EMAIL_USERNAME"],
+    password: env["EMAIL_PASSWORD"],
   });
   const link = `https://www.cucb.co.uk/auth/reset-password?token=${token}`;
   const text = `A password reset has been requested for your account. To choose a new password, go to ${link}. If you have any problems, please get in touch with the webmaster by replying to this email.`;
@@ -182,8 +183,8 @@ export async function startPasswordReset({
   emailClient.send(
     {
       //@ts-ignore
-      from: `CUCB Webmaster <${process.env["EMAIL_SEND_ADDRESS"]}>`,
-      "reply-to": `CUCB Webmaster <${process.env["EMAIL_SEND_ADDRESS"]}>`,
+      from: `CUCB Webmaster <${env["EMAIL_SEND_ADDRESS"]}>`,
+      "reply-to": `CUCB Webmaster <${env["EMAIL_SEND_ADDRESS"]}>`,
       to: `${first} ${last} <${email}>`,
       subject: `CUCB — Password Reset`,
       content: `Hi ${first},
@@ -208,7 +209,7 @@ CUCB Webmaster\n`,
 export async function completePasswordReset({ password, token }: { password: string; token: string }): Promise<void> {
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env["SESSION_SECRET"] as string);
+    decoded = jwt.verify(token, env["SESSION_SECRET"] as string);
   } catch (e) {
     if (e instanceof jwt.TokenExpiredError) {
       throw errors.TOKEN_EXPIRED;

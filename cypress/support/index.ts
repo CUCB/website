@@ -26,12 +26,14 @@ Cypress.DateTime = DateTime;
 chai.use(chaiSorted);
 
 const equalColor = (_chai, utils) => {
-  function assertEqualColor(options) {
-    let objectColor = tinycolor(this._obj.css("color")).toHexString();
+  function assertEqualColor(options: string | string[]) {
+    // TODO handle undefined better
+    const objectColor = tinycolor(this._obj.css("color")).toHexString();
+    const colors = Array.isArray(options) ? options : [options];
     this.assert(
-      objectColor === tinycolor(options).toHexString(),
-      `expected #{this} to have color "${tinycolor(options).toHexString()}". actual color is "${objectColor}".`,
-      `expected #{this} to not have color "${tinycolor(options).toHexString()}". actual color is "${objectColor}".`,
+      colors.map((color) => tinycolor(color).toHexString()).includes(objectColor),
+      `expected #{this} to have color in "${colors}". actual color is "${objectColor}".`,
+      `expected #{this} to not have color in "${colors}". actual color is "${objectColor}".`,
       this._obj,
     );
   }
@@ -42,16 +44,13 @@ const equalColor = (_chai, utils) => {
 chai.use(equalColor);
 
 const equalStroke = (_chai, utils) => {
-  function assertEqualStroke(options) {
+  function assertEqualStroke(options: string | string[]) {
     let objectColor = tinycolor(this._obj.css("stroke")).toHexString();
+    const colors = Array.isArray(options) ? options : [options];
     this.assert(
-      objectColor === tinycolor(options).toHexString(),
-      `expected #{this} to have stroke color "${tinycolor(
-        options,
-      ).toHexString()}". actual stroke color is "${objectColor}".`,
-      `expected #{this} to not have stroke color "${tinycolor(
-        options,
-      ).toHexString()}". actual stroke color is "${objectColor}".`,
+      colors.map((color) => tinycolor(color).toHexString()).includes(objectColor),
+      `expected #{this} to have stroke color "${colors}". actual stroke color is "${objectColor}".`,
+      `expected #{this} to not have stroke color "${colors}". actual stroke color is "${objectColor}".`,
       this._obj,
     );
   }

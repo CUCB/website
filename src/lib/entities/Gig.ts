@@ -5,7 +5,7 @@ import { User } from "./User";
 
 @Entity({ schema: "cucb", tableName: "gigs" })
 export class Gig {
-  [OptionalProps]?: "adminsOnly" | "advertise" | "allowSignups" | "foodProvided";
+  [OptionalProps]?: "admins_only" | "advertise" | "allow_signups" | "food_provided";
 
   @PrimaryKey({ columnType: "int8", type: "int8" })
   id!: string;
@@ -23,10 +23,10 @@ export class Gig {
   time?: string;
 
   @Property({ length: 6, nullable: true, type: "timestamptz" })
-  arriveTime?: Date;
+  arrive_time?: Date;
 
   @Property({ length: 6, nullable: true, type: "timestamptz" })
-  finishTime?: Date;
+  finish_time?: Date;
 
   @ManyToOne({ entity: () => GigVenue, onUpdateIntegrity: "cascade", nullable: true, index: "idx_17399_venue_id" })
   venue?: GigVenue;
@@ -39,50 +39,50 @@ export class Gig {
     nullable: true,
     index: "idx_17399_posting_user",
   })
-  postingUser?: User;
+  posting_user?: User;
 
   @Property({ length: 6, nullable: true, defaultRaw: `now()`, type: "timestamptz" })
-  postingTime?: Date;
+  posting_time?: Date;
 
   @ManyToOne({ entity: () => User, fieldName: "editing_user", nullable: true })
-  editingUser?: User;
+  editing_user?: User;
 
   @Property({ length: 6, nullable: true, type: "timestamptz" })
-  editingTime?: Date;
+  editing_time?: Date;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
   summary?: string;
 
   @Property({ columnType: "date", nullable: true, type: "date" })
-  quoteDate?: string;
+  quote_date?: string;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
   finance?: string;
 
   @Property({ nullable: true, default: false, type: "bool" })
-  financeDepositReceived?: boolean = false;
+  finance_deposit_received?: boolean = false;
 
   @Property({ nullable: true, default: false, type: "bool" })
-  financePaymentReceived?: boolean = false;
+  finance_payment_received?: boolean = false;
 
   @Property({ nullable: true, default: false, type: "bool" })
-  financeCallerPaid?: boolean = false;
+  finance_caller_paid?: boolean = false;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  notesBand?: string;
+  notes_band?: string;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  notesAdmin?: string;
+  notes_admin?: string;
 
   @Property({ default: false, type: "bool" })
   advertise: boolean = false;
 
   @Property({ default: true, type: "bool" })
-  adminsOnly: boolean = true;
+  admins_only: boolean = true;
 
   @Property({ default: false, type: "bool" })
-  allowSignups: boolean = false;
+  allow_signups: boolean = false;
 
   @Property({ default: false, type: "bool" })
-  foodProvided: boolean = false;
+  food_provided: boolean = false;
 }
