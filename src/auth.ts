@@ -180,8 +180,8 @@ export async function startPasswordReset({
   const link = `https://www.cucb.co.uk/auth/reset-password?token=${token}`;
   const text = `A password reset has been requested for your account. To choose a new password, go to ${link}. If you have any problems, please get in touch with the webmaster by replying to this email.`;
   const html = `A password reset has been requested for your account. To choose a new password, go to <a href="${link}">${link}</a>. If you have any problems, please get in touch with the webmaster by replying to this email.`;
-  emailClient.send(
-    {
+  try {
+    await emailClient.sendAsync({
       //@ts-ignore
       from: `CUCB Webmaster <${env["EMAIL_SEND_ADDRESS"]}>`,
       "reply-to": `CUCB Webmaster <${env["EMAIL_SEND_ADDRESS"]}>`,
@@ -196,14 +196,11 @@ CUCB Webmaster\n`,
       attachment: [
         { data: `<html><p>Hi ${first},</p><p>${html}</p><p>Thanks,<br>CUCB Webmaster</p>`, alternative: true },
       ],
-    },
-    (err, msg) => {
-      if (err != null) {
-        console.error(`Error sending password reset email: ${err.message}`);
-        throw errors.INTERNAL_ERROR;
-      }
-    },
-  );
+    });
+  } catch (err) {
+    console.error(`Error sending password reset email: ${err.message}`);
+    throw errors.INTERNAL_ERROR;
+  }
 }
 
 export async function completePasswordReset({ password, token }: { password: string; token: string }): Promise<void> {
