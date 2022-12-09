@@ -7,7 +7,7 @@ import { User } from "./User";
 @Unique({ name: "idx_17423_gig_id", properties: ["gig", "user"] })
 @Filter({ name: "approved", cond: { approved: { $eq: true } } })
 export class GigLineup {
-  [OptionalProps]?: "driver" | "equipment" | "leader" | "moneyCollector" | "moneyCollectorNotified";
+  [OptionalProps]?: "driver" | "equipment" | "leader" | "money_collector" | "money_collector_notified";
 
   @Property({ columnType: "int8", type: "int8" })
   id!: string;
@@ -25,10 +25,10 @@ export class GigLineup {
   user!: User;
 
   @Property({ length: 6, nullable: true, defaultRaw: `now()`, type: "timestamptz" })
-  addingTime?: Date;
+  adding_time?: Date;
 
   @Property({ length: 6, nullable: true, type: "timestamptz" })
-  editingTime?: Date;
+  editing_time?: Date;
 
   @Property({ nullable: true, type: "bool" })
   approved?: boolean;
@@ -43,23 +43,23 @@ export class GigLineup {
   driver: boolean = false;
 
   @Property({ default: false, type: "bool" })
-  moneyCollector: boolean = false;
+  money_collector: boolean = false;
 
   @Property({ default: false, type: "bool" })
-  moneyCollectorNotified: boolean = false;
+  money_collector_notified: boolean = false;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  userNotes?: string;
+  user_notes?: string;
 
   @Property({ nullable: true, type: "bool" })
-  userAvailable?: boolean;
+  user_available?: boolean;
 
   @Property({ nullable: true, type: "bool" })
-  userOnlyIfNecessary?: boolean;
+  user_only_if_necessary?: boolean;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  adminNotes?: string;
+  admin_notes?: string;
 
-  @OneToMany({ entity: () => GigLineupInstrument, mappedBy: "gigLineup" })
-  userInstruments = new Collection<GigLineupInstrument>(this);
+  @OneToMany({ entity: () => GigLineupInstrument, mappedBy: "gig_lineup" })
+  user_instruments = new Collection<GigLineupInstrument>(this);
 }

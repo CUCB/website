@@ -570,6 +570,18 @@ describe("iCal files", () => {
       });
     });
   });
+
+  describe("for president", () => {
+    it("contains admin information");
+    it("can be generated for all gigs");
+    it("can be generated for my gigs");
+  });
+
+  describe("for normal user", () => {
+    it("omits admin information");
+    it("can be generated for all gigs excluding hidden gigs");
+    it("can be generated for my gigs");
+  });
 });
 
 import ICAL from "ical.js";

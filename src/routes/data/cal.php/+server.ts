@@ -18,17 +18,18 @@ import { sortLineup } from "../../../components/Gigs/_sort";
 import { error } from "@sveltejs/kit";
 import orm from "$lib/database";
 import { CalendarSubscription } from "$lib/entities/CalendarSubscription";
-import { CalendarSubscriptionType } from "$lib/entities/CalendarSubscriptionType";
+import type { CalendarSubscriptionType } from "$lib/entities/CalendarSubscriptionType";
+import { env } from "$env/dynamic/private";
 const { ICalCalendar, ICalCalendarMethod } = icalPkg;
 
 dotenv.config();
 
 const SESSION_SECRET_HASH = crypto
   .createHash("sha512")
-  .update(Buffer.from(process.env["SESSION_SECRET"] as string))
+  .update(Buffer.from(env["SESSION_SECRET"] as string))
   .digest("hex");
 
-const CALENDAR_SECRET = process.env["CALENDAR_SECRET"];
+const CALENDAR_SECRET = env["CALENDAR_SECRET"];
 
 function applyTimezone(date: string): string {
   return DateTime.fromISO(date).setZone("Europe/London").toISO({ includeOffset: false });
@@ -45,8 +46,8 @@ function startEndTimes(gig) {
   return { start, end };
 }
 
-function graphqlAuthenticationToken(uid): string {
-  return jwt.sign({ userId: uid }, process.env["SESSION_SECRET"] as string, { expiresIn: "15 minutes" });
+function graphqlAuthenticationToken(uid: string): string {
+  return jwt.sign({ userId: uid }, env["SESSION_SECRET"] as string, { expiresIn: "15 minutes" });
 }
 
 function linkTo(gig, baseUrl: string): string {
@@ -341,7 +342,7 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
   const baseUrl = `${proto}://${host}`;
   if (testAuthLink(url.searchParams)) {
     client = new GraphQLClient(fetch, {
-      domain: process.env["GRAPHQL_REMOTE"],
+      domain: env["GRAPHQL_REMOTE"],
       headers: { authorization: `Bearer ${graphqlAuthenticationToken(url.searchParams.get("_cal_uid"))}` },
     });
   } else {

@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 import dotenv from "dotenv";
 import { error } from "@sveltejs/kit";
 import fetch from "node-fetch";
+import { env } from "$env/dynamic/private";
 dotenv.config();
 
 // TODO make sure I'm tested
@@ -27,7 +28,7 @@ async function realpost(request, fetch) {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
     },
-    body: `response=${captchaKey}&secret=${process.env["HCAPTCHA_SECRET"]}`,
+    body: `response=${captchaKey}&secret=${env["HCAPTCHA_SECRET"]}`,
   }).then((res) => res.json());
 
   let webmasters;
@@ -63,21 +64,21 @@ async function realpost(request, fetch) {
     let client;
     try {
       client = new SMTPClient({
-        host: process.env["EMAIL_HOST"],
-        ssl: process.env["EMAIL_SSL"] !== "true" ? false : undefined,
+        host: env["EMAIL_HOST"],
+        ssl: env["EMAIL_SSL"] !== "true" ? false : undefined,
         tls:
-          process.env["EMAIL_SSL"] === "true"
+          env["EMAIL_SSL"] === "true"
             ? {
                 ciphers: "SSLv3",
               }
             : undefined,
-        port: parseInt(process.env["EMAIL_PORT"]),
-        user: process.env["EMAIL_USERNAME"],
-        password: process.env["EMAIL_PASSWORD"],
+        port: parseInt(env["EMAIL_PORT"]),
+        user: env["EMAIL_USERNAME"],
+        password: env["EMAIL_PASSWORD"],
       });
     } catch (e) {
       console.error("Failed to make SMTP client");
-      console.error(`Tried to connect to ${process.env.EMAIL_HOST}:${process.env.EMAIL_PORT}`);
+      console.error(`Tried to connect to ${env.EMAIL_HOST}:${env.EMAIL_PORT}`);
       throw error(
         500,
         `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
@@ -87,7 +88,7 @@ async function realpost(request, fetch) {
     const emailPromise = new Promise((resolve, reject) =>
       client.send(
         {
-          from: `CUCB Website <${process.env["EMAIL_SEND_ADDRESS"]}>`,
+          from: `CUCB Website <${env["EMAIL_SEND_ADDRESS"]}>`,
           to: `CUCB Webmaster <${webmaster.email}>`,
           subject: `Request to join mailing lists`,
           text: `${name}\n${email}\nWishes to join the following lists\n${JSON.parse(lists).map(

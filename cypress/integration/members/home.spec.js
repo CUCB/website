@@ -63,6 +63,10 @@ describe("members' home page", () => {
       cy.visit("/members");
     });
 
+    const TEAL = ["#3e7e7c", "#3f807e"];
+    const RED = ["#fc2900", "#fd2a00"];
+    const CYAN = ["#00fcf5", "#00fdf7"];
+
     it("can change and reset accent colour", () => {
       cy.get("[data-test=settings-cog]").click();
       cy.get("[data-test=change-accent-color]").click();
@@ -75,15 +79,15 @@ describe("members' home page", () => {
           cy.get("[data-test=accent-popup] [data-test=icon-close]").click();
           cy.get("#colorsquare-event").should("not.exist");
           cy.get("[data-test=accent-popup]").should("not.exist");
-          expect(hexAccent.toLowerCase()).to.eq("#3e7e7c");
+          expect(TEAL).to.include(hexAccent.toLowerCase());
           cy.get("[data-test=icon-close]").click();
-          cy.get("nav a").should("have.color", "#3e7e7c");
+          cy.get("nav a").should("have.color", TEAL);
           cy.reload();
-          cy.get("nav a").should("have.color", "#3e7e7c");
+          cy.get("nav a").should("have.color", TEAL);
           cy.get("[data-test=settings-cog]").click();
           cy.get("[data-test=reset-accent-color]").click();
           cy.get("[data-test=icon-close]").click();
-          cy.get("nav a").should("not.have.color", "#3e7e7c");
+          cy.get("nav a").should("not.have.color", TEAL);
         });
     });
 
@@ -98,15 +102,15 @@ describe("members' home page", () => {
           cy.get("[data-test=logo-popup] [data-test=icon-close]").click();
           cy.get("#colorsquare-event").should("not.exist");
           cy.get("[data-test=logo-popup]").should("not.exist");
-          expect(hexLogoColour.toLowerCase()).to.eq("#3e7e7c");
+          expect(TEAL).to.include(hexLogoColour.toLowerCase());
           cy.get("[data-test=icon-close]").click();
-          cy.get("[data-test=logo] path").should("have.stroke", "#3e7e7c");
+          cy.get("[data-test=logo] path").should("have.stroke", TEAL);
           cy.reload();
-          cy.get("[data-test=logo] path").should("have.stroke", "#3e7e7c");
+          cy.get("[data-test=logo] path").should("have.stroke", TEAL);
           cy.get("[data-test=settings-cog]").click();
           cy.get("[data-test=reset-logo-color]").click();
           cy.get("[data-test=icon-close]").click();
-          cy.get("[data-test=logo] path").should("not.have.stroke", "#3e7e7c");
+          cy.get("[data-test=logo] path").should("not.have.stroke", TEAL);
         });
     });
 
@@ -143,8 +147,8 @@ describe("members' home page", () => {
       cy.get("[data-test=select-theme] [data-test=select-box]").select("dark");
       cy.get("[data-test=confirm-theme]").click();
 
-      cy.get("[data-test=logo] path").should("have.stroke", "#fc2900");
-      cy.get("nav a").should("have.color", "#00fcf5");
+      cy.get("[data-test=logo] path").should("have.stroke", RED);
+      cy.get("nav a").should("have.color", CYAN);
 
       cy.get(".theme-dark").should("exist");
       cy.get(".theme-light").should("not.exist");
@@ -154,7 +158,7 @@ describe("members' home page", () => {
 
       cy.reload();
       cy.waitForFormInteractive();
-      cy.get("[data-test=logo] path").should("have.stroke", "#fc2900");
+      cy.get("[data-test=logo] path").should("have.stroke", RED);
 
       cy.get("[data-test=settings-cog]").click();
       cy.get("[data-test=select-theme] [data-test=select-box]").select("light");
@@ -163,8 +167,8 @@ describe("members' home page", () => {
       cy.get(".theme-light").should("exist");
       cy.get(".theme-dark").should("not.exist");
 
-      cy.get("[data-test=logo] path").should("have.stroke", "#00fcf5");
-      cy.get("nav a").should("have.color", "#fc2900");
+      cy.get("[data-test=logo] path").should("have.stroke", CYAN);
+      cy.get("nav a").should("have.color", RED);
     });
 
     Cypress.Commands.add("assertLogoRotates", () => {
@@ -219,9 +223,9 @@ describe("members' home page", () => {
     });
 
     it("preserves settings when logging in again", () => {
-      const LOGO = "#fc0000";
-      const ACCENT_LIGHT = "#00fcf5";
-      const ACCENT_DARK = "#3e7e7c";
+      const LOGO = ["#fc2900", "#fd2a00", "#fc0000"];
+      const ACCENT_DARK = ["#3e7e7c", "#3f807e"];
+      const ACCENT_LIGHT = ["#00fcf5", "#00fdf7"];
       cy.intercept("POST", "/updatetheme").as("updateTheme");
       cy.get("[data-test=settings-cog]").click();
 

@@ -24,41 +24,41 @@ services:
       HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # use `npm run hasura:console` instead, it persists changes via migrations
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
       HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_AUTH_HOOK: http://sveltekit:3000/auth/hook
+      HASURA_GRAPHQL_AUTH_HOOK: http://172.17.0.1:3001/auth/hook
     ports:
       - "8080:8080"
-  sveltekit:
-    image: node:16.14
-    user: node:node
-    environment:
-      GRAPHQL_REMOTE: http://graphql-engine:8080
-      GRAPHQL_PATH: /v1/graphql
-      PG_USER: postgres
-      PG_HOST: postgres
-      PG_DATABASE: postgres
-      PG_PORT: 5432
-      PG_PASSWORD: ${PG_PASSWORD}
-      VITE_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
-      HCAPTCHA_SECRET: "0x0000000000000000000000000000000000000000"
-      EMAIL_HOST: mailhog
-      EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
-      EMAIL_PORT: 1025
-      EMAIL_SSL: "false"
-      SESSION_SECRET: somethingrandom
-      # TODO get this working (in dev AND prod) and re-enable auto csrf protection in svelte.config.js
-      # ORIGIN: "localhost:3000"
-      # ADDRESS_HEADER: "X-Forwarded-For"
-      # XFF_DEPTH: 1
-    volumes:
-      - .:/home/node/app
-      - node_modules_2:/home/node/app/node_modules/
-    restart: always
-    ports:
-      - "127.0.0.1:3001:3000"
-      - "24678:24678"
-    command: >
-      bash -c "cd /home/node/app; npm install; npm run watch:dev"
-  #      bash -c "cd /home/node/app; npm install; npm run build; npm run start -- --host 0.0.0.0 --port 3000"
+  # sveltekit:
+  #   image: node:16.14
+  #   user: node:node
+  #   environment:
+  #     GRAPHQL_REMOTE: http://graphql-engine:8080
+  #     GRAPHQL_PATH: /v1/graphql
+  #     PG_USER: postgres
+  #     PG_HOST: postgres
+  #     PG_DATABASE: postgres
+  #     PG_PORT: 5432
+  #     PG_PASSWORD: ${PG_PASSWORD}
+  #     VITE_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
+  #     HCAPTCHA_SECRET: "0x0000000000000000000000000000000000000000"
+  #     EMAIL_HOST: mailhog
+  #     EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
+  #     EMAIL_PORT: 1025
+  #     EMAIL_SSL: "false"
+  #     SESSION_SECRET: somethingrandom
+  #     # TODO get this working (in dev AND prod) and re-enable auto csrf protection in svelte.config.js
+  #     # ORIGIN: "localhost:3000"
+  #     # ADDRESS_HEADER: "X-Forwarded-For"
+  #     # XFF_DEPTH: 1
+  #   volumes:
+  #     - .:/home/node/app
+  #     - node_modules_2:/home/node/app/node_modules/
+  #   restart: always
+  #   ports:
+  #     - "127.0.0.1:3001:3000"
+  #     - "24678:24678"
+  #   command: >
+  #     bash -c "cd /home/node/app; npm install; npm run watch:dev"
+  # #      bash -c "cd /home/node/app; npm install; npm run build; npm run start -- --host 0.0.0.0 --port 3000"
   caddy:
     image: caddy:latest
     restart: always
@@ -72,6 +72,7 @@ services:
   mailhog:
     image: mailhog/mailhog
     ports:
+      - "1025:1025"
       - "8025:8025"
 volumes:
   db_data:

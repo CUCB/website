@@ -12,7 +12,8 @@ import type { EntityField } from "@mikro-orm/core";
 import { UserPrefType } from "../../../../lib/entities/UserPrefType";
 import { AuthUserType } from "../../../../lib/entities/AuthUserType";
 import { GigLineup } from "../../../../lib/entities/GigLineup";
-import type { LoadOutput } from "./types";
+import type { AggregateInstrument, LoadOutput } from "./types";
+import { Instrument } from "../../../../lib/entities/Instrument";
 
 const PUBLIC_FIELDS: EntityField<User, string>[] = [
   "id",
@@ -37,10 +38,13 @@ const SENSITIVE_FIELDS: EntityField<User, string>[] = [
 const EDITOR_FIELDS: EntityField<User, string>[] = ["adminType"];
 const GIG_LINEUP_FIELDS: EntityField<GigLineup, string>[] = [
   "gig",
-  "userInstruments",
+  "user_instruments",
   {
     gig: ["id", "title", "date"],
-    userInstruments: ["userInstrument", { userInstrument: ["instrument", { instrument: ["id", "name", "novelty"] }] }],
+    user_instruments: [
+      "user_instrument",
+      { user_instrument: ["instrument", { instrument: ["id", "name", "novelty"] }] },
+    ],
   },
 ];
 
@@ -62,11 +66,11 @@ export const load: PageServerLoad = async ({ locals, params: { id }, fetch }): P
     } else {
       userFields = [...PUBLIC_FIELDS];
     }
-    const [userDetails, gigLineups, allPrefs, allAdminStatuses] = await Promise.all([
+    const [userDetails, gig_lineups, allPrefs, allAdminStatuses] = await Promise.all([
       em.findOne(User, id, { fields: userFields }),
       em.fork().find(
         GigLineup,
-        { user: { id }, userInstruments: { approved: true } },
+        { user: { id }, user_instruments: { approved: true } },
         {
           fields: GIG_LINEUP_FIELDS,
           populateWhere: PopulateHint.INFER,
@@ -80,14 +84,27 @@ export const load: PageServerLoad = async ({ locals, params: { id }, fetch }): P
 
     const qb = em.createQueryBuilder(UserInstrument, "ui");
     qb.joinAndSelect("ui.instrument", "i").groupBy(["i.id"]).select(["i.*", "count(ui.id)"]);
-    const allInstruments = await qb.execute("all");
+    const allInstruments: AggregateInstrument[] = await qb.execute("all");
+    const selectedInstrumentIds = new Set(allInstruments.map((i: { id: string }) => i.id));
+    const possibleUnselectedInstruments = await em.find(Instrument, {});
+    possibleUnselectedInstruments
+      .filter((i) => !selectedInstrumentIds.has(i.id))
+      .forEach((i) =>
+        allInstruments.push({
+          ...i,
+          parent_id: i.parent?.id || null,
+          parent: undefined,
+          user_instruments: undefined,
+          count: "0",
+        }),
+      );
     const profilePictureUpdated = await fetch(`/members/images/users/${id}.jpg/modified`).then((res) => res.text());
 
     if (userDetails) {
       const userPrefs = userDetails.prefs.toArray();
       const user = {
         ...wrap(userDetails).toJSON(),
-        gigLineups: gigLineups.map((o) => wrap(o).toJSON()),
+        gig_lineups: gig_lineups.map((o) => wrap(o).toJSON()),
         instruments: userDetails.instruments.toArray(),
         prefs: allPrefs.map(
           (pref) =>

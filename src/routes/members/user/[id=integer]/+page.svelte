@@ -58,7 +58,7 @@
 
   async function saveBio() {
     const res = await graphqlClient.mutate<{
-      update_cucb_users_by_pk: { bio: string | null; bio_changed_date: string | null };
+      update_cucb_users_by_pk: { bio: string | null; bio_changed_date: string };
     }>({
       mutation: UpdateBio,
       variables: { id: user.id, bio: editedBio?.replace("\n", "").trim() || null },

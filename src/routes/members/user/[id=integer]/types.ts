@@ -7,6 +7,7 @@ export interface Instrument {
   id: string;
   name: string;
   novelty: boolean;
+  parent_only: boolean;
 }
 
 export interface AggregateInstrument {
@@ -14,7 +15,8 @@ export interface AggregateInstrument {
   name: string;
   novelty: boolean;
   parent_only: boolean;
-  count: number;
+  parent_id: string | null;
+  count: string;
 }
 
 export interface UserInstrument {
@@ -26,7 +28,7 @@ export interface UserInstrument {
 
 export interface User {
   id: string;
-  adminType?: {
+  adminType: {
     id: string;
     title: string;
   };
@@ -47,7 +49,7 @@ export interface User {
     };
     value: boolean;
   }[];
-  gigLineups: {
+  gig_lineups: {
     gig: {
       id: string;
       title: string;
@@ -57,8 +59,8 @@ export interface User {
         subvenue?: string;
       };
     };
-    userInstruments: {
-      userInstrument: {
+    user_instruments: {
+      user_instrument: {
         instrument: Instrument;
       };
     }[];

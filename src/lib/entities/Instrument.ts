@@ -3,7 +3,7 @@ import { UserInstrument } from "./UsersInstrument";
 
 @Entity({ schema: "cucb", tableName: "instruments" })
 export class Instrument {
-  [OptionalProps]?: "novelty" | "parentOnly";
+  [OptionalProps]?: "novelty" | "parent_only";
 
   @PrimaryKey({ columnType: "int8", type: "int8" })
   id!: string;
@@ -16,7 +16,7 @@ export class Instrument {
   novelty: boolean = false;
 
   @Property({ default: false, type: "boolean" })
-  parentOnly: boolean = false;
+  parent_only: boolean = false;
 
   @ManyToOne({
     entity: () => Instrument,
@@ -29,5 +29,5 @@ export class Instrument {
   parent?: Instrument;
 
   @OneToMany({ entity: () => UserInstrument, mappedBy: (ui) => ui.instrument })
-  userInstruments = new Collection<UserInstrument>(this);
+  user_instruments = new Collection<UserInstrument>(this);
 }

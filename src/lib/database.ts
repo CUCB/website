@@ -15,6 +15,7 @@ import { UserInstrument } from "./entities/UsersInstrument";
 import { GigLineup } from "./entities/GigLineup";
 import { UserPref } from "./entities/UserPref";
 import { UserPrefType } from "./entities/UserPrefType";
+import { env } from "$env/dynamic/private";
 
 const orm = await MikroORM.init({
   entities: [
@@ -34,11 +35,11 @@ const orm = await MikroORM.init({
     UserPref,
     UserPrefType,
   ],
-  dbName: process.env["PG_DATABASE"],
+  dbName: env["PG_DATABASE"],
   type: "postgresql",
-  host: process.env["PG_HOST"],
-  user: process.env["PG_USER"],
-  password: process.env["PG_PASSWORD"],
+  host: env["PG_HOST"],
+  user: env["PG_USER"],
+  password: env["PG_PASSWORD"],
   migrations: {
     emit: "js",
   },

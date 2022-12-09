@@ -12,16 +12,16 @@ export class GigVenue {
   subvenue?: string;
 
   @Property({ length: 1024, nullable: true, type: "varchar" })
-  mapLink?: string;
+  map_link?: string;
 
   @Property({ columnType: "int8", nullable: true, type: "int8" })
-  distanceMiles?: string;
+  distance_miles?: string;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  notesAdmin?: string;
+  notes_admin?: string;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  notesBand?: string;
+  notes_band?: string;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
   address?: string;

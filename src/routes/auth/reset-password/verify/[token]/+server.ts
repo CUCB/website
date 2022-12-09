@@ -3,12 +3,13 @@ import dotenv from "dotenv";
 import { error, json } from "@sveltejs/kit";
 import type { RequestHandler } from "./$types";
 import { PasswordResetToken } from "../../../../../auth";
+import { env } from "$env/dynamic/private";
 
 dotenv.config();
 
 export const GET: RequestHandler = async ({ params }) => {
   try {
-    const token = jwt.verify(params["token"], process.env["SESSION_SECRET"] as string);
+    const token = jwt.verify(params["token"], env["SESSION_SECRET"] as string);
     if (PasswordResetToken.guard(token)) {
       return json(token);
     } else {

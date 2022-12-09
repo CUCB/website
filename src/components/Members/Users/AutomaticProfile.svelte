@@ -63,16 +63,16 @@
   const join_date = user.joinDate ? `in ${displayMonth(user.joinDate)}` : "before records began";
   const login_date = user.lastLoginDate && `in ${displayMonth(user.lastLoginDate)}`;
 
-  const last_gig = [...user.gigLineups].reverse().find((x) => x.gig.date != null);
+  const last_gig = [...user.gig_lineups].reverse().find((x) => x.gig.date != null);
   const last_gig_date = displayDateString(last_gig?.gig.date);
-  const first_gig = user.gigLineups?.[0];
+  const first_gig = user.gig_lineups?.[0];
   const first_gig_date = displayDateString(first_gig?.gig.date);
-  const gig_count = user.gigLineups.length;
-  const instrument_gig_count = user.gigLineups.filter((gig) => gig.userInstruments.length > 0).length;
+  const gig_count = user.gig_lineups.length;
+  const instrument_gig_count = user.gig_lineups.filter((gig) => gig.user_instruments.length > 0).length;
 
-  const gig_instruments = user.gigLineups
-    .flatMap((x) => x.userInstruments)
-    .map((instr) => instr.userInstrument.instrument);
+  const gig_instruments = user.gig_lineups
+    .flatMap((x) => x.user_instruments)
+    .map((instr) => instr.user_instrument.instrument);
   const counted_instruments: { instrument: Instrument; count: number }[] = countInstruments(gig_instruments).map(
     ([instrument, count]) => ({ instrument, count }),
   );

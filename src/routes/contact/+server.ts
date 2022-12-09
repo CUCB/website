@@ -7,6 +7,7 @@ import fetch from "node-fetch";
 import { Committee } from "$lib/entities/Committee";
 import orm from "$lib/database";
 import { LoadStrategy } from "@mikro-orm/core";
+import { env } from "$env/dynamic/private";
 dotenv.config();
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -16,7 +17,7 @@ export const POST: RequestHandler = async ({ request }) => {
   let hcaptcha;
   const body = new URLSearchParams();
   body.append("response", captchaKey.toString());
-  body.append("secret", process.env["HCAPTCHA_SECRET"]);
+  body.append("secret", env["HCAPTCHA_SECRET"]);
   try {
     hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
@@ -57,17 +58,17 @@ export const POST: RequestHandler = async ({ request }) => {
     };
 
     const client = new SMTPClient({
-      host: process.env["EMAIL_HOST"],
-      ssl: process.env["EMAIL_SSL"] !== "true" ? false : undefined,
+      host: env["EMAIL_HOST"],
+      ssl: env["EMAIL_SSL"] !== "true" ? false : undefined,
       tls:
-        process.env["EMAIL_SSL"] === "true"
+        env["EMAIL_SSL"] === "true"
           ? {
               ciphers: "SSLv3",
             }
           : undefined,
-      port: parseInt(process.env["EMAIL_PORT"]),
-      user: process.env["EMAIL_USERNAME"],
-      password: process.env["EMAIL_PASSWORD"],
+      port: parseInt(env["EMAIL_PORT"]),
+      user: env["EMAIL_USERNAME"],
+      password: env["EMAIL_PASSWORD"],
     });
 
     const enquiryInformation =
@@ -78,7 +79,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const sendSecretaryEmail = new Promise((resolve, reject) =>
       client.send(
         {
-          from: `CUCB Online Contact Form <${process.env["EMAIL_SEND_ADDRESS"]}>`,
+          from: `CUCB Online Contact Form <${env["EMAIL_SEND_ADDRESS"]}>`,
           "reply-to": `${name.trim()} <${email.trim()}>`,
           to: `CUCB Secretary <${secretary.email}>`,
           subject: `${name} — Online Enquiry`,
@@ -106,7 +107,7 @@ export const POST: RequestHandler = async ({ request }) => {
     const sendClientEmail = new Promise((resolve, reject) =>
       client.send(
         {
-          from: `CUCB Online Contact Form <${process.env["EMAIL_SEND_ADDRESS"]}>`,
+          from: `CUCB Online Contact Form <${env["EMAIL_SEND_ADDRESS"]}>`,
           "reply-to": `CUCB Secretary <${secretary.email}>`,
           to: `${email}`,
           subject: `[Cambridge University Ceilidh Band] Confirmation of Message`,

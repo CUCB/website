@@ -5,14 +5,16 @@
 
   export let allInstruments: Instrument[];
 
+  console.log(allInstruments);
   let parents = allInstruments.filter((i) => i.parent_id === null);
-  let instrumentsByParent: Record<number, Instrument[]> = {};
+  let instrumentsByParent: Record<string, Instrument[]> = {};
   parents.forEach((i) => (instrumentsByParent[i.id] = []));
+  console.log(parents);
   allInstruments.filter((i) => i.parent_id !== null).forEach((i) => instrumentsByParent[i.parent_id].push(i));
 
   const dispatch = createEventDispatcher();
 
-  function select(id: number): (e: Event) => void {
+  function select(id: string): (e: Event) => void {
     return (_) => dispatch("select", { id });
   }
 </script>
@@ -57,7 +59,7 @@
       {:else}
         <button data-test="add-instrument-{parent.id}" class="link" on:click="{select(parent.id)}">{parent.name}</button
         >
-        [{parent.users_instruments_aggregate.aggregate.count}]
+        [{parent.count}]
       {/if}
       {#if instrumentsByParent[parent.id]?.length > 0}
         <ul>
@@ -66,7 +68,7 @@
               <button data-test="add-instrument-{instrument.id}" class="link" on:click="{select(instrument.id)}"
                 >{instrument.name}</button
               >
-              [{instrument.users_instruments_aggregate.aggregate.count}]
+              [{instrument.count}]
             </li>
           {/each}
         </ul>

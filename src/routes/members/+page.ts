@@ -12,6 +12,7 @@ export const load: PageLoad = async ({ parent, fetch, cookies }) => {
   try {
     res = await get(clientCurrentUser).query({ query: QueryGigSignup });
   } catch (e) {
+    console.error(e);
     handleErrors(e);
   }
   let gigSignups = res.data.cucb_gigs;
