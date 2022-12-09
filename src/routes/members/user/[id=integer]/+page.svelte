@@ -333,7 +333,7 @@
 {#if canEdit && user.email}
   <p>
     <b>Email:</b>
-    <Mailto person="{{ emailObfus: user.email }}" showEmail="{true}" />
+    <Mailto person="{{ email_obfus: user.email }}" showEmail="{true}" />
   </p>
 {/if}
 {#if user.locationInfo}

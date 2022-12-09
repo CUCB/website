@@ -55,7 +55,7 @@ For contact details for the current committee
         <Person person="{person}" aprilFools="{aprilFools}" />
       {/each}
     {:else}
-      {#each committee.members.filter((person) => !person.aprilFoolsOnly) as person}
+      {#each committee.members.filter((person) => !person.april_fools_only) as person}
         <Person person="{person}" />
       {/each}
     {/if}

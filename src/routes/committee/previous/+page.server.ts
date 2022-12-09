@@ -12,16 +12,16 @@ interface Committee_<DateOrString> {
 interface CommitteeMember {
   name: string;
   pic?: string;
-  subPosition?: string;
+  sub_position?: string;
   comments?: string;
-  emailObfus?: string;
-  aprilFoolsDir?: string;
-  aprilFoolsOnly: boolean;
-  lookupName: {
+  email_obfus?: string;
+  april_fools_dir?: string;
+  april_fools_only: boolean;
+  lookup_name: {
     name: string;
   };
   committee: {
-    picFolder?: string;
+    pic_folder?: string;
   };
   position: {
     name: string;
@@ -40,7 +40,7 @@ export const load: PageServerLoad = async ({ url }) => {
         limit: 100,
         orderBy: { started: QueryOrder.DESC },
         fields: ["members", "started"],
-        populate: ["members.lookupName", "members.position"],
+        populate: ["members.lookup_name", "members.position"],
       },
     );
     const committees: Committee_<Date>[] = mikroOrmRes.map((c) => wrap(c).toObject());

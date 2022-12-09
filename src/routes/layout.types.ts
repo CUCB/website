@@ -15,9 +15,9 @@ export type Committee = Static<typeof CommitteeRT>;
 
 export const CommitteeMemberRT = Record({
   name: String,
-  casualName: String,
-  emailObfus: String,
-  lookupName: Record({ name: String }),
+  casual_name: String,
+  email_obfus: String,
+  lookup_name: Record({ name: String }),
 });
 
 export const CommitteeRT = Record({
