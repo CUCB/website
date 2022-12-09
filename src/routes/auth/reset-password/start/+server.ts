@@ -3,39 +3,14 @@ import { error } from "@sveltejs/kit";
 import { Record, String } from "runtypes";
 import { CRSID_PATTERN, EMAIL_PATTERN } from "../../_register";
 import { startPasswordReset } from "../../../../auth";
-import gql from "graphql-tag";
 import { User } from "$lib/entities/User";
 import orm from "$lib/database";
-
-type PostRequest = Request & { body: FormData };
 
 const Body = Record({
   username: String.withConstraint(
     (value) => value.match(CRSID_PATTERN) !== null || value.match(EMAIL_PATTERN) !== null,
   ),
 });
-
-interface UserEmail {
-  cucb_users: [
-    {
-      id: number;
-      email: string;
-      first: string;
-      last: string;
-    },
-  ];
-}
-
-const UserByUsername = gql`
-  query UserByUsername($username: String) {
-    cucb_users(where: { _or: [{ username: { _eq: $username } }, { email: { _eq: $username } }] }) {
-      id
-      email
-      first
-      last
-    }
-  }
-`;
 
 export const POST: RequestHandler = async ({ request }) => {
   const body = Object.fromEntries(await request.formData());
