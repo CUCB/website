@@ -4,6 +4,7 @@ import type { RequestEvent } from "./$types";
 import orm from "$lib/database";
 import { Gig } from "$lib/entities/Gig";
 import { wrap } from "@mikro-orm/core";
+import { DateTime } from "luxon";
 
 const UPDATABLE_FIELDS = [
   "type",
@@ -40,12 +41,15 @@ export const POST = async ({ locals, params, request }: RequestEvent): Promise<R
     await gigRepository.nativeUpdate({ id: params.gig_id }, body);
     const savedGig = await gigRepository.findOneOrFail(
       { id: params.gig_id },
-      { populate: ["contacts", "contacts.contact"], orderBy: { contacts: { contact: { name: "ASC" } } } },
+      {
+        populate: ["contacts", "contacts.contact", "editing_user"],
+        orderBy: { contacts: { contact: { name: "ASC" } } },
+      },
     );
     const gig = wrap(savedGig).toObject();
     gig.type_id = parseInt(gig.type.id);
     gig.venue_id = parseInt(gig.venue.id);
-    gig.date = new Date(gig.date).toISOString().split("T")[0];
+    gig.date = DateTime.fromJSDate(gig.date).toISODate();
     return json(gig);
   } else {
     throw error(403, "You're not allowed to do that!");

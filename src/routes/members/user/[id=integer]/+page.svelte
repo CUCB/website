@@ -140,7 +140,6 @@
       instrument: allInstruments.find((i) => i.id === instr_id),
       user_id: user.id,
     };
-    console.log(currentlyEditingDetails);
   }
 
   function completeEditInstrument(e) {

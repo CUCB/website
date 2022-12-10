@@ -24,7 +24,10 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
         .findOne(
           DbGig,
           { id: gig_id },
-          { populate: ["contacts", "contacts.contact"], orderBy: { contacts: { contact: { name: "ASC" } } } },
+          {
+            populate: ["contacts", "contacts.contact", "editing_user"],
+            orderBy: { contacts: { contact: { name: "ASC" } } },
+          },
         )
         .then((e) => wrap(e).toObject()),
       em.find(DbVenue, {}).then((e) => e.map((e) => wrap(e).toPOJO())),
@@ -33,9 +36,12 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
     ];
     const [gig, venues, gigTypes, allContacts] = await Promise.all(fetchers);
     if (gig) {
+      // TODO create some more structured way to handle this
       gig.date = new Date(gig.date).toISOString().split("T")[0];
       gig.arrive_time = DateTime.fromJSDate(gig.arrive_time).toISO();
       gig.finish_time = DateTime.fromJSDate(gig.finish_time).toISO();
+      gig.editing_time = DateTime.fromJSDate(gig.editing_time).toISO();
+      gig.posting_time = DateTime.fromJSDate(gig.posting_time).toISO();
       sortVenues(venues);
       sortContacts(gig.contacts);
       return {
