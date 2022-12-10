@@ -57,15 +57,13 @@
   }
 
   async function saveBio() {
-    const res = await graphqlClient.mutate<{
-      update_cucb_users_by_pk: { bio: string | null; bio_changed_date: string };
-    }>({
-      mutation: UpdateBio,
-      variables: { id: user.id, bio: editedBio?.replace("\n", "").trim() || null },
-    });
-    const updatedBio = res.data.update_cucb_users_by_pk;
+    const updatedBio = await fetch("", {
+      method: "POST",
+      body: JSON.stringify({ bio: editedBio?.replace("\n", "").trim() }),
+      headers: { "Content-Type": "application/json" },
+    }).then((res) => res.json());
     if (updatedBio) {
-      const bioChangedDate = DateTime.fromISO(updatedBio.bio_changed_date).toJSDate();
+      const bioChangedDate = DateTime.fromISO(updatedBio.bioChangedDate).toJSDate();
       user = { ...user, ...updatedBio, bioChangedDate };
       editingBio = false;
     } else {

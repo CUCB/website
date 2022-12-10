@@ -1,19 +1,16 @@
-import { GraphQLClient, handleErrors } from "../../../../graphql/client";
 import { assertLoggedIn } from "../../../../client-auth.js";
-import { QueryAllGigSignupSummary } from "../../../../graphql/gigs";
 import { DateTime, Settings } from "luxon";
-import type { Gig } from "./types";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 import { SELECT_GIG_LINEUPS } from "$lib/permissions";
 import { error } from "@sveltejs/kit";
 import orm from "$lib/database";
 import { Gig as DbGig } from "$lib/entities/Gig";
 import { wrap } from "@mikro-orm/core";
 
-export const load: PageLoad = async ({ fetch, parent }) => {
+export const load: PageServerLoad = async ({ locals }) => {
   Settings.defaultZoneName = "Europe/London";
 
-  const { session } = await parent();
+  const { session } = locals;
   assertLoggedIn(session);
 
   if (SELECT_GIG_LINEUPS.guard(session)) {
@@ -33,6 +30,7 @@ export const load: PageLoad = async ({ fetch, parent }) => {
       arr.map((arr) =>
         arr.map((e) => ({
           ...wrap(e).toPOJO(),
+          // @ts-ignore
           date: DateTime.fromJSDate(e.date).toISODate(),
           lineup: e.lineup.toArray(),
         })),
