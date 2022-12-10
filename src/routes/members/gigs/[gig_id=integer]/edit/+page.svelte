@@ -34,7 +34,6 @@
     session,
   } = data;
   import { makeTitle, themeName, createValidityChecker } from "../../../../../view";
-  import { UpdateGig, UpsertGigContact, RemoveGigContact } from "../../../../../graphql/gigs";
   import Select from "../../../../../components/Forms/Select.svelte";
   import VenueEditor from "../../../../../components/Gigs/VenueEditor.svelte";
   import ContactEditor from "../../../../../components/Gigs/ContactEditor.svelte";
@@ -45,9 +44,7 @@
   import { fade } from "svelte/transition";
   import SearchBox from "../../../../../components/SearchBox.svelte";
   import { DateTime, Settings } from "luxon";
-  import { client as graphqlClient } from "../../../../../graphql/client";
   import { sortContacts, sortVenues } from "./sort";
-  import type { Gig, GigContact } from "./types";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   let checkValid = createValidityChecker();
@@ -323,7 +320,6 @@
     }
     try {
       const body = {
-        gig: id.toString(),
         contact: contact_id.toString(),
         client: is_client,
         calling: is_calling,
@@ -333,7 +329,6 @@
         body: JSON.stringify(body),
         headers: { "Content-Type": "application/json" },
       }).then((r) => r.json());
-      console.log(res);
       if (res) {
         if (existingContact) {
           existingContact.client = res.client;
@@ -368,18 +363,19 @@
         calling = false;
       }
       try {
-        let res = await $graphqlClient.mutate<{ insert_cucb_gigs_contacts_one: GigContact }>({
-          mutation: UpsertGigContact,
-          variables: {
-            gig_id: id,
-            contact_id,
-            client,
-            calling,
-          },
-        });
-        if (res?.data?.insert_cucb_gigs_contacts_one) {
-          existingContact.client = res.data.insert_cucb_gigs_contacts_one.client;
-          existingContact.calling = res.data.insert_cucb_gigs_contacts_one.calling;
+        const body = {
+          contact: contact_id.toString(),
+          client,
+          calling,
+        };
+        const res = await fetch("contacts", {
+          method: "POST",
+          body: JSON.stringify(body),
+          headers: { "Content-Type": "application/json" },
+        }).then((r) => r.json());
+        if (res) {
+          existingContact.client = res.client;
+          existingContact.calling = res.calling;
           contacts = contacts;
         }
       } catch (e) {
@@ -388,13 +384,12 @@
       }
     } else {
       try {
-        await $graphqlClient.mutate({
-          mutation: RemoveGigContact,
-          variables: {
-            gig_id: id,
-            contact_id,
-          },
+        const res = await fetch("contacts", {
+          method: "DELETE",
+          body: JSON.stringify({ contact: contact_id }),
+          headers: { "Content-Type": "application/json" },
         });
+        // TODO error handle status codes
         contacts = contacts.filter((contact) => contact.id !== contact_id);
       } catch (e) {
         // TODO real error handling (#43)
