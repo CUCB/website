@@ -11,8 +11,8 @@
     editing_user,
     lastSaved,
     venues,
-    venue_id,
-    type_id,
+    venue: venue_id,
+    type: type_id,
     gigTypes,
     id,
     admins_only,
@@ -104,16 +104,16 @@
     null;
   $: clients = contacts.filter((contact) => contact.client);
   $: callers = contacts.filter((contact) => contact.calling);
-  $: clientSet = new Set(clients.map((c) => c.id));
-  $: callerSet = new Set(callers.map((c) => c.id));
+  $: clientSet = new Set(clients.map((c) => c.contact.id));
+  $: callerSet = new Set(callers.map((c) => c.contact.id));
   $: potentialClients = allContacts.filter((contact) => !clientSet.has(contact.id));
   $: potentialCallers = allContacts.filter((contact) => contact.caller && !callerSet.has(contact.id));
 
   $: saved =
-    lastSaved.type_id === type_id &&
+    lastSaved.type === type_id &&
     lastSaved.title === title.trim() &&
     lastSaved.date === ((typeCode !== "calendar" && date) || null) &&
-    lastSaved.venue_id === venue_id &&
+    lastSaved.venue === venue_id &&
     lastSaved.summary === (summary && summary.trim()) &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
     lastSaved.notes_band === (notes_band && notes_band.trim()) &&
@@ -309,12 +309,12 @@
     let is_client, is_calling;
     if (contactType === contactTypes.CLIENT) {
       contact_id = selectedClient;
-      existingContact = contacts.find((contact) => contact.id === contact_id);
+      existingContact = contacts.find((contact) => (contact.id || contact.contact.id) === contact_id);
       is_client = true;
       is_calling = (existingContact || false) && existingContact.calling;
     } else {
       contact_id = selectedCaller;
-      existingContact = contacts.find((contact) => contact.id === contact_id);
+      existingContact = contacts.find((contact) => (contact.id || contact.contact.id) === contact_id);
       is_calling = true;
       is_client = (existingContact || false) && existingContact.client;
     }
@@ -335,8 +335,9 @@
           existingContact.calling = res.calling;
           contacts = contacts;
         } else {
-          let contactsClone = [...contacts, { ...res, id: contact_id }];
+          let contactsClone = [...contacts, res];
           sortContacts(contactsClone);
+          console.log("---------------");
           contacts = contactsClone;
         }
         contactType === contactTypes.CLIENT ? (selectedClient = undefined) : (selectedCaller = undefined);
@@ -351,7 +352,7 @@
   let selectCaller = (e) => selectContact(contactTypes.CALLER, e);
 
   async function removeContact(contactType, contact_id, _) {
-    let existingContact = contacts.find((contact) => contact.id === contact_id);
+    let existingContact = contacts.find((contact) => (contact.id || contact.contact.id) === contact_id);
     if (existingContact.client && existingContact.calling) {
       let client, calling;
       // Only removing a role, so update the existing entry
@@ -390,7 +391,7 @@
           headers: { "Content-Type": "application/json" },
         });
         // TODO error handle status codes
-        contacts = contacts.filter((contact) => contact.id !== contact_id);
+        contacts = contacts.filter((contact) => contact.contact.id !== contact_id);
       } catch (e) {
         // TODO real error handling (#43)
         console.error(e);
@@ -404,7 +405,7 @@
   function editContact(contact_id, contactType) {
     return (_) => {
       editContactType = contactType;
-      contactToEdit = { ...contacts.find((contact) => contact.id === contact_id).contact, id: contact_id };
+      contactToEdit = { ...contacts.find((contact) => contact.contact.id === contact_id).contact, id: contact_id };
       displayContactEditor = true;
     };
   }
@@ -418,7 +419,7 @@
       currentContact.organization = updatedContact.organization;
       currentContact.notes = updatedContact.notes;
       currentContact.caller = updatedContact.caller;
-      let gigContact = contacts.find((contact) => contact.id === updatedContact.id);
+      let gigContact = contacts.find((contact) => contact.contact.id === updatedContact.id);
       gigContact.contact = { ...updatedContact };
       sortContacts(allContacts);
       allContacts = allContacts;
@@ -768,18 +769,18 @@
     <h4>Clients</h4>
     <form on:submit|preventDefault class="theme-{$themeName} contacts" data-test="client-form">
       <div data-test="gig-edit-{id}-client-list">
-        {#each clients as contact (contact.id)}
+        {#each clients as contact (contact.contact.id)}
           <div class="gig-contact" transition:fade|local>
             <span data-test="contact-name">{contactDisplayName(contact.contact)}</span>
             <div class="button-group">
               <button
-                on:click="{editContact(contact.id, contactTypes.CLIENT)}"
-                data-test="gig-edit-{id}-clients-{contact.id}-edit"
+                on:click="{editContact(contact.contact.id, contactTypes.CLIENT)}"
+                data-test="gig-edit-{id}-clients-{contact.contact.id}-edit"
                 disabled="{cancelled}">Edit</button
               >
               <button
-                on:click="{removeClient(contact.id)}"
-                data-test="gig-edit-{id}-clients-{contact.id}-remove"
+                on:click="{removeClient(contact.contact.id)}"
+                data-test="gig-edit-{id}-clients-{contact.contact.id}-remove"
                 disabled="{cancelled}">Remove</button
               >
             </div>
@@ -818,18 +819,18 @@
       <h4>Callers</h4>
       <form on:submit|preventDefault class="theme-{$themeName} contacts" data-test="caller-form">
         <div data-test="gig-edit-{id}-caller-list">
-          {#each callers as contact (contact.id)}
+          {#each callers as contact (contact.contact.id)}
             <div class="gig-contact" transition:fade|local>
               <span data-test="contact-name">{contactDisplayName(contact.contact)}</span>
               <div class="button-group">
                 <button
-                  on:click="{editContact(contact.id, contactTypes.CALLER)}"
-                  data-test="gig-edit-{id}-callers-{contact.id}-edit"
+                  on:click="{editContact(contact.contact.id, contactTypes.CALLER)}"
+                  data-test="gig-edit-{id}-callers-{contact.contact.id}-edit"
                   disabled="{cancelled}">Edit</button
                 >
                 <button
-                  on:click="{removeCaller(contact.id)}"
-                  data-test="gig-edit-{id}-callers-{contact.id}-remove"
+                  on:click="{removeCaller(contact.contact.id)}"
+                  data-test="gig-edit-{id}-callers-{contact.contact.id}-remove"
                   disabled="{cancelled}">Remove</button
                 >
               </div>

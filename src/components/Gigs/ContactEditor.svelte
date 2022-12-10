@@ -1,7 +1,5 @@
 <script>
   import { createEventDispatcher } from "svelte";
-  import { GraphQLClient } from "../../graphql/client";
-  import { CreateContact, UpdateContact } from "../../graphql/gigs";
   export let id, name, organization, email, caller, notes;
 
   const dispatch = createEventDispatcher();
@@ -10,7 +8,7 @@
     if (!name.trim()) {
       return;
     }
-    let variables = {
+    const body = {
       id,
       name: name.trim(),
       organization: (organization && organization.trim()) || null,
@@ -19,23 +17,14 @@
       notes: (notes && notes.trim()) || null,
     };
 
-    let client = new GraphQLClient(fetch);
-    let mutationDetails;
-    if (id !== null && id !== undefined) {
-      mutationDetails = [UpdateContact, "update_cucb_contacts_by_pk"];
-    } else {
-      mutationDetails = [CreateContact, "insert_cucb_contacts_one"];
-    }
-
     try {
-      let res = await client.mutate({
-        mutation: mutationDetails[0],
-        variables,
-      });
+      const res = await fetch("/members/gigs/contacts", { method: "POST", body: JSON.stringify(body) }).then((res) =>
+        res.json(),
+      );
 
       dispatch("saved", {
         // @ts-ignore
-        contact: res.data[mutationDetails[1]],
+        contact: res,
       });
     } catch (e) {
       // Oh shit, probably should do something here
