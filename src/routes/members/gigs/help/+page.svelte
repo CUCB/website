@@ -17,7 +17,6 @@
     myCalendarTippy = tippy(document.querySelector("#myCalendarButton"), args);
   });
   let runningTimer;
-  console.log(calendarLinks);
 
   interface CalendarLinks {
     allgigs: string;

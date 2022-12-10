@@ -337,7 +337,6 @@
         } else {
           let contactsClone = [...contacts, res];
           sortContacts(contactsClone);
-          console.log("---------------");
           contacts = contactsClone;
         }
         contactType === contactTypes.CLIENT ? (selectedClient = undefined) : (selectedCaller = undefined);

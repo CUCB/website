@@ -61,7 +61,6 @@ async function realpost(request: Request) {
     casual_name: "Webmaster",
     email: "webmaster@cucb.co.uk",
   };
-  console.log(webmaster);
 
   if (hcaptcha.success) {
     let client: SMTPClient;
