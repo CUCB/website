@@ -16,6 +16,8 @@ import { GigLineup } from "./entities/GigLineup";
 import { UserPref } from "./entities/UserPref";
 import { UserPrefType } from "./entities/UserPrefType";
 import { env } from "$env/dynamic/private";
+import { GigContact } from "./entities/GigContact";
+import { Gig } from "./entities/Gig";
 
 const orm = await MikroORM.init({
   entities: [
@@ -31,6 +33,8 @@ const orm = await MikroORM.init({
     CalendarSubscriptionType,
     Instrument,
     UserInstrument,
+    Gig,
+    GigContact,
     GigLineup,
     UserPref,
     UserPrefType,

@@ -1,29 +1,29 @@
 import { Entity, ManyToOne, OptionalProps, Property } from "@mikro-orm/core";
-import { Contacts } from "./Contacts.js";
-import { Gig } from "./Gig.js";
+import { Contact } from "./Contact";
+import { Gig } from "./Gig";
 
-@Entity({ schema: "cucb" })
-export class GigsContacts {
+@Entity({ schema: "cucb", tableName: "gigs_contacts" })
+export class GigContact {
   [OptionalProps]?: "calling" | "client" | "contact";
 
   @ManyToOne({ entity: () => Gig, onUpdateIntegrity: "cascade", onDelete: "cascade", primary: true })
   gig!: Gig;
 
   @ManyToOne({
-    entity: () => Contacts,
+    entity: () => Contact,
     onUpdateIntegrity: "cascade",
     primary: true,
     default: "0",
     index: "idx_17412_contact_id",
   })
-  contact!: Contacts;
+  contact!: Contact;
 
-  @Property({ columnType: "text", nullable: true })
+  @Property({ columnType: "text", nullable: true, type: "text" })
   notes?: string;
 
-  @Property({ default: false })
+  @Property({ default: false, type: "bool" })
   calling: boolean = false;
 
-  @Property({ default: true })
+  @Property({ default: true, type: "bool" })
   client: boolean = true;
 }
