@@ -251,37 +251,39 @@
       }
     }
     try {
-      let res = await $graphqlClient.mutate<{ update_cucb_gigs_by_pk: Gig }>({
-        mutation: UpdateGig,
-        variables: {
-          id,
-          title: title.trim(),
-          date: (typeCode !== "calendar" && date) || null,
-          venue_id,
-          type_id,
-          advertise,
-          admins_only,
-          allow_signups: typeCode !== "calendar" && allow_signups,
-          food_provided: typeCode !== "calendar" && food_provided,
-          notes_admin: notes_admin && notes_admin.trim(),
-          notes_band: notes_band && notes_band.trim(),
-          summary: summary && summary.trim(),
-          arrive_time: typeCode === "calendar" ? DateTime.fromISO(arrive_time_date) : arrive_time,
-          finish_time: typeCode === "calendar" ? DateTime.fromISO(finish_time_date) : finish_time,
-          time: time || null,
-          quote_date,
-          finance: finance && finance.trim(),
-          finance_deposit_received,
-          finance_payment_received,
-          finance_caller_paid,
-        },
-      });
-      if (res?.data?.update_cucb_gigs_by_pk) {
+      const body = {
+        id,
+        title: title.trim(),
+        date: (typeCode !== "calendar" && date) || null,
+        venue_id,
+        type_id,
+        advertise,
+        admins_only,
+        allow_signups: typeCode !== "calendar" && allow_signups,
+        food_provided: typeCode !== "calendar" && food_provided,
+        notes_admin: notes_admin && notes_admin.trim(),
+        notes_band: notes_band && notes_band.trim(),
+        summary: summary && summary.trim(),
+        arrive_time: typeCode === "calendar" ? DateTime.fromISO(arrive_time_date) : arrive_time,
+        finish_time: typeCode === "calendar" ? DateTime.fromISO(finish_time_date) : finish_time,
+        time: time || null,
+        quote_date,
+        finance: finance && finance.trim(),
+        finance_deposit_received,
+        finance_payment_received,
+        finance_caller_paid,
+      };
+      let res = await fetch("", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json" },
+      }).then((r) => r.json());
+      if (res) {
         window.clearTimeout(runningTimer);
         recentlySavedOpacity.set(0, { duration: 50 });
         runningTimer = window.setTimeout(recentlySavedTimer, 2000);
         recentlySavedOpacity.set(1);
-        lastSaved = { ...res.data.update_cucb_gigs_by_pk };
+        lastSaved = { ...res };
       }
       editing_user = { id: session.userId, first: session.firstName, last: session.lastName };
       editing_time = DateTime.local().toISO();
@@ -293,6 +295,7 @@
   }
 
   function keyboardShortcuts(e) {
+    // Alt + S
     if (e.altKey && e.which === 83) {
       e.preventDefault();
       saveGig(e);
