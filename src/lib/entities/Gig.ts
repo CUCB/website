@@ -1,4 +1,5 @@
-import { Entity, ManyToOne, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
+import { Collection, Entity, ManyToOne, OneToMany, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
+import { GigContact } from "./GigContact";
 import { GigType } from "./GigType";
 import { GigVenue } from "./GigVenue";
 import { User } from "./User";
@@ -85,4 +86,7 @@ export class Gig {
 
   @Property({ default: false, type: "bool" })
   food_provided: boolean = false;
+
+  @OneToMany(() => GigContact, (contact) => contact.gig)
+  contacts = new Collection<GigContact>(this);
 }

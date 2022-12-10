@@ -38,7 +38,10 @@ export const POST = async ({ locals, params, request }: RequestEvent): Promise<R
     const gigRepository = orm.em.fork().getRepository(Gig);
 
     await gigRepository.nativeUpdate({ id: params.gig_id }, body);
-    const savedGig = await gigRepository.findOneOrFail({ id: params.gig_id }, { populate: true });
+    const savedGig = await gigRepository.findOneOrFail(
+      { id: params.gig_id },
+      { populate: ["contacts", "contacts.contact"], orderBy: { contacts: { contact: { name: "ASC" } } } },
+    );
     const gig = wrap(savedGig).toObject();
     gig.type_id = parseInt(gig.type.id);
     gig.venue_id = parseInt(gig.venue.id);
