@@ -10,6 +10,7 @@ const ROLES = {
   gigEditor: Literal("gig_editor"),
   user: Literal("user"),
   musicOnly: Literal("music_only"),
+  blueGig: Literal("blue_gig"),
 };
 
 const LOGGED_IN = Record({ userId: String });
@@ -26,6 +27,13 @@ export const UPDATE_BIO = (userId: string) =>
     Union(ROLES.webmaster, ROLES.president, ROLES.secretary, ROLES.treasurer, ROLES.equipment, ROLES.gigEditor),
   ).Or(IS_SELF(userId));
 export const UPDATE_INSTRUMENTS = (userId: string) =>
-  HAS_ROLE(Union(ROLES.webmaster, ROLES.president)).Or(IS_SELF(userId));
+  HAS_ROLE(Union(ROLES.webmaster, ROLES.president, ROLES.secretary)).Or(IS_SELF(userId));
 export const UPDATE_ADMIN_STATUS = (userId: string) =>
   HAS_ROLE(ROLES.webmaster).withConstraint((session: { userId: string }) => session.userId != userId);
+export const UPDATE_GIG_DETAILS = HAS_ROLE(
+  Union(ROLES.webmaster, ROLES.president, ROLES.secretary, ROLES.treasurer, ROLES.equipment, ROLES.gigEditor),
+);
+export const VIEW_GIG_CONTACT_DETAILS = UPDATE_GIG_DETAILS.Or(HAS_ROLE(ROLES.blueGig));
+export const VIEW_GIG_ADMIN_NOTES = UPDATE_GIG_DETAILS;
+export const SELECT_GIG_LINEUPS = HAS_ROLE(Union(ROLES.webmaster, ROLES.president));
+export const DELETE_GIG = HAS_ROLE(Union(ROLES.webmaster, ROLES.president, ROLES.secretary));

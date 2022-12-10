@@ -1,6 +1,6 @@
 import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
 
-@Entity({ schema: "cucb" })
+@Entity({ schema: "cucb", tableName: "gig_venues" })
 export class GigVenue {
   @PrimaryKey({ columnType: "int8", type: "int8" })
   id!: string;

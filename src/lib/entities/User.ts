@@ -34,10 +34,10 @@ export class User {
   @Property({ length: 255, type: "varchar" })
   username!: string;
 
-  @Property({ length: 40, nullable: true, type: "varchar" })
+  @Property({ length: 40, nullable: true, type: "varchar", hidden: true })
   password?: string;
 
-  @Property({ length: 255, nullable: true, type: "varchar" })
+  @Property({ length: 255, nullable: true, type: "varchar", hidden: true })
   saltedPassword?: string;
 
   @Unique({ name: "idx_17515_email" })
