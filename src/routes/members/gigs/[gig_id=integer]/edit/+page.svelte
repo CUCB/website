@@ -322,22 +322,25 @@
       is_client = (existingContact || false) && existingContact.client;
     }
     try {
-      let res = await $graphqlClient.mutate<{ insert_cucb_gigs_contacts_one: GigContact }>({
-        mutation: UpsertGigContact,
-        variables: {
-          gig_id: id,
-          contact_id,
-          client: is_client,
-          calling: is_calling,
-        },
-      });
-      if (res?.data?.insert_cucb_gigs_contacts_one) {
+      const body = {
+        gig: id.toString(),
+        contact: contact_id.toString(),
+        client: is_client,
+        calling: is_calling,
+      };
+      const res = await fetch("contacts", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: { "Content-Type": "application/json" },
+      }).then((r) => r.json());
+      console.log(res);
+      if (res) {
         if (existingContact) {
-          existingContact.client = res.data.insert_cucb_gigs_contacts_one.client;
-          existingContact.calling = res.data.insert_cucb_gigs_contacts_one.calling;
+          existingContact.client = res.client;
+          existingContact.calling = res.calling;
           contacts = contacts;
         } else {
-          let contactsClone = [...contacts, { ...res.data.insert_cucb_gigs_contacts_one, id: contact_id }];
+          let contactsClone = [...contacts, { ...res, id: contact_id }];
           sortContacts(contactsClone);
           contacts = contactsClone;
         }
