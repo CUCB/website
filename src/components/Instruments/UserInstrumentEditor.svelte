@@ -3,11 +3,8 @@
   // Does it remember the new nicename, or does it forget it? Does anyone care?
 
   // TODO parameterise client so we use current user/admin client correctly
-  import type { GraphQLClient } from "../../graphql/client";
   import { createEventDispatcher } from "svelte";
-  import { CreateCurrentUserInstrument, CreateUserInstrument, UpdateUserInstrument } from "../../graphql/instruments";
 
-  export let client: GraphQLClient;
   export let instrument: UserInstrument;
   export let currentUser: boolean;
 
@@ -30,25 +27,24 @@
   }
 
   async function updateExistingInstrument() {
-    const variables = { id: instrument.id, nickname: nickname.trim() || null };
-    return (
-      await client.mutate<{ update_cucb_users_instruments_by_pk: unknown }>({
-        mutation: UpdateUserInstrument,
-        variables,
-      })
-    ).data.update_cucb_users_instruments_by_pk;
+    const variables = { userInstrumentId: instrument.id, nickname: nickname.trim() || null };
+    const body = JSON.stringify(variables);
+
+    return await fetch(`/members/users/${instrument.user_id}/instruments`, { method: "POST", body }).then((res) =>
+      res.json(),
+    );
   }
 
   async function createNewInstrument() {
     const variables = {
-      instr_id: instrument.instr_id,
+      instrument_id: instrument.instr_id,
       nickname: nickname.trim() || null,
-      user_id: currentUser ? undefined : instrument.user_id,
     };
-    console.log(currentUser);
-    let mutation = currentUser ? CreateCurrentUserInstrument : CreateUserInstrument;
-    return (await client.mutate<{ insert_cucb_users_instruments_one: unknown }>({ mutation, variables })).data
-      .insert_cucb_users_instruments_one;
+    const body = JSON.stringify(variables);
+
+    return await fetch(`/members/users/${instrument.user_id}/instruments`, { method: "POST", body }).then((res) =>
+      res.json(),
+    );
   }
 
   async function saveChanges() {
