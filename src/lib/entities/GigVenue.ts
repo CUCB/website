@@ -30,8 +30,8 @@ export class GigVenue {
   postcode?: string;
 
   @Property({ columnType: "float8", nullable: true, type: "double" })
-  latitude?: string;
+  latitude?: number;
 
   @Property({ columnType: "float8", nullable: true, type: "double" })
-  longitude?: string;
+  longitude?: number;
 }
