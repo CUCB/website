@@ -100,7 +100,8 @@
     return async (_: Event) => {
       const newInstrument = await fetch(`/members/user/${user.id}/instruments`, {
         method: "DELETE",
-        body: JSON.stringify({ userInstrumentId: u_i_id.toString() }),
+        body: JSON.stringify({ userInstrumentId: u_i_id }),
+        headers: { "Content-Type": "application/json" },
       }).then((res) => res.json());
       if (newInstrument) {
         user.instruments[user.instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
@@ -112,11 +113,11 @@
 
   function restoreDeletedInstrument(u_i_id: string) {
     return async (_: Event) => {
-      const res = await graphqlClient.mutate<{ update_cucb_users_instruments_by_pk: UserInstrument }>({
-        mutation: RestoreDeletedUserInstrument,
-        variables: { id: u_i_id },
-      });
-      const newInstrument = res.data.update_cucb_users_instruments_by_pk;
+      const newInstrument = await fetch(`/members/user/${user.id}/instruments`, {
+        method: "POST",
+        body: JSON.stringify({ userInstrumentId: u_i_id, deleted: false }),
+        headers: { "Content-Type": "application/json" },
+      }).then((res) => res.json());
       user.instruments[user.instruments.findIndex((i) => i.id === u_i_id)] = newInstrument;
     };
   }
