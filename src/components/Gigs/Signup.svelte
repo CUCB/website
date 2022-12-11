@@ -59,16 +59,13 @@
   const signup = (newStatus) => async () => {
     let user_available = newStatus !== statuses.NO;
     let user_only_if_necessary = newStatus === statuses.MAYBE;
-    let res = await $clientCurrentUser.mutate({
-      mutation: UpdateSignupStatus,
-      variables: {
-        gig_id: gig.id,
-        user_only_if_necessary,
-        user_available,
-      },
-    });
-    let returning = res.data.insert_cucb_gigs_lineups.returning;
-    status = statusFromAvailability(returning[0]);
+    const body = JSON.stringify({ user_available, user_only_if_necessary });
+    let res = await fetch(`/members/gigs/${gig.id}/signup`, {
+      method: "POST",
+      body,
+      headers: { "Content-Type": "application/json" },
+    }).then((res) => res.json());
+    status = statusFromAvailability(res);
     if (gig.lineup.length > 0) {
       gig = {
         ...gig,
@@ -77,7 +74,7 @@
             ...gig.lineup[0],
             user_available,
             user_only_if_necessary,
-            user: returning[0].user,
+            user: res.user,
           },
         ],
       };
@@ -92,7 +89,7 @@
             user_notes: null,
             user_id: user.userId,
             user_instruments: [],
-            user: returning[0].user,
+            user: res.user,
           },
         ],
       };
