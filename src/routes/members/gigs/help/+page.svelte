@@ -205,8 +205,9 @@
         >Using the controls in this blue box you can assemble a lineup for the Ceilidh. Select each band member from the
         dropdown list; once you have done that, a number of checkboxes will appear which allow you to select which
         instrument(s) you would like this band member to play. If a blank checkbox appears, or the instrument is not
-        shown but you know they play it, you can add it to their profile in the <a href="/members/user/" target="_blank"
-          >Admin Control Panel</a
+        shown but you know they play it, you can add it to their profile in the <a
+          href="/members/users/"
+          target="_blank">Admin Control Panel</a
         >. You may select more than one instrument. Once you have selected instruments, click 'Add Band Member' to add
         them to the lineup. They should appear in the list, with a 'Remove' button next to them that does exactly what
         it says. Lineups can be edited at any time.</td

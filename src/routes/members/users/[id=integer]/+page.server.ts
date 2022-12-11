@@ -7,7 +7,7 @@ import orm from "$lib/database";
 import { UserInstrument } from "$lib/entities/UsersInstrument";
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { User } from "$lib/entities/User";
-import { LoadStrategy, PopulateHint, wrap } from "@mikro-orm/core";
+import { PopulateHint, wrap } from "@mikro-orm/core";
 import type { EntityField } from "@mikro-orm/core";
 import { UserPrefType } from "../../../../lib/entities/UserPrefType";
 import { AuthUserType } from "../../../../lib/entities/AuthUserType";

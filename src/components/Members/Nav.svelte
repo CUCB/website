@@ -41,5 +41,5 @@
   <a href="/faqs/members">FAQs</a>
   <a href="/members/resources/">Resources</a>
   <a href="/session/">Sessions</a>
-  <a href="/members/user/">My profile!</a>
+  <a href="/members/users">My profile!</a>
 </nav>

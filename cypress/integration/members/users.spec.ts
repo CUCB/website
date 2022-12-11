@@ -99,7 +99,7 @@ function loginAs(user: User): void {
 }
 
 function urlFor(user?: User): string {
-  return user ? `/members/user/${user.id}` : `/members/user`;
+  return user ? `/members/users/${user.id}` : `/members/users`;
 }
 
 function insertableUser(user: User): InsertableUser {
@@ -213,7 +213,7 @@ describe("User page", () => {
 
   it("redirects to current users's page when no id is provided", () => {
     loginAs(userWithFullInfo);
-    cy.visit("/members/user");
+    cy.visit("/members/users");
     cy.location("pathname").should("eq", urlFor(userWithFullInfo));
   });
 
@@ -222,7 +222,7 @@ describe("User page", () => {
   describe("instrument editor", () => {
     beforeEach(() => {
       loginAs(Role.user);
-      cy.visit("/members/user");
+      cy.visit("/members/users");
     });
     it("can add new instruments", () => {});
 
@@ -257,7 +257,7 @@ describe("User page", () => {
       });
       loginAs(Role.user);
       cy.request({ method: "DELETE", url: `/members/images/users/${Role.user.id}.jpg`, failOnStatusCode: false });
-      cy.visit(`/members/user/${Role.user.id}`);
+      cy.visit(`/members/users/${Role.user.id}`);
 
       cy.get('blockquote[data-test="bio-content"]').should("contain.text", Role.user.bio);
       cy.get('[data-test="bio-name"]').should("include.text", Role.user.firstName).and("include.text", "July 2020");
@@ -442,7 +442,7 @@ describe("User page", () => {
         cy.get("#is-driver").check();
         cy.get('[for="can-tech"]').click();
         cy.get("#can-tech").uncheck();
-        cy.intercept("POST", "/v1/graphql").as("saveDetails");
+        cy.intercept("POST", `/members/users/${userWithFullInfo.id}`).as("saveDetails");
         cy.get('[data-test="save-user-details"]').click();
 
         cy.wait("@saveDetails");
@@ -459,6 +459,8 @@ describe("User page", () => {
         mobileNumber().should("contain.text", "07987654321");
         email().should("contain.text", userWithFullInfo.email);
       });
+
+      it("can change their own password");
 
       it("can edit their own instruments", () => {
         cy.waitForFormInteractive();

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from "svelte";
 
-  import type { User } from "../../../routes/members/user/[id=integer]/types";
+  import type { User } from "../../../routes/members/users[id=integer]/types";
   import { themeName } from "../../../view";
   import MinSizeCropper from "../../MinSizeCropper.svelte";
   import { getCroppedImg } from "./canvasUtils";

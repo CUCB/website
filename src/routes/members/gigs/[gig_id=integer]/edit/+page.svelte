@@ -648,7 +648,7 @@
     {DateTime.fromISO(editing_time).toFormat("HH:mm dd/LL/yyyy")}
     {#if editing_user}
       &nbsp;by user
-      <a href="/members/user/{editing_user.id}">{editing_user.first}&#32;{editing_user.last}</a>
+      <a href="/members/users/{editing_user.id}">{editing_user.first}&#32;{editing_user.last}</a>
     {/if}.
   {/if}
   {#if posting_time}
@@ -656,7 +656,7 @@
     {DateTime.fromISO(posting_time).toFormat("HH:mm dd/LL/yyyy")}
     {#if posting_user}
       &nbsp;by user
-      <a href="/members/user/{posting_user.id}">{posting_user.first}&#32;{posting_user.last}</a>
+      <a href="/members/users/{posting_user.id}">{posting_user.first}&#32;{posting_user.last}</a>
     {/if}.
   {/if}
 </p>

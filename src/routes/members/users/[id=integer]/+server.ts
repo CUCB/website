@@ -4,6 +4,9 @@ import { assertLoggedIn } from "../../../../client-auth";
 import { User } from "$lib/entities/User";
 import type { RequestEvent } from "./$types";
 import orm from "../../../../lib/database";
+import { Record, String } from "runtypes";
+import bcrypt from "bcrypt";
+import { SALT_ROUNDS } from "../../../../auth";
 
 const UPDATABLE_FIELDS = (id: string, session: App.Locals["session"]): (keyof User)[] => {
   const fields: (keyof User)[] = [
@@ -13,7 +16,7 @@ const UPDATABLE_FIELDS = (id: string, session: App.Locals["session"]): (keyof Us
     "last",
     "locationInfo",
     "mobileContactInfo",
-    "saltedPassword",
+    "password",
     "username",
     "bio",
     "gigNotes",
@@ -35,13 +38,19 @@ export const POST = async ({ locals, params, request }: RequestEvent): Promise<R
     const body = Object.fromEntries(
       Object.entries(await request.json()).filter(([key, _]) => updatableFields.includes(key as keyof User)),
     );
+
+    if (String.guard(body.password)) {
+      body.saltedPassword = await bcrypt.hash(body.password, SALT_ROUNDS);
+    }
+    delete body.password;
+
     if (body.bio) {
       body.bioChangedDate = "now()";
     }
 
     const em = orm.em.fork();
     await em.nativeUpdate(User, { id }, body);
-    const user = await em.findOneOrFail(User, { id });
+    const user = await em.findOneOrFail(User, { id }, { populate: ["prefs", "prefs.pref_type"] });
 
     return json(user);
   } else {

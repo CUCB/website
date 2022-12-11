@@ -15,11 +15,7 @@ if (typeof env["SESSION_SECRET"] === "undefined") {
   console.error("Error: SESSION_SECRET must be defined in .env before running the server");
   process.exit(1);
 }
-const SESSION_SECRET_HASH = crypto
-  .createHash("sha512")
-  .update(Buffer.from(env["SESSION_SECRET"] as string))
-  .digest("hex");
-const SALT_ROUNDS = 10;
+export const SALT_ROUNDS = 10;
 
 const errors = {
   INCORRECT_USERNAME_OR_PASSWORD: {
