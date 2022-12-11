@@ -24,7 +24,7 @@ const PUBLIC_FIELDS: EntityField<User, string>[] = [
   "lastLoginDate",
   "joinDate",
   "instruments",
-  { instruments: ["instrument", { instrument: ["id", "name", "novelty"] }] },
+  { instruments: ["instrument", { instrument: ["id", "name", "novelty"] }, "deleted"] },
 ];
 
 const SENSITIVE_FIELDS: EntityField<User, string>[] = [
