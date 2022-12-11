@@ -1,7 +1,6 @@
 <script lang="ts">
   import Mailto from "../../../../components/Mailto.svelte";
   import { DateTime } from "luxon";
-  import { DeleteUserInstrument, RestoreDeletedUserInstrument } from "../../../../graphql/instruments";
   import InstrumentSelector from "../../../../components/Instruments/InstrumentSelector.svelte";
   import UserInstrumentEditor from "../../../../components/Instruments/UserInstrumentEditor.svelte";
   import AutomaticProfile from "../../../../components/Members/Users/AutomaticProfile.svelte";
@@ -11,8 +10,7 @@
   import Select from "../../../../components/Forms/Select.svelte";
   import type { PageData } from "./$types";
   import { GraphQLClient } from "../../../../graphql/client";
-  import type { User, UserInstrument } from "./types";
-  import { UpdateBio, UpdateUserAdminStatus, UpdateUserDetails, UpdateUserPrefs } from "../../../../graphql/user";
+  import type { UserInstrument } from "./types";
   import { makeTitle } from "../../../../view";
 
   export let data: PageData;
@@ -98,7 +96,7 @@
 
   function deleteInstrument(u_i_id: string) {
     return async (_: Event) => {
-      const newInstrument = await fetch(`/members/user/${user.id}/instruments`, {
+      const newInstrument = await fetch(`/members/users/${user.id}/instruments`, {
         method: "DELETE",
         body: JSON.stringify({ userInstrumentId: u_i_id }),
         headers: { "Content-Type": "application/json" },
@@ -113,7 +111,7 @@
 
   function restoreDeletedInstrument(u_i_id: string) {
     return async (_: Event) => {
-      const newInstrument = await fetch(`/members/user/${user.id}/instruments`, {
+      const newInstrument = await fetch(`/members/users/${user.id}/instruments`, {
         method: "POST",
         body: JSON.stringify({ userInstrumentId: u_i_id, deleted: false }),
         headers: { "Content-Type": "application/json" },
@@ -160,6 +158,11 @@
   }
 
   async function updateImportantInfo(_e: Event) {
+    if (newPassword !== newPasswordConfirm) {
+      // TODO handle this
+      return;
+    }
+
     let prefs = [
       { name: "attribute.tshirt", value: has_polo },
       { name: "attribute.folder", value: has_folder },
@@ -174,40 +177,23 @@
 
     message = "Saving...";
     // TODO handle errors
-    await graphqlClient.mutate({
-      mutation: UpdateUserPrefs,
-      variables: {
-        prefs: prefs.map((pref) => ({
-          pref_id: prefsIdsByName[pref.name],
-          user_id: currentUser ? undefined : user.id,
-          value: pref.value,
-        })),
-      },
+    await fetch(`/members/users/${user.id}/prefs`, {
+      method: "POST",
+      body: JSON.stringify(prefs.map((pref) => ({ pref_id: prefsIdsByName[pref.name], value: pref.value }))),
+      headers: { "Content-Type": "application/json" },
     });
-    if (canEditAdminStatus) {
-      await graphqlClient.mutate({
-        mutation: UpdateUserAdminStatus,
-        variables: {
-          user_id: user.id,
-          admin: user.adminType.id,
-        },
-      });
-    }
-    // TODO handle updating password
     const variables = {
-      id: user.id,
-      first: user.first,
-      last: user.last,
-      email: user.email,
-      mobile_contact_info: user.mobileContactInfo,
-      location_info: user.locationInfo,
-      dietaries: user.dietaries,
+      ...user,
+      password: newPassword !== "",
     };
-    const res = await graphqlClient.mutate<{ update_cucb_users_by_pk: User }>({
-      mutation: UpdateUserDetails,
-      variables,
-    });
-    const updatedUser = res.data.update_cucb_users_by_pk;
+
+    if (canEditAdminStatus) {
+      variables.adminType = user.adminType.id;
+    }
+    const body = JSON.stringify(variables);
+
+    // TODO error handling
+    const updatedUser = await fetch(`/members/users/${user.id}`, { method: "POST", body }).then((res) => res.json());
     if (updatedUser) {
       user = { ...user, ...updatedUser };
       has_polo = user.prefs?.find((pref) => pref.pref_type.name == "attribute.tshirt")?.value;

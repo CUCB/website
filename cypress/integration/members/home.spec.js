@@ -418,7 +418,7 @@ describe("gig signup", () => {
       cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
       cy.wait("@signup");
       cy.get(`[data-test="gig-15274-signup-edit"]`).click();
-      cy.get(`a[href="/members/user"]`).should("exist");
+      cy.get(`a[href="/members/users"]`).should("exist");
     });
   });
 

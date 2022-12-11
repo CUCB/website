@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DateTime } from "luxon";
-  import type { User, Instrument } from "../../../routes/members/user/[id=integer]/types";
+  import type { User, Instrument } from "../../../routes/members/users[id=integer]/types";
 
   export let user: User;
   function percentage(a: number, b: number): string {

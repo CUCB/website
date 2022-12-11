@@ -335,7 +335,7 @@
           {:else}
             <p>
               You haven't added any instruments to your account, try adding one to
-              <a href="/members/user">your profile</a>
+              <a href="/members/users">your profile</a>
               .
             </p>
           {/each}

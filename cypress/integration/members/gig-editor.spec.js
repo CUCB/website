@@ -359,6 +359,7 @@ describe("gig editor", () => {
         contacts[1].name,
         { log: false },
       ); // Wait for buttons to have event handlers sorted
+      cy.waitForFormInteractive();
       cy.log("Waited for page to be ready");
       cy.get(`[data-test=gig-edit-${gig.id}-caller-new]`).click();
       cy.get(`[data-test=contact-editor-caller]`).should("be.checked");

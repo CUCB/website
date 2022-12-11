@@ -6,5 +6,5 @@ export const load: PageLoad = async ({ parent }) => {
   const { session } = await parent();
   assertLoggedIn(session);
 
-  throw redirect(302, `/members/user/${session.userId}`);
+  throw redirect(302, `/members/users/${session.userId}`);
 };
