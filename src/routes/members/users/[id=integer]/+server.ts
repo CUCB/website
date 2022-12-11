@@ -4,7 +4,7 @@ import { assertLoggedIn } from "../../../../client-auth";
 import { User } from "$lib/entities/User";
 import type { RequestEvent } from "./$types";
 import orm from "../../../../lib/database";
-import { Record, String } from "runtypes";
+import { String } from "runtypes";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "../../../../auth";
 

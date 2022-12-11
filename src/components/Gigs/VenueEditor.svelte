@@ -1,39 +1,39 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { GraphQLClient } from "../../graphql/client";
-  import type { Fetch } from "../../graphql/client";
   import { CreateVenue, UpdateVenue } from "../../graphql/gigs";
+  import { Tuple, Number } from "runtypes";
 
-  export let id,
-    name,
-    subvenue,
-    map_link,
-    distance_miles,
-    notes_admin,
-    notes_band,
-    address,
-    postcode,
-    latitude,
-    longitude,
+  export let id: string,
+    name: string,
+    subvenue: string,
+    map_link: string,
+    distance_miles: string,
+    notes_admin: string,
+    notes_band: string | null,
+    address: string | null,
+    postcode: string | null,
+    latitude: number | null,
+    longitude: number | null,
     nameEditable = true;
   let initiated = false;
 
   const dispatch = createEventDispatcher();
-  const latLngFrom = (map_link) => {
+  const latLngFrom = (map_link: string): [number | null, number | null] => {
     try {
-      return map_link.split(/@/)[1].split(/,/).slice(0, 2).map(parseFloat);
+      return Tuple(Number, Number).check(map_link.split(/@/)[1].split(/,/).slice(0, 2).map(parseFloat));
     } catch {
-      return [];
+      return [null, null];
     }
   };
 
-  const updateLatLng = (latLngFromLink: [number, number]) => {
+  const updateLatLng = (latLngFromLink: [number | null, number | null]) => {
     if (!initiated) {
       initiated = true;
       return;
     }
-    latitude = map_link && latLngFromLink[0];
-    longitude = map_link && latLngFromLink[1];
+    console.log(latLngFromLink);
+    latitude = map_link ? latLngFromLink[0] : null;
+    longitude = map_link ? latLngFromLink[1] : null;
   };
   $: latLngFromLink = latLngFrom(map_link); // Reactivity is implemented manually with on:change because otherwise you can't edit lat and long fields manually
   $: updateLatLng(latLngFromLink);
@@ -43,35 +43,31 @@
       return;
     }
     let variables = {
-      id,
       name: name.trim(),
       subvenue: (subvenue && subvenue.trim()) || null,
       map_link: (map_link && map_link.trim()) || null,
-      distance_miles: distance_miles === "" ? null : distance_miles,
+      distance_miles: distance_miles || null,
       notes_admin: (notes_admin && notes_admin.trim()) || null,
       notes_band: (notes_band && notes_band.trim()) || null,
       address: (address && address.trim()) || null,
       postcode: (postcode && postcode.trim()) || null,
-      latitude: latitude === "" ? null : latitude,
-      longitude: longitude === "" ? null : longitude,
+      latitude: latitude || null,
+      longitude: longitude || null,
     };
-
-    let client = new GraphQLClient(fetch as Fetch);
-    let mutationDetails;
-    if (id !== null && id !== undefined) {
-      mutationDetails = [UpdateVenue, "update_cucb_gig_venues_by_pk"];
-    } else {
-      mutationDetails = [CreateVenue, "insert_cucb_gig_venues_one"];
-    }
+    console.log(variables);
 
     try {
-      let res = await client.mutate({
-        mutation: mutationDetails[0],
-        variables,
-      });
+      let url = `/members/gigs/venues`;
+      if (id) {
+        url += `/${id}`;
+      }
+      const body = JSON.stringify(variables);
+      const res = await fetch(url, { method: "POST", body, headers: { "Content-Type": "application/json" } }).then(
+        (res) => res.json(),
+      );
 
       dispatch("saved", {
-        venue: res.data[mutationDetails[1] as string],
+        venue: res,
       });
     } catch (e) {
       // Oh shit, probably should do something here

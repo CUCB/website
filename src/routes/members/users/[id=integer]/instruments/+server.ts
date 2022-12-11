@@ -38,18 +38,6 @@ const RESTORE_DELETED = Record({ deleted: Literal(false), userInstrumentId: Stri
 const CREATE = Record({ nickname: String.Or(Null), instrument_id: String });
 const UPDATE_NICKNAME = Record({ nickname: String.Or(Null), userInstrumentId: String });
 
-// const filterFields = <T extends { [_: string]: RuntypeBase<unknown> }, R extends Record<T, false>>(
-//   guard: Record<T, false>,
-//   body: Static<R>,
-// ): Static<R> =>
-//   guard.check(
-//     Object.fromEntries(
-//       Object.entries(body)
-//         .filter(([key, _]) => Object.keys(guard.fields).includes(key))
-//         .filter(([key, _]) => key != "userInstrumentId"),
-//     ),
-//   );
-
 export const POST = async ({
   request,
   locals: { session },
