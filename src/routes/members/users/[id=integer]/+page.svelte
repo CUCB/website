@@ -4,12 +4,10 @@
   import InstrumentSelector from "../../../../components/Instruments/InstrumentSelector.svelte";
   import UserInstrumentEditor from "../../../../components/Instruments/UserInstrumentEditor.svelte";
   import AutomaticProfile from "../../../../components/Members/Users/AutomaticProfile.svelte";
-  import { browser } from "$app/environment";
   import { fade } from "svelte/transition";
   import ProfilePicture from "../../../../components/Members/Users/ProfilePicture.svelte";
   import Select from "../../../../components/Forms/Select.svelte";
   import type { PageData } from "./$types";
-  import { GraphQLClient } from "../../../../graphql/client";
   import type { UserInstrument } from "./types";
   import { makeTitle } from "../../../../view";
 
@@ -25,7 +23,6 @@
     allPrefs,
     profilePictureUpdated,
   } = data;
-  let graphqlClient: GraphQLClient = browser && new GraphQLClient(fetch, currentUser ? { role: "current_user" } : {});
 
   function displayMonth(date: Date | null): string | null {
     if (date == null) return null;
@@ -431,7 +428,6 @@
   {#if editingInstrument === EditInstrumentState.EditingExisting}
     <UserInstrumentEditor
       instrument="{currentlyEditingDetails}"
-      client="{graphqlClient}"
       currentUser="{currentUser}"
       on:save="{completeEditInstrument}"
       on:cancel="{cancelEditInstrument}"
