@@ -1,16 +1,5 @@
 {
-  "data": {
-    "insert_cucb_gigs_lineups": {
-      "returning": [
-        {
-          "user_available": true,
-          "user_only_if_necessary": false,
-          "user": { "gig_notes": "", "__typename": "cucb_users" },
-          "__typename": "cucb_gigs_lineups"
-        }
-      ],
-      "affected_rows": 1,
-      "__typename": "cucb_gigs_lineups_mutation_response"
-    }
-  }
+  "user_available": true,
+  "user_only_if_necessary": false,
+  "user": { "gig_notes": "" }
 }

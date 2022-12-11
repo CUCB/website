@@ -412,7 +412,7 @@ describe("gig signup", () => {
 
     it("links to user profile when editing instruments", () => {
       cy.waitForFormInteractive();
-      cy.intercept("POST", "/v1/graphql", {
+      cy.intercept("POST", "/members/gigs/15274/signup", {
         fixture: "gig/signup/yes.json",
       }).as("signup");
       cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);

@@ -19,7 +19,7 @@ const HAS_ROLE = (role: Runtype) =>
   LOGGED_IN.And(
     Record({ alternativeRole: role }).Or(Record({ alternativeRole: Null.Or(Undefined), hasuraRole: role })),
   );
-const NOT_MUSIC_ONLY = Record({}).withConstraint((session) => !HAS_ROLE(ROLES.musicOnly).guard(session));
+export const NOT_MUSIC_ONLY = LOGGED_IN.withConstraint((session) => !HAS_ROLE(ROLES.musicOnly).guard(session));
 
 export const IS_SELF = (userId: string) => Record({ userId: Literal(userId) });
 export const UPDATE_BIO = (userId: string) =>
