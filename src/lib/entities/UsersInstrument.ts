@@ -1,4 +1,5 @@
-import { Entity, Index, ManyToOne, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, Index, ManyToOne, OneToMany, OptionalProps, PrimaryKey, Property, Collection } from "@mikro-orm/core";
+import { GigLineupInstrument } from "./GigLineupInstrument";
 import { Instrument } from "./Instrument";
 import { User } from "./User";
 
@@ -26,4 +27,7 @@ export class UserInstrument {
 
   @Property({ default: false, type: "boolean" })
   deleted: boolean = false;
+
+  @OneToMany({ entity: () => GigLineupInstrument, mappedBy: (lineupInstrument) => lineupInstrument.user_instrument })
+  lineup_entries = new Collection<GigLineupInstrument>(this);
 }
