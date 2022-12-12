@@ -11,11 +11,11 @@
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
-  export let gig, userInstruments, user;
+  export let gig, userInstruments, user, initialUserNotes;
   export let showLink = true;
   let edit = false;
   Settings.defaultZoneName = "Europe/London";
-  $: date = gig.date && DateTime.fromISO(gig.date);
+  $: date = gig.date && DateTime.fromJSDate(gig.date);
 
   let selectedInstruments =
     // @ts-ignore
@@ -34,6 +34,7 @@
       : { ...userInstr, chosen: false, approved: false },
   );
 
+  if (initialUserNotes !== undefined) $userNotes = initialUserNotes;
   // @ts-ignore
   $userNotes || (gig.lineup.length && ($userNotes = gig.lineup[0].user.gig_notes));
   userNotes.subscribe(

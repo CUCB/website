@@ -21,6 +21,6 @@ export class GigLineupInstrument {
   @Property({ nullable: true, type: "bool", default: "false" })
   approved?: boolean;
 
-  @ManyToOne({ entity: () => GigLineup, primary: true, fieldNames: ["gig_id", "user_id"] })
+  @ManyToOne({ entity: () => GigLineup, fieldNames: ["gig_id", "user_id"] })
   gig_lineup!: GigLineup;
 }

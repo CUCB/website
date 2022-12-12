@@ -33,6 +33,7 @@ export const UPDATE_ADMIN_STATUS = (userId: string) =>
 export const UPDATE_GIG_DETAILS = HAS_ROLE(
   Union(ROLES.webmaster, ROLES.president, ROLES.secretary, ROLES.treasurer, ROLES.equipment, ROLES.gigEditor),
 );
+export const SELECT_LINEUPS = HAS_ROLE(ROLES.webmaster.Or(ROLES.president));
 export const VIEW_GIG_CONTACT_DETAILS = UPDATE_GIG_DETAILS.Or(HAS_ROLE(ROLES.blueGig));
 export const VIEW_GIG_ADMIN_NOTES = UPDATE_GIG_DETAILS;
 export const VIEW_HIDDEN_GIGS = UPDATE_GIG_DETAILS.Or(HAS_ROLE(ROLES.blueGig));
