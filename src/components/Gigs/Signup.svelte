@@ -8,8 +8,6 @@
   import tippy from "tippy.js";
   import "tippy.js/dist/tippy.css";
   import TooltipText from "../TooltipText.svelte";
-  import { clientCurrentUser } from "../../graphql/client";
-  import { UpdateSignupStatus, UpdateSignupInstruments, UpdateSignupNotes } from "../../graphql/gigs";
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
@@ -97,26 +95,27 @@
   };
 
   const updateInstruments = async () => {
-    let to_add = userInstruments
+    let insert = userInstruments
       .filter((i) => i.chosen && !(i.id in selectedInstruments))
-      .map((i) => ({ gig_id: gig.id, user_instrument_id: i.id }));
-    let to_remove = userInstruments.filter((i) => !i.chosen).map((i) => i.id);
-    let res = await $clientCurrentUser.mutate({
-      mutation: UpdateSignupInstruments,
-      variables: {
-        to_add,
-        to_remove,
-        gig_id: gig.id,
-      },
-    });
-    let inserted = res.data.insert_cucb_gigs_lineups_instruments.returning;
-    let deleted = res.data.delete_cucb_gigs_lineups_instruments.returning.map((instr) => instr.user_instrument_id);
+      // TODO de-bodge
+      .map((i) => ({ user_instrument_id: i.id.toString() }));
+    // TODO de-bodge
+    let delete_ = userInstruments.filter((i) => !i.chosen).map((i) => ({ user_instrument_id: i.id.toString() }));
+    const body = JSON.stringify({ insert, delete: delete_ });
+    const res = await fetch(`/members/gigs/${gig.id}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    }).then((res) => res.json());
+    let inserted = res.inserted;
+    let deleted = res.deleted.map((instr) => instr.user_instrument_id);
 
     // Filter deleted instruments from currently selected
     selectedInstruments = Object.assign(
       {},
       ...Object.values(selectedInstruments)
-        .filter((i) => !deleted.includes(i.user_instrument_id))
+        // TODO removeme parseInt
+        .filter((i) => !deleted.includes(i.user_instrument_id) && !deleted.includes(i.user_instrument_id.toString()))
         .map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
     );
 
@@ -147,17 +146,20 @@
   };
 
   const updateNotes = async () => {
-    let res = await $clientCurrentUser.mutate({
-      mutation: UpdateSignupNotes,
-      variables: {
-        gig_notes: gig.lineup[0].user_notes && gig.lineup[0].user_notes.trim(),
-        gig_id: gig.id,
-        other_notes: (gig.lineup[0].user.gig_notes && gig.lineup[0].user.gig_notes.trim()) || "",
-      },
+    const body = JSON.stringify({
+      gig_notes: (gig.lineup[0].user_notes && gig.lineup[0].user_notes.trim()) || null,
+      // TODO de-bodge
+      gig_id: gig.id.toString(),
+      other_notes: (gig.lineup[0].user.gig_notes && gig.lineup[0].user.gig_notes.trim()) || "",
     });
-    if (res.data) {
-      gig.lineup[0].user_notes = res.data.update_cucb_gigs_lineups.returning[0].user_notes;
-      gig.lineup[0].user.gig_notes = res.data.update_cucb_users.returning[0].gig_notes;
+    const res = await fetch(`/members/gigs/${gig.id}/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    }).then((res) => res.json());
+    if (res) {
+      gig.lineup[0].user_notes = res.user_notes;
+      gig.lineup[0].user.gig_notes = res.user.gig_notes;
       $userNotes = gig.lineup[0].user.gig_notes;
     } else {
       console.error(res);

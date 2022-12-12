@@ -35,5 +35,6 @@ export const UPDATE_GIG_DETAILS = HAS_ROLE(
 );
 export const VIEW_GIG_CONTACT_DETAILS = UPDATE_GIG_DETAILS.Or(HAS_ROLE(ROLES.blueGig));
 export const VIEW_GIG_ADMIN_NOTES = UPDATE_GIG_DETAILS;
+export const VIEW_HIDDEN_GIGS = UPDATE_GIG_DETAILS.Or(HAS_ROLE(ROLES.blueGig));
 export const SELECT_GIG_LINEUPS = HAS_ROLE(Union(ROLES.webmaster, ROLES.president));
 export const DELETE_GIG = HAS_ROLE(Union(ROLES.webmaster, ROLES.president, ROLES.secretary));

@@ -450,8 +450,8 @@ describe("gig signup", () => {
     it("allows adding and editing of instruments", () => {
       cy.intercept({
         method: "POST",
-        url: "/v1/graphql",
-      }).as("graphqlRequest");
+        url: "/members/gigs/15274/signup",
+      }).as("signupRequest");
 
       cy.executeQuery(InstrumentsOnGig, {
         variables: {
@@ -462,18 +462,18 @@ describe("gig signup", () => {
         .its("cucb_gigs_lineups_instruments_aggregate.aggregate.count")
         .should("equal", 0);
       cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
-      cy.wait("@graphqlRequest");
+      cy.wait("@signupRequest");
       cy.get(`[data-test="gig-15274-signup-edit"]`).click();
       cy.get(`[data-test="gig-15274-signup-instrument-53-toggle"]`).click();
       cy.get(`[data-test="gig-15274-signup-save"]`).click();
-      cy.wait("@graphqlRequest");
+      cy.wait("@signupRequest");
       cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Trombone").should("exist");
       cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Wind Synth").should("not.exist");
       cy.get(`[data-test="gig-15274-signup-edit"]`).click();
       cy.get(`[data-test="gig-15274-signup-instrument-20-toggle"]`).click();
       cy.get(`[data-test="gig-15274-signup-instrument-53-toggle"]`).click();
       cy.get(`[data-test="gig-15274-signup-save"]`).click();
-      cy.wait("@graphqlRequest");
+      cy.wait("@signupRequest");
       cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Trombone").should("not.exist");
       cy.get(`[data-test="gig-15274-signup-instruments-selected"]`).contains("Wind Synth").should("exist");
     });
