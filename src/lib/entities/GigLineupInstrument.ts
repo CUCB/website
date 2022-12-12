@@ -1,4 +1,4 @@
-import { Entity, Filter, Index, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, Filter, Index, ManyToOne, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
 import { GigLineup } from "./GigLineup";
 import { UserInstrument } from "./UsersInstrument";
 
@@ -7,6 +7,8 @@ import { UserInstrument } from "./UsersInstrument";
 @Index({ name: "idx_17435_user_instrument_id", properties: ["user_instrument", "user_id"] })
 @Filter({ name: "approved", cond: { approved: { $eq: true } } })
 export class GigLineupInstrument {
+  [OptionalProps]?: "approved";
+
   @PrimaryKey({ columnType: "int8", type: "int8" })
   gig_id!: string;
 
@@ -16,7 +18,7 @@ export class GigLineupInstrument {
   @ManyToOne({ entity: () => UserInstrument, primary: true })
   user_instrument!: UserInstrument;
 
-  @Property({ nullable: true, type: "bool" })
+  @Property({ nullable: true, type: "bool", default: "false" })
   approved?: boolean;
 
   @ManyToOne({ entity: () => GigLineup, primary: true, fieldNames: ["gig_id", "user_id"] })
