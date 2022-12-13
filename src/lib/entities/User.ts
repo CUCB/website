@@ -16,7 +16,7 @@ import { UserInstrument } from "./UsersInstrument";
 
 @Entity({ schema: "cucb", tableName: "users" })
 export class User {
-  [OptionalProps]?: "admin" | "gigNotes" | "adminType";
+  [OptionalProps]?: "admin" | "gig_notes" | "adminType";
 
   @PrimaryKey({ columnType: "int8", type: "int8" })
   id!: string;
@@ -66,7 +66,7 @@ export class User {
   bioChangedDate?: Date;
 
   @Property({ default: "", type: "varchar" })
-  gigNotes!: string;
+  gig_notes!: string;
 
   @OneToMany({ entity: () => GigLineup, mappedBy: (gigLineup) => gigLineup.user })
   gigLineups = new Collection<GigLineup>(this);

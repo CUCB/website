@@ -1,9 +1,10 @@
-<script context="module">
+<script context="module" lang="ts">
   import { writable } from "svelte/store";
-  let userNotes = writable(undefined);
+  import type { Writable } from "svelte/store";
+  let userNotes: Writable<string | undefined> = writable(undefined);
 </script>
 
-<script>
+<script lang="ts">
   import AnnotatedIcon from "../AnnotatedIcon.svelte";
   import tippy from "tippy.js";
   import "tippy.js/dist/tippy.css";
@@ -11,51 +12,60 @@
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
-  export let gig, userInstruments, user, initialUserNotes;
+  import type {
+    AvailableUserInstrument,
+    SignupGig,
+    SignupGigLineup,
+    SignupUserInstrument,
+  } from "../../routes/members/types";
+  export let gig: SignupGig,
+    userInstruments: SignupUserInstrument[],
+    session: { userId: string },
+    initialUserNotes: string;
   export let showLink = true;
   let edit = false;
   Settings.defaultZoneName = "Europe/London";
   $: date = gig.date && DateTime.fromJSDate(gig.date);
 
-  let selectedInstruments =
+  let selectedInstruments: Record<string, AvailableUserInstrument> =
     // @ts-ignore
     gig.lineup.length > 0
       ? Object.assign(
           {},
           // @ts-ignore
-          ...gig.lineup[0].user_instruments.map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
+          ...gig.lineup[0].user_instruments.map((instrument) => ({
+            [instrument.user_instrument.id]: instrument.user_instrument,
+          })),
         )
       : {};
 
-  // @ts-ignore
   userInstruments = userInstruments.map((userInstr) =>
-    userInstr.id in selectedInstruments
-      ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
+    userInstr.user_instrument.id in selectedInstruments
+      ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.user_instrument.id].approved }
       : { ...userInstr, chosen: false, approved: false },
   );
 
   if (initialUserNotes !== undefined) $userNotes = initialUserNotes;
-  // @ts-ignore
   $userNotes || (gig.lineup.length && ($userNotes = gig.lineup[0].user.gig_notes));
   userNotes.subscribe(
     (notes) => typeof notes !== "undefined" && gig.lineup.length && (gig.lineup[0].user.gig_notes = notes),
   );
 
+  // TODO probably make this a typescript enum
   const statuses = {
     YES: {},
     NO: {},
     MAYBE: {},
   };
 
-  const statusFromAvailability = (entry) =>
+  const statusFromAvailability = (entry: SignupGigLineup) =>
     (typeof entry.user_available !== "undefined" &&
       (entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO)) ||
     undefined;
 
-  // @ts-ignore
   let status = gig.lineup[0] && statusFromAvailability(gig.lineup[0]);
 
-  const signup = (newStatus) => async () => {
+  const signup = (newStatus: {}) => async () => {
     let user_available = newStatus !== statuses.NO;
     let user_only_if_necessary = newStatus === statuses.MAYBE;
     const body = JSON.stringify({ user_available, user_only_if_necessary });
@@ -85,8 +95,9 @@
           {
             user_available,
             user_only_if_necessary,
+            // @ts-ignore
             user_notes: null,
-            user_id: user.userId,
+            user_id: session.userId,
             user_instruments: [],
             user: res.user,
           },
@@ -97,39 +108,40 @@
 
   const updateInstruments = async () => {
     let insert = userInstruments
-      .filter((i) => i.chosen && !(i.id in selectedInstruments))
-      // TODO de-bodge
-      .map((i) => ({ user_instrument_id: i.id.toString() }));
-    // TODO de-bodge
-    let delete_ = userInstruments.filter((i) => !i.chosen).map((i) => ({ user_instrument_id: i.id.toString() }));
+      .filter((i) => i.chosen && !(i.user_instrument.id in selectedInstruments))
+      .map((i) => i.user_instrument);
+    let delete_ = userInstruments.filter((i) => !i.chosen).map((i) => i.user_instrument);
     const body = JSON.stringify({ insert, delete: delete_ });
     const res = await fetch(`/members/gigs/${gig.id}/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body,
     }).then((res) => res.json());
-    let inserted = res.inserted;
-    let deleted = res.deleted.map((instr) => instr.user_instrument_id);
+    // TODO use runtypes to actually assert we know what's going on here
+    let inserted: { id: string }[] = res.inserted;
+    let deleted = res.deleted.map((instr: { id: string }) => instr.id);
 
     // Filter deleted instruments from currently selected
     selectedInstruments = Object.assign(
       {},
       ...Object.values(selectedInstruments)
         // TODO removeme parseInt
-        .filter((i) => !deleted.includes(i.user_instrument_id) && !deleted.includes(i.user_instrument_id.toString()))
-        .map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
+        .filter((i) => !deleted.includes(i.id) && !deleted.includes(i.id.toString()))
+        .map((instrument) => ({ [instrument.id]: instrument })),
     );
 
     // Add recently inserted instruments to currently selected
     selectedInstruments = Object.assign(
       selectedInstruments,
-      ...inserted.map((instrument) => ({ [instrument.user_instrument_id]: instrument })),
+      ...inserted.map((instrument: { id: string }) => ({
+        [instrument.id]: instrument,
+      })),
     );
 
     // Update userInstruments to display the updated state
     userInstruments = userInstruments.map((userInstr) =>
-      userInstr.id in selectedInstruments
-        ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.id].approved }
+      userInstr.user_instrument.id in selectedInstruments
+        ? { ...userInstr, chosen: true, approved: selectedInstruments[userInstr.user_instrument.id].approved }
         : { ...userInstr, chosen: false, approved: false },
     );
 
@@ -138,9 +150,7 @@
       lineup: [
         {
           ...gig.lineup[0],
-          user_instruments: userInstruments
-            .filter((instrument) => instrument.chosen)
-            .map((instrument) => ({ ...instrument, user_instrument_id: instrument.id })),
+          user_instruments: userInstruments.filter((instrument) => instrument.chosen),
         },
       ],
     };
@@ -322,15 +332,15 @@
       {#if edit}
         <fieldset>
           <legend>Instruments</legend>
-          {#each userInstruments as userInstrument (userInstrument.id)}
+          {#each userInstruments as userInstrument (userInstrument.user_instrument.id)}
             <label
               class="checkbox"
-              data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.instrument.id}-toggle`}"
+              data-test="{`gig-${gig.id}-signup-instrument-${userInstrument.user_instrument.instrument.id}-toggle`}"
               class:disabled="{userInstrument.approved}"
               use:instrumentTooltip
             >
               <input type="checkbox" bind:checked="{userInstrument.chosen}" disabled="{userInstrument.approved}" />
-              {userInstrument.instrument.name}
+              {userInstrument.user_instrument.instrument.name}
             </label>
           {:else}
             <p>
@@ -343,9 +353,9 @@
       {:else}
         <p>Signed up with:</p>
         <ul data-test="{`gig-${gig.id}-signup-instruments-selected`}">
-          {#each userInstruments.filter((instr) => instr.id in selectedInstruments) as userInstrument (userInstrument.id)}
+          {#each userInstruments.filter((instr) => instr.user_instrument.id in selectedInstruments) as userInstrument (userInstrument.user_instrument.id)}
             <li>
-              <InstrumentName userInstrument="{userInstrument}" />
+              <InstrumentName userInstrument="{userInstrument.user_instrument}" />
             </li>
           {:else}
             <li class="none">No instruments selected</li>

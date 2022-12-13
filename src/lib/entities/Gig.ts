@@ -19,7 +19,7 @@ export class Gig {
   type!: GigType;
 
   @Property({ columnType: "date", nullable: true, type: "date" })
-  date?: string;
+  date?: Date;
 
   @Property({ columnType: "time", length: 6, nullable: true, type: "time" })
   time?: string;
