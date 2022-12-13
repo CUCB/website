@@ -87,8 +87,8 @@ export const login: (details: LoginData) => Promise<SessionData> = async ({ user
       throw errors.INCORRECT_USERNAME_OR_PASSWORD;
     }
   } catch (e) {
-    console.trace(e);
     if (e.status) throw e;
+    console.trace(e);
     throw errors.INTERNAL_ERROR;
   }
 };

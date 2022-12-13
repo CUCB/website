@@ -52,8 +52,7 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
         { user: session.userId, gig: gig_id },
         { fields: ["user_available", "user_only_if_necessary", "user.gig_notes", "user_notes"], populate: ["user"] },
       );
-      // TODO de-bodge when Signup.svelte is fully migrated
-      return json({ ...entry, user: { gig_notes: entry.user.gig_notes } });
+      return json(entry);
     } else if (UPDATE_INSTRUMENTS.guard(body)) {
       // TODO ensure users cannot delete instruments that are approved
       const gig_lineup = await em.findOne(GigLineup, { user: session.userId, gig: gig_id });
