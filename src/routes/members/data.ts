@@ -1,7 +1,7 @@
-import { UserInstrument } from "../../lib/entities/UsersInstrument";
+import { UserInstrument } from "$lib/entities/UsersInstrument";
 import { EntityManager, LoadStrategy, PopulateHint, wrap } from "@mikro-orm/core";
-import { Gig } from "../../lib/entities/Gig";
-import { User } from "../../lib/entities/User.js";
+import { Gig } from "$lib/entities/Gig";
+import { User } from "$lib/entities/User.js";
 import type { AvailableUserInstrument, SignupGig } from "./types";
 
 export const fetchSignupGigs = (em: EntityManager, session: { userId: string }): Promise<SignupGig[]> =>

@@ -2,7 +2,7 @@ import { assertLoggedIn } from "../../../../../client-auth";
 import { error } from "@sveltejs/kit";
 import { sortContacts, sortVenues } from "./sort";
 import type { PageServerLoad } from "./$types";
-import { UPDATE_GIG_DETAILS } from "../../../../../lib/permissions";
+import { UPDATE_GIG_DETAILS } from "$lib/permissions";
 import orm from "$lib/database";
 import { Gig as DbGig } from "$lib/entities/Gig";
 import { GigVenue as DbVenue } from "$lib/entities/GigVenue";

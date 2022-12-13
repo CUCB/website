@@ -3,7 +3,7 @@ import { error, json } from "@sveltejs/kit";
 import { assertLoggedIn } from "../../../../client-auth";
 import { User } from "$lib/entities/User";
 import type { RequestEvent } from "./$types";
-import orm from "../../../../lib/database";
+import orm from "$lib/database";
 import { String } from "runtypes";
 import bcrypt from "bcrypt";
 import { SALT_ROUNDS } from "../../../../auth";

@@ -9,11 +9,11 @@ import type { EntityManager } from "@mikro-orm/postgresql";
 import { User } from "$lib/entities/User";
 import { PopulateHint, wrap } from "@mikro-orm/core";
 import type { EntityField } from "@mikro-orm/core";
-import { UserPrefType } from "../../../../lib/entities/UserPrefType";
-import { AuthUserType } from "../../../../lib/entities/AuthUserType";
-import { GigLineup } from "../../../../lib/entities/GigLineup";
+import { UserPrefType } from "$lib/entities/UserPrefType";
+import { AuthUserType } from "$lib/entities/AuthUserType";
+import { GigLineup } from "$lib/entities/GigLineup";
 import type { AggregateInstrument, LoadOutput } from "./types";
-import { Instrument } from "../../../../lib/entities/Instrument";
+import { Instrument } from "$lib/entities/Instrument";
 
 const PUBLIC_FIELDS: EntityField<User, string>[] = [
   "id",
