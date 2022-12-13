@@ -178,12 +178,11 @@ export async function startPasswordReset({
   const html = `A password reset has been requested for your account. To choose a new password, go to <a href="${link}">${link}</a>. If you have any problems, please get in touch with the webmaster by replying to this email.`;
   try {
     await emailClient.sendAsync({
-      //@ts-ignore
       from: `CUCB Webmaster <${env["EMAIL_SEND_ADDRESS"]}>`,
       "reply-to": `CUCB Webmaster <${env["EMAIL_SEND_ADDRESS"]}>`,
       to: `${first} ${last} <${email}>`,
       subject: `CUCB — Password Reset`,
-      content: `Hi ${first},
+      text: `Hi ${first},
 
 ${text}
 

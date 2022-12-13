@@ -1,4 +1,4 @@
-import { invalid, redirect } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import type { Actions } from "./$types";
 import { login } from "../../../auth";
 import { String, Record, Optional } from "runtypes";
@@ -35,15 +35,18 @@ export const actions: Actions = {
         let [name, value, opts] = await locals.session.save();
         cookies.set(name, value, opts);
       } catch (e) {
-        console.error(e);
         if (e.status === 401) {
-          return invalid(401, { username: body.username, message: "Incorrect username or password" });
+          return fail(401, { username: body.username, message: "Incorrect username or password" });
+        } else if (e.status) {
+          throw error(e.status, e.message);
+        } else {
+          console.trace(e);
+          throw error(500, "Something went wrong");
         }
-        throw error(e.status, e.message);
       }
       throw redirect(303, body.redirectTo || "/members");
     } else {
-      return invalid(400, { username: body.username, message: "Missing username or password" });
+      return fail(400, { username: body.username, message: "Missing username or password" });
     }
   },
 };
