@@ -16,9 +16,14 @@ export const POST: RequestHandler = async ({ request }) => {
   if (Body.guard(body)) {
     try {
       await completePasswordReset(body);
-      return new Response("", { status: 204 });
+      return new Response("", { status: 200 });
     } catch (e) {
-      throw error(e.status, e.message);
+      if (e.status) {
+        throw error(e.status, e.message);
+      } else {
+        console.trace(e);
+        throw error(500, "Something went wrong");
+      }
     }
   } else if ("password" in body && String.check(body["password"])) {
     throw error(400, "Password is too short");

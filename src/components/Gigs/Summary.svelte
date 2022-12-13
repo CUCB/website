@@ -76,7 +76,7 @@
     display: block;
     padding: 1em;
     border-radius: 5px;
-    max-width: calc(100%-10px);
+    max-width: calc(100% - 10px);
     margin: 0 auto 2em auto;
     box-sizing: border-box;
     word-break: break-word;
