@@ -6,7 +6,7 @@ import { handleErrors, client } from "../../../graphql/client";
 import { QueryMultiGigDetails } from "../../../graphql/gigs";
 import orm from "../../../lib/database";
 import { NOT_MUSIC_ONLY } from "../../../lib/permissions";
-import { fetchAvailableInstruments, fetchSignupGigs, fetchUserNotes } from "../+page.server";
+import { fetchAvailableInstruments, fetchSignupGigs, fetchUserNotes } from "../data";
 import type { PageServerLoad } from "./$types";
 import { assertLoggedIn } from "../../../client-auth";
 
