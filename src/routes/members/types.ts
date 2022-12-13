@@ -1,3 +1,4 @@
+// TODO combine this and data.ts?
 export interface SignupGig {
   id: string;
   lineup: SignupGigLineup[];
