@@ -1,8 +1,8 @@
 import { assertLoggedIn } from "../../client-auth.js";
 import type { PageServerLoad } from "./$types";
-import { NOT_MUSIC_ONLY } from "../../lib/permissions";
+import { NOT_MUSIC_ONLY } from "$lib/permissions";
 import { redirect } from "@sveltejs/kit";
-import orm from "../../lib/database";
+import orm from "$lib/database";
 import { fetchAvailableInstruments, fetchSignupGigs, fetchUserNotes } from "./data";
 
 export const load: PageServerLoad = async ({ parent }) => {

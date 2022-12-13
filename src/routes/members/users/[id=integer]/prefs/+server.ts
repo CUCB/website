@@ -1,9 +1,9 @@
 import { error, json } from "@sveltejs/kit";
 import { Array, Boolean, String, Record } from "runtypes";
 import type { Static } from "runtypes";
-import orm from "../../../../../lib/database";
-import { UserPref } from "../../../../../lib/entities/UserPref";
-import { UPDATE_BIO } from "../../../../../lib/permissions";
+import orm from "$lib/database";
+import { UserPref } from "$lib/entities/UserPref";
+import { UPDATE_BIO } from "$lib/permissions";
 import type { RequestEvent } from "./$types";
 
 const PREF = Record({ pref_id: String, value: Boolean });
