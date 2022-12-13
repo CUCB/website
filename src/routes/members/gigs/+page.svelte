@@ -5,25 +5,39 @@
   import Calendar from "../../../components/Gigs/Calendar.svelte";
   import { DateTime, Settings } from "luxon";
   import { writable } from "svelte/store";
+  import type { Writable } from "svelte/store";
   import type { PageData } from "./$types";
   import { QueryMultiGigDetails } from "../../../graphql/gigs";
+  import type { Gig } from "./+page.server";
+  import type { SignupGig } from "../types";
   export let data: PageData;
-  let { gigs, calendarGigs, currentCalendarMonth, userInstruments, signupGigs, session } = data;
+  let { gigs, calendarGigs, currentCalendarMonth, userInstruments, userNotes, initialSignupGigs, session } = data;
+  let signupGigs: Record<string, SignupGig | Writable<SignupGig>> = initialSignupGigs;
   Settings.defaultZoneName = "Europe/London";
 
+  function isStore(arg: SignupGig | Writable<SignupGig>): arg is Writable<SignupGig> {
+    // @ts-expect-error
+    return typeof arg.subscribe !== "undefined";
+  }
+
+  function isNotStore(arg: SignupGig | Writable<SignupGig>): arg is SignupGig {
+    return !isStore(arg);
+  }
+
   $: reloadSignupGigs(gigs);
-  function reloadSignupGigs(gigs) {
-    let newlyMerged = gigs.map((gig) =>
-      gig.id in signupGigs && typeof signupGigs[gig.id].subscribe === "undefined"
+  function reloadSignupGigs(gigs: Gig[]) {
+    let newlyMerged: ([number, Writable<SignupGig>] | [])[] = gigs.map((gig) => {
+      let signupGig = signupGigs[gig.id];
+      return gig.id in signupGigs && isNotStore(signupGig)
         ? [
-            gig.id,
+            gig.id.toString(),
             writable({
-              ...mergeDeep(signupGigs[gig.id], gig),
-              lineup: signupGigs[gig.id].lineup.filter((person) => person.user_id),
+              ...signupGig,
+              allow_signups: true,
             }),
           ]
-        : [],
-    );
+        : [];
+    });
     signupGigs = Object.fromEntries([...Object.entries(signupGigs), ...newlyMerged]);
   }
   let allUpcoming = gigs;
@@ -54,7 +68,7 @@
     return mergeDeep(target, ...sources);
   }
 
-  const display = (toDisplay) => {
+  const display = (toDisplay: "byMonth" | "allUpcoming") => {
     if (toDisplay === "byMonth") {
       gigs = calendarGigs[currentCalendarMonth];
     }
@@ -99,7 +113,7 @@
       // @ts-ignore
       calendarGigs[newDate] = res_gig_2.data.cucb_gigs;
       calendarGigs[newDate] = calendarGigs[newDate].sort(
-        (gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
+        (gigA: Gig, gigB: Gig) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
       );
     }
     currentCalendarMonth = newDate;
@@ -262,15 +276,22 @@
 </div>
 
 {#each gigs as gig (gig.id)}
-  {#if gig.id in signupGigs && typeof signupGigs[gig.id].subscribe !== "undefined"}
+  {@const signupGig = signupGigs[gig.id]}
+  {#if gig.id in signupGigs && isStore(signupGig)}
     <Summary
       gig="{gig}"
-      signupGig="{signupGigs[gig.id]}"
-      userInstruments="{userInstruments}"
+      signupGig="{signupGig}"
+      initialUserNotes="{userNotes}"
+      userInstruments="{userInstruments.map((user_instrument) => ({ user_instrument }))}"
       linkHeading="{true}"
       session="{session}"
     />
   {:else}
-    <Summary gig="{gig}" userInstruments="{userInstruments}" linkHeading="{true}" session="{session}" />
+    <Summary
+      gig="{gig}"
+      userInstruments="{userInstruments.map((user_instrument) => ({ user_instrument }))}"
+      linkHeading="{true}"
+      session="{session}"
+    />
   {/if}
 {:else}No gigs to display{/each}

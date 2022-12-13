@@ -19,7 +19,7 @@ const UPDATABLE_FIELDS = (id: string, session: App.Locals["session"]): (keyof Us
     "password",
     "username",
     "bio",
-    "gigNotes",
+    "gig_notes",
   ];
   if (UPDATE_ADMIN_STATUS(id).guard(session)) {
     fields.push("adminType");

@@ -18,5 +18,11 @@
   <p>You're an important person. You can <a href="/members/gigs/signups">view the gig signup summary</a>.</p>
 {/if}
 {#each gigSignups as gig}
-  <GigSignup gig="{gig}" initialUserNotes="{userNotes}" userInstruments="{userInstruments}" user="{session}" />
+  <!-- TODO find some way of convincing this that session.userId definitely exists -->
+  <GigSignup
+    gig="{gig}"
+    initialUserNotes="{userNotes}"
+    userInstruments="{userInstruments.map((user_instrument) => ({ user_instrument }))}"
+    session="{session}"
+  />
 {:else}No gigs are open for signups at the moment :(.{/each}

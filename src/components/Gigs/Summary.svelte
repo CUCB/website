@@ -1,19 +1,22 @@
-<script>
+<script lang="ts">
   import Signup from "./Signup.svelte";
   import SignupSummary from "./SignupSummary.svelte";
   import TooltipText from "../TooltipText.svelte";
   import Lineup from "./Lineup.svelte";
   import { writable } from "svelte/store";
+  import type { Writable } from "svelte/store";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
+  import type { SignupGig, SignupUserInstrument } from "../../routes/members/types";
   Settings.defaultZoneName = "Europe/London";
 
   export let gig = {},
-    signupGig = writable(undefined),
-    userInstruments = undefined,
+    signupGig: Writable<SignupGig | undefined> = writable(undefined),
+    userInstruments: SignupUserInstrument[] | undefined = undefined,
     displayLinks = true,
     signups = undefined,
-    session;
+    session: { userId: string },
+    initialUserNotes: string | undefined = undefined;
   export let linkHeading = false;
   let showSignup = false;
   let showDetails = !linkHeading;
@@ -406,5 +409,12 @@
   <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
     Show summary
   </button>
-  <Signup bind:gig="{$signupGig}" userInstruments="{userInstruments}" showLink="{false}" user="{session}" />
+  <!-- TODO fix type errors -->
+  <Signup
+    bind:gig="{$signupGig}"
+    initialUserNotes="{initialUserNotes}"
+    userInstruments="{userInstruments}"
+    showLink="{false}"
+    session="{session}"
+  />
 {/if}

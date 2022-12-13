@@ -12,8 +12,8 @@
   $: futureGigs = sinceOneMonth.filter(isInFuture);
   $: signupsOpenOrLineupSelectedForFuture = List(
     Map([
-      ...futureGigs.map<[number, Gig]>((gig) => [gig.id, gig]),
-      ...signupsOpen.map<[number, Gig]>((gig) => [gig.id, gig]),
+      ...futureGigs.map<[string, Gig]>((gig) => [gig.id, gig]),
+      ...signupsOpen.map<[string, Gig]>((gig) => [gig.id, gig]),
     ]).values(),
   )
     .sortBy((gig: Gig) => gig.sort_date)

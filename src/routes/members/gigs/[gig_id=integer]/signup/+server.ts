@@ -15,8 +15,8 @@ const SIGNUP_REQUEST = Record({
 });
 
 const UPDATE_INSTRUMENTS = Record({
-  insert: Array(Record({ user_instrument_id: String })),
-  delete: Array(Record({ user_instrument_id: String })),
+  insert: Array(Record({ id: String })),
+  delete: Array(Record({ id: String })),
 });
 
 const UPDATE_NOTES = Record({
@@ -50,24 +50,25 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
       const entry = await em.findOneOrFail(
         GigLineup,
         { user: session.userId, gig: gig_id },
-        { fields: ["user_available", "user_only_if_necessary", "user.gigNotes", "user_notes"], populate: ["user"] },
+        { fields: ["user_available", "user_only_if_necessary", "user.gig_notes", "user_notes"], populate: ["user"] },
       );
       // TODO de-bodge when Signup.svelte is fully migrated
-      return json({ ...entry, user: { gig_notes: entry.user.gigNotes } });
+      return json({ ...entry, user: { gig_notes: entry.user.gig_notes } });
     } else if (UPDATE_INSTRUMENTS.guard(body)) {
+      // TODO ensure users cannot delete instruments that are approved
       const gig_lineup = await em.findOne(GigLineup, { user: session.userId, gig: gig_id });
       if (gig_lineup) {
-        const inserts = (insert) => ({
+        const inserts = (insert: { id: string }) => ({
           gig_lineup,
-          user_instrument: insert.user_instrument_id,
+          user_instrument: insert.id,
           user_id: session.userId,
         });
-        const deletes = (del) => ({
+        const deletes = (del: { id: string }) => ({
           gig_lineup,
-          user_instrument: del.user_instrument_id,
+          user_instrument: del.id,
         });
         await Promise.all([
-          ...body.insert.map((insert) => em.nativeInsert(GigLineupInstrument, inserts(insert))),
+          ...body.insert.map((insert) => em.upsert(GigLineupInstrument, inserts(insert))),
           ...body.delete.map((del) => em.nativeDelete(GigLineupInstrument, deletes(del))),
         ]);
 
@@ -83,7 +84,7 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
       );
       if (lineup_entry) {
         lineup_entry.user_notes = body.gig_notes ?? undefined;
-        await em.nativeUpdate(User, { id: session.userId }, { gigNotes: body.other_notes });
+        await em.nativeUpdate(User, { id: session.userId }, { gig_notes: body.other_notes });
         await em.persistAndFlush(lineup_entry);
         return json({ user: { gig_notes: body.other_notes }, user_notes: lineup_entry.user_notes });
       } else {

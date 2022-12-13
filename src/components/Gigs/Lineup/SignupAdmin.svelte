@@ -256,7 +256,7 @@
                   gig.title
                 }${statusText(gig) ? `\n${statusText(gig)}` : ''}${
                   gig?.signup?.user_notes?.trim() ? `\nNotes: ${gig.signup.user_notes.trim()}` : ``
-                }${gig?.signup?.user?.gigNotes ? `\nGeneral notes: ${gig.signup.user.gigNotes}` : ``}`}"
+                }${gig?.signup?.user?.gig_notes ? `\nGeneral notes: ${gig.signup.user.gig_notes}` : ``}`}"
                 data-test="signup-details-{person.id}-{gig.id}"
               >
                 <div style="width:100%; height: 100%">
@@ -270,7 +270,7 @@
                     &nbsp;
                     <!-- Add some content to hover over for tooltip-->
                   {/if}
-                  {#if gig.signup.user_notes || gig.signup.user.gigNotes}<i class="las la-comment"></i>{/if}
+                  {#if gig.signup.user_notes || gig.signup.user.gig_notes}<i class="las la-comment"></i>{/if}
                 </div>
               </TooltipText>
             {/if}
