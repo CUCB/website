@@ -10,6 +10,7 @@
   import type { PageData } from "./$types";
   import type { UserInstrument } from "./types";
   import { makeTitle } from "../../../../view";
+  import { String } from "runtypes";
 
   export let data: PageData;
   let {
@@ -24,13 +25,13 @@
     profilePictureUpdated,
   } = data;
 
-  function displayMonth(date: Date | null): string | null {
-    if (date == null) return null;
+  function displayMonth(date: Date | undefined): string | null {
+    if (date == undefined) return null;
     const luxonDate = DateTime.fromJSDate(date);
     return luxonDate.toFormat("MMMM yyyy");
   }
 
-  function displayBioMonth(date: Date | null): string {
+  function displayBioMonth(date: Date | undefined): string {
     return date ? `, ${displayMonth(date)}` : ``;
   }
 
@@ -76,19 +77,28 @@
     AddingNew,
     NotEditing,
   }
-  let editingInstrument = EditInstrumentState.NotEditing;
-  let currentlyEditingDetails: UserInstrument | undefined;
+
+  type EditableUserInstrument = Omit<UserInstrument, "id"> & { id: string | undefined };
+
+  type EditInstrument =
+    | { state: EditInstrumentState.AddingNew }
+    | { state: EditInstrumentState.NotEditing }
+    | { state: EditInstrumentState.EditingExisting; currentlyEditing: EditableUserInstrument };
+
+  let editingInstrument: EditInstrument = {
+    state: EditInstrumentState.NotEditing,
+  };
   // TODO remove the additional layer of function, it's stupid and inconsistent
   function startAddInstrument() {
-    editingInstrument = EditInstrumentState.AddingNew;
+    editingInstrument.state = EditInstrumentState.AddingNew;
   }
 
   function cancelAddInstrument() {
-    editingInstrument = EditInstrumentState.NotEditing;
+    editingInstrument.state = EditInstrumentState.NotEditing;
   }
 
   function cancelEditInstrument() {
-    editingInstrument = EditInstrumentState.NotEditing;
+    editingInstrument.state = EditInstrumentState.NotEditing;
   }
 
   function deleteInstrument(u_i_id: string) {
@@ -119,23 +129,36 @@
 
   function editInstrument(u_i_id: string) {
     return async (_: Event) => {
-      editingInstrument = EditInstrumentState.EditingExisting;
-      currentlyEditingDetails = user.instruments.find((ui) => ui.id === u_i_id);
+      const instrument = user.instruments.find((ui) => ui.id === u_i_id);
+      if (instrument) {
+        editingInstrument = {
+          state: EditInstrumentState.EditingExisting,
+          currentlyEditing: instrument,
+        };
+      } else {
+        throw `Could not find user instrument with id: ${u_i_id}`;
+      }
     };
   }
   function editNewInstrument(e: CustomEvent<{ id: string }>) {
     const instr_id = e.detail.id;
-    editingInstrument = EditInstrumentState.EditingExisting;
-    currentlyEditingDetails = {
-      instr_id,
-      nickname: null,
-      id: null,
-      instrument: allInstruments.find((i) => i.id === instr_id),
-      user_id: user.id,
-    };
+    const instrument = allInstruments.find((i) => i.id === instr_id);
+    if (instrument) {
+      editingInstrument = {
+        state: EditInstrumentState.EditingExisting,
+        currentlyEditing: {
+          nickname: undefined,
+          id: undefined,
+          instrument,
+          deleted: false,
+        },
+      };
+    } else {
+      throw `Could not find instrument with id: ${instr_id}`;
+    }
   }
 
-  function completeEditInstrument(e) {
+  function completeEditInstrument(e: CustomEvent<{ instrument: UserInstrument }>) {
     const instrument = e.detail.instrument;
     const matchingInstrumentIndex = user.instruments.findIndex((ui) => ui.id === instrument.id);
     if (matchingInstrumentIndex > -1) {
@@ -145,7 +168,7 @@
       // Trigger reactivity
       user.instruments = user.instruments;
     }
-    editingInstrument = EditInstrumentState.NotEditing;
+    editingInstrument.state = EditInstrumentState.NotEditing;
   }
 
   function displayInstrumentName(instrument: UserInstrument): string {
@@ -169,19 +192,22 @@
       { name: "attribute.soundtech", value: can_tech },
     ];
 
-    let prefsIdsByName = {};
-    allPrefs.forEach((pref) => (prefsIdsByName[pref.name] = pref.id));
+    const prefsIdsByName: Map<string, string> = new Map();
+    allPrefs.forEach((pref) => prefsIdsByName.set(pref.name, pref.id));
 
     message = "Saving...";
     // TODO handle errors
     await fetch(`/members/users/${user.id}/prefs`, {
       method: "POST",
-      body: JSON.stringify(prefs.map((pref) => ({ pref_id: prefsIdsByName[pref.name], value: pref.value }))),
+      body: JSON.stringify(
+        prefs.map((pref) => ({ pref_id: String.check(prefsIdsByName.get(pref.name)), value: pref.value })),
+      ),
       headers: { "Content-Type": "application/json" },
     });
-    const variables = {
+    const variables: Omit<typeof user, "adminType"> & { password?: string; adminType?: string } = {
       ...user,
-      password: newPassword !== "",
+      adminType: undefined,
+      password: newPassword !== "" ? newPassword : undefined,
     };
 
     if (canEditAdminStatus) {
@@ -425,14 +451,15 @@
 {/if}
 {#if canEditInstruments}
   <h3>Edit instruments</h3>
-  {#if editingInstrument === EditInstrumentState.EditingExisting}
+  {#if editingInstrument.state === EditInstrumentState.EditingExisting}
     <UserInstrumentEditor
-      instrument="{currentlyEditingDetails}"
+      instrument="{editingInstrument.currentlyEditing}"
+      user="{user}"
       currentUser="{currentUser}"
       on:save="{completeEditInstrument}"
       on:cancel="{cancelEditInstrument}"
     />
-  {:else if editingInstrument === EditInstrumentState.AddingNew}
+  {:else if editingInstrument.state === EditInstrumentState.AddingNew}
     <InstrumentSelector allInstruments="{allInstruments}" on:select="{editNewInstrument}" />
     <button on:click="{cancelAddInstrument}" data-test="add-instrument">Cancel</button>
   {:else if user.instruments?.length}
