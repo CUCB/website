@@ -7,15 +7,15 @@
 
   export let instrument: UserInstrument;
   export let currentUser: boolean;
+  export let user: { id: string };
 
   interface UserInstrument {
-    id?: number;
-    nickname: string | null;
-    instr_id: number;
+    id?: string;
+    nickname?: string;
     instrument: {
+      id: string;
       name: string;
     };
-    user_id: number;
   }
 
   let nickname = instrument.nickname || "";
@@ -30,21 +30,17 @@
     const variables = { userInstrumentId: instrument.id, nickname: nickname.trim() || null };
     const body = JSON.stringify(variables);
 
-    return await fetch(`/members/users/${instrument.user_id}/instruments`, { method: "POST", body }).then((res) =>
-      res.json(),
-    );
+    return await fetch(`/members/users/${user.id}/instruments`, { method: "POST", body }).then((res) => res.json());
   }
 
   async function createNewInstrument() {
     const variables = {
-      instrument_id: instrument.instr_id,
+      instrument_id: instrument.instrument.id,
       nickname: nickname.trim() || null,
     };
     const body = JSON.stringify(variables);
 
-    return await fetch(`/members/users/${instrument.user_id}/instruments`, { method: "POST", body }).then((res) =>
-      res.json(),
-    );
+    return await fetch(`/members/users/${user.id}/instruments`, { method: "POST", body }).then((res) => res.json());
   }
 
   async function saveChanges() {

@@ -5,7 +5,7 @@
     fuse,
     toDisplayName,
     toId,
-    disabled = undefined;
+    disabled = false;
   let searchField,
     searchText = "",
     resultsList;
