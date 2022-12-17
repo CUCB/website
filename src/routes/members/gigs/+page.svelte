@@ -26,7 +26,7 @@
 
   $: reloadSignupGigs(gigs);
   function reloadSignupGigs(gigs: Gig[]) {
-    let newlyMerged: ([number, Writable<SignupGig>] | [])[] = gigs.map((gig) => {
+    let newlyMerged: ([string, Writable<SignupGig>] | [])[] = gigs.map((gig) => {
       let signupGig = signupGigs[gig.id];
       return gig.id in signupGigs && isNotStore(signupGig)
         ? [
@@ -113,6 +113,7 @@
       // @ts-ignore
       calendarGigs[newDate] = res_gig_2.data.cucb_gigs;
       calendarGigs[newDate] = calendarGigs[newDate].sort(
+        // TODO hmm, suspciious that this is doing anything
         (gigA: Gig, gigB: Gig) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
       );
     }

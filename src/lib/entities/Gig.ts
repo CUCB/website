@@ -1,4 +1,5 @@
 import { Collection, Entity, ManyToOne, OneToMany, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
+import { DateTime } from "luxon";
 import { GigContact } from "./GigContact";
 import { GigLineup } from "./GigLineup";
 import { GigType } from "./GigType";
@@ -93,4 +94,14 @@ export class Gig {
 
   @OneToMany(() => GigLineup, (entry) => entry.gig)
   lineup = new Collection<GigLineup>(this);
+
+  get sort_date(): Date {
+    return (
+      (this.arrive_time && DateTime.fromJSDate(this.arrive_time)) ||
+      utcFromDateAndTime(this.date, this.time || "00:00")
+    ).toJSDate();
+  }
 }
+
+const utcFromDateAndTime = (date: Date, time: String): DateTime =>
+  DateTime.fromISO(`${DateTime.fromJSDate(date).toISODate()}T${time}Z`);
