@@ -3,12 +3,7 @@
   import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
   import { setInstrumentApproved, addInstrument } from "../../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
-  import {
-    setApproved,
-    setAdminNotes,
-    addUser as addUserUpdater,
-    destroyLineupInformation,
-  } from "../../../../../graphql/gigs/lineups";
+  import { setApproved, setAdminNotes, destroyLineupInformation } from "../../../../../graphql/gigs/lineups";
   import { client } from "../../../../../graphql/client";
   import { Map } from "immutable";
   import Fuse from "fuse.js";
@@ -16,6 +11,7 @@
   import { makeTitle, themeName } from "../../../../../view";
   import Lineup from "../../../../../components/Gigs/Lineup.svelte";
   import type { PageData } from "./$types";
+  import { extractAttributes } from "../../../../../graphql/gigs/lineups/users/attributes";
   export let data: PageData;
   let { people, gigId, allPeople, title } = data;
   let searchText = "";
@@ -24,6 +20,19 @@
   let selectedUser = undefined;
   let userSelectBox;
   let showPreview = false;
+
+  const addUserUpdater = async ({ gigId, people, errors }, userId) => {
+    const body = JSON.stringify({ type: "addUser", id: userId });
+    const person = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
+      res.json(),
+    );
+    person.user.attributes = extractAttributes(person.user);
+    person.user.prefs = undefined;
+    return {
+      people: people.set(userId, person),
+      errors,
+    };
+  };
 
   const wrap =
     (fn) =>

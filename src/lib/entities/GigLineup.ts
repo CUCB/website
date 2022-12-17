@@ -27,6 +27,7 @@ export class GigLineup {
   @Property({ length: 6, nullable: true, defaultRaw: `now()`, type: "timestamptz" })
   adding_time?: Date;
 
+  // TODO this should have some sql thing to track when updated?
   @Property({ length: 6, nullable: true, type: "timestamptz" })
   editing_time?: Date;
 
