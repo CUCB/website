@@ -32,7 +32,7 @@ export class GigLineup {
   editing_time?: Date;
 
   @Property({ nullable: true, type: "bool" })
-  approved?: boolean;
+  approved?: boolean | null;
 
   @Property({ default: false, type: "bool" })
   equipment: boolean = false;
