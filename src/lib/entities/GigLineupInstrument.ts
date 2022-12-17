@@ -22,6 +22,6 @@ export class GigLineupInstrument {
   // TODO is this appropriate elsewhere where nullable: true??
   approved?: boolean | null;
 
-  @ManyToOne({ entity: () => GigLineup, fieldNames: ["gig_id", "user_id"] })
+  @ManyToOne({ entity: () => GigLineup, fieldNames: ["gig_id", "user_id"], onDelete: "cascade" })
   gig_lineup!: GigLineup;
 }

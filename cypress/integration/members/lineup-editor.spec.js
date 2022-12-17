@@ -615,6 +615,21 @@ describe("lineup editor", () => {
         for (let person of signups) {
           cy.get(`[data-test=member-${person.user.id}]`).should("not.exist");
         }
+        cy.reload();
+        cy.waitForFormInteractive();
+        for (let person of signups) {
+          cy.get(`[data-test=member-${person.user.id}]`).should("not.exist");
+        }
+      });
+
+      it("resets the instruments when the lineup information is destroyed", () => {
+        cy.get(`[data-test=destroy-lineup]`).click();
+        cy.get(`[data-test="select-box"]`).select("Huggable Treasurechest");
+        cy.contains("Add user").click();
+        cy.contains("Fiddle").should("not.exist");
+        cy.reload();
+        cy.waitForFormInteractive();
+        cy.contains("Fiddle").should("not.exist");
       });
     });
   });

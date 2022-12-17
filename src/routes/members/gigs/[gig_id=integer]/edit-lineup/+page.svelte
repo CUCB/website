@@ -3,7 +3,6 @@
   import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
   import { addInstrument } from "../../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
-  import { destroyLineupInformation } from "../../../../../graphql/gigs/lineups";
   import { client } from "../../../../../graphql/client";
   import { Map } from "immutable";
   import Fuse from "fuse.js";
@@ -68,6 +67,15 @@
     );
     return {
       people: people.setIn([userId, "admin_notes"], response.admin_notes),
+      errors,
+    };
+  };
+
+  const destroyLineupInformation = async ({ gigId, people, errors }) => {
+    const body = JSON.stringify({ type: "destroyLineupInformation" });
+    await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body });
+    return {
+      people: Map(),
       errors,
     };
   };
