@@ -19,7 +19,8 @@ export class GigLineupInstrument {
   user_instrument!: UserInstrument;
 
   @Property({ nullable: true, type: "bool", default: "false" })
-  approved?: boolean;
+  // TODO is this appropriate elsewhere where nullable: true??
+  approved?: boolean | null;
 
   @ManyToOne({ entity: () => GigLineup, fieldNames: ["gig_id", "user_id"] })
   gig_lineup!: GigLineup;
