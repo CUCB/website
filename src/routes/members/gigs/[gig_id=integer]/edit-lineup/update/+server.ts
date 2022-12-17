@@ -1,6 +1,6 @@
 import { error, json } from "@sveltejs/kit";
 import { wrap } from "@mikro-orm/core";
-import { Boolean, Literal, Null, Record, String } from "runtypes";
+import { Boolean, Literal, Null, Record, String, Union } from "runtypes";
 import orm from "../../../../../../lib/database";
 import { GigLineup } from "../../../../../../lib/entities/GigLineup";
 import { SELECT_GIG_LINEUPS } from "../../../../../../lib/permissions";
@@ -41,6 +41,21 @@ const destroyLineupInformation = Record({
 const addInstrument = Record({
   type: Literal("addInstrument"),
   id: String,
+});
+
+const Role = Union(
+  Literal("leader"),
+  Literal("equipment"),
+  Literal("driver"),
+  Literal("money_collector"),
+  Literal("money_collector_notified"),
+);
+
+const setRole = Record({
+  type: Literal("setRole"),
+  id: String,
+  role: Role,
+  value: Boolean,
 });
 
 export const POST = async ({ request, locals: { session }, params: { gig_id } }: RequestEvent): Response => {
@@ -126,6 +141,16 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         }
       } else {
         throw error(400, "User instrument not found");
+      }
+    } else if (setRole.guard(body)) {
+      const em = orm.em.fork();
+      const lineup_entry = await em.findOne(GigLineup, { gig: gig_id, user: body.id });
+      if (lineup_entry) {
+        lineup_entry[body.role] = body.value;
+        await em.persistAndFlush(lineup_entry);
+        return json(lineup_entry);
+      } else {
+        throw error(400, "User not signed up to gig");
       }
     } else {
       throw error(400, "Invalid body");

@@ -1,7 +1,6 @@
 <script lang="ts">
   import Select from "../../../../../components/Forms/Select.svelte";
   import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
-  import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
   import { client } from "../../../../../graphql/client";
   import { Map } from "immutable";
   import Fuse from "fuse.js";
@@ -89,6 +88,17 @@
         ...instruments,
         [instrument.user_instrument.id]: instrument,
       })),
+      errors,
+    };
+  };
+
+  const setRole = async ({ gigId, people, errors, userId }, role, value) => {
+    const body = JSON.stringify({ type: "setRole", id: userId, role, value });
+    const person = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
+      res.json(),
+    );
+    return {
+      people: people.setIn([userId, role], person[role]),
       errors,
     };
   };
