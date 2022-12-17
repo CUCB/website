@@ -33,6 +33,10 @@ const setAdminNotes = Record({
   admin_notes: String.Or(Null),
 });
 
+const destroyLineupInformation = Record({
+  type: Literal("destroyLineupInformation"),
+});
+
 export const POST = async ({ request, locals: { session }, params: { gig_id } }: RequestEvent): Response => {
   if (SELECT_GIG_LINEUPS.guard(session)) {
     const body = await request.json();
@@ -88,6 +92,10 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
       } else {
         throw error(400, "Person not found");
       }
+    } else if (destroyLineupInformation.guard(body)) {
+      const em = orm.em.fork();
+      await em.nativeDelete(GigLineup, { gig: gig_id });
+      return json([]);
     } else {
       throw error(400, "Invalid body");
     }
