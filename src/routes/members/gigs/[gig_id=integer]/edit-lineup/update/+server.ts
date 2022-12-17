@@ -58,7 +58,7 @@ const setRole = Record({
   value: Boolean,
 });
 
-export const POST = async ({ request, locals: { session }, params: { gig_id } }: RequestEvent): Response => {
+export const POST = async ({ request, locals: { session }, params: { gig_id } }: RequestEvent): Promise<Response> => {
   if (SELECT_GIG_LINEUPS.guard(session)) {
     const body = await request.json();
     if (addUser.guard(body)) {
