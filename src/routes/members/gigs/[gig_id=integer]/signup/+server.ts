@@ -60,14 +60,13 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
         const inserts = (insert: { id: string }) => ({
           gig_lineup,
           user_instrument: insert.id,
-          user_id: session.userId,
         });
         const deletes = (del: { id: string }) => ({
           gig_lineup,
           user_instrument: del.id,
         });
         await Promise.all([
-          ...body.insert.map((insert) => em.upsert(GigLineupInstrument, inserts(insert))),
+          em.upsertMany(GigLineupInstrument, body.insert.map(inserts)),
           ...body.delete.map((del) => em.nativeDelete(GigLineupInstrument, deletes(del))),
         ]);
 

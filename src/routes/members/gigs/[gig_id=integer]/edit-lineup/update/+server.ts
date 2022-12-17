@@ -126,7 +126,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         const user_id = userInstrument.user.id;
         const gig_lineup = await em.findOne(GigLineup, { user: user_id, gig: gig_id });
         if (gig_lineup) {
-          await em.nativeInsert(GigLineupInstrument, {
+          await em.upsert(GigLineupInstrument, {
             gig_lineup,
             user_instrument: body.id,
           });
