@@ -1,7 +1,7 @@
 <script lang="ts">
   import Select from "../../../../../components/Forms/Select.svelte";
   import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
-  import { setInstrumentApproved, addInstrument } from "../../../../../graphql/gigs/lineups/users/instruments";
+  import { addInstrument } from "../../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
   import { setApproved, setAdminNotes, destroyLineupInformation } from "../../../../../graphql/gigs/lineups";
   import { client } from "../../../../../graphql/client";
@@ -30,6 +30,21 @@
     person.user.prefs = undefined;
     return {
       people: people.set(userId, person),
+      errors,
+    };
+  };
+
+  const setInstrumentApproved = async (
+    { gigId, userId, people, errors },
+    user_instrument_id: string,
+    approved: boolean,
+  ) => {
+    const body = JSON.stringify({ type: "setInstrumentApproved", id: user_instrument_id, approved });
+    const instrumentApproved = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then(
+      (res) => res.json(),
+    );
+    return {
+      people: people.setIn([userId, "user_instruments", user_instrument_id, "approved"], instrumentApproved.approved),
       errors,
     };
   };
