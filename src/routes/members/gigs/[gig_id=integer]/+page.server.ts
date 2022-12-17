@@ -3,7 +3,7 @@ import { assertLoggedIn } from "../../../../client-auth";
 import { handleErrors, client, clientCurrentUser } from "../../../../graphql/client";
 import { get, writable } from "svelte/store";
 import type { Writable } from "svelte/store";
-import type { PageLoad } from "./$types";
+import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 
 // TODO refine me a bit
@@ -27,7 +27,7 @@ interface QuerySignupSummary {
   cucb_gigs_lineups: SignupSummary;
 }
 
-export const load: PageLoad = async ({ params: { gig_id }, parent }): Promise<Props> => {
+export const load: PageServerLoad = async ({ params: { gig_id }, parent }): Promise<Props> => {
   const { session } = await parent();
   assertLoggedIn(session);
 
@@ -67,7 +67,7 @@ export const load: PageLoad = async ({ params: { gig_id }, parent }): Promise<Pr
 
   return {
     gig,
-    signupGig: writable(res_signup.data.cucb_gigs?.[0]),
+    signupGig: res_signup.data.cucb_gigs?.[0],
     userInstruments: res_signup.data.cucb_users_instruments,
     signupSummary,
   };
