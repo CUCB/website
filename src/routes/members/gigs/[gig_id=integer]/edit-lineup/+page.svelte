@@ -1,7 +1,6 @@
 <script lang="ts">
   import Select from "../../../../../components/Forms/Select.svelte";
   import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
-  import { client } from "../../../../../graphql/client";
   import { Map } from "immutable";
   import Fuse from "fuse.js";
   import SearchBox from "../../../../../components/SearchBox.svelte";
@@ -107,7 +106,7 @@
     (fn) =>
     (userId) =>
     async (...args) => {
-      let res = await fn({ client: $client, people: peopleStore, errors, gigId, userId }, ...args);
+      let res = await fn({ people: peopleStore, errors, gigId, userId }, ...args);
 
       peopleStore = res.people;
       errors = res.errors;
