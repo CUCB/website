@@ -49,6 +49,18 @@
     };
   };
 
+  const setPersonApproved = async ({ gigId, people, errors, userId }, approved) => {
+    const body = JSON.stringify({ type: "setPersonApproved", id: userId, approved });
+
+    const personApproved = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then(
+      (res) => res.json(),
+    );
+    return {
+      people: people.setIn([userId, "approved"], personApproved.approved),
+      errors,
+    };
+  };
+
   const wrap =
     (fn) =>
     (userId) =>
@@ -73,7 +85,7 @@
   let updaters = {
     setInstrumentApproved: wrap(setInstrumentApproved),
     setRole: wrap(setRole),
-    setApproved: wrap(setApproved),
+    setApproved: wrap(setPersonApproved),
     setAdminNotes: wrap(setAdminNotes),
     addInstrument: wrap(addInstrument),
   };

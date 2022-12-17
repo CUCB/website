@@ -21,6 +21,12 @@ const setInstrumentApproved = Record({
   approved: Boolean.Or(Null),
 });
 
+const setPersonApproved = Record({
+  type: Literal("setPersonApproved"),
+  id: String,
+  approved: Boolean.Or(Null),
+});
+
 export const POST = async ({ request, locals: { session }, params: { gig_id } }: RequestEvent): Response => {
   if (SELECT_GIG_LINEUPS.guard(session)) {
     const body = await request.json();
@@ -47,13 +53,24 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
       return json(person);
     } else if (setInstrumentApproved.guard(body)) {
       const em = orm.em.fork();
-      const entry = await em.findOne(GigLineupInstrument, { user_instrument: body.id });
+      // TODO I didn't include gig id here initially, that was an error the tests didn't catch
+      const entry = await em.findOne(GigLineupInstrument, { gig_id, user_instrument: body.id });
       if (entry) {
         entry.approved = body.approved;
         await em.persistAndFlush(entry);
         return json({ approved: entry.approved });
       } else {
         throw error(400, "Instrument not found");
+      }
+    } else if (setPersonApproved.guard(body)) {
+      const em = orm.em.fork();
+      const entry = await em.findOne(GigLineup, { gig: gig_id, user: body.id });
+      if (entry) {
+        entry.approved = body.approved;
+        await em.persistAndFlush(entry);
+        return json({ approved: entry.approved });
+      } else {
+        throw error(400, "Person not found");
       }
     } else {
       throw error(400, "Invalid body");
