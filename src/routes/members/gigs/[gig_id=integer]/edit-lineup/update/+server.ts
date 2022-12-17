@@ -7,6 +7,7 @@ import { SELECT_GIG_LINEUPS } from "../../../../../../lib/permissions";
 // TODO ensure requestevent is always imported from ./$types, not @sveltejs/kit
 import type { RequestEvent } from "./$types";
 import { GigLineupInstrument } from "../../../../../../lib/entities/GigLineupInstrument";
+import { UserInstrument } from "../../../../../../lib/entities/UsersInstrument";
 
 // TODO the url for this endpoint is crap, but since actions were added, a standard json endpoint needs to be on a separate url from +page.server.ts
 
@@ -35,6 +36,11 @@ const setAdminNotes = Record({
 
 const destroyLineupInformation = Record({
   type: Literal("destroyLineupInformation"),
+});
+
+const addInstrument = Record({
+  type: Literal("addInstrument"),
+  id: String,
 });
 
 export const POST = async ({ request, locals: { session }, params: { gig_id } }: RequestEvent): Response => {
@@ -96,6 +102,31 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
       const em = orm.em.fork();
       await em.nativeDelete(GigLineup, { gig: gig_id });
       return json([]);
+    } else if (addInstrument.guard(body)) {
+      const em = orm.em.fork();
+      const userInstrument = await em
+        .fork()
+        .findOne(UserInstrument, { id: body.id }, { fields: ["user.id"], populate: ["user"] });
+      if (userInstrument) {
+        const user_id = userInstrument.user.id;
+        const gig_lineup = await em.findOne(GigLineup, { user: user_id, gig: gig_id });
+        if (gig_lineup) {
+          await em.nativeInsert(GigLineupInstrument, {
+            gig_lineup,
+            user_instrument: body.id,
+          });
+          const instrument = await em.findOne(
+            GigLineupInstrument,
+            { gig_lineup, user_instrument: body.id },
+            { populate: ["user_instrument", "user_instrument.instrument"] },
+          );
+          return json(instrument);
+        } else {
+          throw error(400, "User not signed up to gig");
+        }
+      } else {
+        throw error(400, "User instrument not found");
+      }
     } else {
       throw error(400, "Invalid body");
     }
