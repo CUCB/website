@@ -1,18 +1,14 @@
-import { extractAttributes } from "../../../../../graphql/gigs/lineups/users/attributes";
-import { QueryGigLineup, AllUserNames } from "../../../../../graphql/gigs/lineups";
-import { QueryGigType } from "../../../../../graphql/gigs";
-import { handleErrors, client } from "../../../../../graphql/client";
 import { assertLoggedIn } from "../../../../../client-auth.js";
 import type { PageServerLoad } from "./$types";
-import { get } from "svelte/store";
 import { error } from "@sveltejs/kit";
 import type { UserInstrument } from "../../../users/[id=integer]/types";
-import { Collection, PopulateHint, type EntityManager } from "@mikro-orm/core";
+import { PopulateHint, type EntityManager } from "@mikro-orm/core";
 import { Gig } from "../../../../../lib/entities/Gig";
 import orm from "../../../../../lib/database";
 import { SELECT_GIG_LINEUPS } from "../../../../../lib/permissions";
 import { User } from "../../../../../lib/entities/User";
 import { wrap } from "@mikro-orm/core";
+import { extractAttributes } from "./attributes";
 
 interface UserName {
   id: string;
@@ -36,7 +32,7 @@ interface PersonQuery {
   };
   user_available?: boolean;
   user_only_if_necessary?: boolean;
-  approved?: boolean;
+  approved?: boolean | null;
   user_instruments: LineupInstrument[];
   leader: boolean;
   equipment: boolean;
@@ -54,7 +50,7 @@ interface Person {
   };
   user_available?: boolean;
   user_only_if_necessary?: boolean;
-  approved?: boolean;
+  approved?: boolean | null;
   user_instruments: Record<string, LineupInstrument>;
   leader: boolean;
   equipment: boolean;
@@ -124,7 +120,7 @@ export const load: PageServerLoad = async ({ params: { gig_id }, parent }) => {
 
 interface LineupInstrument {
   user_instrument: UserInstrument;
-  approved?: boolean;
+  approved?: boolean | null;
 }
 
 function userInstrumentsById(instrument_list: LineupInstrument[]): Record<string, LineupInstrument> {

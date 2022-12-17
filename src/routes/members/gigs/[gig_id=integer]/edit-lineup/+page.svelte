@@ -8,7 +8,7 @@
   import { makeTitle, themeName } from "../../../../../view";
   import Lineup from "../../../../../components/Gigs/Lineup.svelte";
   import type { PageData } from "./$types";
-  import { extractAttributes } from "../../../../../graphql/gigs/lineups/users/attributes";
+  import { extractAttributes } from "./attributes";
   export let data: PageData;
   let { people, gigId, allPeople, title } = data;
   let searchText = "";
