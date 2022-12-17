@@ -3,7 +3,7 @@
   import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
   import { addInstrument } from "../../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
-  import { setApproved, setAdminNotes, destroyLineupInformation } from "../../../../../graphql/gigs/lineups";
+  import { destroyLineupInformation } from "../../../../../graphql/gigs/lineups";
   import { client } from "../../../../../graphql/client";
   import { Map } from "immutable";
   import Fuse from "fuse.js";
@@ -57,6 +57,17 @@
     );
     return {
       people: people.setIn([userId, "approved"], personApproved.approved),
+      errors,
+    };
+  };
+
+  const setAdminNotes = async ({ gigId, people, errors, userId }, admin_notes) => {
+    const body = JSON.stringify({ type: "setAdminNotes", id: userId, admin_notes });
+    const response = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
+      res.json(),
+    );
+    return {
+      people: people.setIn([userId, "admin_notes"], response.admin_notes),
       errors,
     };
   };
