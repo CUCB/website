@@ -1,4 +1,14 @@
-import { Collection, Entity, Filter, ManyToOne, OneToMany, OptionalProps, Property, Unique } from "@mikro-orm/core";
+import {
+  Collection,
+  Entity,
+  Filter,
+  ManyToOne,
+  OneToMany,
+  OptionalProps,
+  PrimaryKeyType,
+  Property,
+  Unique,
+} from "@mikro-orm/core";
 import { Gig } from "./Gig";
 import { GigLineupInstrument } from "./GigLineupInstrument";
 import { User } from "./User";
@@ -8,6 +18,8 @@ import { User } from "./User";
 @Filter({ name: "approved", cond: { approved: { $eq: true } } })
 export class GigLineup {
   [OptionalProps]?: "driver" | "equipment" | "leader" | "money_collector" | "money_collector_notified";
+
+  [PrimaryKeyType]?: [string, string];
 
   @Property({ columnType: "int8", type: "int8" })
   id!: string;
