@@ -1,20 +1,22 @@
+import type { DateTime } from "luxon";
+
 export interface User {
-  id: number;
+  id: string;
   first: string;
   last: string;
-  gig_notes: string | null;
+  gig_notes: string;
 }
 export interface LineupEntry {
-  approved: boolean | null;
+  approved?: boolean;
   user: User;
-  user_available: boolean | null;
-  user_only_if_necessary: boolean | null;
-  user_notes: string | null;
+  user_available?: boolean;
+  user_only_if_necessary?: boolean;
+  user_notes?: string;
 }
 export interface Gig {
-  id: number;
-  date: string;
-  sort_date: string;
+  id: string;
+  date?: string;
+  sort_date: Date;
   lineup: LineupEntry[];
   title: string;
 }

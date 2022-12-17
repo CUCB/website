@@ -17,7 +17,7 @@
     ]).values(),
   )
     .sortBy((gig: Gig) => gig.sort_date)
-    .toJS();
+    .toJS() as typeof signupsOpen;
   const VIEWS = { signupsOpen: {}, sinceOneMonth: {}, noLineup: {} };
   let view = VIEWS.signupsOpen;
   $: gigs =

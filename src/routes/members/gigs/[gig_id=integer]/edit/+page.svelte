@@ -71,14 +71,14 @@
   let finish_time_date = (finish_time && DateTime.fromISO(finish_time).toFormat("yyyy-LL-dd")) || null;
   let finish_time_time = (finish_time && DateTime.fromISO(finish_time).toFormat("HH:mm")) || null;
   let fields = {
-    finish_time_date: null,
-    finish_time_time: null,
-    arrive_time_time: null,
-    arrive_time_date: null,
-    quote_date: null,
-    time: null,
-    end_date: null,
-    start_date: null,
+    finish_time_date: null as HTMLImageElement | null,
+    finish_time_time: null as HTMLImageElement | null,
+    arrive_time_time: null as HTMLImageElement | null,
+    arrive_time_date: null as HTMLImageElement | null,
+    quote_date: null as HTMLInputElement | null,
+    time: null as HTMLInputElement | null,
+    end_date: null as HTMLInputElement | null,
+    start_date: null as HTMLInputElement | null,
   };
   $: timingWarnings = [
     arrive_time &&
