@@ -1,7 +1,6 @@
 <script lang="ts">
   import Select from "../../../../../components/Forms/Select.svelte";
   import Editor from "../../../../../components/Gigs/Lineup/Editor/Editor.svelte";
-  import { addInstrument } from "../../../../../graphql/gigs/lineups/users/instruments";
   import { setRole } from "../../../../../graphql/gigs/lineups/users/roles";
   import { client } from "../../../../../graphql/client";
   import { Map } from "immutable";
@@ -76,6 +75,20 @@
     await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body });
     return {
       people: Map(),
+      errors,
+    };
+  };
+
+  const addInstrument = async ({ gigId, people, errors, userId }, userInstrumentId) => {
+    const body = JSON.stringify({ type: "addInstrument", id: userInstrumentId });
+    const instrument = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
+      res.json(),
+    );
+    return {
+      people: people.updateIn([userId, "user_instruments"], (instruments) => ({
+        ...instruments,
+        [instrument.user_instrument.id]: instrument,
+      })),
       errors,
     };
   };
