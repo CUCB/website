@@ -27,6 +27,12 @@ const setPersonApproved = Record({
   approved: Boolean.Or(Null),
 });
 
+const setAdminNotes = Record({
+  type: Literal("setAdminNotes"),
+  id: String,
+  admin_notes: String.Or(Null),
+});
+
 export const POST = async ({ request, locals: { session }, params: { gig_id } }: RequestEvent): Response => {
   if (SELECT_GIG_LINEUPS.guard(session)) {
     const body = await request.json();
@@ -69,6 +75,16 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         entry.approved = body.approved;
         await em.persistAndFlush(entry);
         return json({ approved: entry.approved });
+      } else {
+        throw error(400, "Person not found");
+      }
+    } else if (setAdminNotes.guard(body)) {
+      const em = orm.em.fork();
+      const entry = await em.findOne(GigLineup, { gig: gig_id, user: body.id });
+      if (entry) {
+        entry.admin_notes = body.admin_notes;
+        await em.persistAndFlush(entry);
+        return json({ admin_notes: entry.admin_notes });
       } else {
         throw error(400, "Person not found");
       }

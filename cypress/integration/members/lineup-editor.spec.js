@@ -481,14 +481,14 @@ describe("lineup editor", () => {
       });
 
       it("allows admin notes to be edited", () => {
-        cy.intercept("POST", "/v1/graphql").as("mutation");
+        cy.intercept("POST", `/members/gigs/15274/edit-lineup/update`).as("update");
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=admin-notes]`)
           .focus()
           .type("Testing")
           .clear()
           .type("Testing admin notes")
           .blur();
-        cy.wait("@mutation");
+        cy.wait("@update");
         cy.reload();
         cy.get(`[data-test=member-${signups[0].user.id}] [data-test=admin-notes]`).should(
           "contain",

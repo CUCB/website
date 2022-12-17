@@ -59,7 +59,7 @@ export class GigLineup {
   user_only_if_necessary?: boolean;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  admin_notes?: string;
+  admin_notes?: string | null;
 
   @OneToMany({ entity: () => GigLineupInstrument, mappedBy: "gig_lineup" })
   user_instruments = new Collection<GigLineupInstrument>(this);
