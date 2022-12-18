@@ -9,29 +9,29 @@ export class GigVenue {
   name!: string;
 
   @Property({ length: 256, nullable: true, type: "varchar" })
-  subvenue?: string;
+  subvenue?: string | null;
 
   @Property({ length: 1024, nullable: true, type: "varchar" })
-  map_link?: string;
+  map_link?: string | null;
 
   @Property({ columnType: "int8", nullable: true, type: "int8" })
-  distance_miles?: string;
+  distance_miles?: string | null;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  notes_admin?: string;
+  notes_admin?: string | null;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
-  notes_band?: string;
+  notes_band?: string | null;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  address?: string;
+  address?: string | null;
 
   @Property({ length: 32, nullable: true, type: "varchar" })
-  postcode?: string;
+  postcode?: string | null;
 
   @Property({ columnType: "float8", nullable: true, type: "double" })
-  latitude?: number;
+  latitude?: number | null;
 
   @Property({ columnType: "float8", nullable: true, type: "double" })
-  longitude?: number;
+  longitude?: number | null;
 }

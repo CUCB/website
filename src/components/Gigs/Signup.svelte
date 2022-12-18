@@ -34,7 +34,9 @@
           {},
           // @ts-ignore
           ...gig.lineup[0].user_instruments.map((instrument) => ({
-            [instrument.user_instrument.id]: instrument.user_instrument,
+            // TODO deselecting an approved instrument was possible before I changed this,
+            // and I think that's not
+            [instrument.user_instrument.id]: { ...instrument.user_instrument, ...instrument },
           })),
         )
       : {};
@@ -59,7 +61,7 @@
   };
 
   const statusFromAvailability = (entry: SignupGigLineup) =>
-    (typeof entry.user_available !== "undefined" &&
+    (typeof (entry.user_available ?? undefined) !== "undefined" &&
       (entry.user_available ? (entry.user_only_if_necessary ? statuses.MAYBE : statuses.YES) : statuses.NO)) ||
     undefined;
 
@@ -125,7 +127,7 @@
     selectedInstruments = Object.assign(
       {},
       ...Object.values(selectedInstruments)
-        // TODO removeme parseInt
+        // TODO removeme toString
         .filter((i) => !deleted.includes(i.id) && !deleted.includes(i.id.toString()))
         .map((instrument) => ({ [instrument.id]: instrument })),
     );

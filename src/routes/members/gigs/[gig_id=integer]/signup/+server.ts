@@ -57,12 +57,15 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
       // TODO ensure users cannot delete instruments that are approved
       const gig_lineup = await em.findOne(GigLineup, { user: session.userId, gig: gig_id });
       if (gig_lineup) {
+        // TODO this doesn't seem to work???
         const inserts = (insert: { id: string }) => ({
-          gig_lineup,
+          gig_id,
+          user_id: session.userId,
           user_instrument: insert.id,
         });
         const deletes = (del: { id: string }) => ({
-          gig_lineup,
+          gig_id,
+          user_id: session.userId,
           user_instrument: del.id,
         });
         await Promise.all([

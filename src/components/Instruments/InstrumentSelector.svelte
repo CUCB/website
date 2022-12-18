@@ -5,11 +5,9 @@
 
   export let allInstruments: Instrument[];
 
-  console.log(allInstruments);
   let parents = allInstruments.filter((i) => i.parent_id === null);
   let instrumentsByParent: Record<string, Instrument[]> = {};
   parents.forEach((i) => (instrumentsByParent[i.id] = []));
-  console.log(parents);
   allInstruments.filter((i) => i.parent_id !== null).forEach((i) => instrumentsByParent[i.parent_id].push(i));
 
   const dispatch = createEventDispatcher();

@@ -60,7 +60,8 @@
       <span> <a href="/members/users/{person.user.id}">{person.user.first}&#32;{person.user.last}</a> </span>
     </div>
     <div class="person-instruments" class:odd="{i % 2 === 1}">
-      {#each person.user_instruments as instrument (instrument.user_instrument_id)}
+      <!-- TODO remove || user_instrument_id when gig diary is migrated -->
+      {#each person.user_instruments as instrument (instrument.user_instrument.id || instrument.user_instrument_id)}
         <div class="person-instrument">
           <InstrumentName userInstrument="{instrument.user_instrument}" />
         </div>
