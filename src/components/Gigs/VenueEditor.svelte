@@ -31,7 +31,6 @@
       initiated = true;
       return;
     }
-    console.log(latLngFromLink);
     latitude = map_link ? latLngFromLink[0] : null;
     longitude = map_link ? latLngFromLink[1] : null;
   };
@@ -54,7 +53,6 @@
       latitude: latitude || null,
       longitude: longitude || null,
     };
-    console.log(variables);
 
     try {
       let url = `/members/gigs/venues`;
