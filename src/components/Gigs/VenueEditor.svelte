@@ -1,6 +1,5 @@
 <script lang="ts">
   import { createEventDispatcher } from "svelte";
-  import { CreateVenue, UpdateVenue } from "../../graphql/gigs";
   import { Tuple, Number } from "runtypes";
 
   export let id: string,

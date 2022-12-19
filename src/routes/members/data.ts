@@ -4,6 +4,7 @@ import { Gig } from "$lib/entities/Gig";
 import { User } from "$lib/entities/User.js";
 import type { AvailableUserInstrument, SignupGig } from "./types";
 
+// TODO merge this with ./gigs/queries.ts
 export const fetchSignupGigs = (em: EntityManager, session: { userId: string }): Promise<SignupGig[]> =>
   em
     .find(
