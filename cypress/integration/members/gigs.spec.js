@@ -503,7 +503,7 @@ describe("gig diary", () => {
       it("can switch between upcoming and past gigs", () => {
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
         cy.get(`[data-test=gigview-by-month]`).pipe(click).should("not.exist");
-        cy.intercept({ method: "POST", url: "/v1/graphql" }).as("fetchGigs");
+        cy.intercept({ method: "GET", url: /^\/members\/gigs.json/ }).as("fetchGigs");
         cy.selectPreviousMonth();
         cy.wait("@fetchGigs");
         cy.selectPreviousMonth();

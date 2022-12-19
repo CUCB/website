@@ -1,4 +1,6 @@
 import { PopulateHint, wrap, type EntityField, type ObjectQuery } from "@mikro-orm/core";
+import type { OperatorMap } from "@mikro-orm/core/typings";
+import { DateTime } from "luxon";
 import orm from "../../../lib/database";
 import { Gig } from "../../../lib/entities/Gig";
 import { GigLineup } from "../../../lib/entities/GigLineup";
@@ -9,6 +11,7 @@ import {
   VIEW_HIDDEN_GIGS,
   VIEW_SIGNUP_SUMMARY,
 } from "../../../lib/permissions";
+import type { AvailableUserInstrument, SignupGig, SignupSummaryEntry } from "../types";
 
 type Session = { userId: string };
 
@@ -143,6 +146,20 @@ const applyArrayFilter = <T extends object, E>(res: T, filter: ObjectQuery<E>): 
   }
 };
 
+export const filterAnyGigDate = (filter: OperatorMap<Date>): ObjectQuery<Gig> => ({
+  $or: [{ date: filter }, { arrive_time: filter }, { finish_time: filter }],
+});
+
+export const bySortDate = (gigA: { sort_date: Date }, gigB: { sort_date: Date }): number =>
+  gigA.sort_date.getTime() - gigB.sort_date.getTime();
+export const inFuture: ObjectQuery<Gig> = filterAnyGigDate({ $gte: "now()" });
+export const inMonth = (date: DateTime): ObjectQuery<Gig> =>
+  filterAnyGigDate({
+    $gte: date.startOf("month").toISO(),
+    $lte: date.endOf("month").toISO(),
+  });
+export const inCurrentMonth: ObjectQuery<Gig> = inMonth(DateTime.local());
+
 export const fetchMultiGigSummary = (session: Session, filter: ObjectQuery<Gig>): Promise<GigSummary[]> =>
   orm.em
     .fork()
@@ -157,16 +174,18 @@ export const fetchMultiGigSummary = (session: Session, filter: ObjectQuery<Gig>)
       },
     )
     .then((gigs) =>
-      gigs.map((gig_) => {
-        const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
-        return gig && applyArrayFilter(gig, { ...contactResultFilter(session), ...lineupResultFilter });
-      }),
+      gigs
+        .map((gig_) => {
+          const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
+          return gig && applyArrayFilter(gig, { ...contactResultFilter(session), ...lineupResultFilter });
+        })
+        .sort(bySortDate),
     );
 
 export const fetchSpecificGigSummary = (session: Session, id: string | null): Promise<GigSummary> =>
   fetchMultiGigSummary(session, { id }).then((gig) => gig?.[0]);
 
-export const fetchMultiGigSignup = (session: Session, filter: ObjectQuery<Gig>): Promise<GigSummary[]> =>
+export const fetchMultiGigSignup = (session: Session, filter: ObjectQuery<Gig>): Promise<SignupGig[]> =>
   orm.em
     .fork()
     .find<Gig, string>(
@@ -178,16 +197,18 @@ export const fetchMultiGigSignup = (session: Session, filter: ObjectQuery<Gig>):
       },
     )
     .then((gigs) =>
-      gigs.map((gig_) => {
-        const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
-        return gig && applyArrayFilter(gig, { lineup: { user: { id: session.userId } } });
-      }),
+      gigs
+        .map((gig_) => {
+          const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
+          return gig && applyArrayFilter(gig, { lineup: { user: { id: session.userId } } });
+        })
+        .sort(bySortDate),
     );
 
-export const fetchSpecificGigSignup = (session: Session, id: string | null): Promise<GigSummary> =>
+export const fetchSpecificGigSignup = (session: Session, id: string | null): Promise<SignupGig> =>
   fetchMultiGigSignup(session, { id }).then((gig) => gig?.[0]);
 
-export const fetchAllInstrumentsForUser = (session: Session): Promise<Instrument[]> =>
+export const fetchAllInstrumentsForUser = (session: Session): Promise<AvailableUserInstrument[]> =>
   orm.em
     .fork()
     .find<UserInstrument>(
@@ -206,16 +227,16 @@ export const fetchAllInstrumentsForUser = (session: Session): Promise<Instrument
 export const fetchMultiGigSignupSummary = (
   session: Session,
   filter: ObjectQuery<GigLineup>,
-): Promise<SignupSummary[] | null> =>
+): Promise<SignupSummaryEntry[] | null> =>
   VIEW_SIGNUP_SUMMARY.guard(session)
     ? orm.em
         .fork()
         .find<GigLineup>(GigLineup, filter, {
-          fields: [{ user: ["first", "last"] }, "user_available", "user_only_if_necessary"],
+          fields: [{ user: ["first", "last"] }, "user_available", "user_only_if_necessary", { gig: ["id"] }],
           populateWhere: PopulateHint.INFER,
         })
         .then((lineup) => lineup.map((entry) => wrap(entry).toPOJO()))
     : Promise.resolve(null);
 
-export const fetchSpecificGigSignupSummary = (session: Session, id: string): Promise<SignupSummary | null> =>
+export const fetchSpecificGigSignupSummary = (session: Session, id: string): Promise<SignupSummaryEntry[] | null> =>
   fetchMultiGigSignupSummary(session, { gig: id });

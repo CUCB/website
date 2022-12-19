@@ -39,3 +39,17 @@ export interface AvailableUserInstrument {
     novelty: boolean;
   };
 }
+
+export interface SignupSummaryEntry {
+  user: {
+    first: string;
+    last: string;
+  };
+  user_available?: boolean | null;
+  user_only_if_necessary?: boolean | null;
+  gig: {
+    id: string;
+  };
+}
+
+export interface GigSummary {}

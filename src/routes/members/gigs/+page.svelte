@@ -1,17 +1,16 @@
 <script lang="ts">
   import { makeTitle, calendarStartDay, themeName } from "../../../view";
-  import { client } from "../../../graphql/client";
   import Summary from "../../../components/Gigs/Summary.svelte";
   import Calendar from "../../../components/Gigs/Calendar.svelte";
   import { DateTime, Settings } from "luxon";
   import { writable } from "svelte/store";
   import type { Writable } from "svelte/store";
   import type { PageData } from "./$types";
-  import { QueryMultiGigDetails } from "../../../graphql/gigs";
   import type { Gig } from "./+page.server";
   import type { SignupGig } from "../types";
   export let data: PageData;
-  let { gigs, calendarGigs, currentCalendarMonth, userInstruments, userNotes, initialSignupGigs, session } = data;
+  let { gigs, calendarGigs, currentCalendarMonth, userInstruments, userNotes, initialSignupGigs, session, signups } =
+    data;
   let signupGigs: Record<string, SignupGig | Writable<SignupGig>> = initialSignupGigs;
   Settings.defaultZoneName = "Europe/London";
 
@@ -45,29 +44,6 @@
   $: currentCalendarMonthLuxon = DateTime.fromFormat(currentCalendarMonth, "yyyy-LL");
   let displaying = "allUpcoming";
 
-  function isObject(item) {
-    return item && typeof item === "object" && !Array.isArray(item);
-  }
-  function mergeDeep(target, ...sources) {
-    if (!sources.length) return target;
-    const source = sources.shift();
-
-    if (isObject(target) && isObject(source)) {
-      for (const key in source) {
-        if (isObject(source[key])) {
-          if (!target[key]) Object.assign(target, { [key]: {} });
-          mergeDeep(target[key], source[key]);
-        } else if (Array.isArray(source[key]) && Array.isArray(target[key])) {
-          Object.assign(target, { [key]: [...target[key], ...source[key]] });
-        } else {
-          Object.assign(target, { [key]: source[key] });
-        }
-      }
-    }
-
-    return mergeDeep(target, ...sources);
-  }
-
   const display = (toDisplay: "byMonth" | "allUpcoming") => {
     if (toDisplay === "byMonth") {
       gigs = calendarGigs[currentCalendarMonth];
@@ -82,40 +58,15 @@
 
   let gotoDate = (newDate) => async () => {
     if (!(newDate in calendarGigs)) {
-      let res_gig_2 = await $client.query({
-        query: QueryMultiGigDetails(session.hasuraRole),
-        variables: {
-          where: {
-            _or: [
-              {
-                date: {
-                  _gte: DateTime.fromFormat(newDate, "yyyy-LL").startOf("month").toISO(),
-                  _lte: DateTime.fromFormat(newDate, "yyyy-LL").endOf("month").toISO(),
-                },
-              },
-              {
-                arrive_time: {
-                  _gte: DateTime.fromFormat(newDate, "yyyy-LL").startOf("month").toISO(),
-                  _lte: DateTime.fromFormat(newDate, "yyyy-LL").endOf("month").toISO(),
-                },
-              },
-              {
-                finish_time: {
-                  _gte: DateTime.fromFormat(newDate, "yyyy-LL").startOf("month").toISO(),
-                  _lte: DateTime.fromFormat(newDate, "yyyy-LL").endOf("month").toISO(),
-                },
-              },
-            ],
-          },
-          order_by: { date: "asc" },
-        },
-      });
-      // @ts-ignore
-      calendarGigs[newDate] = res_gig_2.data.cucb_gigs;
-      calendarGigs[newDate] = calendarGigs[newDate].sort(
-        // TODO hmm, suspciious that this is doing anything
-        (gigA: Gig, gigB: Gig) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
-      );
+      const isoToJS = (date: string | null): Date | null => (date !== null ? DateTime.fromISO(date).toJSDate() : null);
+      const gigs = await fetch(`/members/gigs.json?inMonth=${newDate}`).then((res) => res.json());
+      calendarGigs[newDate] = gigs.map((gig) => ({
+        ...gig,
+        arrive_time: isoToJS(gig.arrive_time),
+        finish_time: isoToJS(gig.finish_time),
+        sort_date: isoToJS(gig.sort_date),
+        date: isoToJS(gig.date),
+      }));
     }
     currentCalendarMonth = newDate;
     gigs = gigs;
@@ -279,20 +230,23 @@
 {#each gigs as gig (gig.id)}
   {@const signupGig = signupGigs[gig.id]}
   {#if gig.id in signupGigs && isStore(signupGig)}
+    <!-- TODO ensure tests cover the fact that the signup summary that should exist here -->
     <Summary
       gig="{gig}"
       signupGig="{signupGig}"
       initialUserNotes="{userNotes}"
-      userInstruments="{userInstruments.map((user_instrument) => ({ user_instrument }))}"
+      userInstruments="{userInstruments}"
       linkHeading="{true}"
       session="{session}"
+      signups="{signups?.filter((entry) => entry.gig.id === gig.id)}"
     />
   {:else}
     <Summary
       gig="{gig}"
-      userInstruments="{userInstruments.map((user_instrument) => ({ user_instrument }))}"
+      userInstruments="{userInstruments}"
       linkHeading="{true}"
       session="{session}"
+      signups="{signups?.filter((entry) => entry.gig.id === gig.id)}"
     />
   {/if}
 {:else}No gigs to display{/each}
