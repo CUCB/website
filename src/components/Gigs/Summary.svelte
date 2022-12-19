@@ -7,17 +7,18 @@
   import type { Writable } from "svelte/store";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
-  import type { SignupGig, SignupUserInstrument } from "../../routes/members/types";
+  import type { AvailableUserInstrument, SignupGig, SignupUserInstrument } from "../../routes/members/types";
   Settings.defaultZoneName = "Europe/London";
 
   export let gig = {},
     signupGig: Writable<SignupGig | undefined> = writable(undefined),
-    userInstruments: SignupUserInstrument[] | undefined = undefined,
+    userInstruments: SignupUserInstrument[] | AvailableUserInstrument[] | undefined = undefined,
     displayLinks = true,
-    signups = undefined,
+    signups: unknown[] = undefined,
     session: { userId: string },
     initialUserNotes: string | undefined = undefined;
   export let linkHeading = false;
+
   let showSignup = false;
   let showDetails = !linkHeading;
   const formatCalendarDate = (date) => date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
@@ -380,8 +381,9 @@
         <b>
           {#if clients.length === 1}Contact:&nbsp;{:else}Contacts:&nbsp;{/if}
         </b>
-        {#each clients as client, i (client.id)}
-          <a href="/members/gigs/contacts/{client.id}">
+        <!-- TODO debodge and add test with multiple clients -->
+        {#each clients as client, i (client.id || client.contact.id)}
+          <a href="/members/gigs/contacts/{client.id || client.contact.id}">
             {client.contact.name}
             {#if client.contact.organization}&nbsp;@ {client.contact.organization}{/if}
           </a>{#if i + 1 < clients.length},&nbsp;{/if}
@@ -391,8 +393,10 @@
     {#if callers.length > 0}
       <p>
         <b>Calling:&nbsp;</b>
-        {#each callers as caller, i (caller.id)}
-          <a href="/members/gigs/contacts/{caller.id}">{caller.contact.name}</a>{#if i + 1 < callers.length},&nbsp;{/if}
+        <!-- TODO debodge and add test with multiple callers -->
+        {#each callers as caller, i (caller.id || caller.contact.id)}
+          <a href="/members/gigs/contacts/{caller.id || caller.contact.id}">{caller.contact.name}</a
+          >{#if i + 1 < callers.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
