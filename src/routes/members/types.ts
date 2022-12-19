@@ -2,38 +2,38 @@
 export interface SignupGig {
   id: string;
   lineup: SignupGigLineup[];
-  finish_time?: Date;
-  arrive_time?: Date;
-  time?: string;
-  date?: Date;
+  finish_time?: Date | null;
+  arrive_time?: Date | null;
+  time?: string | null;
+  date?: Date | null;
   title: string;
-  venue?: SignupGigVenue;
+  venue?: SignupGigVenue | null;
 }
 
 export interface SignupGigLineup {
-  user_available?: boolean;
-  user_only_if_necessary?: boolean;
-  user_notes?: string;
+  user_available?: boolean | null;
+  user_only_if_necessary?: boolean | null;
+  user_notes?: string | null;
   user_instruments: SignupUserInstrument[];
   user: { id: string; gig_notes: string };
 }
 
 export interface SignupUserInstrument {
-  approved?: boolean;
-  chosen?: boolean;
+  approved?: boolean | null;
+  chosen?: boolean | null;
   user_instrument: AvailableUserInstrument;
 }
 
 export interface SignupGigVenue {
   id: string;
   name: string;
-  map_link?: string;
-  subvenue?: string;
+  map_link?: string | null;
+  subvenue?: string | null;
 }
 
 export interface AvailableUserInstrument {
   id: string;
-  nickname?: string;
+  nickname?: string | null;
   instrument: {
     name: string;
     novelty: boolean;
