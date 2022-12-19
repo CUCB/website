@@ -153,12 +153,12 @@ export const fetchMultiGigSummary = (session: Session, filter: ObjectQuery<Gig>)
       {
         fields: summaryFields(session),
         populateWhere: PopulateHint.INFER,
-        orderBy: { lineup: { leader: "desc", equipment: "asc" } },
+        orderBy: { date: "asc", lineup: { leader: "desc", equipment: "asc" } },
       },
     )
     .then((gigs) =>
       gigs.map((gig_) => {
-        const gig = wrap(gig_)?.toPOJO();
+        const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
         return gig && applyArrayFilter(gig, { ...contactResultFilter(session), ...lineupResultFilter });
       }),
     );
@@ -179,7 +179,7 @@ export const fetchMultiGigSignup = (session: Session, filter: ObjectQuery<Gig>):
     )
     .then((gigs) =>
       gigs.map((gig_) => {
-        const gig = wrap(gig_)?.toPOJO();
+        const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
         return gig && applyArrayFilter(gig, { lineup: { user: { id: session.userId } } });
       }),
     );

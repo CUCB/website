@@ -6,9 +6,9 @@
     id: number;
     type: GigType;
     admins_only?: boolean;
-    date: string;
-    arrive_time: string;
-    finish_time: string;
+    date: Date;
+    arrive_time: Date;
+    finish_time: Date;
   }
 </script>
 
@@ -83,10 +83,10 @@
         id: `calendar_date_${date.toFormat("yyyyLLdd")}`,
         gigs: gigs.filter(
           (gig) =>
-            (gig.date && DateTime.fromFormat(gig.date, "yyyy-LL-dd").hasSame(date, "day")) ||
+            (gig.date && DateTime.fromJSDate(gig.date).hasSame(date, "day")) ||
             ((gig.type.code === "calendar" || gig.date === null) &&
-              DateTime.fromISO(gig.arrive_time).startOf("day") <= DateTime.fromISO(date).startOf("day") &&
-              DateTime.fromISO(gig.finish_time).startOf("day") >= DateTime.fromISO(date).startOf("day")),
+              DateTime.fromJSDate(gig.arrive_time).startOf("day") <= DateTime.fromISO(date).startOf("day") &&
+              DateTime.fromJSDate(gig.finish_time).startOf("day") >= DateTime.fromISO(date).startOf("day")),
         ),
       })),
     );

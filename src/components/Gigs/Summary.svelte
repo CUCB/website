@@ -25,9 +25,9 @@
   const formatTimeOnly = (date) => date.toFormat("HH:mm");
   const formatTimeWithDate = (date) => date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");
   const midnight = { hour: 0, minute: 0, second: 0 };
-  $: arrive_time = gig.arrive_time && DateTime.fromISO(gig.arrive_time);
-  $: finish_time = gig.finish_time && DateTime.fromISO(gig.finish_time);
-  $: date = gig.date && DateTime.fromISO(gig.date);
+  $: arrive_time = gig.arrive_time && DateTime.fromJSDate(gig.arrive_time);
+  $: finish_time = gig.finish_time && DateTime.fromJSDate(gig.finish_time);
+  $: date = gig.date && DateTime.fromJSDate(gig.date);
   $: clients = gig.contacts.filter((c) => c.client);
   $: callers = gig.contacts.filter((c) => c.calling);
   signups = signups || gig.signupSummary;
@@ -272,7 +272,7 @@
     {/if}
     <a href="/members/gigs/{gig.id}/calendar" rel="external" target="_blank">Download iCal</a>
     {#if gig.type.code !== "calendar" && gig.date}
-      <p class="date main-detail">{formatCalendarDate(DateTime.fromISO(gig.date))}</p>
+      <p class="date main-detail">{formatCalendarDate(DateTime.fromJSDate(gig.date))}</p>
     {/if}
     {#if gig.allow_signups && signups}
       <SignupSummary signups="{signups}" />
@@ -297,9 +297,9 @@
         {#if finish_time}
           <p>
             <b>Finish time:&nbsp;</b>
-            {#if date && finish_time.set(midnight).equals(date)}
+            {#if date && finish_time.hasSame(date, "day")}
               {@html formatTimeOnly(finish_time)}
-            {:else if !date && arrive_time && finish_time.set(midnight).equals(arrive_time.set(midnight))}
+            {:else if !date && arrive_time && finish_time.hasSame(arrive_time, "day")}
               {@html formatTimeOnly(finish_time)}
             {:else}
               {@html formatTimeWithDate(finish_time)}
@@ -308,12 +308,12 @@
         {/if}
       {:else if arrive_time && finish_time && !arrive_time.set(midnight).equals(finish_time.set(midnight))}
         <p>
-          {formatCalendarDate(DateTime.fromISO(gig.arrive_time))}
+          {formatCalendarDate(DateTime.fromJSDate(gig.arrive_time))}
           &ndash;
-          {formatCalendarDate(DateTime.fromISO(gig.finish_time))}
+          {formatCalendarDate(DateTime.fromJSDate(gig.finish_time))}
         </p>
       {:else if gig.arrive_time}
-        <p>{formatCalendarDate(DateTime.fromISO(gig.arrive_time))}</p>
+        <p>{formatCalendarDate(DateTime.fromJSDate(gig.arrive_time))}</p>
       {/if}
     </div>
     <ul class="tasks main-detail">
@@ -327,7 +327,7 @@
         {/if}
       </li>
       <li>
-        {#if gig.finance_payment_received !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
+        {#if gig.finance_payment_received !== undefined && DateTime.fromJSDate(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
           {#if gig.finance_payment_received}
             <div class="task-summary color-positive"><i class="las la-money-bill-wave"></i> Payment received</div>
           {:else}
@@ -336,7 +336,7 @@
         {/if}
       </li>
       <li>
-        {#if gig.finance_caller_paid !== undefined && DateTime.fromISO(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
+        {#if gig.finance_caller_paid !== undefined && DateTime.fromJSDate(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
           {#if gig.finance_caller_paid}
             <div class="task-summary color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</div>
           {:else}
