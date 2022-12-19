@@ -1,14 +1,16 @@
 import { error } from "@sveltejs/kit";
 import { DateTime, Settings } from "luxon";
-import { get } from "svelte/store";
 import type { AvailableUserInstrument, SignupGig } from "../types";
-import { handleErrors, client } from "../../../graphql/client";
-import { QueryMultiGigDetails } from "../../../graphql/gigs";
 import orm from "$lib/database";
 import { NOT_MUSIC_ONLY } from "$lib/permissions";
 import { fetchAvailableInstruments, fetchSignupGigs, fetchUserNotes } from "../data";
 import type { PageServerLoad } from "./$types";
 import { assertLoggedIn } from "../../../client-auth";
+import { fetchMultiGigSummary } from "./queries";
+import type { ObjectQuery } from "@mikro-orm/core";
+import type { OperatorMap } from "@mikro-orm/core/typings";
+import type { Gig as DbGig } from "$lib/entities/Gig";
+import { writable } from "svelte/store";
 
 export interface GigQueryRes {
   data: {
@@ -19,7 +21,7 @@ export interface GigQueryRes {
 
 export interface Gig {
   id: number;
-  sort_date: string;
+  sort_date: Date;
   user: {
     first: string;
   };
@@ -30,6 +32,12 @@ export interface Gig {
 
 interface UserInstrument {}
 
+const filterAnyGigDate = (filter: OperatorMap<Date>): ObjectQuery<DbGig> => ({
+  $or: [{ date: filter }, { arrive_time: filter }, { finish_time: filter }],
+});
+
+const bySortDate = (gigA: Gig, gigB: Gig): number => gigA.sort_date.getTime() - gigB.sort_date.getTime();
+
 export const load: PageServerLoad = async ({ locals: { session }, parent }) => {
   Settings.defaultZoneName = "Europe/London";
 
@@ -38,63 +46,25 @@ export const load: PageServerLoad = async ({ locals: { session }, parent }) => {
 
   if (NOT_MUSIC_ONLY.guard(session)) {
     const em = orm.em.fork();
-    let res_gig: GigQueryRes,
-      user_notes: string,
-      signup_gigs: SignupGig[],
-      signup_instruments: AvailableUserInstrument[],
-      res_gig_2;
-    try {
-      res_gig = await get(client).query({
-        query: QueryMultiGigDetails(session.hasuraRole),
-        variables: {
-          where: {
-            _or: [{ date: { _gte: "now()" } }, { arrive_time: { _gte: "now()" } }, { finish_time: { _gte: "now()" } }],
-          },
-          order_by: [{ date: "asc" }, { arrive_time: "asc" }],
-        },
-      });
-      res_gig_2 = await get(client).query({
-        query: QueryMultiGigDetails(session.hasuraRole),
-        variables: {
-          where: {
-            _or: [
-              {
-                date: {
-                  _gte: DateTime.local().startOf("month").toISO(),
-                  _lte: DateTime.local().endOf("month").toISO(),
-                },
-              },
-              {
-                arrive_time: {
-                  _gte: DateTime.local().startOf("month").toISO(),
-                  _lte: DateTime.local().endOf("month").toISO(),
-                },
-              },
-              {
-                finish_time: {
-                  _gte: DateTime.local().startOf("month").toISO(),
-                  _lte: DateTime.local().endOf("month").toISO(),
-                },
-              },
-            ],
-          },
-          order_by: { date: "asc" },
-        },
-      });
-      [signup_gigs, user_notes, signup_instruments] = await Promise.all([
+    // Sort the gigs before rendering since the database can't sort by computed field
+    const upcomingGigs = await fetchMultiGigSummary(session, filterAnyGigDate({ $gte: "now()" })).then((gigs) =>
+      gigs.sort(bySortDate),
+    );
+    const gigsInCurrentMonth = await fetchMultiGigSummary(
+      session,
+      filterAnyGigDate({
+        $gte: DateTime.local().startOf("month").toISO(),
+        $lte: DateTime.local().endOf("month").toISO(),
+      }),
+    ).then((gigs) => gigs.sort(bySortDate));
+    const [signup_gigs, user_notes, signup_instruments]: [SignupGig[], string, AvailableUserInstrument[]] =
+      await Promise.all([
         fetchSignupGigs(em, session),
         fetchUserNotes(em, session),
         fetchAvailableInstruments(em, session),
       ]);
-    } catch (e) {
-      return handleErrors(e, session);
-    }
 
-    if (res_gig && res_gig.data && res_gig.data.cucb_gigs) {
-      let gigs = res_gig.data.cucb_gigs;
-      // Sort the gigs before rendering since the database can't sort by computed field
-      gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
-
+    if (upcomingGigs) {
       let signup_dict: Record<string, SignupGig> = {};
       for (let gig of signup_gigs) {
         signup_dict[gig.id] = gig;
@@ -103,14 +73,12 @@ export const load: PageServerLoad = async ({ locals: { session }, parent }) => {
       let currentCalendarMonth = DateTime.local().toFormat("yyyy-LL");
 
       return {
-        gigs,
+        gigs: upcomingGigs,
         initialSignupGigs: signup_dict,
         userInstruments: signup_instruments,
         userNotes: user_notes,
         calendarGigs: {
-          [currentCalendarMonth]: res_gig_2.data.cucb_gigs.sort(
-            (gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime(),
-          ),
+          [currentCalendarMonth]: gigsInCurrentMonth,
         },
         currentCalendarMonth,
       };

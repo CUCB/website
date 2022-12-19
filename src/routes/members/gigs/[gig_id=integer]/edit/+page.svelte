@@ -141,7 +141,7 @@
   $: summaryGig = {
     id,
     title: title.trim(),
-    date: (typeCode !== "calendar" && date) || null,
+    date: (typeCode !== "calendar" && date && DateTime.fromISO(date).toJSDate()) || null,
     venue_id,
     type_id,
     type: gigTypes.find((type) => type_id === type.id),
@@ -152,8 +152,14 @@
     notes_admin: notes_admin && notes_admin.trim(),
     notes_band: notes_band && notes_band.trim(),
     summary: summary && summary.trim(),
-    arrive_time: typeCode === "calendar" ? DateTime.fromISO(arrive_time_date) : arrive_time,
-    finish_time: typeCode === "calendar" ? DateTime.fromISO(finish_time_date) : finish_time,
+    arrive_time:
+      typeCode === "calendar"
+        ? DateTime.fromISO(arrive_time_date).toJSDate()
+        : DateTime.fromISO(arrive_time).toJSDate(),
+    finish_time:
+      typeCode === "calendar"
+        ? DateTime.fromISO(finish_time_date).toJSDate()
+        : DateTime.fromISO(finish_time).toJSDate(),
     time: time || null,
     contacts,
     lineup: [],
