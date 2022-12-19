@@ -7,12 +7,12 @@
   import type { Writable } from "svelte/store";
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
-  import type { AvailableUserInstrument, SignupGig, SignupUserInstrument } from "../../routes/members/types";
+  import type { AvailableUserInstrument, GigSummary, SignupGig } from "../../routes/members/types";
   Settings.defaultZoneName = "Europe/London";
 
-  export let gig = {},
+  export let gig: GigSummary,
     signupGig: Writable<SignupGig | undefined> = writable(undefined),
-    userInstruments: SignupUserInstrument[] | AvailableUserInstrument[] | undefined = undefined,
+    userInstruments: AvailableUserInstrument[] | undefined = undefined,
     displayLinks = true,
     signups: unknown[] = undefined,
     session: { userId: string },
@@ -417,7 +417,7 @@
   <Signup
     bind:gig="{$signupGig}"
     initialUserNotes="{initialUserNotes}"
-    userInstruments="{userInstruments}"
+    userInstruments="{userInstruments?.map((user_instrument) => ({ user_instrument }))}"
     showLink="{false}"
     session="{session}"
   />

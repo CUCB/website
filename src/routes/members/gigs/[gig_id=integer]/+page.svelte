@@ -17,6 +17,6 @@
   gig="{gig}"
   signupGig="{writable(signupGig)}"
   signups="{signupSummary}"
-  userInstruments="{userInstruments.map((user_instrument) => ({ user_instrument }))}"
+  userInstruments="{userInstruments}"
   session="{session}"
 />
