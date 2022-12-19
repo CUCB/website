@@ -415,6 +415,7 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-${signupGig.id}-signup-edit]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-instrument-20-toggle]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).click();
+        cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).should("not.exist");
 
         cy.visit("/members/gigs");
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
