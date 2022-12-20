@@ -1,6 +1,7 @@
 import { Entity, ManyToOne, Property } from "@mikro-orm/core";
-import { CalendarSubscriptionType } from "./CalendarSubscriptionType";
-import { User } from "./User";
+import type { Relation } from "./bodge.js";
+import { CalendarSubscriptionType } from "./CalendarSubscriptionType.js";
+import { User } from "./User.js";
 
 @Entity({ schema: "cucb", tableName: "calendar_subscriptions" })
 export class CalendarSubscription {
@@ -11,7 +12,7 @@ export class CalendarSubscription {
     primary: true,
     index: "idx_17334_user_id",
   })
-  user!: User;
+  user!: Relation<User>;
 
   @ManyToOne({ entity: () => CalendarSubscriptionType, fieldName: "calendar_type", primary: true })
   calendarType!: CalendarSubscriptionType;

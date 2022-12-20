@@ -1,5 +1,6 @@
 import { Entity, ManyToOne, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
-import { User } from "./User";
+import type { Relation } from "./bodge.js";
+import { User } from "./User.js";
 
 @Entity({ schema: "cucb", tableName: "contacts" })
 export class Contact {
@@ -15,7 +16,7 @@ export class Contact {
     nullable: true,
     index: "idx_17383_user_id",
   })
-  user?: User;
+  user?: Relation<User>;
 
   @Property({ length: 128, type: "varchar" })
   name!: string;

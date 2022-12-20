@@ -2,7 +2,7 @@ import { Record, Boolean, String, Array, Null } from "runtypes";
 import { assertLoggedIn } from "../../../../../client-auth";
 import orm from "$lib/database";
 import type { RequestEvent } from "./$types";
-import { GigLineup } from "$lib/entities/GigLineup";
+import { GigLineupEntry } from "$lib/entities/GigLineupEntry";
 import { NOT_MUSIC_ONLY, VIEW_HIDDEN_GIGS } from "$lib/permissions";
 import { error, json } from "@sveltejs/kit";
 import { GigLineupInstrument } from "$lib/entities/GigLineupInstrument";
@@ -41,21 +41,21 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
 
     const body = await request.json();
     if (SIGNUP_REQUEST.guard(body)) {
-      await em.upsert(GigLineup, {
+      await em.upsert(GigLineupEntry, {
         user: session.userId,
         gig: gig_id,
         user_available: body.user_available,
         user_only_if_necessary: body.user_only_if_necessary,
       });
       const entry = await em.findOneOrFail(
-        GigLineup,
+        GigLineupEntry,
         { user: session.userId, gig: gig_id },
         { fields: ["user_available", "user_only_if_necessary", "user.gig_notes", "user_notes"], populate: ["user"] },
       );
       return json(entry);
     } else if (UPDATE_INSTRUMENTS.guard(body)) {
       // TODO ensure users cannot delete instruments that are approved
-      const gig_lineup = await em.findOne(GigLineup, { user: session.userId, gig: gig_id });
+      const gig_lineup = await em.findOne(GigLineupEntry, { user: session.userId, gig: gig_id });
       if (gig_lineup) {
         // TODO this doesn't seem to work???
         const inserts = (insert: { id: string }) => ({
@@ -79,7 +79,7 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
       }
     } else if (UPDATE_NOTES.guard(body)) {
       const lineup_entry = await em.findOne(
-        GigLineup,
+        GigLineupEntry,
         { gig: gig_id, user: session.userId },
         { fields: ["user_notes"] },
       );

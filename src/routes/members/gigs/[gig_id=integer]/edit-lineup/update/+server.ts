@@ -2,12 +2,12 @@ import { error, json } from "@sveltejs/kit";
 import { wrap } from "@mikro-orm/core";
 import { Boolean, Literal, Null, Record, String, Union } from "runtypes";
 import orm from "$lib/database";
-import { GigLineup } from "$lib/entities/GigLineup";
+import { GigLineupEntry } from "$lib/entities/GigLineupEntry";
 import { SELECT_GIG_LINEUPS } from "$lib/permissions";
 // TODO ensure requestevent is always imported from ./$types, not @sveltejs/kit
 import type { RequestEvent } from "./$types";
 import { GigLineupInstrument } from "$lib/entities/GigLineupInstrument";
-import { UserInstrument } from "$lib/entities/UsersInstrument";
+import { UserInstrument } from "$lib/entities/UserInstrument";
 
 // TODO the url for this endpoint is crap, but since actions were added, a standard json endpoint needs to be on a separate url from +page.server.ts
 
@@ -63,10 +63,10 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
     const body = await request.json();
     if (addUser.guard(body)) {
       const em = orm.em.fork();
-      await em.nativeInsert(GigLineup, { user: body.id, gig: gig_id });
+      await em.nativeInsert(GigLineupEntry, { user: body.id, gig: gig_id });
       const person = await em
         .findOne(
-          GigLineup,
+          GigLineupEntry,
           { user: body.id, gig: gig_id },
           {
             populate: [
@@ -95,7 +95,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
       }
     } else if (setPersonApproved.guard(body)) {
       const em = orm.em.fork();
-      const entry = await em.findOne(GigLineup, { gig: gig_id, user: body.id });
+      const entry = await em.findOne(GigLineupEntry, { gig: gig_id, user: body.id });
       if (entry) {
         entry.approved = body.approved;
         await em.persistAndFlush(entry);
@@ -105,7 +105,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
       }
     } else if (setAdminNotes.guard(body)) {
       const em = orm.em.fork();
-      const entry = await em.findOne(GigLineup, { gig: gig_id, user: body.id });
+      const entry = await em.findOne(GigLineupEntry, { gig: gig_id, user: body.id });
       if (entry) {
         entry.admin_notes = body.admin_notes;
         await em.persistAndFlush(entry);
@@ -115,7 +115,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
       }
     } else if (destroyLineupInformation.guard(body)) {
       const em = orm.em.fork();
-      await em.nativeDelete(GigLineup, { gig: gig_id });
+      await em.nativeDelete(GigLineupEntry, { gig: gig_id });
       return json([]);
     } else if (addInstrument.guard(body)) {
       const em = orm.em.fork();
@@ -124,7 +124,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         .findOne(UserInstrument, { id: body.id }, { fields: ["user.id"], populate: ["user"] });
       if (userInstrument) {
         const user_id = userInstrument.user.id;
-        const gig_lineup = await em.findOne(GigLineup, { user: user_id, gig: gig_id });
+        const gig_lineup = await em.findOne(GigLineupEntry, { user: user_id, gig: gig_id });
         if (gig_lineup) {
           await em.upsert(GigLineupInstrument, {
             gig_lineup,
@@ -144,7 +144,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
       }
     } else if (setRole.guard(body)) {
       const em = orm.em.fork();
-      const lineup_entry = await em.findOne(GigLineup, { gig: gig_id, user: body.id });
+      const lineup_entry = await em.findOne(GigLineupEntry, { gig: gig_id, user: body.id });
       if (lineup_entry) {
         lineup_entry[body.role] = body.value;
         await em.persistAndFlush(lineup_entry);

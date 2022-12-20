@@ -1,5 +1,5 @@
 import { Collection, Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import { CommitteeMember } from "./CommitteeMember";
+import { CommitteeMember } from "./CommitteeMember.js";
 
 @Entity({ schema: "cucb", tableName: "committees" })
 export class Committee {

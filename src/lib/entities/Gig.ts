@@ -1,10 +1,11 @@
 import { Collection, Entity, ManyToOne, OneToMany, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
 import { DateTime } from "luxon";
-import { GigContact } from "./GigContact";
-import { GigLineup } from "./GigLineup";
-import { GigType } from "./GigType";
-import { GigVenue } from "./GigVenue";
-import { User } from "./User";
+import type { Relation } from "./bodge.js";
+import { GigContact } from "./GigContact.js";
+import { GigLineupEntry } from "./GigLineupEntry.js";
+import { GigType } from "./GigType.js";
+import { GigVenue } from "./GigVenue.js";
+import { User } from "./User.js";
 
 @Entity({ schema: "cucb", tableName: "gigs" })
 export class Gig {
@@ -19,8 +20,8 @@ export class Gig {
   @ManyToOne({ entity: () => GigType, fieldName: "type", onUpdateIntegrity: "cascade", index: "idx_17399_type" })
   type!: GigType;
 
-  @Property({ columnType: "date", nullable: true, type: "date" })
-  date?: Date;
+  @Property({ columnType: "date", type: "date" })
+  date!: Date;
 
   @Property({ columnType: "time", length: 6, nullable: true, type: "time" })
   time?: string;
@@ -42,13 +43,13 @@ export class Gig {
     nullable: true,
     index: "idx_17399_posting_user",
   })
-  posting_user?: User;
+  posting_user?: Relation<User>;
 
   @Property({ length: 6, nullable: true, defaultRaw: `now()`, type: "timestamptz" })
   posting_time?: Date;
 
   @ManyToOne({ entity: () => User, fieldName: "editing_user", nullable: true })
-  editing_user?: User;
+  editing_user?: Relation<User>;
 
   @Property({ length: 6, nullable: true, type: "timestamptz" })
   editing_time?: Date;
@@ -92,8 +93,8 @@ export class Gig {
   @OneToMany(() => GigContact, (contact) => contact.gig)
   contacts = new Collection<GigContact>(this);
 
-  @OneToMany(() => GigLineup, (entry) => entry.gig)
-  lineup = new Collection<GigLineup>(this);
+  @OneToMany(() => GigLineupEntry, (entry) => entry.gig)
+  lineup = new Collection<GigLineupEntry>(this);
 
   get sort_date(): Date {
     return (

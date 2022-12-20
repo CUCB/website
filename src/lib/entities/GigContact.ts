@@ -1,13 +1,14 @@
 import { Entity, ManyToOne, OptionalProps, Property } from "@mikro-orm/core";
-import { Contact } from "./Contact";
-import { Gig } from "./Gig";
+import type { Relation } from "./bodge.js";
+import { Contact } from "./Contact.js";
+import { Gig } from "./Gig.js";
 
 @Entity({ schema: "cucb", tableName: "gigs_contacts" })
 export class GigContact {
   [OptionalProps]?: "calling" | "client" | "contact";
 
   @ManyToOne({ entity: () => Gig, onUpdateIntegrity: "cascade", onDelete: "cascade", primary: true })
-  gig!: Gig;
+  gig!: Relation<Gig>;
 
   @ManyToOne({
     entity: () => Contact,

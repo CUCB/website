@@ -1,7 +1,8 @@
 import { Entity, ManyToOne, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
 import { CommitteeKey } from "./CommitteeKey.js";
 import { CommitteePosition } from "./CommitteePosition.js";
-import { Committee } from "./Committee";
+import { Committee } from "./Committee.js";
+import type { Relation } from "./bodge.js";
 
 @Entity({ schema: "cucb", tableName: "committee_members" })
 export class CommitteeMember {
@@ -32,7 +33,7 @@ export class CommitteeMember {
   pic?: string;
 
   @ManyToOne({ entity: () => Committee, fieldName: "committee", index: "idx_17360_committee" })
-  committee!: Committee;
+  committee!: Relation<Committee>;
 
   @ManyToOne({ entity: () => CommitteeKey, fieldName: "lookup_name", index: "idx_17360_lookup_name" })
   lookup_name!: CommitteeKey;
