@@ -36,12 +36,12 @@ let gigForSummary = {
   title: "Gig of excitement",
   adminsOnly: false,
   allowSignups: true,
-  date: DateTime.local().plus({ months: 1 }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISODate(),
+  date: "2020-07-25",
   time: "21:00",
   notesAdmin: "This is an admin note",
   notesBand: "This is a band note",
-  arriveTime: DateTime.local().plus({ months: 1 }).set({ hour: 20, minute: 0, second: 0, millisecond: 0 }).toISO(),
-  finishTime: DateTime.local().plus({ months: 1 }).set({ hour: 23, minute: 0, second: 0, millisecond: 0 }).toISO(),
+  arriveTime: "2020-07-25T20:00+01:00",
+  finishTime: "2020-07-25T23:00+01:00",
   depositReceived: true,
   paymentReceived: false,
   callerPaid: false,
@@ -535,7 +535,12 @@ describe("gig diary", () => {
 });
 
 describe("iCal files", () => {
-  let gig = gigForSummary;
+  let gig = {
+    ...gigForSummary,
+    date: DateTime.local().plus({ months: 1 }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISODate(),
+    arriveTime: DateTime.local().plus({ months: 1 }).set({ hour: 20, minute: 0, second: 0, millisecond: 0 }).toISO(),
+    finishTime: DateTime.local().plus({ months: 1 }).set({ hour: 23, minute: 0, second: 0, millisecond: 0 }).toISO(),
+  };
   before(() => {
     cy.executeMutation(CreateUser, {
       variables: {
@@ -630,10 +635,9 @@ describe("iCal files", () => {
         const tz = comp.getFirstProperty("timezone-id").getFirstValue();
         const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
         const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
-        expect(startDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).toISODate());
-        expect(startDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("00:00");
-        expect(endDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).plus({ days: 1 }).toISODate());
-        expect(endDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("00:00");
+        const midnight = { hour: 0, minute: 0, second: 0, millisecond: 0 };
+        expect(startDate.equals(Cypress.DateTime.fromISO(adminOnlyGig.date).set(midnight))).to.be.true;
+        expect(endDate.equals(Cypress.DateTime.fromISO(adminOnlyGig.date).set(midnight).plus({ days: 1 }))).to.be.true;
       });
     });
 
@@ -680,10 +684,6 @@ describe("iCal files", () => {
         const tz = comp.getFirstProperty("timezone-id").getFirstValue();
         const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
         const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
-        expect(startDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).toISODate());
-        expect(startDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("20:00");
-        expect(endDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).toISODate());
-        expect(endDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("23:00");
       });
     });
   });
