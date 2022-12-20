@@ -9,8 +9,8 @@ object_relationships:
     using:
       foreign_key_constraint_on: user_instrument_id
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: current_user
+    permission:
       check:
         users_instrument:
           user_id:
@@ -18,37 +18,33 @@ insert_permissions:
       columns:
         - conn_id
         - user_instrument_id
-    role: current_user
-  - permission:
-      backend_only: false
+  - role: equipment
+    permission:
       check: {}
       columns:
         - conn_id
         - user_instrument_id
-    role: equipment
-  - permission:
-      backend_only: false
+  - role: president
+    permission:
       check: {}
       columns:
         - conn_id
         - user_instrument_id
-    role: president
-  - permission:
-      backend_only: false
+  - role: secretary
+    permission:
       check: {}
       columns:
         - conn_id
         - user_instrument_id
-    role: secretary
-  - permission:
-      backend_only: false
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - conn_id
         - user_instrument_id
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - conn_id
         - id
@@ -57,51 +53,55 @@ select_permissions:
         users_instrument:
           user_id:
             _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - id
         - user_instrument_id
         - conn_id
       filter: {}
-    role: equipment
-  - permission:
+  - role: president
+    permission:
       columns:
         - id
         - user_instrument_id
         - conn_id
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - user_instrument_id
         - conn_id
       filter: {}
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - user_instrument_id
         - conn_id
       filter: {}
-    role: webmaster
 delete_permissions:
-  - permission:
+  - role: current_user
+    permission:
+      backend_only: false
       filter:
         users_instrument:
           user_id:
             _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
+      backend_only: false
       filter: {}
-    role: equipment
-  - permission:
+  - role: president
+    permission:
+      backend_only: false
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
+      backend_only: false
       filter: {}
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter: {}
-    role: webmaster

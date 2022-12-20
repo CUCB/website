@@ -2,7 +2,8 @@ table:
   name: music
   schema: cucb
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - id
         - title
@@ -11,8 +12,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - id
         - title
@@ -21,8 +22,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - id
         - title
@@ -31,8 +32,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - id
         - title
@@ -41,8 +42,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - id
         - title
@@ -51,8 +52,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - title
@@ -61,8 +62,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - id
         - title
@@ -71,8 +72,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - id
         - title
@@ -81,8 +82,8 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - title
@@ -91,4 +92,3 @@ select_permissions:
         - current
         - show_tune
       filter: {}
-    role: webmaster

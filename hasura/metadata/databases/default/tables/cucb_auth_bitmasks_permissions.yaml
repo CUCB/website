@@ -2,45 +2,45 @@ table:
   name: auth_bitmasks_permissions
   schema: cucb
 select_permissions:
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - id
         - php_title
         - bitmask
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - id
         - php_title
         - bitmask
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: president
+    permission:
       columns:
         - id
         - php_title
         - bitmask
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - php_title
         - bitmask
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - id
         - php_title
         - bitmask
       filter: {}
-    role: treasurer
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - php_title
         - bitmask
       filter: {}
-    role: webmaster

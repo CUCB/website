@@ -2,59 +2,59 @@ table:
   name: committee_keys
   schema: cucb
 select_permissions:
-  - permission:
+  - role: anonymous
+    permission:
       columns:
         - name
       filter: {}
-    role: anonymous
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - name
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - name
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - name
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - name
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - name
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - name
       filter: {}
-    role: secretary
-  - permission:
+  - role: server
+    permission:
       columns:
         - id
         - name
       filter: {}
-    role: server
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - name
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - name
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - name
       filter: {}
-    role: webmaster

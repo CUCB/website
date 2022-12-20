@@ -9,17 +9,16 @@ object_relationships:
     using:
       foreign_key_constraint_on: user_id
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: current_user
+    permission:
       check: {}
-      columns:
-        - pref_id
-        - value
       set:
         user_id: x-hasura-User-Id
-    role: current_user
-  - permission:
-      backend_only: false
+      columns:
+        - pref_id
+        - value
+  - role: equipment
+    permission:
       check:
         _and:
           - pref_type:
@@ -31,9 +30,8 @@ insert_permissions:
         - pref_id
         - user_id
         - value
-    role: equipment
-  - permission:
-      backend_only: false
+  - role: gig_editor
+    permission:
       check:
         _and:
           - pref_type:
@@ -45,9 +43,8 @@ insert_permissions:
         - pref_id
         - user_id
         - value
-    role: gig_editor
-  - permission:
-      backend_only: false
+  - role: president
+    permission:
       check:
         _and:
           - pref_type:
@@ -59,9 +56,8 @@ insert_permissions:
         - pref_id
         - user_id
         - value
-    role: president
-  - permission:
-      backend_only: false
+  - role: secretary
+    permission:
       check:
         _and:
           - pref_type:
@@ -73,9 +69,8 @@ insert_permissions:
         - pref_id
         - user_id
         - value
-    role: secretary
-  - permission:
-      backend_only: false
+  - role: treasurer
+    permission:
       check:
         _and:
           - pref_type:
@@ -87,9 +82,8 @@ insert_permissions:
         - pref_id
         - user_id
         - value
-    role: treasurer
-  - permission:
-      backend_only: false
+  - role: webmaster
+    permission:
       check:
         _and:
           - pref_type:
@@ -101,9 +95,9 @@ insert_permissions:
         - pref_id
         - user_id
         - value
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - value
         - pref_id
@@ -111,8 +105,8 @@ select_permissions:
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - pref_id
         - user_id
@@ -121,8 +115,8 @@ select_permissions:
         pref_type:
           name:
             _like: attribute.%
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - pref_id
         - user_id
@@ -131,8 +125,8 @@ select_permissions:
         pref_type:
           name:
             _like: attribute.%
-    role: gig_editor
-  - permission:
+  - role: president
+    permission:
       columns:
         - pref_id
         - user_id
@@ -141,8 +135,8 @@ select_permissions:
         pref_type:
           name:
             _like: attribute.%
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - pref_id
         - user_id
@@ -151,8 +145,8 @@ select_permissions:
         pref_type:
           name:
             _like: attribute.%
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - pref_id
         - user_id
@@ -161,25 +155,24 @@ select_permissions:
         pref_type:
           name:
             _like: attribute.%
-    role: treasurer
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - user_id
         - pref_id
         - value
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: current_user
+    permission:
       columns:
         - value
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
-      check: {}
+      check: null
+  - role: equipment
+    permission:
       columns:
         - value
       filter:
@@ -189,9 +182,9 @@ update_permissions:
                 _like: attribute.%
           - user_id:
               _ne: X-Hasura-User-Id
-    role: equipment
-  - permission:
       check: {}
+  - role: gig_editor
+    permission:
       columns:
         - value
       filter:
@@ -201,9 +194,9 @@ update_permissions:
                 _like: attribute.%
           - user_id:
               _ne: X-Hasura-User-Id
-    role: gig_editor
-  - permission:
       check: {}
+  - role: president
+    permission:
       columns:
         - value
       filter:
@@ -213,9 +206,9 @@ update_permissions:
                 _like: attribute.%
           - user_id:
               _ne: X-Hasura-User-Id
-    role: president
-  - permission:
       check: {}
+  - role: secretary
+    permission:
       columns:
         - value
       filter:
@@ -225,9 +218,9 @@ update_permissions:
                 _like: attribute.%
           - user_id:
               _ne: X-Hasura-User-Id
-    role: secretary
-  - permission:
       check: {}
+  - role: treasurer
+    permission:
       columns:
         - value
       filter:
@@ -237,9 +230,9 @@ update_permissions:
                 _like: attribute.%
           - user_id:
               _ne: X-Hasura-User-Id
-    role: treasurer
-  - permission:
       check: {}
+  - role: webmaster
+    permission:
       columns:
         - value
       filter:
@@ -249,4 +242,4 @@ update_permissions:
                 _like: attribute.%
           - user_id:
               _ne: X-Hasura-User-Id
-    role: webmaster
+      check: {}

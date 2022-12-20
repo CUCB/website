@@ -20,8 +20,8 @@ array_relationships:
           name: gigs_lineups_instruments
           schema: cucb
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: current_user
+    permission:
       check:
         _and:
           - gig:
@@ -32,16 +32,15 @@ insert_permissions:
                     _eq: true
           - user_id:
               _eq: X-Hasura-User-Id
+      set:
+        user_id: x-hasura-User-Id
       columns:
         - gig_id
         - user_available
         - user_notes
         - user_only_if_necessary
-      set:
-        user_id: x-hasura-User-Id
-    role: current_user
-  - permission:
-      backend_only: false
+  - role: president
+    permission:
       check: {}
       columns:
         - admin_notes
@@ -53,9 +52,8 @@ insert_permissions:
         - money_collector
         - money_collector_notified
         - user_id
-    role: president
-  - permission:
-      backend_only: false
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - admin_notes
@@ -67,9 +65,9 @@ insert_permissions:
         - money_collector
         - money_collector_notified
         - user_id
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - approved
         - driver
@@ -81,8 +79,8 @@ select_permissions:
       filter:
         approved:
           _eq: true
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - approved
         - gig_id
@@ -98,8 +96,8 @@ select_permissions:
                 _eq: false
           - user_id:
               _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - approved
         - driver
@@ -111,8 +109,8 @@ select_permissions:
       filter:
         approved:
           _eq: true
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - approved
         - driver
@@ -124,8 +122,8 @@ select_permissions:
       filter:
         approved:
           _eq: true
-    role: gig_editor
-  - permission:
+  - role: president
+    permission:
       columns:
         - id
         - gig_id
@@ -143,8 +141,8 @@ select_permissions:
         - user_only_if_necessary
         - admin_notes
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - gig_id
@@ -162,8 +160,8 @@ select_permissions:
         - user_only_if_necessary
         - admin_notes
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - approved
         - driver
@@ -175,13 +173,14 @@ select_permissions:
       filter:
         approved:
           _eq: true
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - approved
         - driver
         - equipment
         - gig_id
+        - id
         - leader
         - money_collector
         - user_id
@@ -192,8 +191,8 @@ select_permissions:
                 _eq: false
           - approved:
               _eq: true
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - gig_id
@@ -211,10 +210,9 @@ select_permissions:
         - user_only_if_necessary
         - admin_notes
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: current_user
+    permission:
       columns:
         - user_available
         - user_notes
@@ -229,9 +227,9 @@ update_permissions:
                     _eq: true
           - user_id:
               _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
       check: null
+  - role: president
+    permission:
       columns:
         - admin_notes
         - approved
@@ -241,15 +239,15 @@ update_permissions:
         - money_collector
         - money_collector_notified
       filter: {}
-    role: president
-  - permission:
       check: null
+  - role: secretary
+    permission:
       columns:
         - admin_notes
       filter: {}
-    role: secretary
-  - permission:
       check: null
+  - role: webmaster
+    permission:
       columns:
         - admin_notes
         - approved
@@ -259,11 +257,13 @@ update_permissions:
         - money_collector
         - money_collector_notified
       filter: {}
-    role: webmaster
+      check: null
 delete_permissions:
-  - permission:
+  - role: president
+    permission:
+      backend_only: false
       filter: {}
-    role: president
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter: {}
-    role: webmaster

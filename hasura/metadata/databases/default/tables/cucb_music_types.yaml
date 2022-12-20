@@ -2,7 +2,8 @@ table:
   name: music_types
   schema: cucb
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - id
         - abc_field
@@ -10,8 +11,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - id
         - abc_field
@@ -19,8 +20,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - id
         - abc_field
@@ -28,8 +29,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - id
         - abc_field
@@ -37,8 +38,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - id
         - abc_field
@@ -46,8 +47,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - abc_field
@@ -55,8 +56,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - id
         - abc_field
@@ -64,8 +65,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - id
         - abc_field
@@ -73,8 +74,8 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - abc_field
@@ -82,4 +83,3 @@ select_permissions:
         - description
         - common_type
       filter: {}
-    role: webmaster

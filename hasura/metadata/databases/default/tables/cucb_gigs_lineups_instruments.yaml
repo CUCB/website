@@ -16,8 +16,8 @@ object_relationships:
     using:
       foreign_key_constraint_on: user_instrument_id
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: current_user
+    permission:
       check:
         _and:
           - gigs_lineup:
@@ -30,38 +30,38 @@ insert_permissions:
           - user_instrument:
               user_id:
                 _eq: X-Hasura-User-Id
-      columns:
-        - gig_id
-        - user_instrument_id
       set:
         user_id: x-hasura-User-Id
-    role: current_user
-  - permission:
+      columns:
+        - gig_id
+        - user_instrument_id
+  - role: president
+    permission:
       check: {}
       columns:
         - approved
         - gig_id
         - user_id
         - user_instrument_id
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       check: {}
       columns:
         - approved
         - gig_id
         - user_id
         - user_instrument_id
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - approved
         - gig_id
         - user_id
         - user_instrument_id
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - gig_id
         - user_id
@@ -71,8 +71,8 @@ select_permissions:
         _and:
           - approved:
               _eq: true
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - approved
         - gig_id
@@ -90,8 +90,8 @@ select_permissions:
           - user_instrument:
               user_id:
                 _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - gig_id
         - user_id
@@ -101,8 +101,8 @@ select_permissions:
         _and:
           - approved:
               _eq: true
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - gig_id
         - user_id
@@ -112,24 +112,24 @@ select_permissions:
         _and:
           - approved:
               _eq: true
-    role: gig_editor
-  - permission:
+  - role: president
+    permission:
       columns:
         - approved
         - gig_id
         - user_id
         - user_instrument_id
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - approved
         - gig_id
         - user_id
         - user_instrument_id
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - gig_id
         - user_id
@@ -139,8 +139,8 @@ select_permissions:
         _and:
           - approved:
               _eq: true
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - gig_id
         - user_id
@@ -154,30 +154,31 @@ select_permissions:
               gig:
                 admins_only:
                   _eq: false
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - approved
         - gig_id
         - user_id
         - user_instrument_id
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: president
+    permission:
       columns:
         - approved
       filter: {}
-    role: president
-  - permission:
       check: null
+  - role: webmaster
+    permission:
       columns:
         - approved
       filter: {}
-    role: webmaster
+      check: null
 delete_permissions:
-  - permission:
+  - role: current_user
+    permission:
+      backend_only: false
       filter:
         _and:
           - gigs_lineup:
@@ -194,10 +195,11 @@ delete_permissions:
                   _is_null: true
           - user_id:
               _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: president
+    permission:
+      backend_only: false
       filter: {}
-    role: president
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter: {}
-    role: webmaster

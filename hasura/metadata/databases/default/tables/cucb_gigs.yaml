@@ -30,15 +30,19 @@ array_relationships:
           name: gigs_lineups
           schema: cucb
 computed_fields:
-  - comment: ""
+  - name: sort_date
     definition:
       function:
         name: gig_time_or_arrive_time
         schema: cucb
-    name: sort_date
+    comment: ""
 insert_permissions:
-  - permission:
+  - role: equipment
+    permission:
       check: {}
+      set:
+        editing_user: x-hasura-User-Id
+        posting_user: x-hasura-User-Id
       columns:
         - admins_only
         - advertise
@@ -59,12 +63,12 @@ insert_permissions:
         - title
         - type
         - venue_id
+  - role: gig_editor
+    permission:
+      check: {}
       set:
         editing_user: x-hasura-User-Id
         posting_user: x-hasura-User-Id
-    role: equipment
-  - permission:
-      check: {}
       columns:
         - admins_only
         - advertise
@@ -85,12 +89,12 @@ insert_permissions:
         - title
         - type
         - venue_id
+  - role: president
+    permission:
+      check: {}
       set:
         editing_user: x-hasura-User-Id
         posting_user: x-hasura-User-Id
-    role: gig_editor
-  - permission:
-      check: {}
       columns:
         - admins_only
         - advertise
@@ -111,12 +115,12 @@ insert_permissions:
         - title
         - type
         - venue_id
+  - role: secretary
+    permission:
+      check: {}
       set:
         editing_user: x-hasura-User-Id
         posting_user: x-hasura-User-Id
-    role: president
-  - permission:
-      check: {}
       columns:
         - admins_only
         - advertise
@@ -137,12 +141,12 @@ insert_permissions:
         - title
         - type
         - venue_id
+  - role: treasurer
+    permission:
+      check: {}
       set:
         editing_user: x-hasura-User-Id
         posting_user: x-hasura-User-Id
-    role: secretary
-  - permission:
-      check: {}
       columns:
         - admins_only
         - advertise
@@ -163,12 +167,12 @@ insert_permissions:
         - title
         - type
         - venue_id
+  - role: webmaster
+    permission:
+      check: {}
       set:
         editing_user: x-hasura-User-Id
         posting_user: x-hasura-User-Id
-    role: treasurer
-  - permission:
-      check: {}
       columns:
         - admins_only
         - advertise
@@ -189,12 +193,9 @@ insert_permissions:
         - title
         - type
         - venue_id
-      set:
-        editing_user: x-hasura-User-Id
-        posting_user: x-hasura-User-Id
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: anonymous
+    permission:
       columns:
         - date
         - finish_time
@@ -209,8 +210,8 @@ select_permissions:
               _eq: false
           - advertise:
               _eq: true
-    role: anonymous
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - admins_only
         - advertise
@@ -229,8 +230,8 @@ select_permissions:
       computed_fields:
         - sort_date
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - admins_only
         - advertise
@@ -251,8 +252,8 @@ select_permissions:
       filter:
         admins_only:
           _eq: false
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - admins_only
         - advertise
@@ -281,8 +282,8 @@ select_permissions:
       computed_fields:
         - sort_date
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - admins_only
         - advertise
@@ -311,8 +312,8 @@ select_permissions:
       computed_fields:
         - sort_date
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - date
         - finish_time
@@ -327,8 +328,8 @@ select_permissions:
               _eq: false
           - advertise:
               _eq: true
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - admins_only
         - advertise
@@ -357,8 +358,8 @@ select_permissions:
       computed_fields:
         - sort_date
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - admins_only
         - advertise
@@ -387,8 +388,8 @@ select_permissions:
       computed_fields:
         - sort_date
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - admins_only
         - advertise
@@ -417,8 +418,8 @@ select_permissions:
       computed_fields:
         - sort_date
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - admins_only
         - advertise
@@ -439,8 +440,8 @@ select_permissions:
       filter:
         admins_only:
           _eq: false
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - admins_only
         - advertise
@@ -469,10 +470,9 @@ select_permissions:
       computed_fields:
         - sort_date
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: equipment
+    permission:
       columns:
         - admins_only
         - advertise
@@ -494,11 +494,11 @@ update_permissions:
         - type
         - venue_id
       filter: {}
+      check: null
       set:
         editing_user: x-hasura-User-Id
-    role: equipment
-  - permission:
-      check: null
+  - role: gig_editor
+    permission:
       columns:
         - admins_only
         - advertise
@@ -520,11 +520,11 @@ update_permissions:
         - type
         - venue_id
       filter: {}
+      check: null
       set:
         editing_user: x-hasura-User-Id
-    role: gig_editor
-  - permission:
-      check: null
+  - role: president
+    permission:
       columns:
         - admins_only
         - advertise
@@ -546,11 +546,11 @@ update_permissions:
         - type
         - venue_id
       filter: {}
+      check: null
       set:
         editing_user: x-hasura-User-Id
-    role: president
-  - permission:
-      check: null
+  - role: secretary
+    permission:
       columns:
         - admins_only
         - advertise
@@ -572,11 +572,11 @@ update_permissions:
         - type
         - venue_id
       filter: {}
+      check: null
       set:
         editing_user: x-hasura-User-Id
-    role: secretary
-  - permission:
-      check: null
+  - role: treasurer
+    permission:
       columns:
         - admins_only
         - advertise
@@ -598,11 +598,11 @@ update_permissions:
         - type
         - venue_id
       filter: {}
+      check: null
       set:
         editing_user: x-hasura-User-Id
-    role: treasurer
-  - permission:
-      check: null
+  - role: webmaster
+    permission:
       columns:
         - admins_only
         - advertise
@@ -624,13 +624,15 @@ update_permissions:
         - type
         - venue_id
       filter: {}
+      check: null
       set:
         editing_user: x-hasura-User-Id
-    role: webmaster
 delete_permissions:
-  - permission:
+  - role: secretary
+    permission:
+      backend_only: false
       filter: {}
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter: {}
-    role: webmaster

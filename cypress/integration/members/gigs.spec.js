@@ -35,10 +35,12 @@ let gigForSummary = {
   title: "Gig of excitement",
   adminsOnly: false,
   allowSignups: true,
-  date: "2020-07-25",
+  date: DateTime.local().plus({ months: 1 }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISODate(),
   time: "21:00",
-  arriveTime: "2020-07-25T20:00+01:00",
-  finishTime: "2020-07-25T23:00+01:00",
+  notesAdmin: "This is an admin note",
+  notesBand: "This is a band note",
+  arriveTime: DateTime.local().plus({ months: 1 }).set({ hour: 20, minute: 0, second: 0, millisecond: 0 }).toISO(),
+  finishTime: DateTime.local().plus({ months: 1 }).set({ hour: 23, minute: 0, second: 0, millisecond: 0 }).toISO(),
   depositReceived: true,
   paymentReceived: false,
   callerPaid: false,
@@ -141,6 +143,16 @@ let gigForSummary = {
       },
     ],
   },
+};
+
+let adminOnlyGig = {
+  ...gigForSummary,
+  id: gigForSummary.id + 1,
+  title: "Admin only gig",
+  date: Cypress.DateTime.local().plus({ months: 1 }),
+  arriveTime: null,
+  finishTime: null,
+  adminsOnly: true,
 };
 
 describe("gig summary", () => {
@@ -548,6 +560,7 @@ describe("iCal files", () => {
     });
     cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
     cy.executeMutation(CreateGig, { variables: gig });
+    cy.executeMutation(CreateGig, { variables: adminOnlyGig });
   });
 
   it("can be generated per-gig", () => {
@@ -573,16 +586,171 @@ describe("iCal files", () => {
   });
 
   describe("for president", () => {
-    it("contains admin information");
-    it("can be generated for all gigs");
-    it("can be generated for my gigs");
+    beforeEach(() => {
+      cy.login("cypress_president", "abc123");
+      cy.executeMutation(ClearLineupForGig, { variables: { id: adminOnlyGig.id } });
+    });
+
+    it("contains admin information", () => {
+      // TODO verify the appropriate contact information is displayed too
+      cy.request(`/members/gigs/${gig.id}/calendar`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const vevent = comp.getFirstSubcomponent("vevent");
+        const event = new ICAL.Event(vevent);
+        expect(event.summary).to.eq(`GIG: Gig of excitement`);
+        expect(event.description).to.contain("OTHER INFO: This is a band note");
+        expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
+      });
+    });
+
+    it("can be generated for all gigs", () => {
+      cy.request(`/members/gigs/calendar/all`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        const event = events.find((event) => event.summary === "GIG: Admin only gig");
+        expect(event).to.not.be.undefined;
+        expect(event.description).to.contain("OTHER INFO: This is a band note");
+        expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
+        const tz = comp.getFirstProperty("timezone-id").getFirstValue();
+        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
+        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
+        expect(startDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).toISODate());
+        expect(startDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("00:00");
+        expect(endDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).plus({ days: 1 }).toISODate());
+        expect(endDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("00:00");
+      });
+    });
+
+    it("can be generated for my gigs", () => {
+      const expectedSummary = "GIG: Gig of excitement";
+      cy.visit(`/members/gigs/${gig.id}`);
+
+      cy.request(`/members/gigs/calendar/my`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        const event = events.find((event) => event.summary === expectedSummary);
+        expect(event).to.be.undefined;
+      });
+
+      cy.waitForFormInteractive();
+      cy.get("button").contains("Show signup").click();
+      cy.contains("Yes, I'd like to play").click();
+
+      cy.request(`/members/gigs/calendar/my`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        const event = events.find((event) => event.summary === expectedSummary);
+        expect(event).to.be.undefined;
+      });
+      /* ==== Generated with Cypress Studio ==== */
+      cy.get('[data-test="show-summary-74527"]').click();
+      cy.get('[href="/members/gigs/74527/edit-lineup"]').click();
+      cy.get('[data-test="person-approve"]').click();
+      /* ==== End Cypress Studio ==== */
+      cy.request(`/members/gigs/calendar/my`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        const event = events.find((event) => event.summary === expectedSummary);
+        expect(event).not.to.be.undefined;
+
+        expect(event.description).to.contain("OTHER INFO: This is a band note");
+        expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
+
+        const tz = comp.getFirstProperty("timezone-id").getFirstValue();
+        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
+        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
+        expect(startDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).toISODate());
+        expect(startDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("20:00");
+        expect(endDate.toISODate()).to.eq(Cypress.DateTime.fromISO(adminOnlyGig.date).toISODate());
+        expect(endDate.toLocaleString(Cypress.DateTime.TIME_24_SIMPLE)).to.eq("23:00");
+      });
+    });
   });
 
   describe("for normal user", () => {
-    it("omits admin information");
-    it("can be generated for all gigs excluding hidden gigs");
-    it("can be generated for my gigs");
+    beforeEach(() => {
+      cy.login("cypress_user", "abc123");
+      cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
+    });
+
+    it("omits admin information", () => {
+      cy.request(`/members/gigs/${gig.id}/calendar`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const vevent = comp.getFirstSubcomponent("vevent");
+        const event = new ICAL.Event(vevent);
+        expect(event.summary).to.eq(`GIG: Gig of excitement`);
+        expect(event.description).to.contain("OTHER INFO: This is a band note");
+        expect(event.description).to.not.contain("ADMIN NOTES: This is an admin note");
+      });
+    });
+
+    it("can be generated for all gigs excluding hidden gigs", () => {
+      cy.request(`/members/gigs/calendar/all`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        let event = events.find((event) => event.summary === "GIG: Admin only gig");
+        expect(event).to.be.undefined;
+        event = events.find((event) => event.summary === "GIG: Gig of excitement");
+        expect(event).not.to.be.undefined;
+        expect(event.description).to.contain("OTHER INFO: This is a band note");
+        expect(event.description).not.to.contain("ADMIN NOTES: This is an admin note");
+      });
+    });
+
+    it("can be generated for my gigs", () => {
+      // TODO actually approve user for lineup and check gig shows up
+      const expectedSummary = "GIG: Gig of excitement";
+      cy.visit(`/members/gigs/${gig.id}`);
+
+      cy.request(`/members/gigs/calendar/my`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        const event = events.find((event) => event.summary === expectedSummary);
+        expect(event).to.be.undefined;
+      });
+
+      cy.waitForFormInteractive();
+      cy.get("button").contains("Show signup").click();
+      cy.contains("Yes, I'd like to play").click();
+
+      cy.request(`/members/gigs/calendar/my`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        cy.log(events);
+        const event = events.find((event) => event.summary === expectedSummary);
+        expect(event).to.be.undefined;
+      });
+
+      cy.login("cypress_president", "abc123");
+      cy.request("POST", `members/gigs/${gig.id}/edit-lineup/update`, {
+        type: "setPersonApproved",
+        id: "27250",
+        approved: true,
+      });
+
+      cy.login("cypress_user", "abc123");
+      cy.request(`/members/gigs/calendar/my`).then((res) => {
+        const data = ICAL.parse(res.body);
+        const comp = new ICAL.Component(data);
+        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
+        cy.log(events);
+        const event = events.find((event) => event.summary === expectedSummary);
+        expect(event).not.to.be.undefined;
+        expect(event.description).to.contain("OTHER INFO: This is a band note");
+        expect(event.description).not.to.contain("ADMIN NOTES: This is an admin note");
+      });
+    });
   });
 });
 
 import ICAL from "ical.js";
+import { DateTime } from "luxon";

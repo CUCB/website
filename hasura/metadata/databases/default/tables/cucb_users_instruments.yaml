@@ -24,50 +24,45 @@ array_relationships:
           name: gigs_lineups_instruments
           schema: cucb
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: current_user
+    permission:
       check: {}
-      columns:
-        - instr_id
-        - nickname
       set:
         user_id: x-hasura-User-Id
-    role: current_user
-  - permission:
-      backend_only: false
+      columns:
+        - instr_id
+        - nickname
+  - role: equipment
+    permission:
       check: {}
       columns:
         - instr_id
         - nickname
         - user_id
-    role: equipment
-  - permission:
-      backend_only: false
+  - role: president
+    permission:
       check: {}
       columns:
         - instr_id
         - nickname
         - user_id
-    role: president
-  - permission:
-      backend_only: false
+  - role: secretary
+    permission:
       check: {}
       columns:
         - instr_id
         - nickname
         - user_id
-    role: secretary
-  - permission:
-      backend_only: false
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - instr_id
         - nickname
         - user_id
-    role: webmaster
 select_permissions:
-  - permission:
-      allow_aggregations: true
+  - role: blue_gig
+    permission:
       columns:
         - deleted
         - id
@@ -81,9 +76,9 @@ select_permissions:
           - gigs_lineups_instruments:
               approved:
                 _eq: true
-    role: blue_gig
-  - permission:
       allow_aggregations: true
+  - role: current_user
+    permission:
       columns:
         - deleted
         - id
@@ -93,9 +88,9 @@ select_permissions:
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
       allow_aggregations: true
+  - role: equipment
+    permission:
       columns:
         - id
         - user_id
@@ -103,9 +98,9 @@ select_permissions:
         - nickname
         - deleted
       filter: {}
-    role: equipment
-  - permission:
       allow_aggregations: true
+  - role: gig_editor
+    permission:
       columns:
         - deleted
         - id
@@ -119,9 +114,9 @@ select_permissions:
           - gigs_lineups_instruments:
               approved:
                 _eq: true
-    role: gig_editor
-  - permission:
       allow_aggregations: true
+  - role: president
+    permission:
       columns:
         - id
         - user_id
@@ -129,9 +124,9 @@ select_permissions:
         - nickname
         - deleted
       filter: {}
-    role: president
-  - permission:
       allow_aggregations: true
+  - role: secretary
+    permission:
       columns:
         - id
         - user_id
@@ -139,9 +134,9 @@ select_permissions:
         - nickname
         - deleted
       filter: {}
-    role: secretary
-  - permission:
       allow_aggregations: true
+  - role: treasurer
+    permission:
       columns:
         - deleted
         - id
@@ -155,9 +150,9 @@ select_permissions:
           - gigs_lineups_instruments:
               approved:
                 _eq: true
-    role: treasurer
-  - permission:
       allow_aggregations: true
+  - role: user
+    permission:
       columns:
         - deleted
         - id
@@ -171,9 +166,9 @@ select_permissions:
           - gigs_lineups_instruments:
               approved:
                 _eq: true
-    role: user
-  - permission:
       allow_aggregations: true
+  - role: webmaster
+    permission:
       columns:
         - id
         - user_id
@@ -181,47 +176,49 @@ select_permissions:
         - nickname
         - deleted
       filter: {}
-    role: webmaster
+      allow_aggregations: true
 update_permissions:
-  - permission:
-      check: null
+  - role: current_user
+    permission:
       columns:
         - deleted
         - nickname
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
       check: null
+  - role: equipment
+    permission:
       columns:
         - deleted
         - nickname
       filter: {}
-    role: equipment
-  - permission:
       check: null
+  - role: president
+    permission:
       columns:
         - deleted
         - nickname
       filter: {}
-    role: president
-  - permission:
       check: null
+  - role: secretary
+    permission:
       columns:
         - deleted
         - nickname
       filter: {}
-    role: secretary
-  - permission:
       check: null
+  - role: webmaster
+    permission:
       columns:
         - deleted
         - nickname
       filter: {}
-    role: webmaster
+      check: null
 delete_permissions:
-  - permission:
+  - role: current_user
+    permission:
+      backend_only: false
       filter:
         _and:
           - user_id:
@@ -230,32 +227,35 @@ delete_permissions:
               gigs_lineups_instruments:
                 gig_id:
                   _is_null: false
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
+      backend_only: false
       filter:
         _not:
           gigs_lineups_instruments:
             gig_id:
               _is_null: false
-    role: equipment
-  - permission:
+  - role: president
+    permission:
+      backend_only: false
       filter:
         _not:
           gigs_lineups_instruments:
             gig_id:
               _is_null: false
-    role: president
-  - permission:
+  - role: secretary
+    permission:
+      backend_only: false
       filter:
         _not:
           gigs_lineups_instruments:
             gig_id:
               _is_null: false
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter:
         _not:
           gigs_lineups_instruments:
             gig_id:
               _is_null: false
-    role: webmaster

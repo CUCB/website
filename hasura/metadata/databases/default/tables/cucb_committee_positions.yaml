@@ -10,70 +10,70 @@ array_relationships:
           name: committee_members
           schema: cucb
 select_permissions:
-  - permission:
+  - role: anonymous
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: anonymous
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: secretary
-  - permission:
+  - role: server
+    permission:
       columns:
         - id
         - name
         - position
       filter: {}
-    role: server
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - name
         - position
       filter: {}
-    role: webmaster
