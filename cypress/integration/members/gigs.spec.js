@@ -559,6 +559,17 @@ describe("iCal files", () => {
         lastName: "Webmaster",
       },
     });
+    cy.executeMutation(CreateUser, {
+      variables: {
+        id: 27382,
+        username: "cypress_president",
+        saltedPassword: HASHED_PASSWORDS.abc123,
+        admin: 2,
+        email: "cucb.president@cypress.io",
+        firstName: "Cypress",
+        lastName: "President",
+      },
+    });
     cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
     cy.executeMutation(CreateGig, { variables: gig });
     cy.executeMutation(CreateGig, { variables: adminOnlyGig });
