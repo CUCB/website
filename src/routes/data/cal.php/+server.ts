@@ -1,16 +1,5 @@
 import { DateTime } from "luxon";
 import icalPkg from "ical-generator";
-import {
-  gigAdminGuard,
-  MyGigsFrom,
-  AdminMyGigsFrom,
-  UpdateLastCalendarAccess,
-  AllGigsFrom,
-  AdminAllGigsFrom,
-  AdminSingleGig,
-  SingleGig,
-} from "../../../graphql/gigs/calendar";
-import { GraphQLClient, handleErrors } from "../../../graphql/client";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -20,6 +9,11 @@ import orm from "$lib/database";
 import { CalendarSubscription } from "$lib/entities/CalendarSubscription";
 import type { CalendarSubscriptionType } from "$lib/entities/CalendarSubscriptionType";
 import { env } from "$env/dynamic/private";
+import type { RequestEvent } from "./$types";
+import { fetchMultiGigSummary, fetchSpecificGigSignup, fetchSpecificGigSummary } from "../../members/gigs/queries";
+import { VIEW_GIG_ADMIN_NOTES } from "../../../lib/permissions";
+import type { GigSummary } from "../../members/types";
+import { User } from "../../../lib/entities/User";
 const { ICalCalendar, ICalCalendarMethod } = icalPkg;
 
 dotenv.config();
@@ -31,8 +25,12 @@ const SESSION_SECRET_HASH = crypto
 
 const CALENDAR_SECRET = env["CALENDAR_SECRET"];
 
-function applyTimezone(date: string): string {
-  return DateTime.fromISO(date).setZone("Europe/London").toISO({ includeOffset: false });
+function applyTimezone(date: string | Date): string {
+  if (typeof date === "string") {
+    return DateTime.fromISO(date).setZone("Europe/London").toISO({ includeOffset: false });
+  } else {
+    return DateTime.fromJSDate(date).setZone("Europe/London").toISO({ includeOffset: false });
+  }
 }
 
 function startEndTimes(gig) {
@@ -96,15 +94,18 @@ class GigCalendar {
     return this.calendar.toString();
   }
 
-  addGig(gig) {
+  addGig(gig: GigSummary) {
     const { start, end } = startEndTimes(gig);
     let description = `[Correct as of ${DateTime.local().toHTTP()}.]`;
-    const times = [`| Time: ${DateTime.fromISO(gig.time).toLocaleString(DateTime.TIME_24_SIMPLE) || ""}`.trim()];
+    const times = [
+      gig.time &&
+        `| Time: ${DateTime.fromISO(`1970-01-01T${gig.time}`).toLocaleString(DateTime.TIME_24_SIMPLE) || ""}`.trim(),
+    ];
     if (gig.arrive_time) {
-      times.push(`Arrive ${DateTime.fromISO(gig.arrive_time).toLocaleString(DateTime.TIME_24_SIMPLE)}`);
+      times.push(`Arrive ${DateTime.fromJSDate(gig.arrive_time).toLocaleString(DateTime.TIME_24_SIMPLE)}`);
     }
     if (gig.finish_time) {
-      times.push(`Finish ${DateTime.fromISO(gig.finish_time).toLocaleString(DateTime.TIME_24_SIMPLE)}`);
+      times.push(`Finish ${DateTime.fromJSDate(gig.finish_time).toLocaleString(DateTime.TIME_24_SIMPLE)}`);
     }
     description += `\n${times.join(" | ")}`;
     description += `\n${gig.summary || "No summary available"}`;
@@ -175,34 +176,21 @@ async function firstSuccess<T>(promises: Promise<T>[]): Promise<T | null> {
   }
 }
 
-export async function allGigs(client: GraphQLClient, uid: number, ipAddress: string, baseUrl: string) {
-  let [resUserGigs, hidden] = [undefined, undefined];
-  try {
-    const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
-    const variables = { user_id: uid, startDate: twoDaysAgo, startTime: twoDaysAgo };
-    [resUserGigs, hidden] = await Promise.all([
-      firstSuccess([
-        client.query({ query: AdminAllGigsFrom, variables }),
-        client.query({ query: AllGigsFrom, variables }),
-      ]),
-      client
-        .query({ query: gigAdminGuard })
-        .then((_) => true)
-        .catch((_) => false),
-    ]);
-  } catch (e) {
-    console.trace(e);
-    throw handleErrors(e);
-  }
-  const em = orm.em.fork();
-  const update = em.upsert(CalendarSubscription, {
+type Session = { firstName: string; lastName: string; hasuraRole: string; userId: string };
+
+export async function allGigs(ipAddress: string, baseUrl: string, session: Session) {
+  const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
+  const gigs = await fetchMultiGigSummary(session, {
+    $or: [{ date: { $gte: twoDaysAgo } }, { arrive_time: { $gte: twoDaysAgo } }],
+  });
+  const hidden = VIEW_GIG_ADMIN_NOTES.guard(session);
+  const update = orm.em.fork().upsert(CalendarSubscription, {
     calendarType: "allgigs" as unknown as CalendarSubscriptionType,
     ipAddress,
-    user: uid.toString(),
+    user: session.userId,
     lastAccessed: "now()" as unknown as Date,
   });
-  const user = resUserGigs.data.cucb_users_by_pk;
-  const fullName = `${user.first} ${user.last}`;
+  const fullName = `${session.firstName} ${session.lastName}`;
 
   // TODO factor out some of this since it's basically identical to mygigs
   const calendar = new GigCalendar(
@@ -214,7 +202,7 @@ export async function allGigs(client: GraphQLClient, uid: number, ipAddress: str
     more frequently. [This description retrieved ${DateTime.local().toHTTP()}.]`,
     baseUrl,
   );
-  for (let gig of resUserGigs.data.cucb_gigs) {
+  for (let gig of gigs) {
     calendar.addGig(gig);
   }
   try {
@@ -224,39 +212,33 @@ export async function allGigs(client: GraphQLClient, uid: number, ipAddress: str
     // TODO this should probably be handled differently
     // should it even be an error?
     // it should probably notify the webmaster?
-    throw handleErrors(e);
+    throw error(500, "Something went wrong");
   }
   return calendar.generate();
 }
 
-export async function myGigs(client: GraphQLClient, uid: number, ipAddress: string, baseUrl: string) {
-  let [resUserGigs, hidden] = [undefined, undefined];
-  try {
-    const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
-    const variables = { user_id: uid, startDate: twoDaysAgo, startTime: twoDaysAgo };
-    [resUserGigs, hidden] = await Promise.all([
-      firstSuccess([
-        client.query({ query: AdminMyGigsFrom, variables }),
-        client.query({ query: MyGigsFrom, variables }),
-      ]),
-      client
-        .query({ query: gigAdminGuard })
-        .then((_) => true)
-        .catch((_) => false),
-    ]);
-  } catch (e) {
-    console.trace(e);
-    throw handleErrors(e);
-  }
+export async function myGigs(ipAddress: string, baseUrl: string, session: Session) {
+  const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
+  const userGigs = await orm.em.fork().findOne(
+    User,
+    {
+      id: session.userId,
+      gigLineups: {
+        approved: true,
+        gig: { $or: [{ date: { $gte: twoDaysAgo } }, { arrive_time: { $gte: twoDaysAgo } }] },
+      },
+    },
+    { fields: ["gigLineups", "gigLineups.gig"] },
+  );
+  const hidden = VIEW_GIG_ADMIN_NOTES.guard(session);
   const em = orm.em.fork();
   const update = em.upsert(CalendarSubscription, {
     calendarType: "mygigs" as unknown as CalendarSubscriptionType,
     ipAddress,
-    user: uid.toString(),
+    user: session.userId,
     lastAccessed: "now()" as unknown as Date,
   });
-  const user = resUserGigs.data.cucb_users_by_pk;
-  const fullName = `${user.first} ${user.last}`;
+  const fullName = `${session.firstName} ${session.lastName}`;
 
   const calendar = new GigCalendar(
     `CUCB: ${fullName}'s Gig Feed`,
@@ -267,8 +249,12 @@ export async function myGigs(client: GraphQLClient, uid: number, ipAddress: stri
     [This description retrieved ${DateTime.local().toHTTP()}.]`,
     baseUrl,
   );
-  for (let gig of user.gig_lineups.map((g) => g.gig)) {
-    calendar.addGig(gig);
+  if (userGigs) {
+    const ids = userGigs.gigLineups.toArray().map((entry) => entry.gig.id);
+    const gigs = await fetchMultiGigSummary(session, { id: { $in: ids } });
+    for (const gig of gigs) {
+      calendar.addGig(gig);
+    }
   }
   try {
     await update;
@@ -280,19 +266,8 @@ export async function myGigs(client: GraphQLClient, uid: number, ipAddress: stri
   return calendar.generate();
 }
 
-export async function singleGig(client: GraphQLClient, gig_id: number, baseUrl: string) {
-  let resGig;
-  try {
-    let variables = { id: gig_id };
-    resGig = await firstSuccess([
-      client.query({ query: AdminSingleGig, variables }),
-      client.query({ query: SingleGig, variables }),
-    ]);
-  } catch (e) {
-    console.trace(e);
-    throw handleErrors(e);
-  }
-  const gig = resGig.data.cucb_gigs_by_pk;
+export async function singleGig(gig_id: string, baseUrl: string, session: Session) {
+  const gig = await fetchSpecificGigSummary(session, gig_id);
 
   const calendar = new GigCalendar(
     `Gig: ${gig.title} [${gig_id}]`,
@@ -336,16 +311,11 @@ export function mygigsCalendarUrl(user_id: number): string {
   return calendarUrl(params);
 }
 
-export async function GET({ url, request }: { url: URL; request: Request }) {
-  let client = undefined;
+export async function GET({ url, request, locals: { session } }: RequestEvent): Promise<Response> {
   const { host, "x-forwarded-proto": proto, "x-forwarded-for": ipAddress } = Object.fromEntries(request.headers);
   const baseUrl = `${proto}://${host}`;
-  if (testAuthLink(url.searchParams)) {
-    client = new GraphQLClient(fetch, {
-      domain: env["GRAPHQL_REMOTE"],
-      headers: { authorization: `Bearer ${graphqlAuthenticationToken(url.searchParams.get("_cal_uid"))}` },
-    });
-  } else {
+  // TODO add test for this
+  if (!testAuthLink(url.searchParams)) {
     throw error(401, "Incorrect token");
   }
 
@@ -353,16 +323,15 @@ export async function GET({ url, request }: { url: URL; request: Request }) {
   try {
     switch (url.searchParams.get("type")) {
       case "gig":
-        // TODO this will likely just give a 500 if we can't parse an integer
-        body = await singleGig(client, parseInt(url.searchParams.get("gig")), baseUrl);
+        body = await singleGig(url.searchParams.get("gig"), baseUrl, session);
         filename = `gig${url.searchParams.get("gig")}.ics`;
         break;
       case "allgigs":
-        body = await allGigs(client, parseInt(url.searchParams.get("_cal_uid")), ipAddress, baseUrl);
+        body = await allGigs(ipAddress, baseUrl, session);
         filename = `allgigs.ics`;
         break;
       case "mygigs":
-        body = await myGigs(client, parseInt(url.searchParams.get("_cal_uid")), ipAddress, baseUrl);
+        body = await myGigs(ipAddress, baseUrl, session);
         filename = `mygigs.ics`;
         break;
     }

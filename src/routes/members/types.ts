@@ -52,4 +52,32 @@ export interface SignupSummaryEntry {
   };
 }
 
-export interface GigSummary {}
+export interface GigSummary {
+  title: string;
+  time: string | null;
+  arrive_time: Date | null;
+  finish_time: Date | null;
+  date: Date | null;
+  summary: string;
+  notes_band: string;
+  notes_admin: string;
+  contacts: SummaryContact[];
+  lineup: SummaryLineupEntry[];
+}
+
+export interface SummaryLineupEntry {
+  user_instruments: SignupUserInstrument[];
+  user: {
+    first: string;
+    last: string;
+    email?: string;
+  };
+}
+
+export interface SummaryContact {
+  contact: {
+    name: string;
+  };
+  client?: boolean;
+  calling: boolean;
+}

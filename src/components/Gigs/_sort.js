@@ -20,7 +20,9 @@ const instrumentsByRank = (a, b) => {
   const compareRhythm = (a, b) => (a !== -1 ? (b !== -1 ? a - b : 1) : b !== -1 ? -1 : 0);
   return tuneIndexA !== -1 || tuneIndexB !== -1
     ? compareTune(tuneIndexA, tuneIndexB)
-    : compareRhythm(rhythmIndexA, rhythmIndexB);
+    : rhythmIndexA !== -1 || rhythmIndexB !== -1
+    ? compareRhythm(rhythmIndexA, rhythmIndexB)
+    : a.user_instrument.instrument.name.localeCompare(b.user_instrument.instrument.name);
 };
 
 const peopleLeadersFirst = (a, b) => (a.leader ? (b.leader ? peopleByInstrumentRank(a, b) : -1) : b.leader ? 1 : 0);
