@@ -1,13 +1,13 @@
 import { error, json } from "@sveltejs/kit";
 import { wrap } from "@mikro-orm/core";
 import { Boolean, Literal, Null, Record, String, Union } from "runtypes";
-import orm from "../../../../../../lib/database";
-import { GigLineup } from "../../../../../../lib/entities/GigLineup";
-import { SELECT_GIG_LINEUPS } from "../../../../../../lib/permissions";
+import orm from "$lib/database";
+import { GigLineup } from "$lib/entities/GigLineup";
+import { SELECT_GIG_LINEUPS } from "$lib/permissions";
 // TODO ensure requestevent is always imported from ./$types, not @sveltejs/kit
 import type { RequestEvent } from "./$types";
-import { GigLineupInstrument } from "../../../../../../lib/entities/GigLineupInstrument";
-import { UserInstrument } from "../../../../../../lib/entities/UsersInstrument";
+import { GigLineupInstrument } from "$lib/entities/GigLineupInstrument";
+import { UserInstrument } from "$lib/entities/UsersInstrument";
 
 // TODO the url for this endpoint is crap, but since actions were added, a standard json endpoint needs to be on a separate url from +page.server.ts
 

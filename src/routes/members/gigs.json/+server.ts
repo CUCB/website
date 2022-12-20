@@ -1,7 +1,7 @@
 import { error, json } from "@sveltejs/kit";
 import { DateTime } from "luxon";
 import { Record, String } from "runtypes";
-import { NOT_MUSIC_ONLY } from "../../../lib/permissions";
+import { NOT_MUSIC_ONLY } from "$lib/permissions";
 import { fetchMultiGigSummary, inMonth } from "../gigs/queries";
 import type { RequestEvent } from "./$types";
 

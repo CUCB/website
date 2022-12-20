@@ -1,16 +1,16 @@
 import { PopulateHint, wrap, type EntityField, type ObjectQuery } from "@mikro-orm/core";
 import type { OperatorMap } from "@mikro-orm/core/typings";
 import { DateTime } from "luxon";
-import orm from "../../../lib/database";
-import { Gig } from "../../../lib/entities/Gig";
-import { GigLineup } from "../../../lib/entities/GigLineup";
-import { UserInstrument } from "../../../lib/entities/UsersInstrument";
+import orm from "$lib/database";
+import { Gig } from "$lib/entities/Gig";
+import { GigLineup } from "$lib/entities/GigLineup";
+import { UserInstrument } from "$lib/entities/UsersInstrument";
 import {
   VIEW_GIG_ADMIN_NOTES,
   VIEW_GIG_CONTACT_DETAILS,
   VIEW_HIDDEN_GIGS,
   VIEW_SIGNUP_SUMMARY,
-} from "../../../lib/permissions";
+} from "$lib/permissions";
 import type { AvailableUserInstrument, SignupGig, SignupSummaryEntry } from "../types";
 
 type Session = { userId: string };

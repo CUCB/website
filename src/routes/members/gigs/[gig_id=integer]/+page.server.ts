@@ -1,7 +1,7 @@
 import { assertLoggedIn } from "../../../../client-auth";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import { NOT_MUSIC_ONLY } from "../../../../lib/permissions";
+import { NOT_MUSIC_ONLY } from "$lib/permissions";
 import {
   fetchAllInstrumentsForUser,
   fetchSpecificGigSignup,

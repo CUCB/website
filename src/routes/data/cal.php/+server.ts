@@ -11,9 +11,9 @@ import type { CalendarSubscriptionType } from "$lib/entities/CalendarSubscriptio
 import { env } from "$env/dynamic/private";
 import type { RequestEvent } from "./$types";
 import { fetchMultiGigSummary, fetchSpecificGigSignup, fetchSpecificGigSummary } from "../../members/gigs/queries";
-import { VIEW_GIG_ADMIN_NOTES } from "../../../lib/permissions";
+import { VIEW_GIG_ADMIN_NOTES } from "$lib/permissions";
 import type { GigSummary } from "../../members/types";
-import { User } from "../../../lib/entities/User";
+import { User } from "$lib/entities/User";
 const { ICalCalendar, ICalCalendarMethod } = icalPkg;
 
 dotenv.config();

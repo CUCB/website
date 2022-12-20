@@ -3,7 +3,6 @@
 import {
   onConflictVenue,
   CreateGig,
-  DeleteGig,
   DeleteSignup,
   SignupDetails,
   ClearLineupForGig,
