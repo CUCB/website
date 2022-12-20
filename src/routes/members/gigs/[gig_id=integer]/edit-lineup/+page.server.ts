@@ -3,10 +3,10 @@ import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
 import type { UserInstrument } from "../../../users/[id=integer]/types";
 import { PopulateHint, type EntityManager } from "@mikro-orm/core";
-import { Gig } from "../../../../../lib/entities/Gig";
-import orm from "../../../../../lib/database";
-import { SELECT_GIG_LINEUPS } from "../../../../../lib/permissions";
-import { User } from "../../../../../lib/entities/User";
+import { Gig } from "$lib/entities/Gig";
+import orm from "$lib/database";
+import { SELECT_GIG_LINEUPS } from "$lib/permissions";
+import { User } from "$lib/entities/User";
 import { wrap } from "@mikro-orm/core";
 import { extractAttributes } from "./attributes";
 
