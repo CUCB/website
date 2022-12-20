@@ -9,8 +9,8 @@ object_relationships:
     using:
       foreign_key_constraint_on: gig_id
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: equipment
+    permission:
       check: {}
       columns:
         - calling
@@ -18,9 +18,8 @@ insert_permissions:
         - contact_id
         - gig_id
         - notes
-    role: equipment
-  - permission:
-      backend_only: false
+  - role: gig_editor
+    permission:
       check: {}
       columns:
         - calling
@@ -28,9 +27,8 @@ insert_permissions:
         - contact_id
         - gig_id
         - notes
-    role: gig_editor
-  - permission:
-      backend_only: false
+  - role: president
+    permission:
       check: {}
       columns:
         - calling
@@ -38,9 +36,8 @@ insert_permissions:
         - contact_id
         - gig_id
         - notes
-    role: president
-  - permission:
-      backend_only: false
+  - role: secretary
+    permission:
       check: {}
       columns:
         - calling
@@ -48,9 +45,8 @@ insert_permissions:
         - contact_id
         - gig_id
         - notes
-    role: secretary
-  - permission:
-      backend_only: false
+  - role: treasurer
+    permission:
       check: {}
       columns:
         - calling
@@ -58,9 +54,8 @@ insert_permissions:
         - contact_id
         - gig_id
         - notes
-    role: treasurer
-  - permission:
-      backend_only: false
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - calling
@@ -68,9 +63,9 @@ insert_permissions:
         - contact_id
         - gig_id
         - notes
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - gig_id
         - contact_id
@@ -78,8 +73,8 @@ select_permissions:
         - calling
         - client
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - calling
         - contact_id
@@ -87,8 +82,8 @@ select_permissions:
       filter:
         calling:
           _eq: true
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - gig_id
         - contact_id
@@ -96,8 +91,8 @@ select_permissions:
         - calling
         - client
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - gig_id
         - contact_id
@@ -105,8 +100,8 @@ select_permissions:
         - calling
         - client
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: president
+    permission:
       columns:
         - gig_id
         - contact_id
@@ -114,8 +109,8 @@ select_permissions:
         - calling
         - client
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - gig_id
         - contact_id
@@ -123,8 +118,8 @@ select_permissions:
         - calling
         - client
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - gig_id
         - contact_id
@@ -132,8 +127,8 @@ select_permissions:
         - calling
         - client
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - calling
         - contact_id
@@ -141,8 +136,8 @@ select_permissions:
       filter:
         calling:
           _eq: true
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - gig_id
         - contact_id
@@ -150,72 +145,77 @@ select_permissions:
         - calling
         - client
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: {}
+  - role: equipment
+    permission:
       columns:
         - calling
         - client
         - notes
       filter: {}
-    role: equipment
-  - permission:
       check: {}
+  - role: gig_editor
+    permission:
       columns:
         - calling
         - client
         - notes
       filter: {}
-    role: gig_editor
-  - permission:
       check: {}
+  - role: president
+    permission:
       columns:
         - calling
         - client
         - notes
       filter: {}
-    role: president
-  - permission:
       check: {}
+  - role: secretary
+    permission:
       columns:
         - calling
         - client
         - notes
       filter: {}
-    role: secretary
-  - permission:
       check: {}
+  - role: treasurer
+    permission:
       columns:
         - calling
         - client
         - notes
       filter: {}
-    role: treasurer
-  - permission:
       check: {}
+  - role: webmaster
+    permission:
       columns:
         - calling
         - client
         - notes
       filter: {}
-    role: webmaster
+      check: {}
 delete_permissions:
-  - permission:
+  - role: equipment
+    permission:
+      backend_only: false
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
+      backend_only: false
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: president
+    permission:
+      backend_only: false
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
+      backend_only: false
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
+      backend_only: false
       filter: {}
-    role: treasurer
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter: {}
-    role: webmaster

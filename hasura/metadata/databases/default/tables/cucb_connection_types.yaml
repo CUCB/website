@@ -2,73 +2,73 @@ table:
   name: connection_types
   schema: cucb
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - name
         - icon_name
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - id
         - icon_name
         - name
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - name
         - icon_name
       filter: {}
-    role: webmaster

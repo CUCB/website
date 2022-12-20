@@ -2,31 +2,31 @@ table:
   name: list042
   schema: cucb
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - email
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: server
+    permission:
       columns:
         - email
       filter: {}
-    role: server
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - email
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: webmaster
+    permission:
       columns:
         - email
       filter: {}
-    role: webmaster
+      check: null
 delete_permissions:
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter: {}
-    role: webmaster

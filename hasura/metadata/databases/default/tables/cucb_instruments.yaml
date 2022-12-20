@@ -21,7 +21,8 @@ array_relationships:
           name: users_instruments
           schema: cucb
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - novelty
         - parent_only
@@ -29,8 +30,8 @@ select_permissions:
         - parent_id
         - name
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - novelty
         - parent_only
@@ -38,8 +39,8 @@ select_permissions:
         - parent_id
         - name
       filter: {}
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - novelty
         - parent_only
@@ -47,8 +48,8 @@ select_permissions:
         - parent_id
         - name
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - novelty
         - parent_only
@@ -56,8 +57,8 @@ select_permissions:
         - parent_id
         - name
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: president
+    permission:
       columns:
         - novelty
         - parent_only
@@ -65,8 +66,8 @@ select_permissions:
         - parent_id
         - name
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - name
@@ -74,8 +75,8 @@ select_permissions:
         - parent_only
         - parent_id
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - novelty
         - parent_only
@@ -83,8 +84,8 @@ select_permissions:
         - parent_id
         - name
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - novelty
         - parent_only
@@ -92,8 +93,8 @@ select_permissions:
         - parent_id
         - name
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - name
@@ -101,4 +102,3 @@ select_permissions:
         - parent_only
         - parent_id
       filter: {}
-    role: webmaster

@@ -14,7 +14,8 @@ array_relationships:
           name: gigs_contacts
           schema: cucb
 insert_permissions:
-  - permission:
+  - role: president
+    permission:
       check: {}
       columns:
         - caller
@@ -23,8 +24,8 @@ insert_permissions:
         - notes
         - organization
         - user_id
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       check: {}
       columns:
         - caller
@@ -33,8 +34,8 @@ insert_permissions:
         - notes
         - organization
         - user_id
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - caller
@@ -43,9 +44,9 @@ insert_permissions:
         - notes
         - organization
         - user_id
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - caller
         - id
@@ -53,8 +54,8 @@ select_permissions:
         - organization
         - user_id
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - caller
         - id
@@ -66,8 +67,8 @@ select_permissions:
       filter:
         user_id:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - caller
         - id
@@ -75,8 +76,8 @@ select_permissions:
         - organization
         - user_id
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - caller
         - id
@@ -84,19 +85,8 @@ select_permissions:
         - organization
         - user_id
       filter: {}
-    role: gig_editor
-  - permission:
-      columns:
-        - caller
-        - id
-        - user_id
-        - notes
-        - email
-        - name
-        - organization
-      filter: {}
-    role: president
-  - permission:
+  - role: president
+    permission:
       columns:
         - caller
         - id
@@ -106,8 +96,19 @@ select_permissions:
         - name
         - organization
       filter: {}
-    role: secretary
-  - permission:
+  - role: secretary
+    permission:
+      columns:
+        - caller
+        - id
+        - user_id
+        - notes
+        - email
+        - name
+        - organization
+      filter: {}
+  - role: treasurer
+    permission:
       columns:
         - caller
         - id
@@ -115,8 +116,8 @@ select_permissions:
         - organization
         - user_id
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - id
         - name
@@ -124,8 +125,8 @@ select_permissions:
       filter:
         caller:
           _eq: true
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - caller
         - id
@@ -135,10 +136,9 @@ select_permissions:
         - name
         - organization
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: president
+    permission:
       columns:
         - caller
         - email
@@ -147,9 +147,9 @@ update_permissions:
         - organization
         - user_id
       filter: {}
-    role: president
-  - permission:
       check: null
+  - role: secretary
+    permission:
       columns:
         - caller
         - email
@@ -158,9 +158,9 @@ update_permissions:
         - organization
         - user_id
       filter: {}
-    role: secretary
-  - permission:
       check: null
+  - role: webmaster
+    permission:
       columns:
         - caller
         - email
@@ -169,4 +169,4 @@ update_permissions:
         - organization
         - user_id
       filter: {}
-    role: webmaster
+      check: null

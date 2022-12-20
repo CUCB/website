@@ -146,6 +146,7 @@ export const AdminMyGigsFrom = gql`
             gig_type: { code: { _neq: "gig_cancelled" } }
             _or: [{ date: { _gte: $startDate } }, { arrive_time: { _gte: $startTime } }]
           }
+          approved: { _eq: true }
         }
         order_by: { gig: { sort_date: asc } }
       ) {

@@ -10,69 +10,69 @@ array_relationships:
           name: committee_members
           schema: cucb
 select_permissions:
-  - permission:
+  - role: anonymous
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: anonymous
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: secretary
-  - permission:
+  - role: server
+    permission:
       columns:
         - id
         - started
       filter: {}
-    role: server
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - pic_folder
         - started
       filter: {}
-    role: webmaster

@@ -41,28 +41,28 @@ array_relationships:
           name: user_prefs
           schema: cucb
 computed_fields:
-  - comment: ""
+  - name: prefs
     definition:
       function:
         name: user_prefs_or_default
         schema: cucb
-    name: prefs
+    comment: ""
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: server
+    permission:
       check: {}
-      columns:
-        - email
-        - first
-        - join_date
-        - last
-        - salted_password
-        - username
       set:
         admin: "9"
-    role: server
+      columns:
+        - email
+        - first
+        - join_date
+        - last
+        - salted_password
+        - username
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -72,8 +72,8 @@ select_permissions:
         - last_login_date
         - id
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - admin
         - bio
@@ -92,8 +92,8 @@ select_permissions:
       filter:
         id:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - admin
         - bio
@@ -109,8 +109,8 @@ select_permissions:
         - mobile_contact_info
         - username
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - admin
         - bio
@@ -126,8 +126,8 @@ select_permissions:
         - mobile_contact_info
         - username
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - admin
         - email
@@ -140,8 +140,8 @@ select_permissions:
       filter:
         id:
           _eq: X-Hasura-User-Id
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - admin
         - bio
@@ -158,8 +158,8 @@ select_permissions:
         - mobile_contact_info
         - username
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - admin
         - bio
@@ -176,8 +176,8 @@ select_permissions:
         - mobile_contact_info
         - username
       filter: {}
-    role: secretary
-  - permission:
+  - role: server
+    permission:
       columns:
         - email
         - first
@@ -186,8 +186,8 @@ select_permissions:
         - salted_password
         - username
       filter: {}
-    role: server
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - admin
         - bio
@@ -203,8 +203,8 @@ select_permissions:
         - mobile_contact_info
         - username
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -214,8 +214,8 @@ select_permissions:
         - last_login_date
         - id
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - admin
         - bio
@@ -232,10 +232,9 @@ select_permissions:
         - mobile_contact_info
         - username
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: current_user
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -251,9 +250,9 @@ update_permissions:
       filter:
         id:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
       check: null
+  - role: equipment
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -268,9 +267,9 @@ update_permissions:
       filter:
         id:
           _ne: X-Hasura-User-Id
-    role: equipment
-  - permission:
       check: null
+  - role: gig_editor
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -285,9 +284,9 @@ update_permissions:
       filter:
         id:
           _ne: X-Hasura-User-Id
-    role: gig_editor
-  - permission:
       check: null
+  - role: music_only
+    permission:
       columns:
         - email
         - first
@@ -296,9 +295,9 @@ update_permissions:
       filter:
         id:
           _eq: X-Hasura-User-Id
-    role: music_only
-  - permission:
       check: null
+  - role: president
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -313,9 +312,9 @@ update_permissions:
       filter:
         id:
           _ne: X-Hasura-User-Id
-    role: president
-  - permission:
       check: null
+  - role: secretary
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -330,16 +329,16 @@ update_permissions:
       filter:
         id:
           _ne: X-Hasura-User-Id
-    role: secretary
-  - permission:
       check: null
+  - role: server
+    permission:
       columns:
         - last_login_date
         - salted_password
       filter: {}
-    role: server
-  - permission:
       check: null
+  - role: treasurer
+    permission:
       columns:
         - bio
         - bio_changed_date
@@ -354,9 +353,9 @@ update_permissions:
       filter:
         id:
           _ne: X-Hasura-User-Id
-    role: treasurer
-  - permission:
       check: null
+  - role: webmaster
+    permission:
       columns:
         - admin
         - bio
@@ -372,4 +371,4 @@ update_permissions:
       filter:
         id:
           _ne: X-Hasura-User-Id
-    role: webmaster
+      check: null

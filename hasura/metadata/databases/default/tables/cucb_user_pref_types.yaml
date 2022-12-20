@@ -2,73 +2,73 @@ table:
   name: user_pref_types
   schema: cucb
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - name
         - default
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - default
         - id
         - name
       filter: {}
-    role: webmaster

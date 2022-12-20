@@ -12,7 +12,8 @@ object_relationships:
     using:
       foreign_key_constraint_on: position
 select_permissions:
-  - permission:
+  - role: anonymous
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -27,8 +28,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: anonymous
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -43,8 +44,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -59,8 +60,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -75,8 +76,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -91,8 +92,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -107,8 +108,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -123,8 +124,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: secretary
-  - permission:
+  - role: server
+    permission:
       columns:
         - april_fools_only
         - hidden
@@ -142,8 +143,8 @@ select_permissions:
         - pic
         - sub_position
       filter: {}
-    role: server
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -158,8 +159,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -174,8 +175,8 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - april_fools_dir
         - april_fools_only
@@ -190,4 +191,3 @@ select_permissions:
         - position
         - sub_position
       filter: {}
-    role: webmaster

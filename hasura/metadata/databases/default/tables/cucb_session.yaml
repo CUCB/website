@@ -2,32 +2,32 @@ table:
   name: session
   schema: cucb
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: server
+    permission:
       check: {}
       columns:
         - sid
         - sess
         - expire
-    role: server
 select_permissions:
-  - permission:
+  - role: server
+    permission:
       columns:
         - sess
         - expire
         - sid
       filter: {}
-    role: server
 update_permissions:
-  - permission:
-      check: null
+  - role: server
+    permission:
       columns:
         - sess
         - expire
         - sid
       filter: {}
-    role: server
+      check: null
 delete_permissions:
-  - permission:
+  - role: server
+    permission:
+      backend_only: false
       filter: {}
-    role: server

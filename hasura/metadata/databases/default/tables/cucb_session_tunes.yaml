@@ -2,22 +2,22 @@ table:
   name: session_tunes
   schema: cucb
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: current_user
+    permission:
       check: {}
-      columns:
-        - contributor_notes
-        - filename
-        - hidden
-        - other_notes
-        - title
-        - touched
-        - type
       set:
         contributor: x-hasura-User-Id
-    role: current_user
+      columns:
+        - contributor_notes
+        - filename
+        - hidden
+        - other_notes
+        - title
+        - touched
+        - type
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -31,8 +31,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - hidden
         - contributed_date
@@ -47,8 +47,8 @@ select_permissions:
       filter:
         contributor:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -62,8 +62,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -77,8 +77,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -92,8 +92,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -107,8 +107,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -122,8 +122,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -137,8 +137,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -152,8 +152,8 @@ select_permissions:
       filter:
         hidden:
           _ne: true
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - contributed_date
         - contributor
@@ -166,10 +166,9 @@ select_permissions:
         - touched
         - type
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: current_user
+    permission:
       columns:
         - contributor_notes
         - hidden
@@ -180,13 +179,13 @@ update_permissions:
       filter:
         contributor:
           _eq: X-Hasura-User-Id
-    role: current_user
-  - permission:
       check: null
+  - role: webmaster
+    permission:
       columns:
         - hidden
         - other_notes
         - title
         - type
       filter: {}
-    role: webmaster
+      check: null

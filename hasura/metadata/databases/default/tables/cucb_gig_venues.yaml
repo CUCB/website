@@ -10,7 +10,8 @@ array_relationships:
           name: gigs
           schema: cucb
 insert_permissions:
-  - permission:
+  - role: secretary
+    permission:
       check: {}
       columns:
         - address
@@ -23,8 +24,8 @@ insert_permissions:
         - notes_band
         - postcode
         - subvenue
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
       check: {}
       columns:
         - address
@@ -37,9 +38,9 @@ insert_permissions:
         - notes_band
         - postcode
         - subvenue
-    role: webmaster
 select_permissions:
-  - permission:
+  - role: anonymous
+    permission:
       columns:
         - address
         - distance_miles
@@ -58,8 +59,8 @@ select_permissions:
           - gigs:
               advertise:
                 _eq: true
-    role: anonymous
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - address
         - distance_miles
@@ -72,8 +73,8 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: current_user
+    permission:
       columns:
         - address
         - distance_miles
@@ -86,23 +87,8 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: current_user
-  - permission:
-      columns:
-        - latitude
-        - longitude
-        - distance_miles
-        - id
-        - notes_admin
-        - notes_band
-        - address
-        - map_link
-        - name
-        - postcode
-        - subvenue
-      filter: {}
-    role: equipment
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - latitude
         - longitude
@@ -116,8 +102,23 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: gig_editor
+    permission:
+      columns:
+        - latitude
+        - longitude
+        - distance_miles
+        - id
+        - notes_admin
+        - notes_band
+        - address
+        - map_link
+        - name
+        - postcode
+        - subvenue
+      filter: {}
+  - role: music_only
+    permission:
       columns:
         - address
         - distance_miles
@@ -132,8 +133,8 @@ select_permissions:
         gigs:
           advertise:
             _eq: true
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - latitude
         - longitude
@@ -147,8 +148,8 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - latitude
         - longitude
@@ -162,8 +163,8 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - latitude
         - longitude
@@ -177,8 +178,8 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - address
         - distance_miles
@@ -191,8 +192,8 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - latitude
         - longitude
@@ -206,10 +207,9 @@ select_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: webmaster
 update_permissions:
-  - permission:
-      check: null
+  - role: secretary
+    permission:
       columns:
         - address
         - distance_miles
@@ -222,9 +222,9 @@ update_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: secretary
-  - permission:
       check: null
+  - role: webmaster
+    permission:
       columns:
         - address
         - distance_miles
@@ -237,11 +237,13 @@ update_permissions:
         - postcode
         - subvenue
       filter: {}
-    role: webmaster
+      check: null
 delete_permissions:
-  - permission:
+  - role: secretary
+    permission:
+      backend_only: false
       filter: {}
-    role: secretary
-  - permission:
+  - role: webmaster
+    permission:
+      backend_only: false
       filter: {}
-    role: webmaster

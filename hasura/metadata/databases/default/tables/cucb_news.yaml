@@ -2,17 +2,17 @@ table:
   name: news
   schema: cucb
 insert_permissions:
-  - permission:
-      backend_only: false
+  - role: webmaster
+    permission:
       check: {}
-      columns:
-        - description
-        - title
       set:
         posted_by: x-hasura-User-Id
-    role: webmaster
+      columns:
+        - description
+        - title
 select_permissions:
-  - permission:
+  - role: blue_gig
+    permission:
       columns:
         - id
         - title
@@ -20,8 +20,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: blue_gig
-  - permission:
+  - role: equipment
+    permission:
       columns:
         - id
         - title
@@ -29,8 +29,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: equipment
-  - permission:
+  - role: gig_editor
+    permission:
       columns:
         - id
         - title
@@ -38,8 +38,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: gig_editor
-  - permission:
+  - role: music_only
+    permission:
       columns:
         - id
         - title
@@ -47,8 +47,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: music_only
-  - permission:
+  - role: president
+    permission:
       columns:
         - id
         - title
@@ -56,8 +56,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: president
-  - permission:
+  - role: secretary
+    permission:
       columns:
         - id
         - title
@@ -65,8 +65,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: secretary
-  - permission:
+  - role: treasurer
+    permission:
       columns:
         - id
         - title
@@ -74,8 +74,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: treasurer
-  - permission:
+  - role: user
+    permission:
       columns:
         - id
         - title
@@ -83,8 +83,8 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: user
-  - permission:
+  - role: webmaster
+    permission:
       columns:
         - id
         - title
@@ -92,4 +92,3 @@ select_permissions:
         - posted
         - posted_by
       filter: {}
-    role: webmaster
