@@ -101,7 +101,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         await em.persistAndFlush(entry);
         return json({ approved: entry.approved });
       } else {
-        throw error(400, "Person not found");
+        throw error(400, "Person not found in lineup");
       }
     } else if (setAdminNotes.guard(body)) {
       const em = orm.em.fork();

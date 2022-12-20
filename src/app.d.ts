@@ -2,7 +2,7 @@
 
 declare namespace App {
   interface Locals {
-    session: {} | { userId: string; hasuraRole: string };
+    session: {} | { userId: string; hasuraRole: string; firstName: string; lastName: string };
   }
 
   interface PageData {}

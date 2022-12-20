@@ -595,7 +595,7 @@ describe("iCal files", () => {
         const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
         const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
         expect(event.summary).to.eq(`GIG: Gig of excitement`);
-        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
+        expect(event.description).to.contain("Leady Lead").and.contain("[Eigenharp, Wind Synth]");
         expect(startDate.equals(Cypress.DateTime.fromISO(gig.arriveTime))).to.be.true;
         expect(endDate.equals(Cypress.DateTime.fromISO(gig.finishTime))).to.be.true;
       });
@@ -629,7 +629,7 @@ describe("iCal files", () => {
         const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
         const event = events.find((event) => event.summary === "GIG: Admin only gig");
         expect(event).to.not.be.undefined;
-        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
+        expect(event.description).to.contain("Leady Lead").and.contain("[Eigenharp, Wind Synth]");
         expect(event.description).to.contain("OTHER INFO: This is a band note");
         expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
         const tz = comp.getFirstProperty("timezone-id").getFirstValue();
@@ -643,7 +643,7 @@ describe("iCal files", () => {
 
     it("can be generated for my gigs", () => {
       const expectedSummary = "GIG: Gig of excitement";
-      cy.visit(`/members/gigs/${gig.id}`);
+      cy.request("POST", `/members/gigs/${gig.id}/signup`, { user_available: true, user_only_if_necessary: false });
 
       cy.request(`/members/gigs/calendar/my`).then((res) => {
         const data = ICAL.parse(res.body);
@@ -653,10 +653,6 @@ describe("iCal files", () => {
         expect(event).to.be.undefined;
       });
 
-      cy.waitForFormInteractive();
-      cy.get("button").contains("Show signup").click();
-      cy.contains("Yes, I'd like to play").click();
-
       cy.request(`/members/gigs/calendar/my`).then((res) => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
@@ -664,11 +660,13 @@ describe("iCal files", () => {
         const event = events.find((event) => event.summary === expectedSummary);
         expect(event).to.be.undefined;
       });
-      /* ==== Generated with Cypress Studio ==== */
-      cy.get('[data-test="show-summary-74527"]').click();
-      cy.get('[href="/members/gigs/74527/edit-lineup"]').click();
-      cy.get('[data-test="person-approve"]').click();
-      /* ==== End Cypress Studio ==== */
+
+      cy.request("POST", `/members/gigs/${gig.id}/edit-lineup/update`, {
+        type: "setPersonApproved",
+        id: "27382",
+        approved: true,
+      });
+
       cy.request(`/members/gigs/calendar/my`).then((res) => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
@@ -676,14 +674,12 @@ describe("iCal files", () => {
         const event = events.find((event) => event.summary === expectedSummary);
         expect(event).not.to.be.undefined;
 
-        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
+        expect(event.description).to.contain("Leady Lead").and.contain("[Eigenharp, Wind Synth]");
         expect(event.description).to.contain("Cypress President");
         expect(event.description).to.contain("OTHER INFO: This is a band note");
         expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
 
         const tz = comp.getFirstProperty("timezone-id").getFirstValue();
-        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
-        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
       });
     });
   });
@@ -722,10 +718,7 @@ describe("iCal files", () => {
     });
 
     it("can be generated for my gigs", () => {
-      // TODO actually approve user for lineup and check gig shows up
       const expectedSummary = "GIG: Gig of excitement";
-      cy.visit(`/members/gigs/${gig.id}`);
-
       cy.request(`/members/gigs/calendar/my`).then((res) => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
@@ -734,9 +727,7 @@ describe("iCal files", () => {
         expect(event).to.be.undefined;
       });
 
-      cy.waitForFormInteractive();
-      cy.get("button").contains("Show signup").click();
-      cy.contains("Yes, I'd like to play").click();
+      cy.request("POST", `/members/gigs/${gig.id}/signup`, { user_available: true, user_only_if_necessary: false });
 
       cy.request(`/members/gigs/calendar/my`).then((res) => {
         const data = ICAL.parse(res.body);
@@ -748,7 +739,7 @@ describe("iCal files", () => {
       });
 
       cy.login("cypress_president", "abc123");
-      cy.request("POST", `members/gigs/${gig.id}/edit-lineup/update`, {
+      cy.request("POST", `/members/gigs/${gig.id}/edit-lineup/update`, {
         type: "setPersonApproved",
         id: "27250",
         approved: true,
@@ -763,7 +754,7 @@ describe("iCal files", () => {
         expect(event).not.to.be.undefined;
         expect(event.description).to.contain("OTHER INFO: This is a band note");
         expect(event.description).not.to.contain("ADMIN NOTES: This is an admin note");
-        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
+        expect(event.description).to.contain("Leady Lead").and.contain("[Eigenharp, Wind Synth]");
         expect(event.description).to.contain("Cypress User");
       });
     });

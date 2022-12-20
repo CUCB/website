@@ -57,11 +57,10 @@ async function sessionFromHeaders(cookies, request: Request) {
     if (request.headers.get("authorization")?.startsWith("Bearer ")) {
       try {
         const token = jwt.verify(request.headers.get("authorization").slice("Bearer ".length), SESSION_SECRET);
-        const hasuraRole = await userRepository
-          .findOne({ id: parseInt(token.userId) })
-          .then((user) => user?.adminType.hasuraRole);
-        if (hasuraRole) {
-          session = { userId: parseInt(token.userId), hasuraRole };
+        const user = await userRepository.findOne({ id: parseInt(token.userId) });
+        if (user) {
+          const hasuraRole = user.adminType.hasuraRole;
+          session = { userId: parseInt(token.userId), hasuraRole, firstName: user.first, lastName: user.last };
         }
 
         // TODO possible error handling/logging
