@@ -1,25 +1,25 @@
 import { Entity, ManyToOne, OptionalProps, PrimaryKey, Property } from "@mikro-orm/core";
-import { MusicTypes } from "./MusicTypes.js";
+import { MusicType } from "./MusicType.js";
 
 @Entity({ schema: "cucb" })
 export class Music {
   [OptionalProps]?: "current" | "showTune";
 
-  @PrimaryKey({ columnType: "int8" })
+  @PrimaryKey({ columnType: "int8", type: "int8" })
   id!: string;
 
-  @Property({ length: 128 })
+  @Property({ length: 128, type: "varchar" })
   title!: string;
 
-  @Property({ length: 128 })
+  @Property({ length: 128, type: "varchar" })
   filename!: string;
 
-  @ManyToOne({ entity: () => MusicTypes, fieldName: "type", index: "idx_17463_type" })
-  type!: MusicTypes;
+  @ManyToOne({ entity: () => MusicType, fieldName: "type", index: "idx_17463_type" })
+  type!: MusicType;
 
-  @Property({ default: true })
+  @Property({ default: true, type: "boolean" })
   current: boolean = true;
 
-  @Property({ default: false })
+  @Property({ default: false, type: "boolean" })
   showTune: boolean = false;
 }

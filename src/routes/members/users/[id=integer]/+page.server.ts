@@ -3,14 +3,14 @@ import { error } from "@sveltejs/kit";
 import { assertLoggedIn } from "../../../../client-auth";
 import { UPDATE_ADMIN_STATUS, UPDATE_BIO, UPDATE_INSTRUMENTS, IS_SELF } from "$lib/permissions";
 import orm from "$lib/database";
-import { UserInstrument } from "$lib/entities/UsersInstrument";
+import { UserInstrument } from "$lib/entities/UserInstrument";
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { User } from "$lib/entities/User";
 import { PopulateHint, wrap } from "@mikro-orm/core";
 import type { EntityField } from "@mikro-orm/core";
 import { UserPrefType } from "$lib/entities/UserPrefType";
 import { AuthUserType } from "$lib/entities/AuthUserType";
-import { GigLineup } from "$lib/entities/GigLineup";
+import { GigLineupEntry } from "$lib/entities/GigLineupEntry";
 import type { AggregateInstrument, LoadOutput } from "./types";
 import { Instrument } from "$lib/entities/Instrument";
 
@@ -35,7 +35,7 @@ const SENSITIVE_FIELDS: EntityField<User, string>[] = [
   { prefs: ["value", "pref_type", { pref_type: ["name", "default"] }] },
 ];
 const EDITOR_FIELDS: EntityField<User, string>[] = ["adminType"];
-const GIG_LINEUP_FIELDS: EntityField<GigLineup, string>[] = [
+const GIG_LINEUP_FIELDS: EntityField<GigLineupEntry, string>[] = [
   "gig",
   "user_instruments",
   {
@@ -67,7 +67,7 @@ export const load: PageServerLoad = async ({ locals, params: { id }, fetch }): P
   const [userDetails, gig_lineups, allPrefs, allAdminStatuses] = await Promise.all([
     em.findOne(User, id, { fields: userFields }),
     em.fork().find(
-      GigLineup,
+      GigLineupEntry,
       { user: { id }, user_instruments: { approved: true } },
       {
         fields: GIG_LINEUP_FIELDS,

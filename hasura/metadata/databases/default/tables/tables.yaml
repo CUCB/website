@@ -1,5 +1,6 @@
 - "!include cucb_auth_action_types.yaml"
 - "!include cucb_auth_bitmasks_permissions.yaml"
+- "!include cucb_auth_tokens.yaml"
 - "!include cucb_auth_user_types.yaml"
 - "!include cucb_biscuit_poll_entries.yaml"
 - "!include cucb_biscuit_poll_votes.yaml"

@@ -2,7 +2,7 @@ import { assertLoggedIn } from "../../../../../client-auth";
 import { UPDATE_INSTRUMENTS } from "$lib/permissions";
 import type { RequestEvent } from "./$types";
 import orm from "$lib/database";
-import { UserInstrument } from "$lib/entities/UsersInstrument";
+import { UserInstrument } from "$lib/entities/UserInstrument";
 import { error, json } from "@sveltejs/kit";
 import { Literal, Null, Record, String } from "runtypes";
 

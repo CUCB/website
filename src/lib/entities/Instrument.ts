@@ -1,5 +1,5 @@
 import { Collection, Entity, ManyToOne, OneToMany, OptionalProps, PrimaryKey, Property, Unique } from "@mikro-orm/core";
-import { UserInstrument } from "./UsersInstrument";
+import { UserInstrument } from "./UserInstrument.js";
 
 @Entity({ schema: "cucb", tableName: "instruments" })
 export class Instrument {

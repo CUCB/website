@@ -1,18 +1,8 @@
-import {
-  Collection,
-  Entity,
-  Filter,
-  ManyToOne,
-  OneToMany,
-  OptionalProps,
-  PrimaryKey,
-  Property,
-  Unique,
-} from "@mikro-orm/core";
-import { AuthUserType } from "./AuthUserType";
-import { GigLineup } from "./GigLineup";
-import { UserPref } from "./UserPref";
-import { UserInstrument } from "./UsersInstrument";
+import { Collection, Entity, ManyToOne, OneToMany, OptionalProps, PrimaryKey, Property, Unique } from "@mikro-orm/core";
+import { AuthUserType } from "./AuthUserType.js";
+import { GigLineupEntry } from "./GigLineupEntry.js";
+import { UserPref } from "./UserPref.js";
+import { UserInstrument } from "./UserInstrument.js";
 
 @Entity({ schema: "cucb", tableName: "users" })
 export class User {
@@ -68,8 +58,8 @@ export class User {
   @Property({ default: "", type: "varchar" })
   gig_notes!: string;
 
-  @OneToMany({ entity: () => GigLineup, mappedBy: (gigLineup) => gigLineup.user })
-  gigLineups = new Collection<GigLineup>(this);
+  @OneToMany({ entity: () => GigLineupEntry, mappedBy: (gigLineup) => gigLineup.user })
+  gigLineups = new Collection<GigLineupEntry>(this);
 
   @OneToMany({ entity: () => UserInstrument, mappedBy: (instrument) => instrument.user })
   instruments = new Collection<UserInstrument>(this);

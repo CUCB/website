@@ -1,7 +1,8 @@
 import { Entity, Index, ManyToOne, OneToMany, OptionalProps, PrimaryKey, Property, Collection } from "@mikro-orm/core";
-import { GigLineupInstrument } from "./GigLineupInstrument";
-import { Instrument } from "./Instrument";
-import { User } from "./User";
+import type { Relation } from "./bodge.js";
+import { GigLineupInstrument } from "./GigLineupInstrument.js";
+import { Instrument } from "./Instrument.js";
+import { User } from "./User.js";
 
 @Entity({ schema: "cucb", tableName: "users_instruments" })
 @Index({ name: "idx_17525_id", properties: ["id", "user"] })
@@ -12,7 +13,7 @@ export class UserInstrument {
   id!: string;
 
   @ManyToOne({ entity: () => User, onUpdateIntegrity: "cascade", onDelete: "cascade", index: "idx_17525_user_id" })
-  user!: User;
+  user!: Relation<User>;
 
   @ManyToOne({
     entity: () => Instrument,

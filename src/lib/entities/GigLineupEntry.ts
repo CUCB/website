@@ -9,14 +9,15 @@ import {
   Property,
   Unique,
 } from "@mikro-orm/core";
-import { Gig } from "./Gig";
-import { GigLineupInstrument } from "./GigLineupInstrument";
-import { User } from "./User";
+import type { Relation } from "./bodge.js";
+import { Gig } from "./Gig.js";
+import { GigLineupInstrument } from "./GigLineupInstrument.js";
+import { User } from "./User.js";
 
 @Entity({ schema: "cucb", tableName: "gigs_lineups" })
 @Unique({ name: "idx_17423_gig_id", properties: ["gig", "user"] })
 @Filter({ name: "approved", cond: { approved: { $eq: true } } })
-export class GigLineup {
+export class GigLineupEntry {
   [OptionalProps]?: "driver" | "equipment" | "leader" | "money_collector" | "money_collector_notified";
 
   [PrimaryKeyType]?: [string, string];
@@ -25,7 +26,7 @@ export class GigLineup {
   id!: string;
 
   @ManyToOne({ entity: () => Gig, onUpdateIntegrity: "cascade", onDelete: "cascade", primary: true })
-  gig!: Gig;
+  gig!: Relation<Gig>;
 
   @ManyToOne({
     entity: () => User,
@@ -34,7 +35,7 @@ export class GigLineup {
     primary: true,
     index: "idx_17423_user_id",
   })
-  user!: User;
+  user!: Relation<User>;
 
   @Property({ length: 6, nullable: true, defaultRaw: `now()`, type: "timestamptz" })
   adding_time?: Date;

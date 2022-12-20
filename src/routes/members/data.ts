@@ -1,4 +1,4 @@
-import { UserInstrument } from "$lib/entities/UsersInstrument";
+import { UserInstrument } from "$lib/entities/UserInstrument";
 import { EntityManager, LoadStrategy, PopulateHint, wrap } from "@mikro-orm/core";
 import { Gig } from "$lib/entities/Gig";
 import { User } from "$lib/entities/User.js";

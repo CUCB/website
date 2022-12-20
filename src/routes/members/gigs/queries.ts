@@ -3,8 +3,8 @@ import type { OperatorMap } from "@mikro-orm/core/typings";
 import { DateTime } from "luxon";
 import orm from "$lib/database";
 import { Gig } from "$lib/entities/Gig";
-import { GigLineup } from "$lib/entities/GigLineup";
-import { UserInstrument } from "$lib/entities/UsersInstrument";
+import { GigLineupEntry } from "$lib/entities/GigLineupEntry";
+import { UserInstrument } from "$lib/entities/UserInstrument";
 import {
   VIEW_GIG_ADMIN_NOTES,
   VIEW_GIG_CONTACT_DETAILS,
@@ -32,7 +32,7 @@ const generalFields: EntityField<Gig, string>[] = [
   "food_provided",
 ];
 
-const lineupFields: EntityField<GigLineup, string>[] = [
+const lineupFields: EntityField<GigLineupEntry, string>[] = [
   { user: ["id", "first", "last"] },
   { user_instruments: [{ user_instrument: ["id", "nickname", { instrument: ["id", "name"] }] }, "approved"] },
   "leader",
@@ -64,7 +64,7 @@ const summaryFields = (session: { userId: string }): readonly EntityField<Gig, s
   ...(VIEW_GIG_ADMIN_NOTES.guard(session) ? financialFields : []),
 ];
 
-const signupLineupFields: EntityField<GigLineup, string>[] = [
+const signupLineupFields: EntityField<GigLineupEntry, string>[] = [
   "approved",
   "user_available",
   "user_only_if_necessary",
@@ -226,12 +226,12 @@ export const fetchAllInstrumentsForUser = (session: Session): Promise<AvailableU
 
 export const fetchMultiGigSignupSummary = (
   session: Session,
-  filter: ObjectQuery<GigLineup>,
+  filter: ObjectQuery<GigLineupEntry>,
 ): Promise<SignupSummaryEntry[] | null> =>
   VIEW_SIGNUP_SUMMARY.guard(session)
     ? orm.em
         .fork()
-        .find<GigLineup>(GigLineup, filter, {
+        .find<GigLineupEntry>(GigLineupEntry, filter, {
           fields: [{ user: ["first", "last"] }, "user_available", "user_only_if_necessary", { gig: ["id"] }],
           populateWhere: PopulateHint.INFER,
         })
