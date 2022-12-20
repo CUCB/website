@@ -3,6 +3,7 @@
 import {
   onConflictVenue,
   CreateGig,
+  DeleteGig,
   DeleteSignup,
   SignupDetails,
   ClearLineupForGig,
@@ -588,7 +589,8 @@ describe("iCal files", () => {
   describe("for president", () => {
     beforeEach(() => {
       cy.login("cypress_president", "abc123");
-      cy.executeMutation(ClearLineupForGig, { variables: { id: adminOnlyGig.id } });
+      cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
+      cy.executeMutation(CreateGig, { variables: gig });
     });
 
     it("contains admin information", () => {
@@ -611,6 +613,7 @@ describe("iCal files", () => {
         const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
         const event = events.find((event) => event.summary === "GIG: Admin only gig");
         expect(event).to.not.be.undefined;
+        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
         expect(event.description).to.contain("OTHER INFO: This is a band note");
         expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
         const tz = comp.getFirstProperty("timezone-id").getFirstValue();
@@ -658,6 +661,8 @@ describe("iCal files", () => {
         const event = events.find((event) => event.summary === expectedSummary);
         expect(event).not.to.be.undefined;
 
+        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
+        expect(event.description).to.contain("Cypress President");
         expect(event.description).to.contain("OTHER INFO: This is a band note");
         expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
 
@@ -676,6 +681,7 @@ describe("iCal files", () => {
     beforeEach(() => {
       cy.login("cypress_user", "abc123");
       cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
+      cy.executeMutation(CreateGig, { variables: gig });
     });
 
     it("omits admin information", () => {
@@ -742,11 +748,12 @@ describe("iCal files", () => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
         const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
-        cy.log(events);
         const event = events.find((event) => event.summary === expectedSummary);
         expect(event).not.to.be.undefined;
         expect(event.description).to.contain("OTHER INFO: This is a band note");
         expect(event.description).not.to.contain("ADMIN NOTES: This is an admin note");
+        expect(event.description).to.contain("Leady Lead").and.contain("[Wind Synth, Eigenharp]");
+        expect(event.description).to.contain("Cypress User");
       });
     });
   });
