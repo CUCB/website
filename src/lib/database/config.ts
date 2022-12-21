@@ -81,7 +81,9 @@ const makeConfig = (env: Record<string, string | undefined>) => ({
   user: env["PG_USER"],
   password: env["PG_PASSWORD"],
   migrations: {
-    emit: "js" as const,
+    emit: "ts" as const,
+    path: "./build/migrations",
+    pathTs: "./src/migrations",
   },
 });
 

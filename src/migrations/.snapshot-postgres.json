@@ -1,0 +1,3222 @@
+{
+  "namespaces": ["cucb"],
+  "name": "public",
+  "tables": [
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "php_title": {
+          "name": "php_title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "bitmask": {
+          "name": "bitmask",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "auth_bitmasks_permissions",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "auth_bitmasks_permissions_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "description": {
+          "name": "description",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "auth_bitmask": {
+          "name": "auth_bitmask",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "auth_action_types",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["auth_bitmask"],
+          "composite": false,
+          "keyName": "idx_17283_auth_bitmask",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "auth_action_types_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "auth_action_types_auth_bitmask_foreign": {
+          "constraintName": "auth_action_types_auth_bitmask_foreign",
+          "columnNames": ["auth_bitmask"],
+          "localTableName": "cucb.auth_action_types",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.auth_bitmasks_permissions",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "php_title": {
+          "name": "php_title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "hasura_role": {
+          "name": "hasura_role",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "string"
+        }
+      },
+      "name": "auth_user_types",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["hasura_role"],
+          "composite": false,
+          "keyName": "auth_user_types_hasura_role_key",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "auth_user_types_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "name": {
+          "name": "name",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        }
+      },
+      "name": "calendar_subscriptions_types",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "calendar_subscriptions_types_pkey",
+          "columnNames": ["name"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "captionid": {
+          "name": "captionid",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "userid": {
+          "name": "userid",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        },
+        "photo": {
+          "name": "photo",
+          "type": "varchar(20)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 20,
+          "mappedType": "string"
+        },
+        "text": {
+          "name": "text",
+          "type": "bytea",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "blob"
+        },
+        "time": {
+          "name": "time",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "dirid": {
+          "name": "dirid",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        },
+        "photoid": {
+          "name": "photoid",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "captions",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "captions_pkey",
+          "columnNames": ["captionid"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "started": {
+          "name": "started",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "pic_folder": {
+          "name": "pic_folder",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "committees",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "committees_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "committee_keys",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "committee_keys_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "position": {
+          "name": "position",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "committee_positions",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "committee_positions_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "position": {
+          "name": "position",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "casual_name": {
+          "name": "casual_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "crsid": {
+          "name": "crsid",
+          "type": "varchar(10)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 10,
+          "mappedType": "string"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "email_obfus": {
+          "name": "email_obfus",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "pic": {
+          "name": "pic",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "committee": {
+          "name": "committee",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "lookup_name": {
+          "name": "lookup_name",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "april_fools_only": {
+          "name": "april_fools_only",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "comments": {
+          "name": "comments",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "april_fools_dir": {
+          "name": "april_fools_dir",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "sub_position": {
+          "name": "sub_position",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "committee_members",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["position"],
+          "composite": false,
+          "keyName": "idx_17360_position",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["committee"],
+          "composite": false,
+          "keyName": "idx_17360_committee",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["lookup_name"],
+          "composite": false,
+          "keyName": "idx_17360_lookup_name",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "committee_members_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "committee_members_position_foreign": {
+          "constraintName": "committee_members_position_foreign",
+          "columnNames": ["position"],
+          "localTableName": "cucb.committee_members",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.committee_positions",
+          "updateRule": "cascade"
+        },
+        "committee_members_committee_foreign": {
+          "constraintName": "committee_members_committee_foreign",
+          "columnNames": ["committee"],
+          "localTableName": "cucb.committee_members",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.committees",
+          "updateRule": "cascade"
+        },
+        "committee_members_lookup_name_foreign": {
+          "constraintName": "committee_members_lookup_name_foreign",
+          "columnNames": ["lookup_name"],
+          "localTableName": "cucb.committee_members",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.committee_keys",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(30)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 30,
+          "mappedType": "string"
+        },
+        "icon_name": {
+          "name": "icon_name",
+          "type": "varchar(32)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 32,
+          "mappedType": "string"
+        }
+      },
+      "name": "connection_types",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "connection_types_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "secure": {
+          "name": "secure",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        },
+        "attribution": {
+          "name": "attribution",
+          "type": "varchar(512)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 512,
+          "mappedType": "string"
+        }
+      },
+      "name": "gallery",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "gallery_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "code": {
+          "name": "code",
+          "type": "varchar(16)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 16,
+          "mappedType": "string"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(128)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 128,
+          "mappedType": "string"
+        }
+      },
+      "name": "gig_types",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["code"],
+          "composite": false,
+          "keyName": "idx_17440_code",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "gig_types_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(256)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 256,
+          "mappedType": "string"
+        },
+        "subvenue": {
+          "name": "subvenue",
+          "type": "varchar(256)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 256,
+          "mappedType": "string"
+        },
+        "map_link": {
+          "name": "map_link",
+          "type": "varchar(1024)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 1024,
+          "mappedType": "string"
+        },
+        "distance_miles": {
+          "name": "distance_miles",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        },
+        "notes_admin": {
+          "name": "notes_admin",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "notes_band": {
+          "name": "notes_band",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "postcode": {
+          "name": "postcode",
+          "type": "varchar(32)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 32,
+          "mappedType": "string"
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "float8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "double"
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "float8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "double"
+        }
+      },
+      "name": "gig_venues",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "gig_venues_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 128,
+          "mappedType": "string"
+        },
+        "novelty": {
+          "name": "novelty",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "parent_only": {
+          "name": "parent_only",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "parent_id": {
+          "name": "parent_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "instruments",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["name"],
+          "composite": false,
+          "keyName": "idx_17455_name",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["parent_id"],
+          "composite": false,
+          "keyName": "idx_17455_parent_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "instruments_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "instruments_parent_id_foreign": {
+          "constraintName": "instruments_parent_id_foreign",
+          "columnNames": ["parent_id"],
+          "localTableName": "cucb.instruments",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.instruments",
+          "deleteRule": "set null",
+          "updateRule": "set null"
+        }
+      }
+    },
+    {
+      "columns": {
+        "email": {
+          "name": "email",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        }
+      },
+      "name": "list042",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "list042_pkey",
+          "columnNames": ["email"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "abc_field": {
+          "name": "abc_field",
+          "type": "varchar(32)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 32,
+          "mappedType": "string"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(32)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 32,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "common_type": {
+          "name": "common_type",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "music_types",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["abc_field"],
+          "composite": false,
+          "keyName": "idx_17471_abc_field",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "music_types_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(128)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 128,
+          "mappedType": "string"
+        },
+        "filename": {
+          "name": "filename",
+          "type": "varchar(128)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 128,
+          "mappedType": "string"
+        },
+        "type": {
+          "name": "type",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "current": {
+          "name": "current",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "true",
+          "mappedType": "boolean"
+        },
+        "show_tune": {
+          "name": "show_tune",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "music",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["type"],
+          "composite": false,
+          "keyName": "idx_17463_type",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "music_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "music_type_foreign": {
+          "constraintName": "music_type_foreign",
+          "columnNames": ["type"],
+          "localTableName": "cucb.music",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.music_types",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "sid": {
+          "name": "sid",
+          "type": "bigint",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "sess": {
+          "name": "sess",
+          "type": "json",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "json"
+        },
+        "expire": {
+          "name": "expire",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        }
+      },
+      "name": "session",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["expire"],
+          "composite": false,
+          "keyName": "IDX_session_expire",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "session_pkey",
+          "columnNames": ["sid"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 64,
+          "mappedType": "string"
+        },
+        "filename": {
+          "name": "filename",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 64,
+          "mappedType": "string"
+        },
+        "tuneid": {
+          "name": "tuneid",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'0'",
+          "mappedType": "bigint"
+        },
+        "new": {
+          "name": "new",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "true",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "songs",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "songs_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "admin": {
+          "name": "admin",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "9",
+          "mappedType": "bigint"
+        },
+        "first": {
+          "name": "first",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 64,
+          "mappedType": "string"
+        },
+        "last": {
+          "name": "last",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 64,
+          "mappedType": "string"
+        },
+        "username": {
+          "name": "username",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "password": {
+          "name": "password",
+          "type": "varchar(40)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 40,
+          "mappedType": "string"
+        },
+        "salted_password": {
+          "name": "salted_password",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "join_date": {
+          "name": "join_date",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "last_login_date": {
+          "name": "last_login_date",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "mobile_contact_info": {
+          "name": "mobile_contact_info",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "location_info": {
+          "name": "location_info",
+          "type": "varchar(512)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 512,
+          "mappedType": "string"
+        },
+        "dietaries": {
+          "name": "dietaries",
+          "type": "varchar(512)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 512,
+          "mappedType": "string"
+        },
+        "bio": {
+          "name": "bio",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "bio_changed_date": {
+          "name": "bio_changed_date",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "gig_notes": {
+          "name": "gig_notes",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "''",
+          "mappedType": "string"
+        }
+      },
+      "name": "users",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["username"],
+          "composite": false,
+          "keyName": "idx_17515_username",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["email"],
+          "composite": false,
+          "keyName": "idx_17515_email",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "users_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "users_admin_foreign": {
+          "constraintName": "users_admin_foreign",
+          "columnNames": ["admin"],
+          "localTableName": "cucb.users",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.auth_user_types",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "filename": {
+          "name": "filename",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "type": {
+          "name": "type",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "touched": {
+          "name": "touched",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "date"
+        },
+        "contributor": {
+          "name": "contributor",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "contributed_date": {
+          "name": "contributed_date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "date"
+        },
+        "contributor_notes": {
+          "name": "contributor_notes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "other_notes": {
+          "name": "other_notes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "hidden": {
+          "name": "hidden",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "session_tunes",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["type"],
+          "composite": false,
+          "keyName": "idx_17497_type",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["contributor"],
+          "composite": false,
+          "keyName": "idx_17497_contributor",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "session_tunes_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "session_tunes_type_foreign": {
+          "constraintName": "session_tunes_type_foreign",
+          "columnNames": ["type"],
+          "localTableName": "cucb.session_tunes",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.music_types",
+          "updateRule": "cascade"
+        },
+        "session_tunes_contributor_foreign": {
+          "constraintName": "session_tunes_contributor_foreign",
+          "columnNames": ["contributor"],
+          "localTableName": "cucb.session_tunes",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "posted": {
+          "name": "posted",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "posted_by": {
+          "name": "posted_by",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "news",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["posted_by"],
+          "composite": false,
+          "keyName": "idx_17481_posted_by",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "news_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "news_posted_by_foreign": {
+          "constraintName": "news_posted_by_foreign",
+          "columnNames": ["posted_by"],
+          "localTableName": "cucb.news",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(128)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 128,
+          "mappedType": "string"
+        },
+        "type": {
+          "name": "type",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "date"
+        },
+        "time": {
+          "name": "time",
+          "type": "time",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "time"
+        },
+        "arrive_time": {
+          "name": "arrive_time",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "finish_time": {
+          "name": "finish_time",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "venue_id": {
+          "name": "venue_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        },
+        "posting_user": {
+          "name": "posting_user",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        },
+        "posting_time": {
+          "name": "posting_time",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "default": "now()",
+          "mappedType": "datetime"
+        },
+        "editing_user": {
+          "name": "editing_user",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        },
+        "editing_time": {
+          "name": "editing_time",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "summary": {
+          "name": "summary",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "quote_date": {
+          "name": "quote_date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "date"
+        },
+        "finance": {
+          "name": "finance",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "finance_deposit_received": {
+          "name": "finance_deposit_received",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "finance_payment_received": {
+          "name": "finance_payment_received",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "finance_caller_paid": {
+          "name": "finance_caller_paid",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "notes_band": {
+          "name": "notes_band",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "notes_admin": {
+          "name": "notes_admin",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "advertise": {
+          "name": "advertise",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "admins_only": {
+          "name": "admins_only",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "true",
+          "mappedType": "boolean"
+        },
+        "allow_signups": {
+          "name": "allow_signups",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "food_provided": {
+          "name": "food_provided",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "gigs",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["type"],
+          "composite": false,
+          "keyName": "idx_17399_type",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["venue_id"],
+          "composite": false,
+          "keyName": "idx_17399_venue_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["posting_user"],
+          "composite": false,
+          "keyName": "idx_17399_posting_user",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "gigs_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "gigs_type_foreign": {
+          "constraintName": "gigs_type_foreign",
+          "columnNames": ["type"],
+          "localTableName": "cucb.gigs",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.gig_types",
+          "updateRule": "cascade"
+        },
+        "gigs_venue_id_foreign": {
+          "constraintName": "gigs_venue_id_foreign",
+          "columnNames": ["venue_id"],
+          "localTableName": "cucb.gigs",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.gig_venues",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "gigs_posting_user_foreign": {
+          "constraintName": "gigs_posting_user_foreign",
+          "columnNames": ["posting_user"],
+          "localTableName": "cucb.gigs",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        },
+        "gigs_editing_user_foreign": {
+          "constraintName": "gigs_editing_user_foreign",
+          "columnNames": ["editing_user"],
+          "localTableName": "cucb.gigs",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "deleteRule": "set null",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "gig_id": {
+          "name": "gig_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "adding_time": {
+          "name": "adding_time",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "default": "now()",
+          "mappedType": "datetime"
+        },
+        "editing_time": {
+          "name": "editing_time",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "approved": {
+          "name": "approved",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "equipment": {
+          "name": "equipment",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "leader": {
+          "name": "leader",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "driver": {
+          "name": "driver",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "money_collector": {
+          "name": "money_collector",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "money_collector_notified": {
+          "name": "money_collector_notified",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "user_notes": {
+          "name": "user_notes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "user_available": {
+          "name": "user_available",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "user_only_if_necessary": {
+          "name": "user_only_if_necessary",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "boolean"
+        },
+        "admin_notes": {
+          "name": "admin_notes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        }
+      },
+      "name": "gigs_lineups",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["user_id"],
+          "composite": false,
+          "keyName": "idx_17423_user_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "idx_17423_gig_id",
+          "columnNames": ["gig_id", "user_id"],
+          "composite": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "gigs_lineups_pkey",
+          "columnNames": ["gig_id", "user_id"],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "gigs_lineups_gig_id_foreign": {
+          "constraintName": "gigs_lineups_gig_id_foreign",
+          "columnNames": ["gig_id"],
+          "localTableName": "cucb.gigs_lineups",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.gigs",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "gigs_lineups_user_id_foreign": {
+          "constraintName": "gigs_lineups_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "cucb.gigs_lineups",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(128)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 128,
+          "mappedType": "string"
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "organization": {
+          "name": "organization",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "caller": {
+          "name": "caller",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        }
+      },
+      "name": "contacts",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["user_id"],
+          "composite": false,
+          "keyName": "idx_17383_user_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "contacts_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "contacts_user_id_foreign": {
+          "constraintName": "contacts_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "cucb.contacts",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "gig_id": {
+          "name": "gig_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "contact_id": {
+          "name": "contact_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "'0'",
+          "mappedType": "bigint"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "text"
+        },
+        "calling": {
+          "name": "calling",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "client": {
+          "name": "client",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "true",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "gigs_contacts",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["contact_id"],
+          "composite": false,
+          "keyName": "idx_17412_contact_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "gigs_contacts_pkey",
+          "columnNames": ["gig_id", "contact_id"],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "gigs_contacts_gig_id_foreign": {
+          "constraintName": "gigs_contacts_gig_id_foreign",
+          "columnNames": ["gig_id"],
+          "localTableName": "cucb.gigs_contacts",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.gigs",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "gigs_contacts_contact_id_foreign": {
+          "constraintName": "gigs_contacts_contact_id_foreign",
+          "columnNames": ["contact_id"],
+          "localTableName": "cucb.gigs_contacts",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.contacts",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "calendar_type": {
+          "name": "calendar_type",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "text"
+        },
+        "last_accessed": {
+          "name": "last_accessed",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 64,
+          "mappedType": "string"
+        }
+      },
+      "name": "calendar_subscriptions",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["user_id"],
+          "composite": false,
+          "keyName": "idx_17334_user_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "calendar_subscriptions_pkey",
+          "columnNames": ["user_id", "calendar_type"],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "calendar_subscriptions_user_id_foreign": {
+          "constraintName": "calendar_subscriptions_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "cucb.calendar_subscriptions",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "calendar_subscriptions_calendar_type_foreign": {
+          "constraintName": "calendar_subscriptions_calendar_type_foreign",
+          "columnNames": ["calendar_type"],
+          "localTableName": "cucb.calendar_subscriptions",
+          "referencedColumnNames": ["name"],
+          "referencedTableName": "cucb.calendar_subscriptions_types",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "default": "now()",
+          "mappedType": "datetime"
+        },
+        "open": {
+          "name": "open",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "true",
+          "mappedType": "boolean"
+        },
+        "archived": {
+          "name": "archived",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        },
+        "rehearsal_date": {
+          "name": "rehearsal_date",
+          "type": "date",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "mappedType": "date"
+        }
+      },
+      "name": "biscuit_polls",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["created_by"],
+          "composite": false,
+          "keyName": "idx_17313_created_by",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "biscuit_polls_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "biscuit_polls_created_by_foreign": {
+          "constraintName": "biscuit_polls_created_by_foreign",
+          "columnNames": ["created_by"],
+          "localTableName": "cucb.biscuit_polls",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "poll": {
+          "name": "poll",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "added_at": {
+          "name": "added_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "default": "now()",
+          "mappedType": "datetime"
+        },
+        "added_by": {
+          "name": "added_by",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "biscuit_poll_entries",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["poll"],
+          "composite": false,
+          "keyName": "idx_17322_poll",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["added_by"],
+          "composite": false,
+          "keyName": "idx_17322_added_by",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "biscuit_poll_entries_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "biscuit_poll_entries_poll_foreign": {
+          "constraintName": "biscuit_poll_entries_poll_foreign",
+          "columnNames": ["poll"],
+          "localTableName": "cucb.biscuit_poll_entries",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.biscuit_polls",
+          "updateRule": "cascade"
+        },
+        "biscuit_poll_entries_added_by_foreign": {
+          "constraintName": "biscuit_poll_entries_added_by_foreign",
+          "columnNames": ["added_by"],
+          "localTableName": "cucb.biscuit_poll_entries",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "user": {
+          "name": "user",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "cast_at": {
+          "name": "cast_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "default": "now()",
+          "mappedType": "datetime"
+        },
+        "vote_for": {
+          "name": "vote_for",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "biscuit_poll_votes",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["user"],
+          "composite": false,
+          "keyName": "idx_17329_user",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["vote_for"],
+          "composite": false,
+          "keyName": "idx_17329_vote_for",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "biscuit_poll_votes_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "biscuit_poll_votes_user_foreign": {
+          "constraintName": "biscuit_poll_votes_user_foreign",
+          "columnNames": ["user"],
+          "localTableName": "cucb.biscuit_poll_votes",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "updateRule": "cascade"
+        },
+        "biscuit_poll_votes_vote_for_foreign": {
+          "constraintName": "biscuit_poll_votes_vote_for_foreign",
+          "columnNames": ["vote_for"],
+          "localTableName": "cucb.biscuit_poll_votes",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.biscuit_poll_entries",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "hash": {
+          "name": "hash",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "expires": {
+          "name": "expires",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 6,
+          "mappedType": "datetime"
+        },
+        "device_id": {
+          "name": "device_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 255,
+          "mappedType": "string"
+        }
+      },
+      "name": "auth_tokens",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["user_id"],
+          "composite": false,
+          "keyName": "idx_17295_user_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "auth_tokens_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "auth_tokens_user_id_foreign": {
+          "constraintName": "auth_tokens_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "cucb.auth_tokens",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "instr_id": {
+          "name": "instr_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "nickname": {
+          "name": "nickname",
+          "type": "varchar(128)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "length": 128,
+          "mappedType": "string"
+        },
+        "deleted": {
+          "name": "deleted",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "default": "false",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "users_instruments",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["user_id"],
+          "composite": false,
+          "keyName": "idx_17525_user_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["instr_id"],
+          "composite": false,
+          "keyName": "idx_17525_instr_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "idx_17525_id",
+          "columnNames": ["id", "user_id"],
+          "composite": true,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "users_instruments_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "users_instruments_user_id_foreign": {
+          "constraintName": "users_instruments_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "cucb.users_instruments",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "users_instruments_instr_id_foreign": {
+          "constraintName": "users_instruments_instr_id_foreign",
+          "columnNames": ["instr_id"],
+          "localTableName": "cucb.users_instruments",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.instruments",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "gig_id": {
+          "name": "gig_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "user_instrument_id": {
+          "name": "user_instrument_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "approved": {
+          "name": "approved",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "default": "'false'",
+          "mappedType": "boolean"
+        }
+      },
+      "name": "gigs_lineups_instruments",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "keyName": "idx_17435_user_instrument_id",
+          "columnNames": ["user_instrument_id", "user_id"],
+          "composite": true,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "idx_17435_gig_id",
+          "columnNames": ["gig_id", "user_id"],
+          "composite": true,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "gigs_lineups_instruments_pkey",
+          "columnNames": ["gig_id", "user_id", "user_instrument_id"],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "gigs_lineups_instruments_user_instrument_id_foreign": {
+          "constraintName": "gigs_lineups_instruments_user_instrument_id_foreign",
+          "columnNames": ["user_instrument_id"],
+          "localTableName": "cucb.gigs_lineups_instruments",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users_instruments",
+          "updateRule": "cascade"
+        },
+        "gigs_lineups_instruments_gig_id_user_id_foreign": {
+          "constraintName": "gigs_lineups_instruments_gig_id_user_id_foreign",
+          "columnNames": ["gig_id", "user_id"],
+          "localTableName": "cucb.gigs_lineups_instruments",
+          "referencedColumnNames": ["gig_id", "user_id"],
+          "referencedTableName": "cucb.gigs_lineups",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "user_instrument_id": {
+          "name": "user_instrument_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "conn_id": {
+          "name": "conn_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        }
+      },
+      "name": "users_instruments_connections",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["user_instrument_id"],
+          "composite": false,
+          "keyName": "idx_17532_user_instrument_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "columnNames": ["conn_id"],
+          "composite": false,
+          "keyName": "idx_17532_conn_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "users_instruments_connections_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "users_instruments_connections_user_instrument_id_foreign": {
+          "constraintName": "users_instruments_connections_user_instrument_id_foreign",
+          "columnNames": ["user_instrument_id"],
+          "localTableName": "cucb.users_instruments_connections",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users_instruments",
+          "deleteRule": "cascade",
+          "updateRule": "cascade"
+        },
+        "users_instruments_connections_conn_id_foreign": {
+          "constraintName": "users_instruments_connections_conn_id_foreign",
+          "columnNames": ["conn_id"],
+          "localTableName": "cucb.users_instruments_connections",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.connection_types",
+          "updateRule": "cascade"
+        }
+      }
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "int8",
+          "unsigned": true,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar(250)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "length": 250,
+          "mappedType": "string"
+        },
+        "default": {
+          "name": "default",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        }
+      },
+      "name": "user_pref_types",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["name"],
+          "composite": false,
+          "keyName": "idx_17551_name",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "user_pref_types_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {}
+    },
+    {
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "pref_id": {
+          "name": "pref_id",
+          "type": "bigint",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "bigint"
+        },
+        "value": {
+          "name": "value",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "mappedType": "boolean"
+        }
+      },
+      "name": "user_prefs",
+      "schema": "cucb",
+      "indexes": [
+        {
+          "columnNames": ["pref_id"],
+          "composite": false,
+          "keyName": "idx_17543_pref_id",
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "idx_17543_userpref",
+          "columnNames": ["user_id", "pref_id"],
+          "composite": true,
+          "primary": false,
+          "unique": true
+        },
+        {
+          "keyName": "user_prefs_pkey",
+          "columnNames": ["user_id", "pref_id"],
+          "composite": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {
+        "user_prefs_user_id_foreign": {
+          "constraintName": "user_prefs_user_id_foreign",
+          "columnNames": ["user_id"],
+          "localTableName": "cucb.user_prefs",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.users",
+          "updateRule": "cascade"
+        },
+        "user_prefs_pref_id_foreign": {
+          "constraintName": "user_prefs_pref_id_foreign",
+          "columnNames": ["pref_id"],
+          "localTableName": "cucb.user_prefs",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "cucb.user_pref_types",
+          "updateRule": "cascade"
+        }
+      }
+    }
+  ]
+}
