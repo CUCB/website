@@ -54,6 +54,7 @@ export async function POST({ request, cookies, locals }) {
       } catch (e) {
         if (e.message) {
           let { message, status } = e;
+          console.log(e);
           throw error(status, message);
         } else {
           console.trace(e);
