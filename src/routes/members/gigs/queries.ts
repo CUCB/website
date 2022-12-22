@@ -162,16 +162,17 @@ export const inCurrentMonth: ObjectQuery<Gig> = inMonth(DateTime.local());
 
 export const fetchMultiGigSummary = (session: Session, filter: ObjectQuery<Gig>): Promise<GigSummary[]> =>
   orm()
-    .em.fork()
-    .find<Gig, string>(
-      Gig,
-      // TODO maybe a deep merge is required here, but probably not
-      { ...filter, ...gigQueryFilter(session) },
-      {
-        fields: summaryFields(session),
-        populateWhere: PopulateHint.INFER,
-        orderBy: { date: "asc", lineup: { leader: "desc", equipment: "asc" } },
-      },
+    .then((orm) =>
+      orm.em.fork().find<Gig, string>(
+        Gig,
+        // TODO maybe a deep merge is required here, but probably not
+        { ...filter, ...gigQueryFilter(session) },
+        {
+          fields: summaryFields(session),
+          populateWhere: PopulateHint.INFER,
+          orderBy: { date: "asc", lineup: { leader: "desc", equipment: "asc" } },
+        },
+      ),
     )
     .then((gigs) =>
       gigs
@@ -187,14 +188,15 @@ export const fetchSpecificGigSummary = (session: Session, id: string | null): Pr
 
 export const fetchMultiGigSignup = (session: Session, filter: ObjectQuery<Gig>): Promise<SignupGig[]> =>
   orm()
-    .em.fork()
-    .find<Gig, string>(
-      Gig,
-      { ...filter, ...signupQueryFilter(session) },
-      {
-        fields: signupFields,
-        orderBy: { lineup: { leader: "desc", equipment: "asc" } },
-      },
+    .then((orm) =>
+      orm.em.fork().find<Gig, string>(
+        Gig,
+        { ...filter, ...signupQueryFilter(session) },
+        {
+          fields: signupFields,
+          orderBy: { lineup: { leader: "desc", equipment: "asc" } },
+        },
+      ),
     )
     .then((gigs) =>
       gigs
@@ -210,17 +212,18 @@ export const fetchSpecificGigSignup = (session: Session, id: string | null): Pro
 
 export const fetchAllInstrumentsForUser = (session: Session): Promise<AvailableUserInstrument[]> =>
   orm()
-    .em.fork()
-    .find<UserInstrument>(
-      UserInstrument,
-      {
-        deleted: { $ne: true },
-        user: session.userId,
-      },
-      {
-        fields: ["nickname", { instrument: ["id", "name", "novelty"] }, { user: ["id"] }],
-        populateWhere: PopulateHint.INFER,
-      },
+    .then((orm) =>
+      orm.em.fork().find<UserInstrument>(
+        UserInstrument,
+        {
+          deleted: { $ne: true },
+          user: session.userId,
+        },
+        {
+          fields: ["nickname", { instrument: ["id", "name", "novelty"] }, { user: ["id"] }],
+          populateWhere: PopulateHint.INFER,
+        },
+      ),
     )
     .then((instruments) => instruments.map((instrument) => wrap(instrument).toPOJO()));
 
@@ -230,11 +233,12 @@ export const fetchMultiGigSignupSummary = (
 ): Promise<SignupSummaryEntry[] | null> =>
   VIEW_SIGNUP_SUMMARY.guard(session)
     ? orm()
-        .em.fork()
-        .find<GigLineupEntry>(GigLineupEntry, filter, {
-          fields: [{ user: ["first", "last"] }, "user_available", "user_only_if_necessary", { gig: ["id"] }],
-          populateWhere: PopulateHint.INFER,
-        })
+        .then((orm) =>
+          orm.em.fork().find<GigLineupEntry>(GigLineupEntry, filter, {
+            fields: [{ user: ["first", "last"] }, "user_available", "user_only_if_necessary", { gig: ["id"] }],
+            populateWhere: PopulateHint.INFER,
+          }),
+        )
         .then((lineup) => lineup.map((entry) => wrap(entry).toPOJO()))
     : Promise.resolve(null);
 
