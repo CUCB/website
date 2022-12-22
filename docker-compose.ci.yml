@@ -3,12 +3,6 @@ services:
   postgres:
     environment:
       POSTGRES_PASSWORD: postgrespassword
-  graphql-engine:
-    environment:
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:postgrespassword@postgres:5432/postgres
-    ports:
-      - "8080:8080"
   sveltekit:
     build:
       context: .
@@ -19,4 +13,4 @@ services:
     environment:
       PG_PASSWORD: postgrespassword
     command: >
-      bash -c "cd /home/node/app; npm ci; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run start:ci"
+      bash -c "cd /home/node/app; npm ci; npm run build; npm run start:ci"

@@ -7,23 +7,6 @@ services:
       - db_data_test:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
-  graphql-engine:
-    image: hasura/graphql-engine:v2.13.2.cli-migrations-v3
-    volumes:
-      - ./hasura/migrations:/hasura-migrations
-      - ./hasura/metadata:/hasura-metadata
-    depends_on:
-      - "postgres"
-    restart: always
-    environment:
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # set to "false" to disable console
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      ## uncomment next line to set an admin secret
-      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_AUTH_HOOK: http://sveltekit:3000/auth/hook
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
-    ports:
-      - "8080:8080"
   sveltekit:
     build:
       context: .
@@ -36,8 +19,6 @@ services:
     ports:
       - "127.0.0.1:3001:3000"
     environment:
-      GRAPHQL_REMOTE: http://graphql-engine:8080
-      GRAPHQL_PATH: /v1/graphql
       SESSION_SECRET: somethingrandom
       PG_USER: postgres
       PG_HOST: postgres
@@ -51,7 +32,7 @@ services:
       EMAIL_PORT: 1025
       EMAIL_SSL: "false"
     command: >
-      bash -c "cd /home/node/app; npm ci; npm run build; chmod a+x wait-for-it.sh; ./wait-for-it.sh graphql-engine:8080 -t 180 -- npm run start:ci"
+      bash -c "cd /home/node/app; npm ci; npm run build; chmod a+x wait-for-it.sh; npm run start:ci"
 
   caddy:
     image: caddy:latest

@@ -11,28 +11,10 @@ services:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
     ports:
       - "5432:5432"
-  graphql-engine:
-    image: hasura/graphql-engine:v2.13.2.cli-migrations-v3
-    volumes:
-      - ./hasura/migrations:/hasura-migrations
-      - ./hasura/metadata:/hasura-metadata
-    depends_on:
-      - "postgres"
-    restart: always
-    environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # use `npm run hasura:console` instead, it persists changes via migrations
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
-      HASURA_GRAPHQL_AUTH_HOOK: http://172.17.0.1:3001/auth/hook
-    ports:
-      - "8080:8080"
   # sveltekit:
   #   image: node:16.14
   #   user: node:node
   #   environment:
-  #     GRAPHQL_REMOTE: http://graphql-engine:8080
-  #     GRAPHQL_PATH: /v1/graphql
   #     PG_USER: postgres
   #     PG_HOST: postgres
   #     PG_DATABASE: postgres

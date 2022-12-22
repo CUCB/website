@@ -12,31 +12,9 @@ services:
       driver: "json-file"
       options:
         max-size: "50m"
-  graphql-engine:
-    image: hasura/graphql-engine:v2.13.2.cli-migrations-v3
-    volumes:
-      - ./hasura/migrations:/hasura-migrations
-      - ./hasura/metadata:/hasura-metadata
-    depends_on:
-      - "postgres"
-    restart: always
-    environment:
-      HASURA_GRAPHQL_DATABASE_URL: postgres://postgres:${PG_PASSWORD}@postgres:5432/postgres
-      HASURA_GRAPHQL_ENABLE_CONSOLE: "false" # use hasura cli console instead
-      HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, websocket-log, query-log
-      HASURA_GRAPHQL_ADMIN_SECRET: ${HASURA_GRAPHQL_ADMIN_SECRET}
-      HASURA_GRAPHQL_AUTH_HOOK: http://sveltekit:3000/auth/hook
-    ports:
-      - "8080:8080"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "50m"
   sveltekit:
     image: $DEPLOY_REGISTRY/cucb/sveltekit:slim
     environment:
-      GRAPHQL_REMOTE: http://graphql-engine:8080
-      GRAPHQL_PATH: /v1/graphql
       PG_USER: postgres
       PG_HOST: postgres
       PG_DATABASE: postgres

@@ -6,7 +6,6 @@
   "recommendations": [
     "zamerick.vscode-caddyfile-syntax",
     "ms-azuretools.vscode-docker",
-    "graphql.vscode-graphql",
     "unifiedjs.vscode-mdx",
     "svelte.svelte-vscode",
     "esbenp.prettier-vscode",
