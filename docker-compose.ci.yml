@@ -3,6 +3,8 @@ services:
   postgres:
     environment:
       POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
   sveltekit:
     build:
       context: .
