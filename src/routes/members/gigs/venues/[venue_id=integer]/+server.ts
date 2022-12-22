@@ -11,7 +11,7 @@ export const POST = async ({ locals: { session }, request, params: { venue_id } 
 
     if (VALID_VENUE.guard(body)) {
       const filteredBody = filterFields(VALID_VENUE, body);
-      const venues = orm.em.fork().getRepository(GigVenue);
+      const venues = (await orm()).em.fork().getRepository(GigVenue);
 
       await venues.nativeUpdate({ id: venue_id }, filteredBody);
       const venue = await venues.findOne(filteredBody);

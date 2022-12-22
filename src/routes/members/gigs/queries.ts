@@ -161,8 +161,8 @@ export const inMonth = (date: DateTime): ObjectQuery<Gig> =>
 export const inCurrentMonth: ObjectQuery<Gig> = inMonth(DateTime.local());
 
 export const fetchMultiGigSummary = (session: Session, filter: ObjectQuery<Gig>): Promise<GigSummary[]> =>
-  orm.em
-    .fork()
+  orm()
+    .em.fork()
     .find<Gig, string>(
       Gig,
       // TODO maybe a deep merge is required here, but probably not
@@ -186,8 +186,8 @@ export const fetchSpecificGigSummary = (session: Session, id: string | null): Pr
   fetchMultiGigSummary(session, { id }).then((gig) => gig?.[0]);
 
 export const fetchMultiGigSignup = (session: Session, filter: ObjectQuery<Gig>): Promise<SignupGig[]> =>
-  orm.em
-    .fork()
+  orm()
+    .em.fork()
     .find<Gig, string>(
       Gig,
       { ...filter, ...signupQueryFilter(session) },
@@ -209,8 +209,8 @@ export const fetchSpecificGigSignup = (session: Session, id: string | null): Pro
   fetchMultiGigSignup(session, { id }).then((gig) => gig?.[0]);
 
 export const fetchAllInstrumentsForUser = (session: Session): Promise<AvailableUserInstrument[]> =>
-  orm.em
-    .fork()
+  orm()
+    .em.fork()
     .find<UserInstrument>(
       UserInstrument,
       {
@@ -229,8 +229,8 @@ export const fetchMultiGigSignupSummary = (
   filter: ObjectQuery<GigLineupEntry>,
 ): Promise<SignupSummaryEntry[] | null> =>
   VIEW_SIGNUP_SUMMARY.guard(session)
-    ? orm.em
-        .fork()
+    ? orm()
+        .em.fork()
         .find<GigLineupEntry>(GigLineupEntry, filter, {
           fields: [{ user: ["first", "last"] }, "user_available", "user_only_if_necessary", { gig: ["id"] }],
           populateWhere: PopulateHint.INFER,

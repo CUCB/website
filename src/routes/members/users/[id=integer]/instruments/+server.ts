@@ -10,7 +10,7 @@ export const DELETE = async ({ request, params: { id }, locals: { session } }: R
   assertLoggedIn(session);
   if (UPDATE_INSTRUMENTS(id).guard(session)) {
     const { userInstrumentId } = await request.json();
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const instrumentGigs = await em.findOne(
       UserInstrument,
       {
@@ -46,7 +46,7 @@ export const POST = async ({
   assertLoggedIn(session);
 
   if (UPDATE_INSTRUMENTS(userId).guard(session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     let body = await request.json();
     if (RESTORE_DELETED.guard(body)) {
       const id = body.userInstrumentId;

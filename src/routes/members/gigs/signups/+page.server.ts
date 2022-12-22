@@ -45,7 +45,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   assertLoggedIn(session);
 
   if (SELECT_GIG_LINEUPS.guard(session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const [signupsOpen, sinceOneMonth] = await Promise.all([fetchSignupsOpen(em), fetchSinceOneMonth(em)]);
 
     return {

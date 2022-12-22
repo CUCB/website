@@ -15,7 +15,7 @@ const Body = Record({
 export const POST: RequestHandler = async ({ request }) => {
   const body = Object.fromEntries(await request.formData());
   if (Body.guard(body)) {
-    const userRepository = orm.em.fork().getRepository(User);
+    const userRepository = (await orm()).em.fork().getRepository(User);
     const user = await userRepository.findOne({ username: body.username.toLowerCase() });
     if (user) {
       try {

@@ -62,7 +62,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
   if (SELECT_GIG_LINEUPS.guard(session)) {
     const body = await request.json();
     if (addUser.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       await em.upsert(GigLineupEntry, { user: body.id, gig: gig_id });
       const person = await em
         .findOne(
@@ -83,7 +83,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         .then((e) => e && wrap(e).toPOJO());
       return json(person);
     } else if (setInstrumentApproved.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       // TODO I didn't include gig id here initially, that was an error the tests didn't catch
       const entry = await em.findOne(GigLineupInstrument, { gig_id, user_instrument: body.id });
       if (entry) {
@@ -94,7 +94,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         throw error(400, "Instrument not found");
       }
     } else if (setPersonApproved.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       const entry = await em.findOne(GigLineupEntry, { gig: gig_id, user: body.id });
       if (entry) {
         entry.approved = body.approved;
@@ -104,7 +104,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         throw error(400, "Person not found in lineup");
       }
     } else if (setAdminNotes.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       const entry = await em.findOne(GigLineupEntry, { gig: gig_id, user: body.id });
       if (entry) {
         entry.admin_notes = body.admin_notes;
@@ -114,11 +114,11 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         throw error(400, "Person not found");
       }
     } else if (destroyLineupInformation.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       await em.nativeDelete(GigLineupEntry, { gig: gig_id });
       return json([]);
     } else if (addInstrument.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       const userInstrument = await em
         .fork()
         .findOne(UserInstrument, { id: body.id }, { fields: ["user.id"], populate: ["user"] });
@@ -143,7 +143,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
         throw error(400, "User instrument not found");
       }
     } else if (setRole.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       const lineup_entry = await em.findOne(GigLineupEntry, { gig: gig_id, user: body.id });
       if (lineup_entry) {
         lineup_entry[body.role] = body.value;

@@ -10,7 +10,7 @@ const REQUIRED_FIELDS = Record({ contact: String });
 
 export const POST = async ({ request, locals, params }: RequestEvent): Promise<Response> => {
   if (UPDATE_GIG_DETAILS.guard(locals.session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const body = Object.fromEntries(
       Object.entries(await request.json()).filter(([key, _]) => (UPDATABLE_FIELDS as string[]).includes(key)),
     );
@@ -33,7 +33,7 @@ export const POST = async ({ request, locals, params }: RequestEvent): Promise<R
 
 export const DELETE = async ({ request, locals, params }: RequestEvent): Promise<Response> => {
   if (UPDATE_GIG_DETAILS.guard(locals.session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const body = Object.fromEntries(Object.entries(await request.json()).filter(([key, _]) => key == "contact"));
 
     if (REQUIRED_FIELDS.guard(body)) {

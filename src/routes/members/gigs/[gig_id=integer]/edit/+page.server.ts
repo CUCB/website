@@ -18,7 +18,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
   assertLoggedIn(session);
 
   if (UPDATE_GIG_DETAILS.guard(session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const fetchers = [
       em
         .findOne(

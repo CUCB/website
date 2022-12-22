@@ -54,7 +54,7 @@ export const load: PageServerLoad = async ({ locals, params: { id }, fetch }): P
   const canEditInstruments = UPDATE_INSTRUMENTS(id).guard(session);
   const canEditAdminStatus = UPDATE_ADMIN_STATUS(id).guard(session);
 
-  const em: EntityManager = orm.em.fork() as EntityManager;
+  const em: EntityManager = (await orm()).em.fork() as EntityManager;
 
   let userFields;
   if (IS_SELF(id).guard(session)) {

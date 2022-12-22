@@ -9,7 +9,7 @@ const UPDATABLE_FIELDS: (keyof Contact)[] = ["id", "caller", "email", "name", "n
 
 export const POST = async ({ request, locals }: RequestEvent): Promise<Response> => {
   if (UPDATE_GIG_DETAILS.guard(locals.session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const body = Object.fromEntries(
       Object.entries(await request.json()).filter(([key, _]) => UPDATABLE_FIELDS.includes(key as keyof Contact)),
     );

@@ -6,7 +6,7 @@ export async function load({ parent }) {
   const { session } = await parent();
 
   try {
-    const userRepository = orm.em.fork().getRepository(User);
+    const userRepository = (await orm()).em.fork().getRepository(User);
     const user = await userRepository.findOne(
       { id: session.userId },
       { populate: ["prefs", "prefs.pref_type"], fields: ["prefs.*"] },

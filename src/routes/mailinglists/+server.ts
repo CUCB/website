@@ -42,7 +42,7 @@ async function realpost(request: Request) {
   let webmasters;
   try {
     // TODO make sure queries like this actually pick the latest committee, but not future committees
-    const committeeRepository = orm.em.fork().getRepository(Committee);
+    const committeeRepository = (await orm()).em.fork().getRepository(Committee);
     const committee = await committeeRepository.findOne(
       { started: { $lte: "now()" }, members: { lookup_name: { name: { $eq: "webmaster" } } } },
       {

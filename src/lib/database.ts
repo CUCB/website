@@ -3,15 +3,16 @@ import { env } from "$env/dynamic/private";
 import makeConfig from "./database/config";
 import { NecessaryDataSeeder } from "../seeders/NecessaryDataSeeder";
 
-let orm;
+let orm: MikroORM | undefined;
 
-const makeOrm = async () => {
-  orm = await MikroORM.init(makeConfig(env));
-  await orm.migrator.up();
-  await orm.seeder.seed(NecessaryDataSeeder);
+const makeOrm = async (): Promise<MikroORM> => {
+  if (!orm) {
+    orm = await MikroORM.init(makeConfig(env));
+    await orm.migrator.up();
+    await orm.seeder.seed(NecessaryDataSeeder);
+  }
+  return orm;
 };
 
-await makeOrm();
-
 // Export the orm as default
-export default orm;
+export default makeOrm;

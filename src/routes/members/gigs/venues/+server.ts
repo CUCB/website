@@ -45,7 +45,7 @@ export const POST = async ({ locals: { session }, request }: RequestEvent): Prom
 
     if (VALID_VENUE.guard(body)) {
       const filteredBody = filterFields(VALID_VENUE, body);
-      const venues = orm.em.fork().getRepository(GigVenue);
+      const venues = (await orm()).em.fork().getRepository(GigVenue);
       const venue = venues.create(filteredBody);
       await venues.persistAndFlush(venue);
       return json(venue);

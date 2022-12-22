@@ -13,7 +13,7 @@ export async function GET() {
   // Return from cache if recent enough
   if (!retrieved || DateTime.local().diff(retrieved).hours > 0) {
     try {
-      const committeeRepository = orm.em.fork().getRepository(Committee);
+      const committeeRepository = (await orm()).em.fork().getRepository(Committee);
       const queryResult = await committeeRepository.findOne(
         { started: { $lte: "now()" } },
         {
