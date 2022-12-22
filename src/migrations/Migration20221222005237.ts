@@ -1,6 +1,6 @@
 import { Migration } from "@mikro-orm/migrations";
 
-export class Migration20221220223935 extends Migration {
+export class Migration20221222005237 extends Migration {
   async up(): Promise<void> {
     this.addSql('create schema if not exists "cucb";');
 
@@ -83,7 +83,7 @@ export class Migration20221220223935 extends Migration {
     this.addSql('create index "idx_17463_type" on "cucb"."music" ("type");');
 
     this.addSql(
-      'create table "cucb"."session" ("sid" bigserial primary key, "sess" json not null, "expire" timestamptz(6) not null);',
+      'create table "cucb"."session" ("sid" varchar(255) not null, "sess" json not null, "expire" timestamptz(6) not null, constraint "session_pkey" primary key ("sid"));',
     );
     this.addSql('create index "IDX_session_expire" on "cucb"."session" ("expire");');
 
@@ -109,14 +109,14 @@ export class Migration20221220223935 extends Migration {
     this.addSql('create index "idx_17481_posted_by" on "cucb"."news" ("posted_by");');
 
     this.addSql(
-      'create table "cucb"."gigs" ("id" bigserial primary key, "title" varchar(128) not null, "type" bigint not null, "date" date not null, "time" time null, "arrive_time" timestamptz(6) null, "finish_time" timestamptz(6) null, "venue_id" bigint null, "posting_user" bigint null, "posting_time" timestamptz(6) null default now(), "editing_user" bigint null, "editing_time" timestamptz(6) null, "summary" text null, "quote_date" date null, "finance" text null, "finance_deposit_received" boolean null default false, "finance_payment_received" boolean null default false, "finance_caller_paid" boolean null default false, "notes_band" text null, "notes_admin" text null, "advertise" boolean not null default false, "admins_only" boolean not null default true, "allow_signups" boolean not null default false, "food_provided" boolean not null default false);',
+      'create table "cucb"."gigs" ("id" bigserial primary key, "title" varchar(128) not null, "type" bigint not null, "date" date null, "time" time null, "arrive_time" timestamptz(6) null, "finish_time" timestamptz(6) null, "venue_id" bigint null, "posting_user" bigint null, "posting_time" timestamptz(6) null default now(), "editing_user" bigint null, "editing_time" timestamptz(6) null, "summary" text null, "quote_date" date null, "finance" text null, "finance_deposit_received" boolean null default false, "finance_payment_received" boolean null default false, "finance_caller_paid" boolean null default false, "notes_band" text null, "notes_admin" text null, "advertise" boolean not null default false, "admins_only" boolean not null default true, "allow_signups" boolean not null default false, "food_provided" boolean not null default false);',
     );
     this.addSql('create index "idx_17399_type" on "cucb"."gigs" ("type");');
     this.addSql('create index "idx_17399_venue_id" on "cucb"."gigs" ("venue_id");');
     this.addSql('create index "idx_17399_posting_user" on "cucb"."gigs" ("posting_user");');
 
     this.addSql(
-      'create table "cucb"."gigs_lineups" ("gig_id" bigint not null, "user_id" bigint not null, "id" int8 not null, "adding_time" timestamptz(6) null default now(), "editing_time" timestamptz(6) null, "approved" boolean null, "equipment" boolean not null default false, "leader" boolean not null default false, "driver" boolean not null default false, "money_collector" boolean not null default false, "money_collector_notified" boolean not null default false, "user_notes" text null, "user_available" boolean null, "user_only_if_necessary" boolean null, "admin_notes" text null, constraint "gigs_lineups_pkey" primary key ("gig_id", "user_id"));',
+      'create table "cucb"."gigs_lineups" ("gig_id" bigint not null, "user_id" bigint not null, "adding_time" timestamptz(6) null default now(), "editing_time" timestamptz(6) null, "approved" boolean null, "equipment" boolean not null default false, "leader" boolean not null default false, "driver" boolean not null default false, "money_collector" boolean not null default false, "money_collector_notified" boolean not null default false, "user_notes" text null, "user_available" boolean null, "user_only_if_necessary" boolean null, "admin_notes" text null, constraint "gigs_lineups_pkey" primary key ("gig_id", "user_id"));',
     );
     this.addSql('create index "idx_17423_user_id" on "cucb"."gigs_lineups" ("user_id");');
     this.addSql('alter table "cucb"."gigs_lineups" add constraint "idx_17423_gig_id" unique ("gig_id", "user_id");');
@@ -166,7 +166,7 @@ export class Migration20221220223935 extends Migration {
     this.addSql('create index "idx_17525_id" on "cucb"."users_instruments" ("id", "user_id");');
 
     this.addSql(
-      'create table "cucb"."gigs_lineups_instruments" ("gig_id" bigint not null, "user_id" bigint not null, "user_instrument_id" bigint not null, "approved" boolean null default \'false\', constraint "gigs_lineups_instruments_pkey" primary key ("gig_id", "user_id", "user_instrument_id"));',
+      'create table "cucb"."gigs_lineups_instruments" ("gig_id" bigint not null, "user_id" bigint not null, "user_instrument_id" bigint not null, "approved" boolean null default null, constraint "gigs_lineups_instruments_pkey" primary key ("gig_id", "user_id", "user_instrument_id"));',
     );
     this.addSql(
       'create index "idx_17435_user_instrument_id" on "cucb"."gigs_lineups_instruments" ("user_instrument_id", "user_id");',
@@ -257,7 +257,7 @@ export class Migration20221220223935 extends Migration {
       'alter table "cucb"."gigs_contacts" add constraint "gigs_contacts_gig_id_foreign" foreign key ("gig_id") references "cucb"."gigs" ("id") on update cascade on delete cascade;',
     );
     this.addSql(
-      'alter table "cucb"."gigs_contacts" add constraint "gigs_contacts_contact_id_foreign" foreign key ("contact_id") references "cucb"."contacts" ("id") on update cascade;',
+      'alter table "cucb"."gigs_contacts" add constraint "gigs_contacts_contact_id_foreign" foreign key ("contact_id") references "cucb"."contacts" ("id") on update cascade on delete cascade;',
     );
 
     this.addSql(
@@ -311,7 +311,7 @@ export class Migration20221220223935 extends Migration {
     );
 
     this.addSql(
-      'alter table "cucb"."user_prefs" add constraint "user_prefs_user_id_foreign" foreign key ("user_id") references "cucb"."users" ("id") on update cascade;',
+      'alter table "cucb"."user_prefs" add constraint "user_prefs_user_id_foreign" foreign key ("user_id") references "cucb"."users" ("id") on update cascade on delete cascade;',
     );
     this.addSql(
       'alter table "cucb"."user_prefs" add constraint "user_prefs_pref_id_foreign" foreign key ("pref_id") references "cucb"."user_pref_types" ("id") on update cascade;',

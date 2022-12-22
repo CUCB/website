@@ -19,7 +19,7 @@ export class GigLineupInstrument {
   @ManyToOne({ entity: () => UserInstrument, primary: true })
   user_instrument!: Relation<UserInstrument>;
 
-  @Property({ nullable: true, type: "bool", default: "false" })
+  @Property({ nullable: true, type: "bool", default: null })
   // TODO is this appropriate elsewhere where nullable: true??
   approved?: boolean | null;
 

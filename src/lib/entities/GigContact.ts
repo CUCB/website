@@ -13,6 +13,7 @@ export class GigContact {
   @ManyToOne({
     entity: () => Contact,
     onUpdateIntegrity: "cascade",
+    onDelete: "cascade",
     primary: true,
     default: "0",
     index: "idx_17412_contact_id",

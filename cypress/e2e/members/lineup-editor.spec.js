@@ -21,7 +21,7 @@ const click = ($el) => $el.click();
 let signups = [
   // Names from http://tabbycats.club/
   {
-    user: { first: "Huggable", last: "Treasurechest", gig_notes: "Can only lead on fiddle", user_prefs: ["leader"] },
+    user: { first: "Huggable", last: "Treasurechest", gig_notes: "Can only lead on fiddle", prefs: ["leader"] },
     user_available: true,
     user_instruments: [["Fiddle", "Stringy"], "Mandolin"],
     user_notes: "Fiddle if possible, please",
@@ -31,7 +31,7 @@ let signups = [
       first: "Infinite",
       last: "Smasher",
       gig_notes: "",
-      user_prefs: ["soundtech"],
+      prefs: ["soundtech"],
       user_instruments: ["Drum(s)", "Cajón"],
     },
     user_available: true,
@@ -39,21 +39,21 @@ let signups = [
     user_notes: "",
   },
   {
-    user: { first: "Poofy", last: "Bubby", gig_notes: "", user_prefs: ["soundtech", "driver", "car"] },
+    user: { first: "Poofy", last: "Bubby", gig_notes: "", prefs: ["soundtech", "driver", "car"] },
     user_available: true,
     user_only_if_necessary: true,
     user_instruments: ["Guitar", "Whistle(s)"],
     user_notes: "",
   },
   {
-    user: { first: "Sneaky", last: "Burglar", gig_notes: "", user_prefs: [] },
+    user: { first: "Sneaky", last: "Burglar", gig_notes: "", prefs: [] },
     user_available: false,
     user_only_if_necessary: false,
     user_instruments: [],
     user_notes: "Can't make this one",
   },
   {
-    user: { first: "Old Man", last: "Ringpop", gig_notes: "", user_prefs: [] },
+    user: { first: "Old Man", last: "Ringpop", gig_notes: "", prefs: [] },
     user_available: false,
     user_only_if_necessary: false,
     user_instruments: ["Kazoo", "Bombarde"],
@@ -65,157 +65,101 @@ describe("lineup editor", () => {
   let signupsToInsert;
   beforeEach(() => {
     let melodeonId, clarinetId;
-    cy.executeMutation(CreateGig, {
-      variables: {
-        id: 15274,
-        title: "Cypress Demo Gig",
-        type: 1,
-        adminsOnly: false,
-        allowSignups: false,
-      },
+    cy.task("db:create_gig", {
+      id: "15274",
+      title: "Cypress Demo Gig",
+      type: "1",
+      admins_only: false,
+      allow_signups: false,
     });
-    cy.executeMutation(DeleteGig, { variables: { id: 15275 } });
-    cy.executeMutation(ClearLineupForGig, { variables: { id: 15274 } });
-    cy.executeQuery(AllAttributes)
-      .its("cucb_user_pref_types")
-      .then((attributeList) => {
-        let attributeIds = new Map();
-        for (let attribute of attributeList) attributeIds.set(attribute.name.split(".")[1], attribute.id);
-        cy.executeQuery(AllInstrumentNames)
-          .its("cucb_instruments")
-          .then((instrumentList) => {
-            let userIdBase = 283472;
-            let userInstrumentIdBase = 283479;
-            let userInstrumentCount = 0;
-            let userCount = 0;
-            signupsToInsert = [];
-            let instrumentIds = new Map();
-            for (let instrument of instrumentList) {
-              instrumentIds = instrumentIds.set(instrument.name, instrument.id);
-            }
-            melodeonId = instrumentIds.get("Melodeon");
-            clarinetId = instrumentIds.get("Clarinet");
-            for (let person of signups) {
-              person.user.id = userIdBase * ++userCount;
-              if (
-                person.user_instruments &&
-                person.user_instruments.length > 0 &&
-                (typeof person.user_instruments[0] === "string" ||
-                  (typeof person.user_instruments[0] === "object" && person.user_instruments[0].hasOwnProperty(0)))
-              ) {
-                person.user_instruments = person.user_instruments.map((name) => {
-                  let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
-                  return {
-                    id: userInstrumentIdBase * ++userInstrumentCount,
-                    instr_id: instrumentIds.get(fields.name),
-                    ...fields,
-                  };
-                });
-                person.user.user_instruments =
-                  person.user.user_instruments &&
-                  person.user.user_instruments.map((name) => {
-                    let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
-                    return {
-                      id: userInstrumentIdBase * ++userInstrumentCount,
-                      instr_id: instrumentIds.get(fields.name),
-                      ...fields,
-                    };
-                  });
-              }
-              let userPrefs = person.user.user_prefs.map((name) => ({
-                pref_id: attributeIds.get(name),
-                value: true,
-              }));
-              let signupInstruments =
-                person.user_instruments &&
-                person.user_instruments.map(({ id, instr_id, nickname }) => ({
-                  approved: null,
-                  user_instrument: {
-                    data: {
-                      id,
-                      instr_id,
-                      user_id: person.user.id,
-                      nickname,
-                    },
-                    on_conflict: OnConflictUserInstruments,
-                  },
-                }));
-              let nonSignupInstruments =
-                (person.user.user_instruments && {
-                  user_instruments: {
-                    data: person.user.user_instruments.map(({ id, instr_id, nickname }) => ({
-                      id,
-                      instr_id,
-                      nickname,
-                    })),
-                    on_conflict: OnConflictUserInstruments,
-                  },
-                }) ||
-                {};
-              signupsToInsert.push({
-                ...person,
-                gig_id: 15274,
-                user: {
-                  data: {
-                    email: `user${person.user.id}@lineup-edit.or`,
-                    username: `cypress_gig_lineup_u${person.user.id}`,
-                    admin: 9,
-                    ...person.user,
-                    user_prefs: { data: userPrefs, on_conflict: OnConflictUserPrefs },
-                    ...nonSignupInstruments,
-                  },
-                  on_conflict: OnConflictUser,
-                },
-                user_instruments: { data: signupInstruments, on_conflict: OnConflictLineupInstruments },
-                leader: false,
-                money_collector: false,
-                money_collector_notified: false,
-                equipment: false,
-                driver: false,
-                approved: null,
-              });
-            }
-            cy.executeMutation(DeleteUsers, {
-              variables: { ids: signupsToInsert.map((signup) => signup.user.data.id) },
+    cy.task("db:delete_signups", { id: "15274" });
+    cy.task("db:delete_gig", "15275");
+    cy.task("db:create_login_users");
+    cy.task("db:attribute_ids_by_name").then((attributeIds) => {
+      cy.task("db:instrument_ids_by_name").then((instrumentIds) => {
+        let userIdBase = 283472;
+        let userInstrumentIdBase = 283479;
+        let userInstrumentCount = 0;
+        let userCount = 0;
+        signupsToInsert = [];
+
+        melodeonId = instrumentIds["Melodeon"];
+        clarinetId = instrumentIds["Clarinet"];
+        for (const person of signups) {
+          person.user.id = (userIdBase * ++userCount).toString();
+          if (
+            typeof person.user_instruments?.[0] === "string" ||
+            (typeof person.user_instruments?.[0] === "object" && person.user_instruments[0].hasOwnProperty(0))
+          ) {
+            person.user_instruments = person.user_instruments?.map((name) => {
+              let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+              return {
+                id: (userInstrumentIdBase * ++userInstrumentCount).toString(),
+                instrument: instrumentIds[fields.name],
+                nickname: fields.nickname,
+                name: fields.name,
+              };
             });
-            cy.executeMutation(CreateLineup, { variables: { entries: signupsToInsert } });
-            cy.executeMutation(DeleteUserInstruments, { variables: { userId: 27382 } });
-            cy.executeMutation(CreateUser, {
-              variables: {
-                id: 27382,
-                username: "cypress_president",
-                saltedPassword: HASHED_PASSWORDS.abc123,
-                admin: 2,
-                email: "cucb.president@cypress.io",
-                firstName: "Cypress",
-                lastName: "President",
-                userInstruments: {
-                  data: [
-                    {
-                      id: 53257432,
-                      instr_id: melodeonId,
-                    },
-                    {
-                      id: 53257433,
-                      instr_id: clarinetId,
-                    },
-                  ],
-                  on_conflict: OnConflictUserInstruments,
-                },
-              },
+            person.user.user_instruments = person.user.user_instruments?.map((name) => {
+              let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+              return {
+                id: (userInstrumentIdBase * ++userInstrumentCount).toString(),
+                instrument: instrumentIds[fields.name],
+                nickname: fields.nickname,
+                name: fields.name,
+              };
             });
+          }
+          let userPrefs = person.user.prefs.map((name) => ({
+            pref_type: attributeIds[name],
+            value: true,
+          }));
+          let signupInstruments =
+            person.user_instruments &&
+            person.user_instruments.map(({ id }) => ({
+              approved: null,
+              user_instrument: id,
+            }));
+          let userInstruments = {
+            instruments: [...(person.user.user_instruments || []), ...person.user_instruments].map((instrument) => ({
+              ...instrument,
+              name: undefined,
+            })),
+          };
+
+          signupsToInsert.push({
+            ...person,
+            user: {
+              email: `user${person.user.id}@lineup-edit.or`,
+              username: `cypress_gig_lineup_u${person.user.id}`,
+              admin: "9",
+              ...person.user,
+              prefs: userPrefs,
+              ...userInstruments,
+            },
+            user_instruments: signupInstruments,
+            leader: false,
+            money_collector: false,
+            money_collector_notified: false,
+            equipment: false,
+            driver: false,
+            approved: null,
           });
+          for (const signup of signupsToInsert) {
+            delete signup.user["user_instruments"];
+          }
+        }
+        cy.log(signupsToInsert);
+
+        cy.task(
+          "db:delete_users_where",
+          signupsToInsert.map((signup) => ({ id: signup.user.id })),
+        );
+        cy.task("db:create_lineup", { entries: signupsToInsert, gig: "15274" });
+        cy.task("db:delete_instruments_for_user", "27382");
+        cy.task("db:create_user_instrument", { id: "53257432", user: "27382", instrument: melodeonId });
+        cy.task("db:create_user_instrument", { id: "53257433", user: "27382", instrument: clarinetId });
       });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
     });
   });
 
@@ -232,20 +176,18 @@ describe("lineup editor", () => {
     });
 
     it("gives a 404 error if the gig is kit hire, calendar event, cancelled or an enquiry", () => {
-      cy.executeQuery(AllGigTypes)
-        .its("cucb_gig_types")
-        .then((gigTypes) => {
-          for (let type of gigTypes.filter((type) => type.code !== "gig")) {
-            cy.log(`Testing ${type.title}`);
-            cy.executeMutation(UpdateGigType, { variables: { gigId: 15274, typeId: type.id } }, { log: false });
-            cy.request({
-              url: "/members/gigs/15274/edit-lineup",
-              failOnStatusCode: false,
-            })
-              .its("status")
-              .should("eq", 404);
-          }
-        });
+      cy.task("db:all_gig_types").then((gigTypes) => {
+        for (const type of gigTypes.filter((type) => type.code !== "gig")) {
+          cy.log(`Testing ${type.title}`);
+          cy.task("db:update_gig_type", { id: "15274", type: type.id });
+          cy.request({
+            url: "/members/gigs/15274/edit-lineup",
+            failOnStatusCode: false,
+          })
+            .its("status")
+            .should("eq", 404);
+        }
+      });
     });
 
     context("viewing valid gig", () => {
@@ -262,7 +204,7 @@ describe("lineup editor", () => {
             ? "lineup-editor-applicants"
             : "lineup-editor-nope";
           cy.get(`[data-test=${listSelector}] [data-test=member-${person.user.id}]`).then(($row) => {
-            if (person.user.user_prefs.includes("leader")) {
+            if (person.user.prefs.includes("leader")) {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-leader]`)
                 .should("be.visible")
                 .click()
@@ -272,7 +214,7 @@ describe("lineup editor", () => {
                 "not.exist",
               );
             }
-            if (person.user.user_prefs.includes("soundtech")) {
+            if (person.user.prefs.includes("soundtech")) {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`)
                 .should("be.visible")
                 .click()
@@ -282,7 +224,7 @@ describe("lineup editor", () => {
                 `[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-soundtech]`,
               ).should("not.exist");
             }
-            if (person.user.user_prefs.includes("driver")) {
+            if (person.user.prefs.includes("driver")) {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-driver]`)
                 .should("be.visible")
                 .click()
@@ -292,7 +234,7 @@ describe("lineup editor", () => {
                 "not.exist",
               );
             }
-            if (person.user.user_prefs.includes("car")) {
+            if (person.user.prefs.includes("car")) {
               cy.get(`[data-test=member-${person.user.id}] [data-test=attribute-icons] [data-test=icon-car]`)
                 .should("be.visible")
                 .click()
@@ -304,9 +246,10 @@ describe("lineup editor", () => {
             }
             cy.wrap($row).within(() => {
               for (let instrument of person.user_instruments) {
-                cy.contains(instrument.name)
+                cy.get("[data-test=instrument-name]")
+                  .contains(instrument.name)
                   .should("be.visible")
-                  .parentsUntil("[data-test=instrument-row]")
+                  .parents(`[data-test=instrument-${instrument.id}]`)
                   .within(() => {
                     cy.get("[data-test=instrument-maybe]").should("have.attr", "aria-checked", "true");
                   });
@@ -676,22 +619,22 @@ let signupAdminGigs = [
   {
     date: currentDate.minus({ weeks: 1 }),
     title: "Gone gig",
-    allowSignups: false,
+    allow_signups: false,
   },
   {
     date: currentDate.plus({ days: 2 }),
     title: "Soon gig",
-    allowSignups: false,
+    allow_signups: false,
   },
   {
     date: currentDate.plus({ weeks: 2 }),
     title: "Then gig",
-    allowSignups: true,
+    allow_signups: true,
   },
   {
     date: currentDate.plus({ weeks: 3 }),
     title: "Further gig",
-    allowSignups: true,
+    allow_signups: true,
   },
 ];
 
@@ -752,14 +695,8 @@ describe("signup admin", () => {
     for (let index in signupAdminGigs) {
       let gig = signupAdminGigs[index];
       gig.id = gigIds[index];
-      cy.executeMutation(CreateGig, {
-        variables: {
-          ...gig,
-          adminsOnly: false,
-          type: 1,
-        },
-      });
-      cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
+      cy.task("db:create_gig", { ...gig, admins_only: false, type: "1" });
+      cy.task("db:delete_signups", { id: gig.id });
     }
     signupsToInsert = [];
     let userIdBase = 737632;
@@ -769,26 +706,23 @@ describe("signup admin", () => {
       for (let gigIndex in signupAdminGigs) {
         let gigSignup = person.gigs[gigIndex];
         if (gigSignup) {
-          gigSignup.gig_id = signupAdminGigs[gigIndex].id;
+          gigSignup.gig = signupAdminGigs[gigIndex].id;
           signupsToInsert.push({
             user: {
-              data: {
-                id: person.id,
-                email: `user${person.id}@signup-adm.in`,
-                username: `cypress_gig_signup_admin_u${person.id}`,
-                admin: 9,
-                first: person.first,
-                last: person.last,
-                gig_notes: person.gig_notes,
-              },
-              on_conflict: OnConflictUser,
+              id: person.id.toString(),
+              email: `user${person.id}@signup-adm.in`,
+              username: `cypress_gig_signup_admin_u${person.id}`,
+              admin: "9",
+              first: person.first,
+              last: person.last,
+              gig_notes: person.gig_notes,
             },
             ...gigSignup,
           });
         }
       }
     }
-    cy.executeMutation(CreateLineup, { variables: { entries: signupsToInsert } });
+    cy.task("db:create_lineup", { entries: signupsToInsert, gig_id: null });
   });
 
   it("is not accessible to normal users", () => {

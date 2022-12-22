@@ -7,7 +7,7 @@ import type { Relation } from "./bodge.js";
 @Unique({ name: "idx_17543_userpref", properties: ["user", "pref_type"] })
 @Filter({ name: "isAttribute", cond: { pref_type: { name: { $ilike: "attribute.%" } } } })
 export class UserPref {
-  @ManyToOne({ entity: () => User, primary: true })
+  @ManyToOne({ entity: () => User, primary: true, onDelete: "cascade" })
   user!: Relation<User>;
 
   @ManyToOne({ entity: () => UserPrefType, primary: true, index: "idx_17543_pref_id", fieldName: "pref_id" })

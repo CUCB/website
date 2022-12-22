@@ -1,5 +1,4 @@
-import { onConflictVenue, SetResetGig } from "../../database/gigs";
-import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
+import { DateTime } from "luxon";
 
 const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
 
@@ -19,115 +18,93 @@ let onConflictLineupUserInstrument = {
 };
 
 let gig = {
-  id: 74527,
+  id: "74527",
+  type: "1",
   title: "Gig of excitement",
-  adminsOnly: false,
-  allowSignups: true,
+  admins_only: false,
+  allow_signups: true,
   date: "2020-07-25",
   time: "21:00",
-  arriveTime: "2020-07-25T20:00+01:00",
-  finishTime: "2020-07-25T23:00+01:00",
-  depositReceived: true,
-  paymentReceived: false,
-  callerPaid: false,
+  arrive_time: DateTime.fromISO("2020-07-25T20:00+01:00").toJSDate(),
+  finish_time: DateTime.fromISO("2020-07-25T23:00+01:00").toJSDate(),
+  finance_deposit_received: true,
+  finance_payment_received: false,
+  finance_caller_paid: false,
   venue: {
-    on_conflict: onConflictVenue,
-    data: {
-      address: "3 Trumpington St, Cambridge",
-      postcode: "CB2 1QY",
-      distance_miles: 0,
-      longitude: 0.1182611,
-      latitude: 52.2014254,
-      map_link:
-        "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
-      name: "Emmanuel United Reform Church",
-      notes_band: "Where we (used to) rehearse",
-      subvenue: null,
-      id: 3277452,
-    },
+    address: "3 Trumpington St, Cambridge",
+    postcode: "CB2 1QY",
+    distance_miles: 0,
+    longitude: 0.1182611,
+    latitude: 52.2014254,
+    map_link:
+      "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
+    name: "Emmanuel United Reform Church",
+    notes_band: "Where we (used to) rehearse",
+    subvenue: null,
+    id: "3277452",
   },
-  lineup: {
-    on_conflict: {
-      constraint: "gigs_lineups_pkey",
-      update_columns: ["approved", "leader", "money_collector", "driver", "equipment", "user_id"],
+  lineup: [
+    {
+      approved: true,
+      leader: true,
+      equipment: false,
+      money_collector: false,
+      driver: false,
+      user: {
+        id: "374325",
+        username: "leady374325",
+        first: "Leady",
+        last: "Lead",
+        email: "user374325@testi.ng",
+        instruments: [
+          {
+            id: "105747",
+            deleted: false,
+            instrument: "20",
+            nickname: null,
+          },
+          {
+            id: "576743",
+            deleted: true,
+            instrument: "63",
+            nickname: "Cluck cluck",
+          },
+        ],
+      },
+      user_instruments: [
+        {
+          user_instrument_id: 105747,
+          approved: true,
+        },
+        {
+          user_instrument_id: 576743,
+          approved: true,
+        },
+      ],
     },
-    data: [
-      {
-        approved: true,
-        leader: true,
-        equipment: false,
-        money_collector: false,
-        driver: false,
-        user: {
-          on_conflict: onConflictUser,
-          data: {
-            id: 374325,
-            username: "leady374325",
-            first: "Leady",
-            last: "Lead",
-            email: "user374325@testi.ng",
-            user_instruments: {
-              on_conflict: onConflictUserInstrument,
-              data: [
-                {
-                  id: 105747,
-                  deleted: false,
-                  instr_id: 20,
-                  nickname: null,
-                },
-                {
-                  id: 576743,
-                  deleted: true,
-                  instr_id: 63,
-                  nickname: "Cluck cluck",
-                },
-              ],
-            },
+    {
+      approved: true,
+      leader: false,
+      equipment: true,
+      driver: true,
+      money_collector: true,
+      user: {
+        id: "567236",
+        username: "User567236",
+        first: "Twizzly",
+        last: "Dialy",
+        email: "user567236@testi.ng",
+        instruments: [
+          {
+            id: "547452",
+            deleted: false,
+            instrument: "66",
+            nickname: null,
           },
-        },
-        user_instruments: {
-          on_conflict: onConflictLineupUserInstrument,
-          data: [
-            {
-              user_instrument_id: 105747,
-              approved: true,
-            },
-            {
-              user_instrument_id: 576743,
-              approved: true,
-            },
-          ],
-        },
+        ],
       },
-      {
-        approved: true,
-        leader: false,
-        equipment: true,
-        driver: true,
-        money_collector: true,
-        user: {
-          on_conflict: onConflictUser,
-          data: {
-            id: 567236,
-            username: "User567236",
-            first: "Twizzly",
-            last: "Dialy",
-            email: "user567236@testi.ng",
-            user_instruments: {
-              on_conflict: onConflictUserInstrument,
-              data: [
-                {
-                  deleted: false,
-                  instr_id: 66,
-                  nickname: null,
-                },
-              ],
-            },
-          },
-        },
-      },
-    ],
-  },
+    },
+  ],
 };
 
 let venues = [1, 2, 3, 4, 5].map((n) => ({
@@ -141,13 +118,13 @@ let venues = [1, 2, 3, 4, 5].map((n) => ({
   name: `A really long venue name to search for ${n.toString().repeat(n)}`,
   notes_band: null,
   subvenue: null,
-  id: 3277457 * n,
+  id: (3277457 * n).toString(),
 }));
 
 let contacts = [
   {
-    id: 3274354,
-    user_id: 32747,
+    id: "3274354",
+    user_id: "32747",
     name: "Cally Call",
     email: "caller@call.io",
     organization: null,
@@ -155,7 +132,7 @@ let contacts = [
     caller: true,
   },
   {
-    id: 3274354 * 2,
+    id: (3274354 * 2).toString(),
     user_id: null,
     name: "A Client1",
     email: "client@gmail.com",
@@ -164,7 +141,7 @@ let contacts = [
     caller: false,
   },
   {
-    id: 3274354 * 3,
+    id: (3274354 * 3).toString(),
     user_id: null,
     name: "A Client2",
     email: "client@gmail.com",
@@ -173,7 +150,7 @@ let contacts = [
     caller: false,
   },
   {
-    id: 3274354 * 4,
+    id: (3274354 * 4).toString(),
     user_id: null,
     name: "A Client3",
     email: "client@gmail.com",
@@ -185,30 +162,17 @@ let contacts = [
 
 describe("gig editor", () => {
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 32747,
-        username: "cypress",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 1,
-        email: "cy@press.io",
-        firstName: "Cypress",
-        lastName: "Webmaster",
-      },
-    });
+    cy.task("db:create_login_users");
   });
 
   context("saving changes", () => {
     beforeEach(() => {
-      cy.executeMutation(SetResetGig, {
-        variables: {
-          ...gig,
-          where_delete_contacts: { _or: [{ name: { _like: "A Client%" } }, { name: { _like: "A Caller%" } }] },
-          where_delete_venues: { name: { _like: "%og on%" } },
-          create_contacts: contacts,
-          create_venues: venues,
-        },
-      });
+      cy.task("db:delete_contacts", { $or: [{ name: { $like: "%A Client%" } }, { name: { $like: "A Caller%" } }] });
+      cy.task("db:delete_venues", { name: { $like: "%og on%" } });
+      cy.task("db:delete_gig", gig.id);
+      cy.task("db:create_venues", venues);
+      cy.task("db:create_contacts", contacts);
+      cy.task("db:create_gig", gig);
       cy.login("cypress", "abc123");
       cy.visit(`/members/gigs/${gig.id}/edit`);
       cy.waitForFormInteractive();
@@ -265,7 +229,7 @@ describe("gig editor", () => {
         .log("should trim that field");
       cy.get(`[data-test=gig-edit-${gig.id}-advertise]`).check();
       cy.get(`[data-test=gig-edit-${gig.id}-finance-deposit]`).uncheck();
-      cy.get(`[data-test=gig-edit-${gig.id}-finance]`).click().type("Deposit: some amount", { delay: 0 });
+      cy.get(`[data-test=gig-edit-${gig.id}-finance]`).click().clear().type("Deposit: some amount", { delay: 0 });
 
       cy.contains("unsaved changes").should("be.visible");
       cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
@@ -584,15 +548,12 @@ describe("gig editor", () => {
 
   context("not saving changes", () => {
     before(() => {
-      cy.executeMutation(SetResetGig, {
-        variables: {
-          ...gig,
-          where_delete_contacts: { _or: [{ name: { _like: "A Client%" } }, { name: { _like: "A Caller%" } }] },
-          where_delete_venues: { name: { _like: "%og on%" } },
-          create_contacts: contacts,
-          create_venues: venues,
-        },
-      });
+      cy.task("db:delete_contacts", { $or: [{ name: { $like: "%A Client%" } }, { name: { $like: "A Caller%" } }] });
+      cy.task("db:delete_venues", { name: { $like: "%og on%" } });
+      cy.task("db:delete_gig", gig.id);
+      cy.task("db:create_gig", gig);
+      cy.task("db:create_venues", venues);
+      cy.task("db:create_contacts", contacts);
     });
 
     beforeEach(() => {
@@ -614,11 +575,11 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-show-preview]`).pipe(click).should("not.exist");
       cy.get(`[data-test=gig-summary-${gig.id}]`)
         .should("contain", gig.title)
-        .and("contain", Cypress.DateTime.fromISO(gig.arriveTime).toFormat("HH:mm"))
+        .and("contain", Cypress.DateTime.fromJSDate(gig.arrive_time).toFormat("HH:mm"))
         .and("contain", gig.time)
         .and("contain", "Deposit received")
         .and("contain", "Caller not paid")
-        .and("contain", gig.venue.data.name)
+        .and("contain", gig.venue.name)
         .and("not.contain", "Edit gig");
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select] [data-test=select-box]`).select(contacts[0].name);
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
@@ -628,7 +589,7 @@ describe("gig editor", () => {
 
       cy.get(`[data-test=gig-summary-${gig.id}]`)
         .should("contain", gig.title)
-        .and("contain", Cypress.DateTime.fromISO(gig.arriveTime).toFormat("HH:mm"))
+        .and("contain", Cypress.DateTime.fromJSDate(gig.arrive_time).toFormat("HH:mm"))
         .and("contain", gig.time)
         .and("contain", "Deposit received")
         .and("contain", "Caller not paid")

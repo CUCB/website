@@ -1,12 +1,4 @@
-import {
-  CreateGig,
-  DeleteSignup,
-  SignupDetails,
-  AddInstrument,
-  RemoveInstruments,
-  InstrumentsOnGig,
-} from "../../database/gigs";
-import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
+import { HASHED_PASSWORDS } from "../../database/users";
 
 const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
 
@@ -14,28 +6,18 @@ let colors = {};
 
 describe("members' home page", () => {
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 2725552,
+    cy.task("db:create_login_users");
+    cy.task("db:create_custom_users", [
+      {
+        id: "2725552",
         username: "shiny_colours",
         saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
+        admin: "9",
         email: "cypress.themetester@cypress.io",
-        firstName: "Cypress",
-        lastName: "ThemeTester",
+        first: "Cypress",
+        last: "ThemeTester",
       },
-    });
+    ]);
   });
 
   it("gives 401 error when not logged in", () => {
@@ -223,7 +205,7 @@ describe("members' home page", () => {
     });
 
     it("preserves settings when logging in again", () => {
-      const LOGO = ["#fc2900", "#fd2a00", "#fc0000"];
+      const LOGO = ["#fc2900", "#fd2a00", "#fc0000", "#fd0000"];
       const ACCENT_DARK = ["#3e7e7c", "#3f807e"];
       const ACCENT_LIGHT = ["#00fcf5", "#00fdf7"];
       cy.intercept("POST", "/updatetheme").as("updateTheme");
@@ -290,44 +272,16 @@ describe("members' home page", () => {
 describe("gig signup", () => {
   before(() => {
     cy.visit("/");
-    cy.executeMutation(CreateGig, {
-      variables: {
-        id: 15274,
-        title: "Cypress Demo Gig",
-        type: 1,
-        adminsOnly: false,
-        allowSignups: true,
-        date: "2020-07-17",
-      },
+    cy.task("db:create_gig", {
+      id: "15274",
+      title: "Cypress Demo Gig",
+      type: "1",
+      admins_only: false,
+      allow_signups: true,
+      date: "2020-07-17",
     });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 32747,
-        username: "cypress",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 1,
-        email: "cy@press.io",
-        firstName: "Cypress",
-        lastName: "Webmaster",
-      },
-    });
-    cy.executeMutation(DeleteSignup, {
-      variables: {
-        userId: 27250,
-        gigId: 15274,
-      },
-    });
+    cy.task("db:create_login_users");
+    cy.task("db:delete_signup", { user_id: "27250", gig_id: "15274" });
     cy.cssProperty("--positive").then((positive_) => (colors.positive = positive_));
     cy.cssProperty("--negative").then((negative_) => (colors.negative = negative_));
     cy.cssProperty("--neutral").then((neutral_) => (colors.neutral = neutral_));
@@ -343,69 +297,16 @@ describe("gig signup", () => {
     cy.get(`[data-test="gig-15274-signup-yes"]`).should("not.have.color", colors.positive);
     cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
 
-    cy.executeQuery(SignupDetails, {
-      variables: {
-        userId: 27250,
-        gigId: 15274,
-      },
-    })
-      .its("cucb_gigs_lineups_by_pk")
-      .should("include", {
-        user_available: true,
-        user_only_if_necessary: false,
-      });
-
     cy.get(`[data-test="gig-15274-signup-maybe"]`).should("not.have.color", colors.netural);
     cy.get(`[data-test="gig-15274-signup-maybe"]`).click().should("have.color", colors.neutral);
 
-    cy.executeQuery(SignupDetails, {
-      variables: {
-        userId: 27250,
-        gigId: 15274,
-      },
-    })
-      .its("cucb_gigs_lineups_by_pk")
-      .then((res) => {
-        cy.log("Checking user available");
-        expect(res.user_available).to.equal(true);
-        cy.log("Checking user if necessary");
-        expect(res.user_only_if_necessary).to.equal(true);
-      });
-
-    cy.executeQuery(SignupDetails, {
-      variables: {
-        userId: 27250,
-        gigId: 15274,
-      },
-    })
-      .its("cucb_gigs_lineups_by_pk")
-      .should("include", {
-        user_available: true,
-        user_only_if_necessary: true,
-      });
-
     cy.get(`[data-test="gig-15274-signup-no"]`).should("not.have.color", colors.negative);
     cy.get(`[data-test="gig-15274-signup-no"]`).click().should("have.color", colors.negative);
-
-    cy.executeQuery(SignupDetails, {
-      variables: {
-        userId: 27250,
-        gigId: 15274,
-      },
-    })
-      .its("cucb_gigs_lineups_by_pk")
-      .should("include", {
-        user_available: false,
-      });
   });
 
   context("without_instruments", () => {
     before(() => {
-      cy.executeMutation(RemoveInstruments, {
-        variables: {
-          userId: 27250,
-        },
-      });
+      cy.task("db:delete_instruments_for_user", "27250");
       cy.login("cypress_user", "abc123");
       cy.visit("/members");
     });
@@ -424,25 +325,9 @@ describe("gig signup", () => {
 
   context("with instruments", () => {
     before(() => {
-      cy.executeMutation(RemoveInstruments, {
-        variables: {
-          userId: 27250,
-        },
-      });
-      cy.executeMutation(AddInstrument, {
-        variables: {
-          userInstrumentId: 28474292,
-          userId: 27250,
-          instrumentId: 53,
-        },
-      });
-      cy.executeMutation(AddInstrument, {
-        variables: {
-          userInstrumentId: 28474293,
-          userId: 27250,
-          instrumentId: 20,
-        },
-      });
+      cy.task("db:delete_instruments_for_user", "27250");
+      cy.task("db:create_user_instrument", { id: "28474292", user: "27250", instrument: "53" });
+      cy.task("db:create_user_instrument", { id: "28474293", user: "27250", instrument: "20" });
       cy.login("cypress_user", "abc123");
       cy.visit("/members");
     });
@@ -453,14 +338,6 @@ describe("gig signup", () => {
         url: "/members/gigs/15274/signup",
       }).as("signupRequest");
 
-      cy.executeQuery(InstrumentsOnGig, {
-        variables: {
-          userId: 27250,
-          gigId: 15274,
-        },
-      })
-        .its("cucb_gigs_lineups_instruments_aggregate.aggregate.count")
-        .should("equal", 0);
       cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
       cy.wait("@signupRequest");
       cy.get(`[data-test="gig-15274-signup-edit"]`).click();

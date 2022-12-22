@@ -200,7 +200,7 @@
           role="radio"
           on:click="{() => updateEntry.instruments.setApproved(id, false)}">No</button
         >
-        <div class="instrument-name">
+        <div class="instrument-name" data-test="instrument-name">
           <InstrumentName userInstrument="{instrument.user_instrument}" />
         </div>
       </div>

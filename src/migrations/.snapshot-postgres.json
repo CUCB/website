@@ -1170,12 +1170,12 @@
       "columns": {
         "sid": {
           "name": "sid",
-          "type": "bigint",
-          "unsigned": true,
-          "autoincrement": true,
-          "primary": true,
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
           "nullable": false,
-          "mappedType": "bigint"
+          "mappedType": "string"
         },
         "sess": {
           "name": "sess",
@@ -1739,7 +1739,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "mappedType": "date"
         },
         "time": {
@@ -2021,15 +2021,6 @@
         "user_id": {
           "name": "user_id",
           "type": "bigint",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "bigint"
-        },
-        "id": {
-          "name": "id",
-          "type": "int8",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -2387,6 +2378,7 @@
           "localTableName": "cucb.gigs_contacts",
           "referencedColumnNames": ["id"],
           "referencedTableName": "cucb.contacts",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         }
       }
@@ -2965,7 +2957,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": true,
-          "default": "'false'",
+          "default": "null",
           "mappedType": "boolean"
         }
       },
@@ -3206,6 +3198,7 @@
           "localTableName": "cucb.user_prefs",
           "referencedColumnNames": ["id"],
           "referencedTableName": "cucb.users",
+          "deleteRule": "cascade",
           "updateRule": "cascade"
         },
         "user_prefs_pref_id_foreign": {

@@ -11,11 +11,6 @@ declare global {
     interface Chainable {
       login(username: string, password: string, options?: Partial<RequestOptions>): void;
       loginWithoutCySession(username: string, password: string, options: Partial<RequestOptions>): void;
-      executeMutation<T>(
-        mutation: string,
-        params: { variables: Record<string, any> },
-      ): Chainable<Response<{ data: T }>>;
-      executeQuery<T>(mutation: string, params?: { variables: Record<string, any> }): Chainable<T>;
       searchEmails(limit: number, start: number): Chainable<{ items: Email[] }>;
       clickLink(options: Partial<VisitOptions>): Chainable<AUTWindow>;
       checkFileExists(filename: string): Chainable<boolean>;
@@ -73,25 +68,6 @@ Cypress.Commands.add("loginWithoutCySession", (username, password, options) =>
     .should("not.equal", "error"),
 );
 
-Cypress.Commands.add("executeMutation", (mutation, params) =>
-  cy
-    .request({
-      url: `${Cypress.env("GRAPHQL_REMOTE")}${Cypress.env("GRAPHQL_PATH")}`,
-      headers: {
-        "x-hasura-admin-secret": Cypress.env("HASURA_GRAPHQL_ADMIN_SECRET"),
-      },
-      body: {
-        query: mutation,
-        ...params,
-      },
-      method: "POST",
-    })
-    .its("body")
-    .should("not.have.key", "errors"),
-);
-
-Cypress.Commands.add("executeQuery", (mutation, params) => cy.executeMutation(mutation, params).its("data"));
-
 Cypress.Commands.add("searchEmails", (limit = 1, start = 0) => {
   cy.request(`${Cypress.env("MAILHOG_HOST")}/api/v2/messages?limit=${limit}&start=${start}`)
     .its("body")
@@ -130,7 +106,7 @@ Cypress.Commands.add("cssProperty", (name) =>
   cy
     .document()
     .its("documentElement")
-    .pipe((elem) => getComputedStyle(elem[0]))
+    .pipe((elem) => getComputedStyle(elem))
     .invoke("getPropertyValue", name)
     .invoke("trim")
     .should("not.equal", undefined),

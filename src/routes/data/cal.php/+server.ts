@@ -312,7 +312,11 @@ export function mygigsCalendarUrl(user_id: number): string {
 }
 
 export async function GET({ url, request, locals: { session } }: RequestEvent): Promise<Response> {
-  const { host, "x-forwarded-proto": proto, "x-forwarded-for": ipAddress } = Object.fromEntries(request.headers);
+  let { host, "x-forwarded-proto": proto, "x-forwarded-for": ipAddress } = Object.fromEntries(request.headers);
+  if (!ipAddress) {
+    ipAddress = request.headers.get("x-real-ip") || "127.0.0.1";
+  }
+  console.log(ipAddress);
   const baseUrl = `${proto}://${host}`;
   // TODO add test for this
   if (!testAuthLink(url.searchParams)) {

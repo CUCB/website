@@ -10,11 +10,12 @@ import {
   SetJoinAndLoginDate,
 } from "../../database/users";
 import crypto from "crypto";
+import { DateTime } from "luxon";
 
 const userWithFullInfo: User = {
   id: 282947,
-  firstName: "Furry",
-  lastName: "Pocky",
+  first: "Furry",
+  last: "Pocky",
   bio: "I am a tabby cat. Meow meow meow.",
   bioChangedDate: "2020-07-01",
   admin: 1,
@@ -30,19 +31,19 @@ type RoleName = "webmaster" | "secretary" | "user";
 
 const Role: Record<RoleName, User> = {
   webmaster: {
-    id: 2829320,
-    firstName: "Example",
-    lastName: "Webmaster",
-    admin: 1,
+    id: "2829320",
+    first: "Example",
+    last: "Webmaster",
+    admin: "1",
     username: "exc123",
     password: "abc123",
     email: "a_webmaster@gmail.com",
   },
   user: {
-    id: 2834914,
-    firstName: "Example",
-    lastName: "User",
-    admin: 9,
+    id: "2834914",
+    first: "Example",
+    last: "User",
+    admin: "9",
     username: "example_user",
     password: "abc123",
     email: "example_user@mail.com",
@@ -50,10 +51,10 @@ const Role: Record<RoleName, User> = {
     bioChangedDate: "2020-07-01",
   },
   secretary: {
-    id: 28349134,
-    firstName: "Example",
-    lastName: "Secretary",
-    admin: 3,
+    id: "28349134",
+    first: "Example",
+    last: "Secretary",
+    admin: "3",
     username: "example_secretary",
     password: "abc123",
     email: "writeywrite@gmail.com",
@@ -61,33 +62,27 @@ const Role: Record<RoleName, User> = {
 };
 
 interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  admin: number;
-  password: string;
+  id: string;
+  first: string;
+  last: string;
+  admin: string;
+  password?: string;
   username: string;
   bio?: string;
   bioChangedDate?: string;
   email: string;
   user_instruments?: ([string, string] | string)[];
-  userInstruments?: {
-    on_conflict: typeof OnConflictUserInstruments;
-    data: { id: number; nickname?: string; instr_id: number }[];
-  };
-  userPrefs?: {
-    on_conflict: typeof OnConflictUserPrefs;
-    data: { pref_id: number; value: boolean }[];
-  };
+  instruments?: { id: string; nickname?: string; instrument: string }[];
+  prefs?: { pref_type: string; value: boolean }[];
   user_prefs?: string[];
   mobileContactInfo?: string;
 }
 
 interface InsertableUser {
-  id: number;
-  firstName: string;
-  lastName: string;
-  admin: number;
+  id: string;
+  first: string;
+  last: string;
+  admin: string;
   saltedPassword: string;
   username: string;
   bio?: string;
@@ -138,61 +133,51 @@ function visitOnceAs(url: string, user: User): void {
 let userInstrumentIdBase = 283283;
 let userInstrumentCount = 0;
 
-type InstrumentId = number;
-type AttributeId = number;
+type InstrumentId = string;
+type AttributeId = string;
 
 let instrumentIds: Map<string, InstrumentId> = new Map();
 let attributeIds: Map<string, AttributeId> = new Map();
 
 function populateInstrumentIds() {
-  return cy
-    .executeQuery(AllInstrumentNames)
-    .its("cucb_instruments")
-    .then((instrumentList) => {
-      for (let instrument of instrumentList) {
-        instrumentIds = instrumentIds.set(instrument.name, instrument.id);
-      }
-    });
+  return cy.task("db:instrument_ids_by_name").then((instrumentList) => {
+    for (const [name, id] of Object.entries(instrumentList)) {
+      instrumentIds = instrumentIds.set(name, id);
+    }
+  });
 }
 
-function populateAttributeIds(): Cypress.Chainable<void> {
-  return cy
-    .executeQuery(AllAttributes)
-    .its("cucb_user_pref_types")
-    .then((attributeList) => {
-      for (let attribute of attributeList) {
-        attributeIds = attributeIds.set(attribute.name.split(".")[1], attribute.id);
-      }
-    });
+function populateAttributeIds() {
+  return cy.task("db:attribute_ids_by_name").then((attributes) => {
+    for (const [name, id] of Object.entries(attributes)) {
+      attributeIds = attributeIds.set(name, id);
+    }
+  });
 }
 
 function insertUser(user: User): void {
-  cy.executeMutation(DeleteUsers, { variables: { ids: [user.id] } });
+  cy.task("db:delete_users_where", { id: user.id });
   const modifiedUser = { ...user };
   if (user.user_instruments) {
-    modifiedUser.userInstruments = {
-      on_conflict: OnConflictUserInstruments,
-      data: user.user_instruments.map((name) => {
-        let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
-        return {
-          id: userInstrumentIdBase * ++userInstrumentCount,
-          instr_id: instrumentIds.get(fields.name),
-          ...fields,
-          name: undefined,
-        };
-      }),
-    };
+    modifiedUser.instruments = user.user_instruments.map((name) => {
+      let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+      return {
+        id: (userInstrumentIdBase * ++userInstrumentCount).toString(),
+        instrument: instrumentIds.get(fields.name),
+        ...fields,
+        name: undefined,
+      };
+    });
     delete modifiedUser.user_instruments;
-    modifiedUser.userPrefs = user.user_prefs && {
-      data: user.user_prefs.map((name) => ({
+    modifiedUser.prefs =
+      user.user_prefs &&
+      user.user_prefs.map((name) => ({
         pref_id: attributeIds.get(name),
         value: true,
-      })),
-      on_conflict: OnConflictUserPrefs,
-    };
+      }));
     delete modifiedUser.user_prefs;
   }
-  cy.executeMutation(CreateUser, { variables: insertableUser(modifiedUser) });
+  cy.task("db:create_custom_users", [insertableUser(modifiedUser)]);
 }
 
 describe("User page", () => {
@@ -260,7 +245,7 @@ describe("User page", () => {
       cy.visit(`/members/users/${Role.user.id}`);
 
       cy.get('blockquote[data-test="bio-content"]').should("contain.text", Role.user.bio);
-      cy.get('[data-test="bio-name"]').should("include.text", Role.user.firstName).and("include.text", "July 2020");
+      cy.get('[data-test="bio-name"]').should("include.text", Role.user.first).and("include.text", "July 2020");
       cy.waitForFormInteractive();
 
       cy.get('[data-test="edit-bio"]').click();
@@ -269,7 +254,7 @@ describe("User page", () => {
 
       cy.get('blockquote[data-test="bio-content"]').should("contain.text", "An example biography");
       cy.get('[data-test="bio-name"]')
-        .should("include.text", Role.user.firstName)
+        .should("include.text", Role.user.first)
         .and("include.text", Cypress.DateTime.now().toFormat("MMMM y"));
 
       cy.reload();
@@ -335,25 +320,23 @@ describe("User page", () => {
   describe("automatic biography", () => {
     describe("basic details", () => {
       beforeEach(() => {
-        cy.executeMutation(SetJoinAndLoginDate, {
-          variables: { userId: userWithFullInfo.id, joinDate: null, lastLoginDate: null },
-        });
+        cy.task("db:update_user", [userWithFullInfo.id, { joinDate: null, lastLoginDate: null }]);
       });
 
       visitOnceAs(urlFor(userWithFullInfo), Role.user);
 
       it("contains the user's name, when they joined and logged in", () => {
-        cy.contains(`${userWithFullInfo.firstName} ${userWithFullInfo.lastName}`);
+        cy.contains(`${userWithFullInfo.first} ${userWithFullInfo.last}`);
         cy.contains("joined the site before records began");
         cy.contains("hasn't been seen in a long time");
 
-        cy.executeMutation(SetJoinAndLoginDate, {
-          variables: {
-            userId: userWithFullInfo.id,
+        cy.task("db:update_user", [
+          userWithFullInfo.id,
+          {
             joinDate: "2019-02-05T19:06:00Z",
             lastLoginDate: "2021-05-13T10:15:32Z",
           },
-        });
+        ]);
 
         cy.reload();
 
@@ -423,7 +406,7 @@ describe("User page", () => {
         mobileNumber().should("contain.text", userWithFullInfo.mobileContactInfo);
         email().should("contain.text", userWithFullInfo.email);
         cy.waitForFormInteractive();
-        cy.get("#first-name").should("have.value", userWithFullInfo.firstName);
+        cy.get("#first-name").should("have.value", userWithFullInfo.first);
         cy.get("#first-name").clear();
         // Check that we have a vaguely sensible tab order, at least for name
         cy.get("#first-name").type("Firstname").tab().type("Lastname");
