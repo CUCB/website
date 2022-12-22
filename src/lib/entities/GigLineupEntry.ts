@@ -22,9 +22,6 @@ export class GigLineupEntry {
 
   [PrimaryKeyType]?: [string, string];
 
-  @Property({ columnType: "int8", type: "int8" })
-  id!: string;
-
   @ManyToOne({ entity: () => Gig, onUpdateIntegrity: "cascade", onDelete: "cascade", primary: true })
   gig!: Relation<Gig>;
 

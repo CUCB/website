@@ -1,26 +1,8 @@
-import {
-  CreateUser,
-  DeleteUsersWhere,
-  AppendToList042,
-  DeleteFromList042,
-  UserWithUsername,
-  HASHED_PASSWORDS,
-} from "../database/users";
 import jwt from "jsonwebtoken";
 
 describe("login page", () => {
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
-    });
+    cy.task("db:create_login_users");
   });
 
   beforeEach(() => {
@@ -87,50 +69,44 @@ describe("login page", () => {
 
 describe("password verification", () => {
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 50000,
+    cy.task("db:create_custom_users", [
+      {
+        id: "50000",
         username: "password_user_0",
         saltedPassword: "$2y$10$e2NuZ7jmxhI33TuD9gjWMevohZOWtRCTUzKOz7cqLqKd80DCCG.iu", // "password"
-        admin: 1,
+        admin: "1",
         email: "password.user0@cypress.io",
-        firstName: "Password",
-        lastName: "User",
+        first: "Password",
+        last: "User",
       },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 50001,
+      {
+        id: "50001",
         username: "password_user_1",
         saltedPassword: "$2y$10$m2SxZYfxU1BefSWFGCfvi.Lkv0svrm4YX7qGvJl6csY7IkOM0yV3W", // "password"
-        admin: 1,
+        admin: "1",
         email: "password.user1@cypress.io",
-        firstName: "Password",
-        lastName: "User",
+        first: "Password",
+        last: "User",
       },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 50002,
+      {
+        id: "50002",
         username: "password_user_2",
         saltedPassword: "$2y$10$YWGYgXuS0nbgA63MvRSTn.NiibtaBRUqRzN6HrvJHSOFD9C6t0id.", // "iloveceilidhband"
-        admin: 1,
+        admin: "1",
         email: "password.user2@cypress.io",
-        firstName: "Password",
-        lastName: "User",
+        first: "Password",
+        last: "User",
       },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 50003,
+      {
+        id: "50003",
         username: "password_user_3",
         saltedPassword: "$2y$12$ZEx7rY3a15Fl9TIR5feygOrnZ8.woJy58tBn7SixUFOMeuBk0.bec", // bogus hash - just made up
-        admin: 1,
+        admin: "1",
         email: "password.user3@cypress.io",
-        firstName: "Password",
-        lastName: "User",
+        first: "Password",
+        last: "User",
       },
-    });
+    ]);
   });
 
   it("accepts correct passwords with 2y prefix", () => {
@@ -173,28 +149,12 @@ describe("password verification", () => {
 
 describe("registration form", () => {
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
+    cy.task("db:create_login_users");
+    cy.task("db:delete_users_where", {
+      $or: [{ username: { $like: "%cy-register%" } }, { username: { $like: "cy456%" } }],
     });
-    cy.executeMutation(DeleteUsersWhere, {
-      variables: { where: { _or: [{ username: { _ilike: "%cy-register%" } }, { username: { _ilike: "cy456%" } }] } },
-    });
-    cy.executeMutation(DeleteFromList042, { variables: { where: { email: { _ilike: "%cy-register%" } } } });
-    cy.executeMutation(AppendToList042, {
-      variables: {
-        objects: ["nonuni@cy-register.test", "cy456@cam.ac.uk", "cypress.user@cypress.io"].map((email) => ({
-          email,
-        })),
-      },
-    });
+    cy.task("db:delete_from_list042", { email: { $like: "%cy-register%" } });
+    cy.task("db:append_to_list042", ["nonuni@cy-register.test", "cy456@cam.ac.uk", "cypress.user@cypress.io"]);
   });
 
   beforeEach(() => {
@@ -289,10 +249,7 @@ describe("registration form", () => {
     cy.get("[data-test=error]").should("not.exist");
     cy.get("input:invalid").should("not.exist");
     cy.wait("@register").its("response.statusCode").should("eq", 200);
-    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" } })
-      .its("cucb_users")
-      .should("have.length", 1);
-    cy.executeMutation(DeleteUsersWhere, { variables: { where: { username: { _eq: "cy456" } } } });
+    cy.task("db:delete_users_where", { username: { $eq: "cy456" } });
 
     cy.request("POST", "/auth/logout");
     cy.visit("/auth/register");
@@ -306,9 +263,6 @@ describe("registration form", () => {
     cy.get("[data-test=error]").should("not.exist");
     cy.get("input:invalid").should("not.exist");
     cy.wait("@register").its("response.statusCode").should("eq", 200);
-    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" } })
-      .its("cucb_users")
-      .should("have.length", 1);
   });
 
   it("gives a suitable error message if the username/email is already registered", () => {
@@ -346,25 +300,12 @@ describe("registration form", () => {
     cy.get("[data-test=error]")
       .contains(/already exists/)
       .should("be.visible");
-    cy.executeQuery(UserWithUsername, { variables: { username: "cy456" } })
-      .its("cucb_users")
-      .should("have.length", 1);
   });
 });
 
 describe("registration page", () => {
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
-    });
+    cy.task("db:create_login_users");
   });
 
   it("can't be accessed by logged in users", () => {
@@ -376,17 +317,17 @@ describe("registration page", () => {
 
 describe("password reset form", () => {
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
+    cy.task("db:create_custom_users", [
+      {
         id: 50000,
         username: "pass2",
         saltedPassword: "$2y$10$e2NuZ7jmxhI33TuD9gjWMevohZOWtRCTUzKOz7cqLqKd80DCCG.iu", // "password"
         admin: 1,
         email: "password.user0@cypress.io",
-        firstName: "Password",
-        lastName: "User",
+        first: "Password",
+        last: "User",
       },
-    });
+    ]);
   });
   it("can't be accessed by logged in users", () => {
     cy.loginWithoutCySession("cypress_user", "abc123");

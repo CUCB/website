@@ -2,7 +2,7 @@ import { Entity, Index, PrimaryKey, Property } from "@mikro-orm/core";
 
 @Entity({ schema: "cucb" })
 export class Session {
-  @PrimaryKey({ type: "bigint" })
+  @PrimaryKey({ type: "varchar" })
   sid!: string;
 
   @Property({ columnType: "json", type: "json" })

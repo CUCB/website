@@ -1,6 +1,3 @@
-import { CreateUser, HASHED_PASSWORDS } from "../database/users";
-import { AddCommittee } from "../database/committee";
-
 function revisitBeforePage() {
   // We want to stay on the same page, but since the sessions feature was introduced,
   // we get redirected to about:blank between tests. Hitting back in the browser is
@@ -161,24 +158,7 @@ describe("header", () => {
     });
 
     it("navigates to /committee", () => {
-      cy.executeMutation(AddCommittee, {
-        variables: {
-          id: 57434,
-          started: "1970-01-01T01:00Z",
-          data: {
-            on_conflict: { constraint: "cucb_committee_members_id_key", update_columns: ["position", "name"] },
-            data: [
-              {
-                id: 17547,
-                position: 1,
-                name: "Leady Lead",
-                casual_name: "Leady",
-                lookup_name: 1,
-              },
-            ],
-          },
-        },
-      });
+      cy.task("db:create_committee");
       cy.get("header nav a").contains("Committee").clickLink();
       cy.url().should("include", "/committee");
     });
@@ -195,17 +175,7 @@ describe("header", () => {
 
     context("when logged in", () => {
       before(() => {
-        cy.executeMutation(CreateUser, {
-          variables: {
-            id: 27250,
-            username: "cypress_user",
-            saltedPassword: HASHED_PASSWORDS.abc123,
-            admin: 9,
-            email: "cypress.user@cypress.io",
-            firstName: "Cypress",
-            lastName: "User",
-          },
-        });
+        cy.task("db:create_login_users");
       });
 
       beforeEach(() => {

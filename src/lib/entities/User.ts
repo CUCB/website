@@ -35,10 +35,10 @@ export class User {
   email!: string;
 
   @Property({ length: 6, nullable: true, type: "date" })
-  joinDate?: Date;
+  joinDate?: Date | null;
 
   @Property({ length: 6, nullable: true, type: "date" })
-  lastLoginDate?: Date;
+  lastLoginDate?: Date | null;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
   mobileContactInfo?: string;

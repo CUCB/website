@@ -13,6 +13,7 @@ import { Session } from "./lib/entities/Session";
 import orm from "./lib/database";
 import { User } from "./lib/entities/User";
 import { env } from "$env/dynamic/private";
+import { DateTime } from "luxon";
 
 dotenv.config();
 const SESSION_SECRET = env["SESSION_SECRET"];
@@ -76,6 +77,10 @@ async function sessionFromHeaders(cookies, request: Request) {
     session = await sessionRepository.findOne({ sid: sessionId }).then((s) => s?.sess);
   }
 
+  if (!session) {
+    sessionId = null;
+  }
+
   return {
     session: {
       ...session,
@@ -106,7 +111,9 @@ async function sessionFromHeaders(cookies, request: Request) {
               user.lastLoginDate = new Date();
               return userRepository.persistAndFlush(user);
             });
-            const deleteExpiredSessions = sessionRepository.nativeDelete({ expire: { $lte: new Date() } });
+            const deleteExpiredSessions = sessionRepository.nativeDelete({
+              expire: { $lte: new Date() },
+            });
             await Promise.all([insert, updateLoginDate, deleteExpiredSessions]);
             return [
               "connect.sid",
@@ -145,7 +152,8 @@ async function sessionFromHeaders(cookies, request: Request) {
                 session.sess = sess;
                 return sessionRepository.persistAndFlush(session);
               } else {
-                console.warn(`session with id ${sessionId} for user ${this.userId}`);
+                console.warn(`failed to find session with id ${sessionId} for user ${this.userId}`);
+                return sessionRepository.create(sess);
               }
             });
             const deleteExpiredSessions = sessionRepository.nativeDelete({ expire: { $lte: new Date() } });

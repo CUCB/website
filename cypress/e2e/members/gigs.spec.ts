@@ -1,7 +1,6 @@
 /// <reference types="Cypress" />
 
 import {
-  onConflictVenue,
   CreateGig,
   DeleteSignup,
   SignupDetails,
@@ -15,173 +14,114 @@ const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypr
 
 let colors = {};
 
-let onConflictUser = {
-  constraint: "cucb_users_id_key",
-  update_columns: ["first", "last", "email"],
-};
-
-let onConflictUserInstrument = {
-  constraint: "cucb_users_instruments_id_key",
-  update_columns: ["nickname", "instr_id", "deleted"],
-};
-
-let onConflictLineupUserInstrument = {
-  constraint: "gigs_lineups_instruments_pkey",
-  update_columns: ["approved"],
-};
-
 let gigForSummary = {
-  id: 74527,
+  id: "74527",
+  type: "1",
   title: "Gig of excitement",
-  adminsOnly: false,
-  allowSignups: true,
+  admins_only: false,
+  allow_signups: true,
   date: "2020-07-25",
   time: "21:00",
-  notesAdmin: "This is an admin note",
-  notesBand: "This is a band note",
-  arriveTime: "2020-07-25T20:00+01:00",
-  finishTime: "2020-07-25T23:00+01:00",
-  depositReceived: true,
-  paymentReceived: false,
-  callerPaid: false,
+  notes_admin: "This is an admin note",
+  notes_band: "This is a band note",
+  arrive_time: DateTime.fromISO("2020-07-25T20:00+01:00").toJSDate(),
+  finish_time: DateTime.fromISO("2020-07-25T23:00+01:00").toJSDate(),
+  finance_deposit_received: true,
+  finance_payment_received: false,
+  finance_caller_paid: false,
   venue: {
-    on_conflict: onConflictVenue,
-    data: {
-      address: "3 Trumpington St, Cambridge",
-      postcode: "CB2 1QY",
-      distance_miles: 0,
-      longitude: 0.1182611,
-      latitude: 52.2014254,
-      map_link:
-        "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
-      name: "Emmanuel United Reform Church",
-      notes_band: "Where we (used to) rehearse",
-      subvenue: null,
-      id: 3277452,
-    },
+    address: "3 Trumpington St, Cambridge",
+    postcode: "CB2 1QY",
+    distance_miles: 0,
+    longitude: 0.1182611,
+    latitude: 52.2014254,
+    map_link:
+      "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
+    name: "Emmanuel United Reform Church",
+    notes_band: "Where we (used to) rehearse",
+    subvenue: null,
+    id: "3277452",
   },
-  lineup: {
-    on_conflict: {
-      constraint: "gigs_lineups_pkey",
-      update_columns: ["approved", "leader", "money_collector", "driver", "equipment", "user_id"],
+  lineup: [
+    {
+      approved: true,
+      leader: true,
+      equipment: false,
+      money_collector: false,
+      driver: false,
+      user: {
+        id: "374325",
+        username: "leady374325",
+        first: "Leady",
+        last: "Lead",
+        email: "user374325@testi.ng",
+        instruments: [
+          {
+            id: "105747",
+            deleted: false,
+            instrument: "20",
+            nickname: null,
+          },
+          {
+            id: "576743",
+            deleted: true,
+            instrument: "63",
+            nickname: "Cluck cluck",
+          },
+        ],
+      },
+      user_instruments: [
+        {
+          user_instrument_id: "105747",
+          approved: true,
+        },
+        {
+          user_instrument_id: "576743",
+          approved: true,
+        },
+      ],
     },
-    data: [
-      {
-        approved: true,
-        leader: true,
-        equipment: false,
-        money_collector: false,
-        driver: false,
-        user: {
-          on_conflict: onConflictUser,
-          data: {
-            id: 374325,
-            username: "leady374325",
-            first: "Leady",
-            last: "Lead",
-            email: "user374325@testi.ng",
-            user_instruments: {
-              on_conflict: onConflictUserInstrument,
-              data: [
-                {
-                  id: 105747,
-                  deleted: false,
-                  instr_id: 20,
-                  nickname: null,
-                },
-                {
-                  id: 576743,
-                  deleted: true,
-                  instr_id: 63,
-                  nickname: "Cluck cluck",
-                },
-              ],
-            },
+    {
+      approved: true,
+      leader: false,
+      equipment: true,
+      driver: true,
+      money_collector: true,
+      user: {
+        id: "567236",
+        username: "User567236",
+        first: "Twizzly",
+        last: "Dialy",
+        email: "user567236@testi.ng",
+        instruments: [
+          {
+            id: "5765073",
+            deleted: false,
+            instrument: "66",
+            nickname: null,
           },
-        },
-        user_instruments: {
-          on_conflict: onConflictLineupUserInstrument,
-          data: [
-            {
-              user_instrument_id: 105747,
-              approved: true,
-            },
-            {
-              user_instrument_id: 576743,
-              approved: true,
-            },
-          ],
-        },
+        ],
       },
-      {
-        approved: true,
-        leader: false,
-        equipment: true,
-        driver: true,
-        money_collector: true,
-        user: {
-          on_conflict: onConflictUser,
-          data: {
-            id: 567236,
-            username: "User567236",
-            first: "Twizzly",
-            last: "Dialy",
-            email: "user567236@testi.ng",
-            user_instruments: {
-              on_conflict: onConflictUserInstrument,
-              data: [
-                {
-                  id: 5765073,
-                  deleted: false,
-                  instr_id: 66,
-                  nickname: null,
-                },
-              ],
-            },
-          },
-        },
-      },
-    ],
-  },
+    },
+  ],
 };
 
 let adminOnlyGig = {
   ...gigForSummary,
-  id: gigForSummary.id + 1,
+  id: (parseInt(gigForSummary.id) + 1).toString(),
   title: "Admin only gig",
   date: Cypress.DateTime.local().plus({ months: 1 }),
-  arriveTime: null,
-  finishTime: null,
-  adminsOnly: true,
+  arrive_time: null,
+  finish_time: null,
+  admins_only: true,
 };
 
 describe("gig summary", () => {
   let gig = gigForSummary;
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 32747,
-        username: "cypress",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 1,
-        email: "cy@press.io",
-        firstName: "Cypress",
-        lastName: "Webmaster",
-      },
-    });
-    cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
-    cy.executeMutation(CreateGig, { variables: gig });
+    cy.task("db:create_login_users");
+    cy.task("db:delete_signups", gig.id);
+    cy.task("db:create_gig", gig);
   });
 
   context("not logged in", () => {
@@ -254,11 +194,11 @@ describe("gig summary", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-title]`).should("have.value", gig.title);
       cy.get(`[data-test=gig-edit-${gig.id}-date]`).should("have.value", gig.date);
       cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
-        .should("have.value", gig.venue.data.id)
+        .should("have.value", gig.venue.id)
         .find(":selected")
         .invoke("html")
         .invoke("trim")
-        .should("eq", gig.venue.data.name);
+        .should("eq", gig.venue.name);
     });
   });
 
@@ -286,55 +226,47 @@ describe("gig diary", () => {
     ...gigForSummary,
     date: Cypress.DateTime.local().plus({ months: 1 }).toFormat("yyyy-LL-dd"),
     time: Cypress.DateTime.local().set({ hour: 19, minute: 30 }).toFormat("HH:mm"),
-    arriveTime: Cypress.DateTime.local().plus({ months: 1 }).set({ hour: 18, minute: 30 }).toISO(),
-    finishTime: Cypress.DateTime.local().plus({ months: 1 }).set({ hour: 22, minute: 0 }).toISO(),
+    arrive_time: Cypress.DateTime.local().plus({ months: 1 }).set({ hour: 18, minute: 30 }).toJSDate(),
+    finish_time: Cypress.DateTime.local().plus({ months: 1 }).set({ hour: 22, minute: 0 }).toJSDate(),
   };
 
   let nonSignupGig = {
     ...gigForSummary,
     id: 34743274,
-    allowSignups: false,
+    allow_signups: false,
     date: Cypress.DateTime.local().plus({ days: 60 }).toFormat("yyyy-LL-dd"),
     time: Cypress.DateTime.local().set({ hour: 19, minute: 0 }).toFormat("HH:mm"),
-    arriveTime: Cypress.DateTime.local().plus({ days: 60 }).set({ hour: 18, minute: 0 }).toISO(),
-    finishTime: Cypress.DateTime.local().plus({ days: 60 }).set({ hour: 21, minute: 15 }).toISO(),
+    arrive_time: Cypress.DateTime.local().plus({ days: 60 }).set({ hour: 18, minute: 0 }).toJSDate(),
+    finish_time: Cypress.DateTime.local().plus({ days: 60 }).set({ hour: 21, minute: 15 }).toJSDate(),
   };
 
   let pastGig = {
     ...gigForSummary,
     id: 33274,
-    allowSignups: false,
+    allow_signups: false,
     date: Cypress.DateTime.local().plus({ months: -2 }).toFormat("yyyy-LL-dd"),
     time: Cypress.DateTime.local().set({ hour: 19, minute: 30 }).toFormat("HH:mm"),
-    arriveTime: Cypress.DateTime.local().plus({ months: -2 }).set({ hour: 18, minute: 30 }).toISO(),
-    finishTime: Cypress.DateTime.local().plus({ months: -2 }).set({ hour: 22, minute: 0 }).toISO(),
+    arrive_time: Cypress.DateTime.local().plus({ months: -2 }).set({ hour: 18, minute: 30 }).toJSDate(),
+    finish_time: Cypress.DateTime.local().plus({ months: -2 }).set({ hour: 22, minute: 0 }).toJSDate(),
   };
 
   before(() => {
     cy.visit("/");
-    cy.executeMutation(CreateGig, { variables: signupGig });
-    cy.executeMutation(CreateGig, { variables: nonSignupGig });
-    cy.executeMutation(CreateGig, { variables: pastGig });
-    cy.executeMutation(DeleteSignup, { variables: { gigId: nonSignupGig.id, userId: 27250 } });
-    cy.executeMutation(DeleteSignup, { variables: { gigId: signupGig.id, userId: 27250 } });
-    cy.executeMutation(RemoveInstruments, {
-      variables: {
-        userId: 27250,
-      },
+    cy.task("db:create_gig", signupGig);
+    cy.task("db:create_gig", nonSignupGig);
+    cy.task("db:create_gig", pastGig);
+    cy.task("db:delete_signup", { gig_id: nonSignupGig.id, user_id: "27250" });
+    cy.task("db:delete_signup", { gig_id: signupGig.id, user_id: "27250" });
+    cy.task("db:delete_instruments_for_user", "27250");
+    cy.task("db:create_user_instrument", {
+      id: "28474292",
+      user: "27250",
+      instrument: "53",
     });
-    cy.executeMutation(AddInstrument, {
-      variables: {
-        userInstrumentId: 28474292,
-        userId: 27250,
-        instrumentId: 53,
-      },
-    });
-    cy.executeMutation(AddInstrument, {
-      variables: {
-        userInstrumentId: 28474293,
-        userId: 27250,
-        instrumentId: 20,
-      },
+    cy.task("db:create_user_instrument", {
+      id: "28474293",
+      user: "27250",
+      instrument: "20",
     });
     cy.cssProperty("--positive").then((positive) => (colors.positive = positive));
     cy.cssProperty("--neutral").then((neutral) => (colors.neutral = neutral));
@@ -363,7 +295,7 @@ describe("gig diary", () => {
 
     describe("signups", () => {
       beforeEach(() => {
-        cy.executeMutation(DeleteSignup, { variables: { userId: 27250, gigId: signupGig.id } });
+        cy.task("db:delete_signup", { user_id: "27250", gig_id: signupGig.id });
         cy.visit("/members/gigs");
       });
 
@@ -380,17 +312,6 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-${signupGig.id}-signup-edit]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-instrument-20-toggle]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).click();
-        cy.executeQuery(SignupDetails, {
-          variables: {
-            userId: 27250,
-            gigId: signupGig.id,
-          },
-        })
-          .its("cucb_gigs_lineups_by_pk")
-          .should("include", {
-            user_available: true,
-            user_only_if_necessary: false,
-          });
         cy.log("Successfully signed up to gig");
 
         cy.get(`[data-test=show-summary-${signupGig.id}]`).click();
@@ -399,20 +320,6 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.unselected);
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.neutral);
-
-        cy.executeQuery(SignupDetails, {
-          variables: {
-            userId: 27250,
-            gigId: signupGig.id,
-          },
-        })
-          .its("cucb_gigs_lineups_by_pk")
-          .should("include", {
-            user_available: true,
-            user_only_if_necessary: true,
-          })
-          .its("user_instruments")
-          .should("have.length", 1);
       });
 
       it("retains signup information on refresh", () => {
@@ -537,46 +444,20 @@ describe("iCal files", () => {
   let gig = {
     ...gigForSummary,
     date: DateTime.local().plus({ months: 1 }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISODate(),
-    arriveTime: DateTime.local().plus({ months: 1 }).set({ hour: 20, minute: 0, second: 0, millisecond: 0 }).toISO(),
-    finishTime: DateTime.local().plus({ months: 1 }).set({ hour: 23, minute: 0, second: 0, millisecond: 0 }).toISO(),
+    arrive_time: DateTime.local()
+      .plus({ months: 1 })
+      .set({ hour: 20, minute: 0, second: 0, millisecond: 0 })
+      .toJSDate(),
+    finish_time: DateTime.local()
+      .plus({ months: 1 })
+      .set({ hour: 23, minute: 0, second: 0, millisecond: 0 })
+      .toJSDate(),
   };
   before(() => {
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27250,
-        username: "cypress_user",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 9,
-        email: "cypress.user@cypress.io",
-        firstName: "Cypress",
-        lastName: "User",
-      },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 32747,
-        username: "cypress",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 1,
-        email: "cy@press.io",
-        firstName: "Cypress",
-        lastName: "Webmaster",
-      },
-    });
-    cy.executeMutation(CreateUser, {
-      variables: {
-        id: 27382,
-        username: "cypress_president",
-        saltedPassword: HASHED_PASSWORDS.abc123,
-        admin: 2,
-        email: "cucb.president@cypress.io",
-        firstName: "Cypress",
-        lastName: "President",
-      },
-    });
-    cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
-    cy.executeMutation(CreateGig, { variables: gig });
-    cy.executeMutation(CreateGig, { variables: adminOnlyGig });
+    cy.task("db:create_login_users");
+    cy.task("db:delete_gig", gig.id);
+    cy.task("db:create_gig", gig);
+    cy.task("db:create_gig", adminOnlyGig);
   });
 
   it("can be generated per-gig", () => {
@@ -595,8 +476,8 @@ describe("iCal files", () => {
         const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
         expect(event.summary).to.eq(`GIG: Gig of excitement`);
         expect(event.description).to.contain("Leady Lead").and.contain("[Eigenharp, Wind Synth]");
-        expect(startDate.equals(Cypress.DateTime.fromISO(gig.arriveTime))).to.be.true;
-        expect(endDate.equals(Cypress.DateTime.fromISO(gig.finishTime))).to.be.true;
+        expect(startDate.equals(Cypress.DateTime.fromJSDate(gig.arrive_time))).to.be.true;
+        expect(endDate.equals(Cypress.DateTime.fromJSDate(gig.finish_time))).to.be.true;
       });
     });
   });
@@ -604,8 +485,8 @@ describe("iCal files", () => {
   describe("for president", () => {
     beforeEach(() => {
       cy.login("cypress_president", "abc123");
-      cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
-      cy.executeMutation(CreateGig, { variables: gig });
+      cy.task("db:delete_gig", gig.id);
+      cy.task("db:create_gig", gig);
     });
 
     it("contains admin information", () => {
@@ -686,8 +567,8 @@ describe("iCal files", () => {
   describe("for normal user", () => {
     beforeEach(() => {
       cy.login("cypress_user", "abc123");
-      cy.executeMutation(ClearLineupForGig, { variables: { id: gig.id } });
-      cy.executeMutation(CreateGig, { variables: gig });
+      cy.task("db:delete_gig", gig.id);
+      cy.task("db:create_gig", gig);
     });
 
     it("omits admin information", () => {

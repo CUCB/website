@@ -20,8 +20,8 @@ export class Gig {
   @ManyToOne({ entity: () => GigType, fieldName: "type", onUpdateIntegrity: "cascade", index: "idx_17399_type" })
   type!: GigType;
 
-  @Property({ columnType: "date", type: "date" })
-  date!: Date;
+  @Property({ columnType: "date", type: "date", nullable: true })
+  date?: Date | null;
 
   @Property({ columnType: "time", length: 6, nullable: true, type: "time" })
   time?: string;
@@ -99,7 +99,7 @@ export class Gig {
   get sort_date(): Date {
     return (
       (this.arrive_time && DateTime.fromJSDate(this.arrive_time)) ||
-      utcFromDateAndTime(this.date, this.time || "00:00")
+      utcFromDateAndTime(this.date || new Date(), this.time || "00:00")
     ).toJSDate();
   }
 }

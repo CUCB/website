@@ -63,7 +63,7 @@ export const POST = async ({ request, locals: { session }, params: { gig_id } }:
     const body = await request.json();
     if (addUser.guard(body)) {
       const em = orm.em.fork();
-      await em.nativeInsert(GigLineupEntry, { user: body.id, gig: gig_id });
+      await em.upsert(GigLineupEntry, { user: body.id, gig: gig_id });
       const person = await em
         .findOne(
           GigLineupEntry,
