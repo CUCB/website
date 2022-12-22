@@ -94,7 +94,7 @@ export const load: PageServerLoad = async ({ params: { gig_id }, parent }) => {
   assertLoggedIn(session);
 
   if (SELECT_GIG_LINEUPS.guard(session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const [allPeople, gig] = await Promise.all([fetchAllUsers(em), fetchGigLineup(gig_id, em)]);
     if (gig) {
       const { lineup, title } = gig;

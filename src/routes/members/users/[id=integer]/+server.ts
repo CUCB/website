@@ -48,7 +48,7 @@ export const POST = async ({ locals, params, request }: RequestEvent): Promise<R
       body.bioChangedDate = "now()";
     }
 
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     await em.nativeUpdate(User, { id }, body);
     const user = await em.findOneOrFail(User, { id }, { populate: ["prefs", "prefs.pref_type"] });
 

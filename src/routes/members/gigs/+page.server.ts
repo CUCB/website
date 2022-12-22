@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals: { session }, parent }) => {
   assertLoggedIn(session);
 
   if (NOT_MUSIC_ONLY.guard(session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     // Sort the gigs before rendering since the database can't sort by computed field
     const [upcomingGigs, gigsInCurrentMonth, signup_gigs, user_notes, signup_instruments, signupSummary] =
       await Promise.all([

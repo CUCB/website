@@ -28,7 +28,7 @@ export async function handle({ event, resolve }) {
   let session = undefined;
   let sessionId = "";
   const cookie = cookies.get("connect.sid");
-  const sessionRepository = orm.em.fork().getRepository(Session);
+  const sessionRepository = (await orm()).em.fork().getRepository(Session);
   if (cookie) {
     sessionId = signature.unsign(cookie, SESSION_SECRET);
   }
@@ -48,7 +48,7 @@ export async function handle({ event, resolve }) {
 async function sessionFromHeaders(cookies, request: Request) {
   let session = undefined;
   let sessionId = null;
-  const em = orm.em.fork();
+  const em = (await orm()).em.fork();
   const userRepository = em.getRepository(User);
   const sessionRepository = em.getRepository(Session);
   if (cookies.get("connect.sid")) {

@@ -180,12 +180,14 @@ export async function allGigs(ipAddress: string, baseUrl: string, session: Sessi
     $or: [{ date: { $gte: twoDaysAgo } }, { arrive_time: { $gte: twoDaysAgo } }],
   });
   const hidden = VIEW_GIG_ADMIN_NOTES.guard(session);
-  const update = orm.em.fork().upsert(CalendarSubscription, {
-    calendarType: "allgigs" as unknown as CalendarSubscriptionType,
-    ipAddress,
-    user: session.userId,
-    lastAccessed: "now()" as unknown as Date,
-  });
+  const update = orm()
+    .em.fork()
+    .upsert(CalendarSubscription, {
+      calendarType: "allgigs" as unknown as CalendarSubscriptionType,
+      ipAddress,
+      user: session.userId,
+      lastAccessed: "now()" as unknown as Date,
+    });
   const fullName = `${session.firstName} ${session.lastName}`;
 
   // TODO factor out some of this since it's basically identical to mygigs
@@ -215,19 +217,21 @@ export async function allGigs(ipAddress: string, baseUrl: string, session: Sessi
 
 export async function myGigs(ipAddress: string, baseUrl: string, session: Session) {
   const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
-  const userGigs = await orm.em.fork().findOne(
-    User,
-    {
-      id: session.userId,
-      gigLineups: {
-        approved: true,
-        gig: { $or: [{ date: { $gte: twoDaysAgo } }, { arrive_time: { $gte: twoDaysAgo } }] },
+  const userGigs = await orm()
+    .em.fork()
+    .findOne(
+      User,
+      {
+        id: session.userId,
+        gigLineups: {
+          approved: true,
+          gig: { $or: [{ date: { $gte: twoDaysAgo } }, { arrive_time: { $gte: twoDaysAgo } }] },
+        },
       },
-    },
-    { fields: ["gigLineups", "gigLineups.gig"] },
-  );
+      { fields: ["gigLineups", "gigLineups.gig"] },
+    );
   const hidden = VIEW_GIG_ADMIN_NOTES.guard(session);
-  const em = orm.em.fork();
+  const em = (await orm()).em.fork();
   const update = em.upsert(CalendarSubscription, {
     calendarType: "mygigs" as unknown as CalendarSubscriptionType,
     ipAddress,

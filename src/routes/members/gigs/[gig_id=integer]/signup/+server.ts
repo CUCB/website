@@ -29,7 +29,7 @@ export const POST = async ({ locals: { session }, params: { gig_id }, request }:
   assertLoggedIn(session);
 
   if (NOT_MUSIC_ONLY.guard(session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const gig = await em.findOneOrFail(Gig, { id: gig_id });
     if (gig) {
       if (!gig.allow_signups) {

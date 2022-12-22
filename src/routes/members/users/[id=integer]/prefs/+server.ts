@@ -14,7 +14,7 @@ export const POST = async ({ params: { id }, request, locals: { session } }: Req
     let body = await request.json();
 
     if (UPDATE_PREFS.guard(body)) {
-      const em = orm.em.fork();
+      const em = (await orm()).em.fork();
       await Promise.all(
         body.map((pref) => em.upsert(UserPref, { user: id, pref_type: pref.pref_id, value: pref.value })),
       );

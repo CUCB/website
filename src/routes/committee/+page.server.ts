@@ -5,7 +5,7 @@ import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
 export const load: PageServerLoad = async ({ url }) => {
-  const committeeRepository = orm.em.fork().getRepository(Committee);
+  const committeeRepository = (await orm()).em.fork().getRepository(Committee);
   const committee = await committeeRepository
     .findOne(
       { started: { $lte: "now()" } },

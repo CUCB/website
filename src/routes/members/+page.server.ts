@@ -10,7 +10,7 @@ export const load: PageServerLoad = async ({ parent }) => {
   assertLoggedIn(session);
 
   if (NOT_MUSIC_ONLY.guard(session)) {
-    const em = orm.em.fork();
+    const em = (await orm()).em.fork();
     const [userInstruments, userNotes, gigSignups] = await Promise.all([
       fetchAvailableInstruments(em, session),
       fetchUserNotes(em, session),

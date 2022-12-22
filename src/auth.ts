@@ -63,7 +63,7 @@ export const login: (details: LoginData) => Promise<SessionData> = async ({ user
   username = username.toLowerCase().trim();
 
   try {
-    const userRepository = orm.em.fork().getRepository(User);
+    const userRepository = (await orm()).em.fork().getRepository(User);
     const user = await userRepository.findOne({ username });
     if (user) {
       if (user.saltedPassword) {
@@ -110,8 +110,8 @@ export const createAccount: (details: CreateAccountDetails) => Promise<NewAccoun
   firstName,
   lastName,
 }) => {
-  const userRepository = orm.em.fork().getRepository(User);
-  const list042Repository = orm.em.fork().getRepository(List042);
+  const userRepository = (await orm()).em.fork().getRepository(User);
+  const list042Repository = (await orm()).em.fork().getRepository(List042);
   if (await list042Repository.findOne({ email: { $ilike: mysql_real_escape_string(email) } })) {
     username = username.toLowerCase();
     email = email.toLowerCase();
@@ -215,7 +215,7 @@ export async function completePasswordReset({ password, token }: { password: str
   password = "";
   if (PasswordResetToken.guard(decoded)) {
     try {
-      const userRepository = orm.em.fork().getRepository(User);
+      const userRepository = (await orm()).em.fork().getRepository(User);
       await userRepository.nativeUpdate({ id: decoded.id }, { saltedPassword });
     } catch (e) {
       console.trace(e);

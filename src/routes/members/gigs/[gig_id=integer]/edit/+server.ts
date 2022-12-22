@@ -36,7 +36,7 @@ export const POST = async ({ locals, params, request }: RequestEvent): Promise<R
     body.editing_time = "now()";
     body.editing_user = locals.session.userId;
 
-    const gigRepository = orm.em.fork().getRepository(Gig);
+    const gigRepository = (await orm()).em.fork().getRepository(Gig);
 
     await gigRepository.nativeUpdate({ id: params.gig_id }, body);
     const savedGig = await gigRepository.findOneOrFail(

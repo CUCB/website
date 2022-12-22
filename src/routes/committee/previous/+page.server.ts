@@ -29,7 +29,7 @@ interface CommitteeMember {
 
 export const load: PageServerLoad = async ({ url }) => {
   let aprilFools = url.searchParams.get("aprilfool") !== null;
-  const committeeRepository = orm.em.fork().getRepository(Committee);
+  const committeeRepository = (await orm()).em.fork().getRepository(Committee);
   const mikroOrmRes = await committeeRepository.find(
     { started: { $lte: "now()" } },
     {

@@ -37,7 +37,7 @@ export const POST: RequestHandler = async ({ request }) => {
   if (hcaptcha.success) {
     let secretaries;
     try {
-      const committeeRepository = orm.em.fork().getRepository(Committee);
+      const committeeRepository = (await orm()).em.fork().getRepository(Committee);
       secretaries = await committeeRepository
         .findOne(
           { started: { $lte: "now()" }, members: { lookup_name: { name: "secretary" } } },
