@@ -1,7 +1,9 @@
-import { Migration } from "@mikro-orm/migrations";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const { Migration } = require("@mikro-orm/migrations");
 
-export class Migration20221222005237 extends Migration {
-  async up(): Promise<void> {
+class Migration20221222014947 extends Migration {
+  async up() {
     this.addSql('create schema if not exists "cucb";');
 
     this.addSql(
@@ -318,3 +320,4 @@ export class Migration20221222005237 extends Migration {
     );
   }
 }
+exports.Migration20221222014947 = Migration20221222014947;
