@@ -35,6 +35,7 @@ import { SessionTune } from "../entities/SessionTune.js";
 import { Song } from "../entities/Song.js";
 import { UserInstrumentConnection } from "../entities/UserInstrumentConnections.js";
 import { AuthToken } from "../entities/AuthToken.js";
+import { dirname, join } from "path";
 
 const makeConfig = (env: Record<string, string | undefined>) => ({
   entities: [
@@ -81,9 +82,12 @@ const makeConfig = (env: Record<string, string | undefined>) => ({
   user: env["PG_USER"],
   password: env["PG_PASSWORD"],
   migrations: {
-    emit: "ts" as const,
-    path: "./build/migrations",
-    pathTs: "./src/migrations",
+    emit: "js" as const,
+    path: "./src/migrations",
+    pathTs: join(dirname(import.meta.url), "../../migrations")
+      .toString()
+      .split(":", 2)[1],
+    glob: "*.cjs",
   },
 });
 
