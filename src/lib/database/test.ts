@@ -9,5 +9,5 @@ export const makeOrm = async (env) => {
     const { NecessaryDataSeeder } = await import("../../seeders/NecessaryDataSeeder");
     await orm.seeder.seed(NecessaryDataSeeder);
   }
-  return (await orm()).em.fork();
+  return orm.em.fork();
 };
