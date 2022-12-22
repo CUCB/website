@@ -8,7 +8,6 @@
   loop:
     - PG_PASSWORD
     - SESSION_SECRET
-    - HASURA_GRAPHQL_ADMIN_SECRET
   loop_control:
     loop_var: secret_name
 

@@ -44,10 +44,6 @@ function startEndTimes(gig) {
   return { start, end };
 }
 
-function graphqlAuthenticationToken(uid: string): string {
-  return jwt.sign({ userId: uid }, env["SESSION_SECRET"] as string, { expiresIn: "15 minutes" });
-}
-
 function linkTo(gig, baseUrl: string): string {
   return `${baseUrl}/members/gigs/${gig.id}`;
 }

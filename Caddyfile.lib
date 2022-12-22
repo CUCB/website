@@ -1,18 +1,5 @@
 # error /* "Maintenance" 503
 
-reverse_proxy /v1/graphql 127.0.0.1:8080
-
-@hasura {
-	path /hasura
-	path /hasura/*
-}
-
-route @hasura {
-	# add a /hasura endpoint for CLI connection if necessary
-	uri strip_prefix /hasura
-	reverse_proxy * 127.0.0.1:8080
-}
-
 root /* /srv
 file_server /images/committee/*
 file_server /static/*

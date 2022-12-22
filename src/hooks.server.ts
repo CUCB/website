@@ -53,24 +53,6 @@ async function sessionFromHeaders(cookies, request: Request) {
   const sessionRepository = em.getRepository(Session);
   if (cookies.get("connect.sid")) {
     sessionId = signature.unsign(cookies.get("connect.sid"), SESSION_SECRET);
-  } else {
-    // Allow JWTs to access the site so the calendar endpoints can make graphql queries
-    if (request.headers.get("authorization")?.startsWith("Bearer ")) {
-      try {
-        const token = jwt.verify(request.headers.get("authorization").slice("Bearer ".length), SESSION_SECRET);
-        const user = await userRepository.findOne({ id: parseInt(token.userId) });
-        if (user) {
-          const hasuraRole = user.adminType.hasuraRole;
-          session = { userId: parseInt(token.userId), hasuraRole, firstName: user.first, lastName: user.last };
-        }
-
-        // TODO possible error handling/logging
-      } catch (e) {
-        console.error(e);
-        throw error(500, "Failed to authenticate iCal request");
-        // TODO maybe handle errors like we do for password reset?
-      }
-    }
   }
 
   if (sessionId) {
@@ -176,19 +158,6 @@ async function sessionFromHeaders(cookies, request: Request) {
       },
     },
   };
-}
-
-export async function handleFetch({ event, request, fetch }) {
-  if (request.url.startsWith(env["GRAPHQL_REMOTE"])) {
-    request.headers.set("cookie", event.request.headers.get("cookie"));
-    request.headers.set("authorization", event.request.headers.get("authorization"));
-    for (const [header, value] of event.request.headers) {
-      if (["cookie", "authorization", "host"].includes(header)) continue;
-      request.headers.set(header, value);
-    }
-  }
-
-  return fetch(request);
 }
 
 export async function getSession({ locals }) {
