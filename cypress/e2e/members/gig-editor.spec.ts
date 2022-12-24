@@ -413,6 +413,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-edit-venue]`).click();
       cy.get(`[data-test=venue-editor-subvenue]`).click().clear().type("A different subvenue", { delay: 0 });
       cy.get(`[data-test=venue-editor-save]`).click();
+      cy.get(`[data-test=venue-editor-save]`).should("not.exist");
       cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
       cy.visit(`/members/gigs/${gig.id}`);
       cy.get("*").should("contain", "Sog on the Pine").and("contain", "A different subvenue");
