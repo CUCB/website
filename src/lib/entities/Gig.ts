@@ -58,7 +58,7 @@ export class Gig {
   summary?: string;
 
   @Property({ columnType: "date", nullable: true, type: "date" })
-  quote_date?: string;
+  quote_date?: Date | null;
 
   @Property({ columnType: "text", nullable: true, type: "text" })
   finance?: string;

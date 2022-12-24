@@ -1,3 +1,5 @@
+/// <reference types="Cypress" />
+
 import { DateTime } from "luxon";
 
 const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
@@ -27,6 +29,7 @@ let gig = {
   time: "21:00",
   arrive_time: DateTime.fromISO("2020-07-25T20:00+01:00").toJSDate(),
   finish_time: DateTime.fromISO("2020-07-25T23:00+01:00").toJSDate(),
+  quote_date: "2020-01-01",
   finance_deposit_received: true,
   finance_payment_received: false,
   finance_caller_paid: false,
@@ -179,6 +182,7 @@ describe("gig editor", () => {
     });
 
     it("detects unsaved changes", () => {
+      cy.contains("unsaved changes").should("not.exist");
       cy.get(`[data-test=gig-edit-${gig.id}-title]`).click().type("modified title", { delay: 0 });
       cy.contains("unsaved changes").should("be.visible");
       cy.get(`[data-test=gig-edit-${gig.id}-title]`).clear().type(gig.title, { delay: 0 });

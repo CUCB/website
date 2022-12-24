@@ -42,6 +42,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
       gig.finish_time = DateTime.fromJSDate(gig.finish_time).toISO();
       gig.editing_time = DateTime.fromJSDate(gig.editing_time).toISO();
       gig.posting_time = DateTime.fromJSDate(gig.posting_time).toISO();
+      gig.quote_date = DateTime.fromJSDate(gig.quote_date).toISODate();
       sortVenues(venues);
       sortContacts(gig.contacts);
       return {
