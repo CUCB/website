@@ -36,8 +36,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
     ];
     const [gig, venues, gigTypes, allContacts] = await Promise.all(fetchers);
     if (gig) {
-      // TODO create some more structured way to handle this
-      gig.date = new Date(gig.date).toISOString().split("T")[0];
+      gig.date = DateTime.fromJSDate(gig.date).toISODate();
       gig.arrive_time = DateTime.fromJSDate(gig.arrive_time).toISO();
       gig.finish_time = DateTime.fromJSDate(gig.finish_time).toISO();
       gig.editing_time = DateTime.fromJSDate(gig.editing_time).toISO();
