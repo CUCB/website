@@ -114,7 +114,7 @@
     lastSaved.title === title.trim() &&
     lastSaved.date === ((typeCode !== "calendar" && date) || null) &&
     lastSaved.venue === venue_id &&
-    lastSaved.summary === (summary && summary.trim()) &&
+    (lastSaved.summary ?? "") === (summary ?? ("" && summary.trim())) &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
     lastSaved.notes_band === (notes_band && notes_band.trim()) &&
     ((!lastSaved.arrive_time && !arrive_time) ||
