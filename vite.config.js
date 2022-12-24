@@ -14,6 +14,10 @@ const config = {
       allow: [path.resolve("../../../kit")],
     },
   },
+
+  test: {
+    includeSource: ["src/**/*.{js,ts}"],
+  },
 };
 
 export default config;

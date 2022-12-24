@@ -1,4 +1,5 @@
 import { PopulateHint, wrap, type EntityField, type ObjectQuery } from "@mikro-orm/core";
+import { applyArrayFilter } from "./filters";
 import type { OperatorMap } from "@mikro-orm/core/typings";
 import { DateTime } from "luxon";
 import orm from "$lib/database";
@@ -11,7 +12,7 @@ import {
   VIEW_HIDDEN_GIGS,
   VIEW_SIGNUP_SUMMARY,
 } from "$lib/permissions";
-import type { AvailableUserInstrument, SignupGig, SignupSummaryEntry } from "../types";
+import type { AvailableUserInstrument, GigSummary, SignupGig, SignupSummaryEntry } from "../types";
 
 type Session = { userId: string };
 
@@ -99,64 +100,17 @@ const contactResultFilter = (session: { userId: string }) =>
 
 const lineupResultFilter = { lineup: { approved: true, user_instruments: { approved: true } } };
 
-// TODO unit test the shit out of me
-const testFilter = <T, E>(res: T, filter: ObjectQuery<E>): boolean => {
-  if (typeof filter === "object") {
-    return Object.entries(filter)
-      .map(([key, filter]) => testFilter(res[key], filter))
-      .reduce((a, b) => a && b);
-  } else {
-    return res === filter;
-  }
-};
-
-// TODO unit test the shit out of me
-const applyArrayFilter = <T extends object, E>(res: T, filter: ObjectQuery<E>): T => {
-  if (Array.isArray(res)) {
-    res = [...res];
-    for (const [key, value] of Object.entries(filter)) {
-      if (typeof value === "object") {
-        if (Array.isArray(res?.[0]?.[key])) {
-          res = res.map((entry) => ({ ...entry, [key]: applyArrayFilter(entry[key], value) }));
-        } else {
-          // TODO does this always work? is there a case where res[0][key] is not an array, but a child of res[0][key] is an array??
-          res = res.filter((entry) => testFilter(entry[key], value));
-        }
-      } else {
-        res = res.filter((entry) => entry[key] === value);
-      }
-    }
-
-    return res;
-  } else if (typeof res === "object") {
-    res = { ...res };
-    for (const [key, value] of Object.entries(filter)) {
-      if (typeof value === "object") {
-        res[key] = applyArrayFilter(res[key], value);
-      } else {
-        console.log([key, value]);
-        console.error("MEWOWOOW");
-        throw "oh shit";
-      }
-    }
-    return res;
-  } else {
-    // TODO proper exception
-    throw "oh shit";
-  }
-};
-
 export const filterAnyGigDate = (filter: OperatorMap<Date>): ObjectQuery<Gig> => ({
   $or: [{ date: filter }, { arrive_time: filter }, { finish_time: filter }],
 });
 
 export const bySortDate = (gigA: { sort_date: Date }, gigB: { sort_date: Date }): number =>
   gigA.sort_date.getTime() - gigB.sort_date.getTime();
-export const inFuture: ObjectQuery<Gig> = filterAnyGigDate({ $gte: "now()" });
+export const inFuture: ObjectQuery<Gig> = filterAnyGigDate({ $gte: DateTime.local().toISODate() });
 export const inMonth = (date: DateTime): ObjectQuery<Gig> =>
   filterAnyGigDate({
-    $gte: date.startOf("month").toISO(),
-    $lte: date.endOf("month").toISO(),
+    $gte: date.startOf("month").toISODate(),
+    $lte: date.endOf("month").toISODate(),
   });
 export const inCurrentMonth: ObjectQuery<Gig> = inMonth(DateTime.local());
 
