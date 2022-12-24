@@ -427,7 +427,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).then(($input) => {
         cy.log("Check field for custom error");
         expect($input[0].validationMessage).to.match(/[Ff]inish time/);
-        expect($input[0].validationMessage).to.match(/[Ar]ive time/);
+        expect($input[0].validationMessage).to.match(/[Aa]rrive time/);
       });
       cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).click().type("22:00");
       cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
@@ -441,7 +441,7 @@ describe("gig editor", () => {
       });
       cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-time]`).then(($input) => {
         cy.log("Check field for custom error");
-        expect($input[0].validationMessage).to.match(/[Ar]ive time/);
+        expect($input[0].validationMessage).to.match(/[Aa]rrive time/);
       });
       cy.visit(`/members/gigs/${gig.id}`);
       cy.contains("Arrive time: 19:13").should("be.visible");
