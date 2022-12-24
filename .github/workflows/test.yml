@@ -23,6 +23,20 @@ jobs:
         run: |
           npm ci
           npm run svelte-check
+  unit-test:
+    name: Run unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - name: Run unit tests
+        run: |
+          npm ci
+          npm run test:unit -- --run
   nonce:
     runs-on: ubuntu-latest
     # persist job results to other jobs in the workflow
