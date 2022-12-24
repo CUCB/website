@@ -383,10 +383,9 @@
         </b>
         <!-- TODO debodge and add test with multiple clients -->
         {#each clients as client, i (client.id || client.contact.id)}
-          <a href="/members/gigs/contacts/{client.id || client.contact.id}">
-            {client.contact.name}
-            {#if client.contact.organization}&nbsp;@ {client.contact.organization}{/if}
-          </a>{#if i + 1 < clients.length},&nbsp;{/if}
+          <a href="/members/gigs/contacts/{client.id || client.contact.id}"
+            >{client.contact.name}{#if client.contact.organization}&nbsp;@ {client.contact.organization}{/if}</a
+          >{#if i + 1 < clients.length},&nbsp;{/if}
         {/each}
       </p>
     {/if}
