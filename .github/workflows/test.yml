@@ -106,6 +106,7 @@ jobs:
     if: ${{ github.ref=='refs/heads/master' }}
     needs:
       - test
+      - unit-test
       - svelte-check
     name: Build and push docker image for deploy
     runs-on: ubuntu-latest
