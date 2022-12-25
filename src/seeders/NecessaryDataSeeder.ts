@@ -3,7 +3,6 @@ import { Seeder } from "@mikro-orm/seeder";
 import { AuthActionType } from "../lib/entities/AuthActionType";
 import { AuthBitmasksPermission } from "../lib/entities/AuthBitmasksPermission";
 import { AuthUserType } from "../lib/entities/AuthUserType";
-import { CalendarSubscriptionType } from "../lib/entities/CalendarSubscriptionType";
 import { CommitteeKey } from "../lib/entities/CommitteeKey";
 import { CommitteePosition } from "../lib/entities/CommitteePosition";
 import { ConnectionType } from "../lib/entities/ConnectionType";
@@ -1007,9 +1006,6 @@ export class NecessaryDataSeeder extends Seeder {
     em.upsert(UserPrefType, { id: "10", name: "style.gigs.shownicknames", default: false });
     em.upsert(UserPrefType, { id: "11", name: "style.gigs.showconnections", default: false });
     em.upsert(UserPrefType, { id: "12", name: "style.calendar.termly", default: true });
-
-    em.upsert(CalendarSubscriptionType, { name: "allgigs" });
-    em.upsert(CalendarSubscriptionType, { name: "mygigs" });
 
     await em.flush();
   }

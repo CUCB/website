@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const { Migration } = require("@mikro-orm/migrations");
 
-class Migration20221222014947 extends Migration {
+class Migration20221225070638 extends Migration {
   async up() {
     this.addSql('create schema if not exists "cucb";');
 
@@ -20,10 +20,6 @@ class Migration20221222014947 extends Migration {
     );
     this.addSql(
       'alter table "cucb"."auth_user_types" add constraint "auth_user_types_hasura_role_key" unique ("hasura_role");',
-    );
-
-    this.addSql(
-      'create table "cucb"."calendar_subscriptions_types" ("name" text not null, constraint "calendar_subscriptions_types_pkey" primary key ("name"));',
     );
 
     this.addSql(
@@ -134,7 +130,7 @@ class Migration20221222014947 extends Migration {
     this.addSql('create index "idx_17412_contact_id" on "cucb"."gigs_contacts" ("contact_id");');
 
     this.addSql(
-      'create table "cucb"."calendar_subscriptions" ("user_id" bigint not null, "calendar_type" text not null, "last_accessed" timestamptz(6) not null, "ip_address" varchar(64) not null, constraint "calendar_subscriptions_pkey" primary key ("user_id", "calendar_type"));',
+      'create table "cucb"."calendar_subscriptions" ("user_id" bigint not null, "calendar_type" text check ("calendar_type" in (\'allgigs\', \'mygigs\')) not null, "last_accessed" timestamptz(6) not null, "ip_address" varchar(64) not null, constraint "calendar_subscriptions_pkey" primary key ("user_id", "calendar_type"));',
     );
     this.addSql('create index "idx_17334_user_id" on "cucb"."calendar_subscriptions" ("user_id");');
 
@@ -265,9 +261,6 @@ class Migration20221222014947 extends Migration {
     this.addSql(
       'alter table "cucb"."calendar_subscriptions" add constraint "calendar_subscriptions_user_id_foreign" foreign key ("user_id") references "cucb"."users" ("id") on update cascade on delete cascade;',
     );
-    this.addSql(
-      'alter table "cucb"."calendar_subscriptions" add constraint "calendar_subscriptions_calendar_type_foreign" foreign key ("calendar_type") references "cucb"."calendar_subscriptions_types" ("name") on update cascade;',
-    );
 
     this.addSql(
       'alter table "cucb"."biscuit_polls" add constraint "biscuit_polls_created_by_foreign" foreign key ("created_by") references "cucb"."users" ("id") on update cascade;',
@@ -320,4 +313,4 @@ class Migration20221222014947 extends Migration {
     );
   }
 }
-exports.Migration20221222014947 = Migration20221222014947;
+exports.Migration20221225070638 = Migration20221225070638;
