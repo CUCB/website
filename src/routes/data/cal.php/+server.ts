@@ -2,15 +2,13 @@ import { DateTime } from "luxon";
 import icalPkg from "ical-generator";
 import dotenv from "dotenv";
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
 import { sortLineup } from "../../../components/Gigs/_sort";
 import { error } from "@sveltejs/kit";
 import orm from "$lib/database";
-import { CalendarSubscription } from "$lib/entities/CalendarSubscription";
-import type { CalendarSubscriptionType } from "$lib/entities/CalendarSubscriptionType";
+import { CalendarSubscription, CalendarSubscriptionType } from "$lib/entities/CalendarSubscription";
 import { env } from "$env/dynamic/private";
 import type { RequestEvent } from "./$types";
-import { fetchMultiGigSummary, fetchSpecificGigSignup, fetchSpecificGigSummary } from "../../members/gigs/queries";
+import { fetchMultiGigSummary, fetchSpecificGigSummary } from "../../members/gigs/queries";
 import { VIEW_GIG_ADMIN_NOTES } from "$lib/permissions";
 import type { GigSummary } from "../../members/types";
 import { User } from "$lib/entities/User";
@@ -181,7 +179,7 @@ export async function allGigs(ipAddress: string, baseUrl: string, session: Sessi
   });
   const hidden = VIEW_GIG_ADMIN_NOTES.guard(session);
   const update = (await orm()).em.fork().upsert(CalendarSubscription, {
-    calendarType: "allgigs" as unknown as CalendarSubscriptionType,
+    calendarType: CalendarSubscriptionType.allgigs,
     ipAddress,
     user: session.userId,
     lastAccessed: "now()" as unknown as Date,
@@ -229,7 +227,7 @@ export async function myGigs(ipAddress: string, baseUrl: string, session: Sessio
   const hidden = VIEW_GIG_ADMIN_NOTES.guard(session);
   const em = (await orm()).em.fork();
   const update = em.upsert(CalendarSubscription, {
-    calendarType: "mygigs" as unknown as CalendarSubscriptionType,
+    calendarType: CalendarSubscriptionType.mygigs,
     ipAddress,
     user: session.userId,
     lastAccessed: "now()" as unknown as Date,

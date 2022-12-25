@@ -8,7 +8,6 @@ import { CommitteeMember } from "../entities/CommitteeMember.js";
 import { CommitteePosition } from "../entities/CommitteePosition.js";
 import { CommitteeKey } from "../entities/CommitteeKey.js";
 import { CalendarSubscription } from "../entities/CalendarSubscription.js";
-import { CalendarSubscriptionType } from "../entities/CalendarSubscriptionType.js";
 import { Instrument } from "../entities/Instrument.js";
 import { UserInstrument } from "../entities/UserInstrument.js";
 import { GigLineupEntry } from "../entities/GigLineupEntry.js";
@@ -47,7 +46,6 @@ const makeConfig = (env: Record<string, string | undefined>) => ({
     BiscuitPollEntry,
     BiscuitPollVote,
     CalendarSubscription,
-    CalendarSubscriptionType,
     Caption,
     Committee,
     CommitteeMember,

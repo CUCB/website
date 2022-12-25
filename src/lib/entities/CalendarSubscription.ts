@@ -1,7 +1,11 @@
-import { Entity, ManyToOne, Property } from "@mikro-orm/core";
+import { Entity, Enum, ManyToOne, Property } from "@mikro-orm/core";
 import type { Relation } from "./bodge.js";
-import { CalendarSubscriptionType } from "./CalendarSubscriptionType.js";
 import { User } from "./User.js";
+
+export enum CalendarSubscriptionType {
+  allgigs = "allgigs",
+  mygigs = "mygigs",
+}
 
 @Entity({ schema: "cucb", tableName: "calendar_subscriptions" })
 export class CalendarSubscription {
@@ -14,7 +18,7 @@ export class CalendarSubscription {
   })
   user!: Relation<User>;
 
-  @ManyToOne({ entity: () => CalendarSubscriptionType, fieldName: "calendar_type", primary: true })
+  @Enum({ items: () => CalendarSubscriptionType, fieldName: "calendar_type", primary: true, type: "varchar" })
   calendarType!: CalendarSubscriptionType;
 
   @Property({ length: 6, type: "timestamptz" })

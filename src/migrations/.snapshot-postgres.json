@@ -172,32 +172,6 @@
     },
     {
       "columns": {
-        "name": {
-          "name": "name",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "mappedType": "text"
-        }
-      },
-      "name": "calendar_subscriptions_types",
-      "schema": "cucb",
-      "indexes": [
-        {
-          "keyName": "calendar_subscriptions_types_pkey",
-          "columnNames": ["name"],
-          "composite": false,
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "foreignKeys": {}
-    },
-    {
-      "columns": {
         "captionid": {
           "name": "captionid",
           "type": "int8",
@@ -2401,7 +2375,8 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "mappedType": "text"
+          "enumItems": ["allgigs", "mygigs"],
+          "mappedType": "enum"
         },
         "last_accessed": {
           "name": "last_accessed",
@@ -2451,14 +2426,6 @@
           "referencedColumnNames": ["id"],
           "referencedTableName": "cucb.users",
           "deleteRule": "cascade",
-          "updateRule": "cascade"
-        },
-        "calendar_subscriptions_calendar_type_foreign": {
-          "constraintName": "calendar_subscriptions_calendar_type_foreign",
-          "columnNames": ["calendar_type"],
-          "localTableName": "cucb.calendar_subscriptions",
-          "referencedColumnNames": ["name"],
-          "referencedTableName": "cucb.calendar_subscriptions_types",
           "updateRule": "cascade"
         }
       }
