@@ -27,6 +27,14 @@ describe("gig signup", () => {
   before(() => {
     cy.visit("/");
     cy.task("db:create_gig", {
+      id: "15275",
+      title: "A gig I created earlier",
+      type: "1",
+      admins_only: false,
+      allow_signups: true,
+      date: "2020-08-01",
+    });
+    cy.task("db:create_gig", {
       id: "15274",
       title: "Cypress Demo Gig",
       type: "1",
@@ -56,6 +64,20 @@ describe("gig signup", () => {
 
     cy.get(`[data-test="gig-15274-signup-no"]`).should("not.have.color", colors.negative);
     cy.get(`[data-test="gig-15274-signup-no"]`).click().should("have.color", colors.negative);
+  });
+
+  it("displays gigs in chronological order", () => {
+    cy.login("cypress_user", "abc123");
+    cy.visit("/members");
+    cy.get("h3").then((elements) => {
+      const datetimes = elements.toArray().map((elem) => elem.querySelector("time").getAttribute("datetime"));
+      expect(elements).to.contain("A gig I created earlier");
+      expect(elements).to.contain("Cypress Demo Gig");
+      expect(datetimes).to.not.contain(null);
+      expect(datetimes).to.be.sorted();
+    });
+    cy.contains("A gig I created earlier");
+    cy.contains("Cypress Demo Gig");
   });
 
   context("without_instruments", () => {
