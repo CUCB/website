@@ -148,7 +148,7 @@ Cypress.Commands.add("paste", { prevSubject: true }, (subject, content) => {
 });
 
 Cypress.Commands.add("waitForFormInteractive", () => {
-  cy.get("[data-test=page-hydrated]").should("exist");
+  cy.get("[data-test=page-hydrated]", { timeout: 10000 }).should("exist");
 });
 
 function parseBool(b: string): boolean {
