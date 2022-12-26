@@ -577,7 +577,7 @@ describe("gig editor", () => {
     });
 
     it("can preview a gig summary", () => {
-      cy.get(`[data-test=gig-edit-${gig.id}-show-preview]`).pipe(click).should("not.exist");
+      cy.get(`[data-test=gig-edit-${gig.id}-show-preview]`).click().should("not.exist");
       cy.get(`[data-test=gig-summary-${gig.id}]`)
         .should("contain", gig.title)
         .and("contain", Cypress.DateTime.fromJSDate(gig.arrive_time).toFormat("HH:mm"))

@@ -297,11 +297,12 @@ describe("gig diary", () => {
       beforeEach(() => {
         cy.task("db:delete_signup", { user_id: "27250", gig_id: signupGig.id });
         cy.visit("/members/gigs");
+        cy.waitForFormInteractive();
       });
 
       it("allows a user to sign up to a gig and change their signup status", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
-          .pipe(click)
+          .click()
           .should(($el) => {
             expect($el).to.not.be.visible;
           });
@@ -324,7 +325,7 @@ describe("gig diary", () => {
 
       it("retains signup information on refresh", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
-          .pipe(click)
+          .click()
           .should(($el) => {
             expect($el).to.not.be.visible;
           });
@@ -337,8 +338,9 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-${signupGig.id}-signup-save]`).should("not.exist");
 
         cy.visit("/members/gigs");
+        cy.waitForFormInteractive();
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
-          .pipe(click)
+          .click()
           .should(($el) => {
             expect($el).to.not.be.visible;
           });
@@ -348,8 +350,9 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-${signupGig.id}-signup-no]`).should("have.color", colors.negative);
 
         cy.visit("/members/gigs");
+        cy.waitForFormInteractive();
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
-          .pipe(click)
+          .click()
           .should(($el) => {
             expect($el).to.not.be.visible;
           });
@@ -376,7 +379,7 @@ describe("gig diary", () => {
 
       it("retains signup information when gig is hidden and then redisplayed", () => {
         cy.get(`[data-test=show-signup-${signupGig.id}]`)
-          .pipe(click)
+          .click()
           .should(($el) => {
             expect($el).to.not.be.visible;
           });
@@ -398,7 +401,8 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("Wind Synth");
 
         cy.visit("/members/gigs");
-        cy.get(`[data-test=gigview-by-month]`).pipe(click).should("not.exist"); // Click it until link becomes text
+        cy.waitForFormInteractive();
+        cy.get(`[data-test=gigview-by-month]`).click().should("not.exist"); // Click it until link becomes text
         cy.selectNextMonth();
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-yes]`).should("have.color", colors.positive);
@@ -410,11 +414,11 @@ describe("gig diary", () => {
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).click();
 
         cy.get(`[data-test=gigcalendar-next-month]`)
-          .pipe(click)
+          .click()
           .parent()
           .parent()
           .should("contain", Cypress.DateTime.local().plus({ months: 2 }).toFormat("LLLL"));
-        cy.get(`[data-test=gigview-all-upcoming]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=gigview-all-upcoming]`).click().should("not.exist");
         cy.get(`[data-test=show-signup-${signupGig.id}]`).click();
         cy.get(`[data-test=gig-${signupGig.id}-signup-maybe]`).should("have.color", colors.neutral);
         cy.get(`[data-test=gig-signup-${signupGig.id}]`).contains("No instruments selected");
@@ -422,7 +426,7 @@ describe("gig diary", () => {
 
       it("can switch between upcoming and past gigs", () => {
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
-        cy.get(`[data-test=gigview-by-month]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=gigview-by-month]`).click().should("not.exist");
         cy.intercept({ method: "GET", url: /^\/members\/gigs.json/ }).as("fetchGigs");
         cy.selectPreviousMonth();
         cy.wait("@fetchGigs");
@@ -433,7 +437,7 @@ describe("gig diary", () => {
         cy.wait("@fetchGigs");
         cy.contains(Cypress.DateTime.local().minus({ months: 3 }).toFormat("LLLL yyyy")).should("exist");
         cy.get(`[data-test=gig-summary-${pastGig.id}]`).should("not.exist");
-        cy.get(`[data-test=gigview-all-upcoming]`).pipe(click).should("not.exist");
+        cy.get(`[data-test=gigview-all-upcoming]`).click().should("not.exist");
         cy.get(`[data-test=gig-summary-${signupGig.id}]`).should("be.visible");
       });
     });

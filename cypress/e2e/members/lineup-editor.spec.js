@@ -545,14 +545,16 @@ describe("lineup editor", () => {
       });
 
       it("doesn't reset the lineup/signup information if dialog cancelled", () => {
-        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
+        cy.waitForFormInteractive();
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).click().should("not.exist");
         cy.on("window:confirm", () => false);
         cy.get(`[data-test=destroy-lineup]`).click();
         cy.get(`[data-test=member-${signups[0].user.id}]`).should("be.visible");
       });
 
       it("resets the lineup/signup information when user agrees", () => {
-        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).pipe(click).should("not.exist");
+        cy.waitForFormInteractive();
+        cy.get(`[data-test=member-${signups[0].user.id}] [data-test=person-approve]`).click().should("not.exist");
         cy.get(`[data-test=destroy-lineup]`).click();
         for (let person of signups) {
           cy.get(`[data-test=member-${person.user.id}]`).should("not.exist");
@@ -806,7 +808,7 @@ describe("signup admin", () => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names).to.be.ascending;
       });
-      cy.get("[data-test=gig-title-52347]").pipe(click).should("have.attr", "aria-selected", "true");
+      cy.get("[data-test=gig-title-52347]").click().should("have.attr", "aria-selected", "true");
       cy.get("[data-test=person-name]").then((elements) => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names.slice(0, 2)).to.eql(["Sparkly Tiger", "Sleepy Prince"]);
