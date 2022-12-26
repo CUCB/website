@@ -33,6 +33,11 @@ describe("gig signup", () => {
       admins_only: false,
       allow_signups: true,
       date: "2020-08-01",
+      venue: {
+        name: "Venue with no information",
+        subvenue: null,
+        id: "32774527",
+      },
     });
     cy.task("db:create_gig", {
       id: "15274",
@@ -41,6 +46,19 @@ describe("gig signup", () => {
       admins_only: false,
       allow_signups: true,
       date: "2020-07-17",
+      venue: {
+        address: "3 Trumpington St, Cambridge",
+        postcode: "CB2 1QY",
+        distance_miles: 0,
+        longitude: 0.1182611,
+        latitude: 52.2014254,
+        map_link:
+          "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
+        name: "Emmanuel United Reform Church",
+        notes_band: "Where we (used to) rehearse",
+        subvenue: null,
+        id: "3277452",
+      },
     });
     cy.task("db:create_login_users");
     cy.task("db:delete_signup", { user_id: "27250", gig_id: "15274" });
@@ -78,6 +96,22 @@ describe("gig signup", () => {
     });
     cy.contains("A gig I created earlier");
     cy.contains("Cypress Demo Gig");
+  });
+
+  it("displays addresses for gig venues", () => {
+    cy.login("cypress_user", "abc123");
+    cy.visit("/members");
+    cy.get('[data-test="gig-signup-15274"] [data-test=venue-map-link]')
+      .should("have.attr", "href")
+      .and(
+        "eq",
+        "https://www.google.com/maps/place/Emmanuel+United+Reformed+Church/@52.2014254,0.1182611,15z/data=!4m5!3m4!1s0x0:0x4386e0813db16b3e!8m2!3d52.2014254!4d0.1182611",
+      );
+    cy.get('[data-test="gig-signup-15274"] [data-test=venue-address]')
+      .tooltipInnerHTML()
+      .should("eq", "3 Trumpington St, Cambridge<br>CB2 1QY");
+    cy.get('[data-test="gig-signup-15275"]').contains("Venue with no information").should("be.visible");
+    cy.get('[data-test="gig-signup-15275"] [data-test=venue-address]').should("not.exist");
   });
 
   context("without_instruments", () => {

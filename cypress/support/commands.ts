@@ -18,6 +18,7 @@ declare global {
       cssProperty(name: string): Chainable<string>;
       hasTooltip(content: string): void;
       tooltipContents(): Chainable<string>;
+      tooltipInnerHTML(): Chainable<string>;
       paste(content: string): void;
       waitForFormInteractive(): void;
       toggleLineupRole(name: string): void;
@@ -125,6 +126,18 @@ Cypress.Commands.add("tooltipContents", { prevSubject: true }, (subject) => {
   cy.get("[data-test='tooltip']")
     .first()
     .invoke("text")
+    .then((text) => {
+      cy.wrap(subject).blur();
+      cy.wrap(text);
+    });
+});
+
+Cypress.Commands.add("tooltipInnerHTML", { prevSubject: true }, (subject) => {
+  cy.get("[data-test=tooltip-loaded]").should("exist");
+  cy.wrap(subject).focus();
+  cy.get("[data-test='tooltip']")
+    .first()
+    .invoke("html")
     .then((text) => {
       cy.wrap(subject).blur();
       cy.wrap(text);
