@@ -34,13 +34,6 @@
     return `${ordinal(day)} ${luxonDate.toFormat("MMMM yyyy")}`;
   }
 
-  function displayDateString(date: string | undefined): string | null {
-    if (date == null) return null;
-    const luxonDate = DateTime.fromISO(date);
-    const day = luxonDate.day;
-    return `${ordinal(day)} ${luxonDate.toFormat("MMMM yyyy")}`;
-  }
-
   function countInstruments(instruments: Instrument[]): [Instrument, number][] {
     const idCounts = new Map();
     const instrumentsById = new Map();
@@ -64,9 +57,9 @@
   const login_date = user.lastLoginDate && `in ${displayMonth(user.lastLoginDate)}`;
 
   const last_gig = [...user.gig_lineups].reverse().find((x) => x.gig.date != null);
-  const last_gig_date = displayDateString(last_gig?.gig.date);
+  const last_gig_date = displayDate(last_gig?.gig.date);
   const first_gig = user.gig_lineups?.[0];
-  const first_gig_date = displayDateString(first_gig?.gig.date);
+  const first_gig_date = displayDate(first_gig?.gig.date);
   const gig_count = user.gig_lineups.length;
   const instrument_gig_count = user.gig_lineups.filter((gig) => gig.user_instruments.length > 0).length;
 
