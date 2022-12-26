@@ -1,5 +1,4 @@
 import "@percy/cypress";
-import "cypress-pipe";
 import { DateTime } from "luxon";
 import { Email } from "./proxies";
 
@@ -107,7 +106,7 @@ Cypress.Commands.add("cssProperty", (name) =>
   cy
     .document()
     .its("documentElement")
-    .pipe((elem) => getComputedStyle(elem))
+    .then((elem) => getComputedStyle(elem))
     .invoke("getPropertyValue", name)
     .invoke("trim")
     .should("not.equal", undefined),
