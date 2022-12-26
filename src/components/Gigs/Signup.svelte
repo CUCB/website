@@ -188,6 +188,8 @@
   const instrumentTooltip = (_) => {
     tippy(".disabled", { content: "This instrument is selected as part of a lineup, you can't remove it." });
   };
+
+  const address = (venue) => [venue.address, venue.postcode].filter((line) => line).join("\n");
 </script>
 
 <style lang="scss">
@@ -279,6 +281,22 @@
     font-size: 1.2em;
     padding: 0 0.25em;
   }
+
+  .venue-title {
+    display: flex;
+    align-items: center;
+  }
+
+  .venue-title i {
+    font-size: 1.3em;
+  }
+
+  .venue-title :global(.tooltip-text) {
+    margin: 0 0.25em;
+  }
+  .venue-title .venue-link {
+    margin-right: 0.5em;
+  }
 </style>
 
 <div data-test="gig-signup-{gig.id}" class="gig-signup theme-{$themeName}">
@@ -291,11 +309,23 @@
       >{/if}
   </h3>
   {#if gig.venue}
-    <h4>
-      <a href="/members/gigs/venue/{gig.venue.id}">
+    <h4 class="venue-title">
+      <a href="/members/gigs/venue/{gig.venue.id}" class="venue-link">
         {gig.venue.name}
         {#if gig.venue.subvenue}&nbsp;| {gig.venue.subvenue}{/if}
       </a>
+      {#if address(gig.venue)}
+        <TooltipText content="{address(gig.venue)}" data-test="venue-address">
+          <i class="las la-map-marked-alt"></i>
+        </TooltipText>
+      {/if}
+      {#if gig.venue.map_link}
+        <TooltipText content="Google maps">
+          <a href="{gig.venue.map_link}" data-test="venue-map-link" target="_blank" rel="noopener noreferrer"
+            ><i class="las la-directions"></i></a
+          >
+        </TooltipText>
+      {/if}
     </h4>
   {/if}
   <fieldset role="radiogroup" class="statuses">
