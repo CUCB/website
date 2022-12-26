@@ -101,3 +101,21 @@ const emailReplyTo = (_chai, utils) => {
 };
 
 chai.use(emailReplyTo);
+
+const regexCSS = (_chai, utils) => {
+  function assertRegexCSS(property, expected) {
+    this.assert(
+      this._obj.css(property) && this._obj.css(property).match(expected),
+      `expected #{this} to have CSS ${property} matching ${expected}, actual value is ${JSON.stringify(
+        this._obj.css(property),
+      )}.`,
+      `expected #{this} to not have CSS ${property} matching ${expected}, actual value is ${JSON.stringify(
+        this._obj.css(property),
+      )}.`,
+    );
+  }
+
+  _chai.Assertion.addChainableMethod("regexCSS", assertRegexCSS);
+};
+
+chai.use(regexCSS);

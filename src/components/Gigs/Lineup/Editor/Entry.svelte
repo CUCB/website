@@ -60,7 +60,8 @@
     opacity: 1;
   }
   [aria-checked="false"],
-  [aria-pressed="false"] {
+  [aria-pressed="false"],
+  .deleted-instrument {
     text-decoration: line-through;
     opacity: 0.63;
     &:hover {
@@ -231,7 +232,9 @@
     {:else}
       <div data-test="instruments-to-add">
         {#each unselectedInstruments as instrument}
-          <button on:click="{() => selectInstrument(instrument.id)}">{instrument.instrument.name}</button>
+          <button class:deleted-instrument="{instrument.deleted}" on:click="{() => selectInstrument(instrument.id)}"
+            >{instrument.instrument.name}</button
+          >
         {:else}No instruments available to add{/each}
         <button on:click="{() => (showUnselectedInstruments = false)}" data-test="cancel-add-instruments">Cancel</button
         >

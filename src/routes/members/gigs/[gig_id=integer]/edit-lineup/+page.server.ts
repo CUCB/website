@@ -73,6 +73,7 @@ const fetchGigLineup = (id: string, em: EntityManager): Promise<null | { lineup:
           "lineup.user_instruments",
           "lineup.user_instruments.user_instrument",
           "lineup.user_instruments.user_instrument.instrument",
+          "lineup.user_instruments.user_instrument.deleted",
           "lineup.user.prefs",
           "lineup.user.prefs.pref_type",
         ],
@@ -121,6 +122,7 @@ export const load: PageServerLoad = async ({ params: { gig_id }, parent }) => {
 interface LineupInstrument {
   user_instrument: UserInstrument;
   approved?: boolean | null;
+  deleted?: boolean;
 }
 
 function userInstrumentsById(instrument_list: LineupInstrument[]): Record<string, LineupInstrument> {
