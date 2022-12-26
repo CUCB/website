@@ -284,7 +284,11 @@
 <div data-test="gig-signup-{gig.id}" class="gig-signup theme-{$themeName}">
   <h3>
     {#if showLink}<a href="/members/gigs/{gig.id}">{gig.title}</a>{:else}{gig.title}{/if}
-    {#if date}<small> &nbsp;on {date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy")} </small>{/if}
+    {#if date}<small>
+        &nbsp;on <time datetime="{date.toISODate()}"
+          >{date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy")}</time
+        ></small
+      >{/if}
   </h3>
   {#if gig.venue}
     <h4>

@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import orm from "$lib/database";
 import { Gig } from "$lib/entities/Gig";
 import { GigLineupEntry } from "$lib/entities/GigLineupEntry";
+import { User } from "$lib/entities/User";
 import { UserInstrument } from "$lib/entities/UserInstrument";
 import {
   VIEW_GIG_ADMIN_NOTES,
@@ -198,3 +199,8 @@ export const fetchMultiGigSignupSummary = (
 
 export const fetchSpecificGigSignupSummary = (session: Session, id: string): Promise<SignupSummaryEntry[] | null> =>
   fetchMultiGigSignupSummary(session, { gig: id });
+
+export const fetchUserNotes = (session: { userId: string }): Promise<string> =>
+  orm()
+    .then((orm) => orm.em.fork().findOneOrFail(User, { id: session.userId }, { fields: ["gig_notes"] }))
+    .then((res) => res.gig_notes);
