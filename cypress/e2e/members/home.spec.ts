@@ -74,8 +74,10 @@ describe("gig signup", () => {
   it("allows a user to sign up to a gig", () => {
     cy.login("cypress_user", "abc123");
     cy.visit("/members");
+    cy.waitForFormInteractive();
+
     cy.get(`[data-test="gig-15274-signup-yes"]`).should("not.have.color", colors.positive);
-    cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
+    cy.get(`[data-test="gig-15274-signup-yes"]`).click().should("have.color", colors.positive);
 
     cy.get(`[data-test="gig-15274-signup-maybe"]`).should("not.have.color", colors.netural);
     cy.get(`[data-test="gig-15274-signup-maybe"]`).click().should("have.color", colors.neutral);
@@ -119,14 +121,14 @@ describe("gig signup", () => {
       cy.task("db:delete_instruments_for_user", "27250");
       cy.login("cypress_user", "abc123");
       cy.visit("/members");
+      cy.waitForFormInteractive();
     });
 
     it("links to user profile when editing instruments", () => {
-      cy.waitForFormInteractive();
       cy.intercept("POST", "/members/gigs/15274/signup", {
         fixture: "gig/signup/yes.json",
       }).as("signup");
-      cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
+      cy.get(`[data-test="gig-15274-signup-yes"]`).click().should("have.color", colors.positive);
       cy.wait("@signup");
       cy.get(`[data-test="gig-15274-signup-edit"]`).click();
       cy.get(`a[href="/members/users"]`).should("exist");
@@ -140,6 +142,7 @@ describe("gig signup", () => {
       cy.task("db:create_user_instrument", { id: "28474293", user: "27250", instrument: "20" });
       cy.login("cypress_user", "abc123");
       cy.visit("/members");
+      cy.waitForFormInteractive();
     });
 
     it("allows adding and editing of instruments", () => {
@@ -148,7 +151,7 @@ describe("gig signup", () => {
         url: "/members/gigs/15274/signup",
       }).as("signupRequest");
 
-      cy.get(`[data-test="gig-15274-signup-yes"]`).pipe(click).should("have.color", colors.positive);
+      cy.get(`[data-test="gig-15274-signup-yes"]`).click().should("have.color", colors.positive);
       cy.wait("@signupRequest");
       cy.get(`[data-test="gig-15274-signup-edit"]`).click();
       cy.get(`[data-test="gig-15274-signup-instrument-53-toggle"]`).click();
