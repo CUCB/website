@@ -1,21 +1,3 @@
-import { AllGigTypes, UpdateGigType, DeleteGig } from "../../database/gigs";
-import {
-  AllInstrumentNames,
-  OnConflictLineupInstruments,
-  OnConflictUserInstruments,
-  DeleteUserInstruments,
-} from "../../database/instruments";
-import { CreateGig, ClearLineupForGig } from "../../database/gigs";
-import {
-  CreateUser,
-  HASHED_PASSWORDS,
-  OnConflictUser,
-  OnConflictUserPrefs,
-  AllAttributes,
-  CreateLineup,
-  DeleteUsers,
-} from "../../database/users";
-
 const click = ($el) => $el.click();
 
 let signups = [
@@ -32,7 +14,7 @@ let signups = [
       last: "Smasher",
       gig_notes: "",
       prefs: ["soundtech"],
-      user_instruments: ["Drum(s)", "Cajón"],
+      user_instruments: ["Drum(s)", "Cajón", "-Melodeon"],
     },
     user_available: true,
     user_instruments: ["Bodhran"],
@@ -93,20 +75,32 @@ describe("lineup editor", () => {
           ) {
             person.user_instruments = person.user_instruments?.map((name) => {
               let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+              let deleted = false;
+              if (fields.name.startsWith("-")) {
+                fields.name = fields.name.slice(1);
+                deleted = true;
+              }
               return {
                 id: (userInstrumentIdBase * ++userInstrumentCount).toString(),
                 instrument: instrumentIds[fields.name],
                 nickname: fields.nickname,
                 name: fields.name,
+                deleted,
               };
             });
             person.user.user_instruments = person.user.user_instruments?.map((name) => {
               let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
+              let deleted = false;
+              if (fields.name.startsWith("-")) {
+                fields.name = fields.name.slice(1);
+                deleted = true;
+              }
               return {
                 id: (userInstrumentIdBase * ++userInstrumentCount).toString(),
                 instrument: instrumentIds[fields.name],
                 nickname: fields.nickname,
                 name: fields.name,
+                deleted,
               };
             });
           }
@@ -448,15 +442,20 @@ describe("lineup editor", () => {
                 .wrap(person.user_instruments)
                 .each((instrument) => cy.get(`[data-test=instruments-to-add]`).should("not.contain", instrument.name));
             person.user.user_instruments &&
-              cy
-                .wrap(person.user.user_instruments)
-                .each((instrument) => cy.get(`[data-test=instruments-to-add]`).should("contain", instrument.name));
+              cy.wrap(person.user.user_instruments).each((instrument) => {
+                if (instrument.deleted) {
+                  cy.contains(instrument.name).should("have.regexCSS", "text-decoration", /line-through/);
+                } else {
+                  cy.get(`[data-test=instruments-to-add]`).should("contain", instrument.name);
+                }
+              });
             cy.get(`[data-test=cancel-add-instruments]`).click();
           });
         }
         cy.get(`[data-test=member-${signups[1].user.id}]`).within(() => {
           cy.get(`[data-test=add-instruments]`).click();
           cy.get(`[data-test=instruments-to-add]`).contains(signups[1].user.user_instruments[0].name).click();
+          cy.contains("Melodeon").should("not.exist");
           cy.get(`[data-test=add-instruments]`).should("be.visible");
           cy.get(`[data-test=cancel-add-instruments]`).should("not.exist");
           cy.get(`[data-test=instrument-${signups[1].user.user_instruments[0].id}]`).within(() => {
