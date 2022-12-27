@@ -1,18 +1,8 @@
 /// <reference types="Cypress" />
 
-import {
-  CreateGig,
-  DeleteSignup,
-  SignupDetails,
-  ClearLineupForGig,
-  AddInstrument,
-  RemoveInstruments,
-} from "../../database/gigs";
-import { CreateUser, HASHED_PASSWORDS } from "../../database/users";
+import { String } from "runtypes";
 
-const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
-
-let colors = {};
+let colors: { unselected?: string; positive?: string; negative?: string; neutral?: string } = {};
 
 let gigForSummary = {
   id: "74527",
@@ -24,8 +14,8 @@ let gigForSummary = {
   time: "21:00",
   notes_admin: "This is an admin note",
   notes_band: "This is a band note",
-  arrive_time: DateTime.fromISO("2020-07-25T20:00+01:00").toJSDate(),
-  finish_time: DateTime.fromISO("2020-07-25T23:00+01:00").toJSDate(),
+  arrive_time: Cypress.DateTime.fromISO("2020-07-25T20:00+01:00").toJSDate(),
+  finish_time: Cypress.DateTime.fromISO("2020-07-25T23:00+01:00").toJSDate(),
   finance_deposit_received: true,
   finance_payment_received: false,
   finance_caller_paid: false,
@@ -445,15 +435,16 @@ describe("gig diary", () => {
 });
 
 describe("iCal files", () => {
+  const months = 1;
   let gig = {
     ...gigForSummary,
-    date: DateTime.local().plus({ months: 1 }).set({ hour: 0, minute: 0, second: 0, millisecond: 0 }).toISODate(),
-    arrive_time: DateTime.local()
-      .plus({ months: 1 })
+    date: Cypress.DateTime.local().plus({ months }).toISODate(),
+    arrive_time: Cypress.DateTime.local()
+      .plus({ months })
       .set({ hour: 20, minute: 0, second: 0, millisecond: 0 })
       .toJSDate(),
-    finish_time: DateTime.local()
-      .plus({ months: 1 })
+    finish_time: Cypress.DateTime.local()
+      .plus({ months })
       .set({ hour: 23, minute: 0, second: 0, millisecond: 0 })
       .toJSDate(),
   };
@@ -468,16 +459,17 @@ describe("iCal files", () => {
     cy.login("cypress", "abc123");
     cy.visit(`/members/gigs/${gig.id}`);
     cy.contains("Download iCal").then((link) => {
+      // @ts-ignore
       const linksTo = link.attr("href");
-      console.log(`${Cypress.config().baseUrl.replace(/\/$/, "")}${linksTo}`);
-      cy.request(Cypress.config().baseUrl.replace(/\/?$/, linksTo)).then((res) => {
+      cy.request(String.check(Cypress.config().baseUrl).replace(/\/?$/, linksTo)).then((res) => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
         const vevent = comp.getFirstSubcomponent("vevent");
         const event = new ICAL.Event(vevent);
-        const tz = comp.getFirstProperty("timezone-id").getFirstValue();
-        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
-        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
+        let tz = comp.getFirstProperty("timezone-id").getFirstValue();
+        expect(tz).to.eq("Europe/London");
+        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined });
+        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined });
         expect(event.summary).to.eq(`GIG: Gig of excitement`);
         expect(event.description).to.contain("Leady Lead").and.contain("[Eigenharp, Wind Synth]");
         expect(startDate.equals(Cypress.DateTime.fromJSDate(gig.arrive_time))).to.be.true;
@@ -506,7 +498,7 @@ describe("iCal files", () => {
       });
     });
 
-    it("can be generated for all gigs", () => {
+    it.only("can be generated for all gigs", () => {
       cy.request(`/members/gigs/calendar/all`).then((res) => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
@@ -517,11 +509,12 @@ describe("iCal files", () => {
         expect(event.description).to.contain("OTHER INFO: This is a band note");
         expect(event.description).to.contain("ADMIN NOTES: This is an admin note");
         const tz = comp.getFirstProperty("timezone-id").getFirstValue();
-        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined }, { zone: tz });
-        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined }, { zone: tz });
+        expect(tz).to.eq("Europe/London");
+        const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined });
+        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined });
         const midnight = { hour: 0, minute: 0, second: 0, millisecond: 0 };
-        expect(startDate.equals(Cypress.DateTime.fromISO(adminOnlyGig.date).set(midnight))).to.be.true;
-        expect(endDate.equals(Cypress.DateTime.fromISO(adminOnlyGig.date).set(midnight).plus({ days: 1 }))).to.be.true;
+        expect(startDate.equals(adminOnlyGig.date.set(midnight))).to.be.true;
+        expect(endDate.equals(adminOnlyGig.date.set(midnight).plus({ days: 1 }))).to.be.true;
       });
     });
 
@@ -617,7 +610,6 @@ describe("iCal files", () => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
         const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
-        cy.log(events);
         const event = events.find((event) => event.summary === expectedSummary);
         expect(event).to.be.undefined;
       });
@@ -646,4 +638,4 @@ describe("iCal files", () => {
 });
 
 import ICAL from "ical.js";
-import { DateTime } from "luxon";
+import { IANAZone } from "luxon";

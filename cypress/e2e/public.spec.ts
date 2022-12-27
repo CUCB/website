@@ -23,7 +23,8 @@ describe("homepage", () => {
       .its("head")
       .find('link[rel="icon"]')
       .should("have.attr", "href")
-      .should((href) => {
+      // @ts-ignore
+      .should((href: string) => {
         const url = new URL(href);
         expect(url.pathname).to.eq("/static/favicon.ico");
       });

@@ -1,24 +1,15 @@
 /// <reference types="Cypress" />
 
-import { AllInstrumentNames, OnConflictUserInstruments } from "../../database/instruments";
-import {
-  AllAttributes,
-  CreateUser,
-  DeleteUsers,
-  HASHED_PASSWORDS,
-  OnConflictUserPrefs,
-  SetJoinAndLoginDate,
-} from "../../database/users";
-import crypto from "crypto";
-import { DateTime } from "luxon";
+import { HASHED_PASSWORDS } from "../../database/users";
+import { String } from "runtypes";
 
-const userWithFullInfo: User = {
-  id: 282947,
+const userWithFullInfo: User & { password: string } = {
+  id: "282947",
   first: "Furry",
   last: "Pocky",
   bio: "I am a tabby cat. Meow meow meow.",
   bioChangedDate: "2020-07-01",
-  admin: 1,
+  admin: "1",
   username: "fur23521",
   password: "abc123",
   email: "fur23521@cam.ac.uk",
@@ -29,7 +20,7 @@ const userWithFullInfo: User = {
 
 type RoleName = "webmaster" | "secretary" | "user";
 
-const Role: Record<RoleName, User> = {
+const Role: Record<RoleName, User & { password: string }> = {
   webmaster: {
     id: "2829320",
     first: "Example",
@@ -73,7 +64,7 @@ interface User {
   email: string;
   user_instruments?: ([string, string] | string)[];
   instruments?: { id: string; nickname?: string; instrument: string }[];
-  prefs?: { pref_type: string; value: boolean }[];
+  prefs?: { pref_id: string; value: boolean }[];
   user_prefs?: string[];
   mobileContactInfo?: string;
 }
@@ -89,7 +80,7 @@ interface InsertableUser {
   email: string;
 }
 
-function loginAs(user: User): void {
+function loginAs(user: User & { password: string }): void {
   cy.login(user.username, user.password, {});
 }
 
@@ -106,7 +97,7 @@ function insertableUser(user: User): InsertableUser {
   return modifiedUser;
 }
 
-function revisitBeforePageAs(user: User): void {
+function revisitBeforePageAs(user: User & { password: string }): void {
   // We want to stay on the same page, but since the sessions feature was introduced,
   // we get redirected to about:blank between tests. Hitting back in the browser is
   // generally much faster than doing a full page load, and we're not editing data
@@ -119,7 +110,7 @@ function revisitBeforePageAs(user: User): void {
   });
 }
 
-function visitOnceAs(url: string, user: User): void {
+function visitOnceAs(url: string, user: User & { password: string }): void {
   before(() => {
     loginAs(user);
     cy.visit(url);
@@ -140,18 +131,16 @@ let instrumentIds: Map<string, InstrumentId> = new Map();
 let attributeIds: Map<string, AttributeId> = new Map();
 
 function populateInstrumentIds() {
-  return cy.task("db:instrument_ids_by_name").then((instrumentList) => {
-    for (const [name, id] of Object.entries(instrumentList)) {
-      instrumentIds = instrumentIds.set(name, id);
-    }
+  return cy.task("db:instrument_ids_by_name").then((instrumentRecord) => {
+    // @ts-ignore
+    instrumentIds = new Map(Object.entries(instrumentRecord));
   });
 }
 
 function populateAttributeIds() {
   return cy.task("db:attribute_ids_by_name").then((attributes) => {
-    for (const [name, id] of Object.entries(attributes)) {
-      attributeIds = attributeIds.set(name, id);
-    }
+    // @ts-ignore
+    attributeIds = new Map(Object.entries(attributes));
   });
 }
 
@@ -163,7 +152,7 @@ function insertUser(user: User): void {
       let fields = typeof name !== "string" ? { name: name[0], nickname: name[1] } : { name };
       return {
         id: (userInstrumentIdBase * ++userInstrumentCount).toString(),
-        instrument: instrumentIds.get(fields.name),
+        instrument: String.check(instrumentIds.get(fields.name)),
         ...fields,
         name: undefined,
       };
@@ -172,7 +161,7 @@ function insertUser(user: User): void {
     modifiedUser.prefs =
       user.user_prefs &&
       user.user_prefs.map((name) => ({
-        pref_id: attributeIds.get(name),
+        pref_id: String.check(attributeIds.get(name)),
         value: true,
       }));
     delete modifiedUser.user_prefs;

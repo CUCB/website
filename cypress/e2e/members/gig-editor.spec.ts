@@ -1,23 +1,6 @@
 /// <reference types="Cypress" />
 
-import { DateTime } from "luxon";
-
-const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
-
-let onConflictUser = {
-  constraint: "cucb_users_id_key",
-  update_columns: ["first", "last", "email"],
-};
-
-let onConflictUserInstrument = {
-  constraint: "cucb_users_instruments_id_key",
-  update_columns: ["nickname", "instr_id", "deleted"],
-};
-
-let onConflictLineupUserInstrument = {
-  constraint: "gigs_lineups_instruments_pkey",
-  update_columns: ["approved"],
-};
+import { String, Record } from "runtypes";
 
 let gig = {
   id: "74527",
@@ -27,8 +10,8 @@ let gig = {
   allow_signups: true,
   date: "2020-07-25",
   time: "21:00",
-  arrive_time: DateTime.fromISO("2020-07-25T20:00+01:00").toJSDate(),
-  finish_time: DateTime.fromISO("2020-07-25T23:00+01:00").toJSDate(),
+  arrive_time: Cypress.DateTime.fromISO("2020-07-25T20:00+01:00").toJSDate(),
+  finish_time: Cypress.DateTime.fromISO("2020-07-25T23:00+01:00").toJSDate(),
   quote_date: "2020-01-01",
   finance_deposit_received: true,
   finance_payment_received: false,
@@ -338,9 +321,9 @@ describe("gig editor", () => {
         .find(":selected")
         .contains("A Caller");
       cy.get(`[data-test=gig-edit-${gig.id}-caller-select-confirm]`).click();
-      cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains("A Caller", { delay: 0 });
+      cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains("A Caller");
       cy.reload();
-      cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains("A Caller", { delay: 0 });
+      cy.get(`[data-test=gig-edit-${gig.id}-caller-list]`).contains("A Caller");
     });
 
     it("can create a new venue", () => {
@@ -370,7 +353,8 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
         .find(":contains('og on')")
         .then((elements) => {
-          let venues = Cypress.$.map(elements, (e) => e.innerHTML);
+          // @ts-ignore
+          let venues: string[] = Cypress.$.map(elements, (e) => e.innerHTML);
           expect(venues).to.have.length(2).and.be.ascending;
         });
 
@@ -405,7 +389,7 @@ describe("gig editor", () => {
       cy.get(`[data-test=venue-editor-save]`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`).select(venues[2].name);
       cy.get(`[data-test=gig-edit-${gig.id}-venue-search]`).click().type("Sog on the", { delay: 0 });
-      cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`).contains("Sog on the Pine", { delay: 0 }).click();
+      cy.get(`[data-test=gig-edit-${gig.id}-venue-search-result]`).contains("Sog on the Pine").click();
       cy.get(`[data-test=gig-edit-${gig.id}-venue-select] [data-test=select-box]`)
         .find(":selected")
         .contains("Sog on the Pine")
@@ -420,6 +404,7 @@ describe("gig editor", () => {
     });
 
     it("rejects invalid dates with custom error messages", () => {
+      const hasValidationMessage = Record({ validationMessage: String });
       cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-time]`).click().type("19:13");
       cy.get(`[data-test=gig-edit-${gig.id}-time]`).click().type("20:26");
       cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).click().type("18:00");
@@ -427,8 +412,9 @@ describe("gig editor", () => {
       cy.contains("unsaved changes").should("be.visible");
       cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).then(($input) => {
         cy.log("Check field for custom error");
-        expect($input[0].validationMessage).to.match(/[Ff]inish time/);
-        expect($input[0].validationMessage).to.match(/[Aa]rrive time/);
+        expect(hasValidationMessage.check($input[0]).validationMessage)
+          .to.match(/[Ff]inish time/)
+          .and.match(/[Aa]rrive time/);
       });
       cy.get(`[data-test=gig-edit-${gig.id}-finish-time-time]`).click().type("22:00");
       cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
@@ -437,12 +423,13 @@ describe("gig editor", () => {
       cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
       cy.get(`[data-test=gig-edit-${gig.id}-time]`).then(($input) => {
         cy.log("Check field for custom error");
-        expect($input[0].validationMessage).to.match(/[Ff]inish time/);
-        expect($input[0].validationMessage).to.match(/[Ss]tart time/);
+        expect(hasValidationMessage.check($input[0]).validationMessage)
+          .to.match(/[Ff]inish time/)
+          .and.match(/[Ss]tart time/);
       });
       cy.get(`[data-test=gig-edit-${gig.id}-arrive-time-time]`).then(($input) => {
         cy.log("Check field for custom error");
-        expect($input[0].validationMessage).to.match(/[Aa]rrive time/);
+        expect(hasValidationMessage.check($input[0]).validationMessage).to.match(/[Aa]rrive time/);
       });
       cy.visit(`/members/gigs/${gig.id}`);
       cy.contains("Arrive time: 19:13").should("be.visible");
