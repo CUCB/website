@@ -8,6 +8,7 @@
   import { themeName, suffix } from "../../view";
   import { DateTime, Settings } from "luxon";
   import type { AvailableUserInstrument, GigSummary, SignupGig } from "../../routes/members/types";
+  import VenueAddressIcons from "./VenueAddressIcons.svelte";
   Settings.defaultZoneName = "Europe/London";
 
   export let gig: GigSummary,
@@ -218,6 +219,15 @@
       color: themed("negative");
     }
   }
+
+  .venue-title {
+    display: flex;
+    align-items: center;
+  }
+
+  .venue-link {
+    margin-right: 0.5em;
+  }
 </style>
 
 {#if !showSignup}
@@ -257,11 +267,12 @@
       </div>
     </h2>
     {#if gig.venue}
-      <h3 class="main-detail">
-        <a href="/members/gigs/venue/{gig.venue.id}">
+      <h3 class="main-detail venue-title">
+        <a href="/members/gigs/venue/{gig.venue.id}" class="venue-link">
           {gig.venue.name}
           {#if gig.venue.subvenue}&nbsp;| {gig.venue.subvenue}{/if}
         </a>
+        <VenueAddressIcons venue="{gig.venue}" />
       </h3>
     {/if}
     {#if displayLinks && ["webmaster", "president", "secretary", "treasurer", "gig_editor"].indexOf(session.role) > -1}

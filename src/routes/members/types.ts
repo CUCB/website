@@ -29,6 +29,8 @@ export interface SignupGigVenue {
   name: string;
   map_link?: string | null;
   subvenue?: string | null;
+  address?: string | null;
+  postcode?: string | null;
 }
 
 export interface AvailableUserInstrument {
