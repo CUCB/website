@@ -7,11 +7,11 @@ declare global {
     interface Cypress {
       DateTime: typeof DateTime;
     }
-    interface Chainable {
+    interface Chainable<Subject> {
       login(username: string, password: string, options?: Partial<RequestOptions>): void;
-      loginWithoutCySession(username: string, password: string, options: Partial<RequestOptions>): void;
-      searchEmails(limit: number, start: number): Chainable<{ items: Email[] }>;
-      clickLink(options: Partial<VisitOptions>): Chainable<AUTWindow>;
+      loginWithoutCySession(username: string, password: string, options?: Partial<RequestOptions>): void;
+      searchEmails(limit?: number, start?: number): Chainable<{ items: Email[] }>;
+      clickLink(options?: Partial<VisitOptions>): Chainable<AUTWindow>;
       checkFileExists(filename: string): Chainable<boolean>;
       removeFile(filepath: string): void;
       cssProperty(name: string): Chainable<string>;
@@ -23,6 +23,26 @@ declare global {
       toggleLineupRole(name: string): void;
       toggleLineupRole(userId: number, name: string): void;
       approveLineupPerson(userId: number): void;
+      assertLogoRotates(): void;
+      assertLogoDoesntRotate(): void;
+      selectNextMonth(): void;
+      selectPreviousMonth(): void;
+      // From cypress-plugin-tab
+      tab(): Chainable<Subject>;
+    }
+
+    interface Chainer<Subject> {
+      (chainer: "be.sentTo", sentTo: string): Chainable<Subject>;
+      (chainer: "have.atttr", name: string): Chainable<string>;
+    }
+  }
+
+  namespace Chai {
+    interface Assertion {
+      sentTo(email: string): void;
+      // From chai-sorted
+      sorted(): void;
+      ascending: Assertion;
     }
   }
 }
@@ -51,7 +71,7 @@ Cypress.Commands.add("login", (username, password, options) =>
   ),
 );
 
-Cypress.Commands.add("loginWithoutCySession", (username, password, options) =>
+Cypress.Commands.add("loginWithoutCySession", (username, password, options = {}) =>
   cy
     .request({
       method: "POST",
@@ -80,7 +100,7 @@ Cypress.Commands.add(
     prevSubject: "element",
   },
   // @ts-ignore - expected to be called on a tags
-  (subject, options) => cy.visit({ ...options, url: subject[0].href }),
+  (subject, options = {}) => cy.visit({ ...options, url: subject[0].href }),
 );
 
 Cypress.Commands.add("checkFileExists", (filename) => {
@@ -163,6 +183,7 @@ Cypress.Commands.add("toggleLineupRole", (...args) => {
   const button = `${userRow} [data-test=toggle-${name}]`;
   cy.get(button)
     .invoke("attr", "aria-pressed")
+    // @ts-ignore
     .then(parseBool)
     .then((previousPressedState) => {
       cy.get(button).click();

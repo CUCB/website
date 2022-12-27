@@ -138,7 +138,7 @@ describe("theme editor", () => {
     cy.get("[data-test=logo]")
       .invoke("css", "transform")
       .then((rotation) => {
-        let container = {};
+        let container: { e?: unknown } = {};
         Cypress.$("[data-test=logo]").on("beginRotate", (e) => (container.e = e));
         cy.get("[data-test=logo]")
           .trigger("mouseover", "bottomRight")
@@ -150,7 +150,7 @@ describe("theme editor", () => {
   });
 
   Cypress.Commands.add("assertLogoDoesntRotate", () => {
-    let container = {};
+    let container: { e?: unknown } = {};
     Cypress.$("[data-test=logo]").on("noRotate", (e) => (container.e = e));
     cy.get("[data-test=logo]").trigger("mouseover", "bottomRight");
     cy.get("[data-test=logo]").trigger("mouseout");

@@ -1,3 +1,5 @@
+/// <reference types="Cypress" />
+
 import jwt from "jsonwebtoken";
 
 describe("login page", () => {
@@ -345,19 +347,22 @@ describe("password reset form", () => {
       .its("items")
       .then((emails) => {
         const email = emails[0];
-        expect(email).to.be.sentTo("password.user0@cypress.io");
-        expect(email.replyTo).to.contain("CUCB Webmaster <webmaster@cucb.co.uk>");
+        cy.wrap(email).should("be.sentTo", "password.user0@cypress.io");
+        cy.wrap(email.replyTo).should("contain", "CUCB Webmaster <webmaster@cucb.co.uk>");
         cy.visit(`/renderemail?id=${email.ID}`);
       });
     cy.get("a")
       .should("have.attr", "href")
       .and("match", /^https:\/\/www.cucb.co.uk\/auth\/reset-password/)
-      .then((link) => {
-        link = link.replace(/^https:\/\/www.cucb.co.uk/, Cypress.config().baseUrl);
+      // @ts-expect-error
+      .then((link: string) => {
+        link = link.replace(/^https:\/\/www.cucb.co.uk/, Cypress.config().baseUrl || "");
         const token = link.split(/=/)[1];
         const decoded = jwt.verify(token, Cypress.env("SESSION_SECRET"));
-        expect(decoded.exp * 1000).to.be.greaterThan(Cypress.DateTime.local().ts);
-        expect(decoded.exp * 1000).to.be.lessThan(Cypress.DateTime.local().plus({ hours: 2 }).ts);
+        expect(decoded)
+          .to.haveOwnProperty("exp")
+          .to.be.greaterThan(Cypress.DateTime.local().toSeconds())
+          .and.be.lessThan(Cypress.DateTime.local().plus({ hours: 2 }).toSeconds());
         cy.visit(link);
       });
     cy.waitForFormInteractive();

@@ -1,6 +1,4 @@
-const click = ($el) => $el.click(); // For retrying clicks, see https://www.cypress.io/blog/2019/01/22/when-can-the-test-click/
-
-let colors = {};
+let colors: { positive?: string; negative?: string; neutral?: string } = {};
 
 describe("members' home page", () => {
   before(() => {
@@ -79,7 +77,7 @@ describe("gig signup", () => {
     cy.get(`[data-test="gig-15274-signup-yes"]`).should("not.have.color", colors.positive);
     cy.get(`[data-test="gig-15274-signup-yes"]`).click().should("have.color", colors.positive);
 
-    cy.get(`[data-test="gig-15274-signup-maybe"]`).should("not.have.color", colors.netural);
+    cy.get(`[data-test="gig-15274-signup-maybe"]`).should("not.have.color", colors.neutral);
     cy.get(`[data-test="gig-15274-signup-maybe"]`).click().should("have.color", colors.neutral);
 
     cy.get(`[data-test="gig-15274-signup-no"]`).should("not.have.color", colors.negative);
@@ -90,7 +88,14 @@ describe("gig signup", () => {
     cy.login("cypress_user", "abc123");
     cy.visit("/members");
     cy.get("h3").then((elements) => {
-      const datetimes = elements.toArray().map((elem) => elem.querySelector("time").getAttribute("datetime"));
+      const datetimes = elements.toArray().map((elem) => {
+        const time = elem.querySelector("time");
+        if (time) {
+          return time.getAttribute("datetime");
+        } else {
+          return null;
+        }
+      });
       expect(elements).to.contain("A gig I created earlier");
       expect(elements).to.contain("Cypress Demo Gig");
       expect(datetimes).to.not.contain(null);

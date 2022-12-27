@@ -1,5 +1,3 @@
-const click = ($el) => $el.click();
-
 let signups = [
   // Names from http://tabbycats.club/
   {

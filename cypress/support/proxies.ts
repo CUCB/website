@@ -1,6 +1,7 @@
 export interface Email {
   replyTo?: string;
   body: string;
+  ID: string;
 }
 
 const emailGetters = {

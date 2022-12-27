@@ -219,26 +219,14 @@ const config = defineConfig({
           }
           return Object.fromEntries(map.entries());
         },
-        async "db:instrument_ids_by_name"() {
+        async "db:instrument_ids_by_name"(): Promise<Record<string, string>> {
           const em = await makeOrm(process.env);
           const instruments = await em.find(Instrument, {});
-          const map = new Map();
+          const map: Map<string, string> = new Map();
           for (const instrument of instruments) {
             map.set(instrument.name, instrument.id);
           }
           return Object.fromEntries(map.entries());
-          return new Promise((resolve, reject) => {
-            makeOrm(process.env)
-              .then((em) => em.find(Instrument, {}))
-              .then((instruments) => {
-                const map = new Map();
-                for (const instrument of instruments) {
-                  map.set(instrument.name, instrument.id);
-                }
-                resolve(Object.fromEntries(map.entries()));
-              })
-              .catch(reject);
-          });
         },
         async "db:create_gig"(gig: Gig) {
           const em = await makeOrm(process.env);
