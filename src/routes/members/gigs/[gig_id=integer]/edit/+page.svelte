@@ -63,7 +63,7 @@
     selectedCaller,
     contactToEdit,
     editContactType,
-    clearVenueSearch;
+    clearVenueSearch: () => void;
   let previewSummary = false;
   time = time && DateTime.fromISO(`1970-01-01T${time}`).toFormat("HH:mm"); // Remove seconds from time if they are present
   let arrive_time_date = (arrive_time && DateTime.fromISO(arrive_time).toFormat("yyyy-LL-dd")) || null;
