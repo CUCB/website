@@ -4,7 +4,6 @@ build
 **/node_modules/
 yarn-error.log
 /cypress/screenshots/
-/cypress/videos/
 /cypress/downloads/
 /cypress/fixtures/example.json
 .env
