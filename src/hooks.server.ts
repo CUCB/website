@@ -76,7 +76,7 @@ async function sessionFromHeaders(cookies, request: Request) {
               userId: this.userId,
               firstName: this.firstName,
               lastName: this.lastName,
-              hasuraRole: this.hasuraRole,
+              role: this.role,
               theme: this.theme,
               alternativeRole: this.alternativeRole,
             };
@@ -115,7 +115,7 @@ async function sessionFromHeaders(cookies, request: Request) {
             userId: this.userId,
             firstName: this.firstName,
             lastName: this.lastName,
-            hasuraRole: this.hasuraRole,
+            role: this.role,
             theme: this.theme,
             alternativeRole: this.alternativeRole,
           };

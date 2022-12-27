@@ -139,8 +139,8 @@
           "length": 255,
           "mappedType": "string"
         },
-        "hasura_role": {
-          "name": "hasura_role",
+        "role": {
+          "name": "role",
           "type": "varchar(255)",
           "unsigned": false,
           "autoincrement": false,
@@ -153,9 +153,9 @@
       "schema": "cucb",
       "indexes": [
         {
-          "columnNames": ["hasura_role"],
+          "columnNames": ["role"],
           "composite": false,
-          "keyName": "auth_user_types_hasura_role_key",
+          "keyName": "auth_user_types_role_key",
           "primary": false,
           "unique": true
         },

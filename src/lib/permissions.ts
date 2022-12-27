@@ -13,13 +13,13 @@ const ROLES = {
   blueGig: Literal("blue_gig"),
 };
 
-const LOGGED_IN = Record({ userId: String });
+export const LOGGED_IN = Record({ userId: String });
 
 const HAS_ROLE = (role: Runtype) =>
   LOGGED_IN.And(
     Record({ alternativeRole: role })
-      .Or(Record({ alternativeRole: Null.Or(Undefined), hasuraRole: role }))
-      .Or(Record({ hasuraRole: role }).withConstraint((record) => !record.hasOwnProperty("alternativeRole"))),
+      .Or(Record({ alternativeRole: Null.Or(Undefined), role }))
+      .Or(Record({ role }).withConstraint((record) => !record.hasOwnProperty("alternativeRole"))),
   );
 export const NOT_MUSIC_ONLY = LOGGED_IN.withConstraint((session) => !HAS_ROLE(ROLES.musicOnly).guard(session));
 
@@ -45,7 +45,7 @@ export const DELETE_GIG = HAS_ROLE(Union(ROLES.webmaster, ROLES.president, ROLES
 
 if (import.meta.vitest) {
   const { it, describe, expect } = import.meta.vitest;
-  const userWithRole = (role: string) => ({ hasuraRole: role, alternativeRole: null, userId: "1" });
+  const userWithRole = (role: string) => ({ role: role, alternativeRole: null, userId: "1" });
 
   describe("NOT_MUSIC_ONLY", () => {
     const sut = NOT_MUSIC_ONLY;
@@ -72,24 +72,24 @@ if (import.meta.vitest) {
     const sut = HAS_ROLE;
 
     it("accepts a user with just the specified role", () => {
-      expect(sut(ROLES.user).guard({ userId: "1", hasuraRole: "user" })).to.be.true;
+      expect(sut(ROLES.user).guard({ userId: "1", role: "user" })).to.be.true;
     });
 
     it("accepts a user with just the specified role and null alternative role", () => {
-      expect(sut(ROLES.user).guard({ userId: "1", hasuraRole: "user", alternativeRole: null })).to.be.true;
-      expect(sut(ROLES.user).guard({ userId: "1", hasuraRole: "user", alternativeRole: undefined })).to.be.true;
+      expect(sut(ROLES.user).guard({ userId: "1", role: "user", alternativeRole: null })).to.be.true;
+      expect(sut(ROLES.user).guard({ userId: "1", role: "user", alternativeRole: undefined })).to.be.true;
     });
 
     it("accepts a user with the correct alternative role", () => {
-      expect(sut(ROLES.user).guard({ userId: "1", hasuraRole: "webmaster", alternativeRole: "user" })).to.be.true;
+      expect(sut(ROLES.user).guard({ userId: "1", role: "webmaster", alternativeRole: "user" })).to.be.true;
     });
 
     it("rejects a user with an incorrect role", () => {
-      expect(sut(ROLES.president).guard({ userId: "1", hasuraRole: "blue_gig" })).to.be.false;
+      expect(sut(ROLES.president).guard({ userId: "1", role: "blue_gig" })).to.be.false;
     });
 
     it("rejects a user with the correct role but incorrect alternative role", () => {
-      expect(sut(ROLES.webmaster).guard({ userId: "1", hasuraRole: "webmaster", alternativeRole: "user" })).to.be.false;
+      expect(sut(ROLES.webmaster).guard({ userId: "1", role: "webmaster", alternativeRole: "user" })).to.be.false;
     });
 
     it("rejects a person who is not logged in", () => {

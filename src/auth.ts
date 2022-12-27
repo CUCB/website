@@ -54,7 +54,7 @@ type SessionData = {
   first: string;
   last: string;
   adminType: {
-    hasuraRole: string;
+    role: string;
   };
   user_id: string;
 };
@@ -101,7 +101,7 @@ interface CreateAccountDetails {
   lastName: string;
 }
 
-type NewAccount = { first: string; last: string; adminType: { hasuraRole: string }; id: string };
+type NewAccount = { first: string; last: string; adminType: { role: string }; id: string };
 
 export const createAccount: (details: CreateAccountDetails) => Promise<NewAccount> = async ({
   username,

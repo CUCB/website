@@ -85,7 +85,7 @@ const fetchAllUsers = (em: EntityManager): Promise<UserName[]> =>
   em
     .find(
       User,
-      { adminType: { hasuraRole: { $ne: "music_only" } } },
+      { adminType: { role: { $ne: "music_only" } } },
       { fields: ["id", "first", "last", "gig_notes"], populateWhere: PopulateHint.INFER },
     )
     .then((e) => e.map((e) => wrap(e).toPOJO()));
