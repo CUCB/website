@@ -9,6 +9,10 @@ const config = {
     noExternal: ["photon-web"],
   },
 
+  define: {
+    "import.meta.vitest": "undefined",
+  },
+
   server: {
     fs: {
       allow: [path.resolve("../../../kit")],
