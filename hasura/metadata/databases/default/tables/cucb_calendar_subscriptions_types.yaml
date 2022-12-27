@@ -1,4 +1,0 @@
-table:
-  name: calendar_subscriptions_types
-  schema: cucb
-is_enum: true
