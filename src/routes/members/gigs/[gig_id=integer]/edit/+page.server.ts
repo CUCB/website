@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ params, fetch, locals }) => {
           DbGig,
           { id: gig_id },
           {
-            populate: ["contacts", "contacts.contact", "editing_user"],
+            populate: ["contacts", "contacts.contact", "editing_user", "posting_user"],
             orderBy: { contacts: { contact: { name: "ASC" } } },
           },
         )
