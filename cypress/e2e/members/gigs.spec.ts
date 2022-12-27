@@ -498,7 +498,7 @@ describe("iCal files", () => {
       });
     });
 
-    it.only("can be generated for all gigs", () => {
+    it("can be generated for all gigs", () => {
       cy.request(`/members/gigs/calendar/all`).then((res) => {
         const data = ICAL.parse(res.body);
         const comp = new ICAL.Component(data);
