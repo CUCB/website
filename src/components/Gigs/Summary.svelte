@@ -264,10 +264,10 @@
         </a>
       </h3>
     {/if}
-    {#if displayLinks && ["webmaster", "president", "secretary", "treasurer", "gig_editor"].indexOf(session.hasuraRole) > -1}
+    {#if displayLinks && ["webmaster", "president", "secretary", "treasurer", "gig_editor"].indexOf(session.role) > -1}
       <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
     {/if}
-    {#if displayLinks && ["webmaster", "president"].indexOf(session.hasuraRole) > -1 && gig.type.code === "gig"}
+    {#if displayLinks && ["webmaster", "president"].indexOf(session.role) > -1 && gig.type.code === "gig"}
       <a href="/members/gigs/{gig.id}/edit-lineup" class="main-detail">Edit lineup</a>
     {/if}
     <a href="/members/gigs/{gig.id}/calendar" rel="external" target="_blank">Download iCal</a>

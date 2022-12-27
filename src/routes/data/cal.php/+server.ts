@@ -170,7 +170,7 @@ async function firstSuccess<T>(promises: Promise<T>[]): Promise<T | null> {
   }
 }
 
-type Session = { firstName: string; lastName: string; hasuraRole: string; userId: string };
+type Session = { firstName: string; lastName: string; role: string; userId: string };
 
 export async function allGigs(ipAddress: string, baseUrl: string, session: Session) {
   const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();

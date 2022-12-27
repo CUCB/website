@@ -45,7 +45,7 @@ export async function POST({ request, cookies, locals }) {
         const loginResult = await createAccount({ firstName, lastName, username, email, password });
 
         locals.session.userId = loginResult.id.toString();
-        locals.session.hasuraRole = loginResult.adminType.hasura_role;
+        locals.session.role = loginResult.adminType.role;
         locals.session.firstName = loginResult.first;
         locals.session.lastName = loginResult.last;
         const cookie = await locals.session.save();

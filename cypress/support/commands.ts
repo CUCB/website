@@ -61,11 +61,11 @@ Cypress.Commands.add("login", (username, password, options) =>
         },
         ...options,
       });
-      cy.request({ method: "GET", url: "/auth/hook", headers: { "x-hasura-role": "current_user" } });
+      cy.request({ method: "GET", url: "/auth/user" });
     },
     {
       validate() {
-        cy.request({ method: "GET", url: "/auth/hook", headers: { "x-hasura-role": "current_user" } });
+        cy.request({ method: "GET", url: "/auth/user" });
       },
     },
   ),

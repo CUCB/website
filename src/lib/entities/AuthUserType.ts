@@ -11,7 +11,7 @@ export class AuthUserType {
   @Property({ length: 255, type: "varchar" })
   phpTitle!: string;
 
-  @Unique({ name: "auth_user_types_hasura_role_key" })
+  @Unique({ name: "auth_user_types_role_key" })
   @Property({ type: "varchar" })
-  hasuraRole!: string;
+  role!: string;
 }

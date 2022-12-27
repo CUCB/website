@@ -8,8 +8,6 @@ file_server /docs/*
 @sveltekit {
 	not path /images/committee/*
 	not path /static/*
-	not path /hasura
-	not path /hasura/*
 	not path /docs/*
 }
 

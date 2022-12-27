@@ -16,11 +16,9 @@ class Migration20221225070638 extends Migration {
     this.addSql('create index "idx_17283_auth_bitmask" on "cucb"."auth_action_types" ("auth_bitmask");');
 
     this.addSql(
-      'create table "cucb"."auth_user_types" ("id" bigserial primary key, "title" varchar(255) not null, "php_title" varchar(255) not null, "hasura_role" varchar(255) not null);',
+      'create table "cucb"."auth_user_types" ("id" bigserial primary key, "title" varchar(255) not null, "php_title" varchar(255) not null, "role" varchar(255) not null);',
     );
-    this.addSql(
-      'alter table "cucb"."auth_user_types" add constraint "auth_user_types_hasura_role_key" unique ("hasura_role");',
-    );
+    this.addSql('alter table "cucb"."auth_user_types" add constraint "auth_user_types_role_key" unique ("role");');
 
     this.addSql(
       'create table "cucb"."captions" ("captionid" bigserial primary key, "userid" int8 null, "photo" varchar(20) null, "text" bytea null, "time" timestamptz(6) null, "dirid" int8 null, "photoid" int8 null);',
