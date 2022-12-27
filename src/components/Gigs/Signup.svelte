@@ -18,6 +18,7 @@
     SignupGigLineup,
     SignupUserInstrument,
   } from "../../routes/members/types";
+  import VenueAddressIcons from "./VenueAddressIcons.svelte";
   export let gig: SignupGig,
     userInstruments: SignupUserInstrument[],
     session: { userId: string },
@@ -241,7 +242,6 @@
       box-shadow: 0px 0px 5px 0px themed("formColor");
     }
   }
-
   @media only screen and (max-width: 400px) {
     .statuses {
       flex-direction: column;
@@ -287,14 +287,7 @@
     align-items: center;
   }
 
-  .venue-title i {
-    font-size: 1.3em;
-  }
-
-  .venue-title :global(.tooltip-text) {
-    margin: 0 0.25em;
-  }
-  .venue-title .venue-link {
+  .venue-link {
     margin-right: 0.5em;
   }
 </style>
@@ -314,18 +307,7 @@
         {gig.venue.name}
         {#if gig.venue.subvenue}&nbsp;| {gig.venue.subvenue}{/if}
       </a>
-      {#if address(gig.venue)}
-        <TooltipText content="{address(gig.venue)}" data-test="venue-address">
-          <i class="las la-map-marked-alt"></i>
-        </TooltipText>
-      {/if}
-      {#if gig.venue.map_link}
-        <TooltipText content="Google maps">
-          <a href="{gig.venue.map_link}" data-test="venue-map-link" target="_blank" rel="noopener noreferrer"
-            ><i class="las la-directions"></i></a
-          >
-        </TooltipText>
-      {/if}
+      <VenueAddressIcons venue="{gig.venue}" />
     </h4>
   {/if}
   <fieldset role="radiogroup" class="statuses">

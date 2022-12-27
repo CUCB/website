@@ -22,7 +22,7 @@ const generalFields: EntityField<Gig, string>[] = [
   "date",
   "title",
   "id",
-  { venue: ["name", "subvenue", "map_link", "id"] },
+  { venue: ["name", "subvenue", "map_link", "id", "address", "postcode"] },
   "finish_time",
   "arrive_time",
   "allow_signups",
