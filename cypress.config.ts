@@ -20,7 +20,6 @@ import { GigType } from "./src/lib/entities/GigType";
 dotenv.config();
 
 const config = defineConfig({
-  video: true,
   projectId: "u67py9",
   defaultCommandTimeout: 4000,
   chromeWebSecurity: false,

@@ -99,7 +99,6 @@ jobs:
         with:
           name: cypress-output
           path: |
-            cypress/videos/**/*.mp4
             cypress/screenshots/**/*.png
 
   build:
