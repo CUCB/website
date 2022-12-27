@@ -21,9 +21,9 @@
   export let person: Person;
   export let aprilFools = false;
   export let showEmail = false;
-  const basePath = person.committee.pic_folder ?? `/images/committee/${person.committee.pic_folder}/`;
+  const basePath = person.committee.pic_folder && `/images/committee/${person.committee.pic_folder}/`;
   const src =
-    basePath ??
+    basePath &&
     (aprilFools && person.april_fools_dir
       ? `${basePath}${person.april_fools_dir}/${person.pic}`
       : `${basePath}${person.pic}`);

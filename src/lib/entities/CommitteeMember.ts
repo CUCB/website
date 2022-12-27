@@ -27,7 +27,7 @@ export class CommitteeMember {
   email?: string;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  email_obfus?: string;
+  email_obfus?: string | null;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
   pic?: string;
@@ -42,7 +42,7 @@ export class CommitteeMember {
   april_fools_only: boolean = false;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  comments?: string;
+  comments?: string | null;
 
   @Property({ default: false, type: "boolean" })
   hidden: boolean = false;
@@ -51,5 +51,5 @@ export class CommitteeMember {
   april_fools_dir?: string;
 
   @Property({ length: 255, nullable: true, type: "varchar" })
-  sub_position?: string;
+  sub_position?: string | null;
 }
