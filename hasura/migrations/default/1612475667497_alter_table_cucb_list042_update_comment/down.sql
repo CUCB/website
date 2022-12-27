@@ -1,1 +1,0 @@
-COMMENT ON TABLE "cucb"."list042" IS NULL;
