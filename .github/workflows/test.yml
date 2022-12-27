@@ -156,9 +156,9 @@ jobs:
   pulumi:
     name: Create/update infrastructure
     runs-on: ubuntu-latest
-    needs:
-      - build
-      - test
+    # needs:
+    #   - build
+    #   - test
     outputs:
       ip: ${{ steps.update.outputs.ip }}
       domain_name: ${{ steps.update.outputs.domain_name }}
@@ -193,7 +193,7 @@ jobs:
   deploy-ansible:
     name: Deploy site to DigitalOcean using ansible
     runs-on: ubuntu-latest
-    # needs: pulumi
+    needs: pulumi
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v2
