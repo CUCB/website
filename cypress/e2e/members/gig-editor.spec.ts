@@ -16,6 +16,8 @@ let gig = {
   finance_deposit_received: true,
   finance_payment_received: false,
   finance_caller_paid: false,
+  posting_user: "27382",
+  posting_time: Cypress.DateTime.fromISO("2020-01-01T09:00Z").toJSDate(),
   venue: {
     address: "3 Trumpington St, Cambridge",
     postcode: "CB2 1QY",
@@ -170,6 +172,38 @@ describe("gig editor", () => {
       cy.contains("unsaved changes").should("be.visible");
       cy.get(`[data-test=gig-edit-${gig.id}-title]`).clear().type(gig.title, { delay: 0 });
       cy.contains("unsaved changes").should("not.exist");
+    });
+
+    it("displays the names and times of the posting user and the editing user", () => {
+      cy.get(`[data-test=posting-user]`).contains("Cypress President").should("be.visible");
+      cy.get(`time[data-test=posting-time]`).contains("09:00 01/01/2020").should("be.visible");
+      cy.get(`[data-test=editing-user]`).should("not.exist");
+      cy.get(`time[data-test=editing-time]`).should("not.exist");
+
+      cy.get(`[data-test=gig-edit-${gig.id}-title]`).click().clear().type("modified title", { delay: 0 });
+      cy.get(`[data-test=gig-edit-${gig.id}-save]`).click();
+      cy.scrollTo("top");
+
+      cy.get(`time[data-test=editing-time]`).should("be.visible");
+      cy.get(`[data-test=posting-user]`).contains("Cypress President").should("be.visible");
+      cy.get(`[data-test=editing-user]`)
+        .contains("Cypress Webmaster")
+        .should("be.visible")
+        .and("have.attr", "href")
+        .and("eq", "/members/users/32747");
+
+      cy.reload();
+
+      cy.get(`[data-test=editing-user]`)
+        .contains("Cypress Webmaster")
+        .should("be.visible")
+        .and("have.attr", "href")
+        .and("eq", "/members/users/32747");
+      cy.get(`[data-test=posting-user]`)
+        .contains("Cypress President")
+        .should("be.visible")
+        .and("have.attr", "href")
+        .and("eq", "/members/users/27382");
     });
 
     it("allows the user to search venues with the keyboard", () => {

@@ -651,13 +651,21 @@
 <p>
   {#if editing_time}
     This gig was last edited at
-    {DateTime.fromISO(editing_time).toFormat("HH:mm dd/LL/yyyy")}{#if editing_user}&nbsp;by user
-      <a href="/members/users/{editing_user.id}">{editing_user.first}&#32;{editing_user.last}</a>{/if}.
+    <time data-test="editing-time" datetime="{editing_time}"
+      >{DateTime.fromISO(editing_time).toFormat("HH:mm dd/LL/yyyy")}</time
+    >{#if editing_user}&nbsp;by user
+      <a data-test="editing-user" href="/members/users/{editing_user.id}"
+        >{editing_user.first}&#32;{editing_user.last}</a
+      >{/if}.
   {/if}
   {#if posting_time}
     It was created at
-    {DateTime.fromISO(posting_time).toFormat("HH:mm dd/LL/yyyy")}{#if posting_user}&nbsp;by user
-      <a href="/members/users/{posting_user.id}">{posting_user.first}&#32;{posting_user.last}</a>{/if}.
+    <time data-test="posting-time" datetime="{posting_time}"
+      >{DateTime.fromISO(posting_time).toFormat("HH:mm dd/LL/yyyy")}</time
+    >{#if posting_user}&nbsp;by user
+      <a data-test="posting-user" href="/members/users/{posting_user.id}"
+        >{posting_user.first}&#32;{posting_user.last}</a
+      >{/if}.
   {/if}
 </p>
 
