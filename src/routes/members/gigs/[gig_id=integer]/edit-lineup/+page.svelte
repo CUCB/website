@@ -8,16 +8,19 @@
   import Lineup from "../../../../../components/Gigs/Lineup.svelte";
   import type { PageData } from "./$types";
   import { extractAttributes } from "./attributes";
+  import type { Person } from "./types";
   export let data: PageData;
   let { people, gigId, allPeople, title } = data;
   let searchText = "";
   let peopleStore = Map(people);
-  let errors = [];
-  let selectedUser = undefined;
-  let userSelectBox;
+  let selectedUser: string | undefined = undefined;
+  let userSelectBox: HTMLSelectElement;
   let showPreview = false;
 
-  const addUserUpdater = async ({ gigId, people, errors }, userId) => {
+  type UpdaterInput = { gigId: string; userId: string | null; people: Map<string, Person> };
+  type UpdaterOutput = Promise<{ people: Map<string, Person> }>;
+
+  const addUserUpdater = async ({ gigId, people }: UpdaterInput, userId: string): UpdaterOutput => {
     const body = JSON.stringify({ type: "addUser", id: userId });
     const person = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
       res.json(),
@@ -26,26 +29,24 @@
     person.user.prefs = undefined;
     return {
       people: people.set(userId, person),
-      errors,
     };
   };
 
   const setInstrumentApproved = async (
-    { gigId, userId, people, errors },
+    { gigId, userId, people }: UpdaterInput,
     user_instrument_id: string,
     approved: boolean,
-  ) => {
+  ): UpdaterOutput => {
     const body = JSON.stringify({ type: "setInstrumentApproved", id: user_instrument_id, approved });
     const instrumentApproved = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then(
       (res) => res.json(),
     );
     return {
       people: people.setIn([userId, "user_instruments", user_instrument_id, "approved"], instrumentApproved.approved),
-      errors,
     };
   };
 
-  const setPersonApproved = async ({ gigId, people, errors, userId }, approved) => {
+  const setPersonApproved = async ({ gigId, people, userId }: UpdaterInput, approved: boolean): UpdaterOutput => {
     const body = JSON.stringify({ type: "setPersonApproved", id: userId, approved });
 
     const personApproved = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then(
@@ -53,71 +54,71 @@
     );
     return {
       people: people.setIn([userId, "approved"], personApproved.approved),
-      errors,
     };
   };
 
-  const setAdminNotes = async ({ gigId, people, errors, userId }, admin_notes) => {
+  const setAdminNotes = async ({ gigId, people, userId }: UpdaterInput, admin_notes: string | null): UpdaterOutput => {
     const body = JSON.stringify({ type: "setAdminNotes", id: userId, admin_notes });
     const response = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
       res.json(),
     );
     return {
       people: people.setIn([userId, "admin_notes"], response.admin_notes),
-      errors,
     };
   };
 
-  const destroyLineupInformation = async ({ gigId, people, errors }) => {
+  const destroyLineupInformation = async ({ gigId }: UpdaterInput): UpdaterOutput => {
     const body = JSON.stringify({ type: "destroyLineupInformation" });
     await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body });
     return {
       people: Map(),
-      errors,
     };
   };
 
-  const addInstrument = async ({ gigId, people, errors, userId }, userInstrumentId) => {
+  const addInstrument = async ({ gigId, people, userId }: UpdaterInput, userInstrumentId: string): UpdaterOutput => {
     const body = JSON.stringify({ type: "addInstrument", id: userInstrumentId });
     const instrument = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
       res.json(),
     );
     return {
       people: people.updateIn([userId, "user_instruments"], (instruments) => ({
+        //@ts-ignore
         ...instruments,
         [instrument.user_instrument.id]: instrument,
       })),
-      errors,
     };
   };
 
-  const setRole = async ({ gigId, people, errors, userId }, role, value) => {
+  const setRole = async ({ gigId, people, userId }: UpdaterInput, role: string, value: boolean): UpdaterOutput => {
     const body = JSON.stringify({ type: "setRole", id: userId, role, value });
     const person = await fetch(`/members/gigs/${gigId}/edit-lineup/update`, { method: "POST", body }).then((res) =>
       res.json(),
     );
     return {
       people: people.setIn([userId, role], person[role]),
-      errors,
     };
   };
 
   const wrap =
-    (fn) =>
-    (userId) =>
-    async (...args) => {
-      let res = await fn({ people: peopleStore, errors, gigId, userId }, ...args);
+    <Args extends any[]>(fn: (input: UpdaterInput, ...args: Args) => UpdaterOutput) =>
+    (userId: string | null) =>
+    async (...args: Args): Promise<void> => {
+      let res = await fn({ people: peopleStore, gigId, userId }, ...args);
 
       peopleStore = res.people;
-      errors = res.errors;
     };
 
   const addUser = async () => {
-    await wrap(addUserUpdater)(null)(selectedUser);
-    selectedUser = undefined;
+    if (selectedUser !== undefined) {
+      await wrap(addUserUpdater)(null)(selectedUser);
+      selectedUser = undefined;
+    } else {
+      // TODO handle this properly
+      throw "Oh shit";
+    }
   };
 
-  const selectUser = async (e) => {
+  const selectUser = async (e: CustomEvent<{ id: string }>): Promise<void> => {
     selectedUser = e.detail.id;
     searchText = "";
     userSelectBox.focus();
@@ -143,7 +144,7 @@
   $: nope = Object.fromEntries(
     Object.entries(peopleStore.toObject()).filter(([_, v]) => v.approved === null && v.user_available === false),
   );
-  $: selectedUserIds = new Set([...peopleStore.keys()].map((i) => parseInt(i)));
+  $: selectedUserIds = new Set([...peopleStore.keys()]);
   $: unselectedUsers = allPeople
     .filter((user) => !selectedUserIds.has(user.id))
     .map((person) => ({ ...person, fullName: `${person.first} ${person.last}` }));
