@@ -37,6 +37,7 @@ export interface AvailableUserInstrument {
   id: string;
   nickname?: string | null;
   instrument: {
+    id: string;
     name: string;
     novelty: boolean;
   };
@@ -68,6 +69,7 @@ export interface GigSummary {
 }
 
 export interface SummaryLineupEntry {
+  leader: boolean;
   user_instruments: SignupUserInstrument[];
   user: {
     first: string;

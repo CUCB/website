@@ -3,7 +3,7 @@
   import TooltipText from "../TooltipText.svelte";
   import InstrumentName from "./InstrumentName.svelte";
   import { themeName } from "../../view";
-  import { sortLineup } from "./_sort";
+  import { sortLineup } from "./sort";
   $: sortLineup(people);
 </script>
 
