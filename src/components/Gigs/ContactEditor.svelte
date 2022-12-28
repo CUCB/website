@@ -1,6 +1,11 @@
-<script>
+<script lang="ts">
   import { createEventDispatcher } from "svelte";
-  export let id, name, organization, email, caller, notes;
+  export let id: string | undefined = undefined,
+    name: string = "",
+    organization: string | null = null,
+    email: string | null = null,
+    caller: boolean = false,
+    notes: string | null = null;
 
   const dispatch = createEventDispatcher();
 
@@ -23,7 +28,6 @@
       );
 
       dispatch("saved", {
-        // @ts-ignore
         contact: res,
       });
     } catch (e) {

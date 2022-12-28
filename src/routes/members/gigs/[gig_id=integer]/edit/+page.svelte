@@ -45,24 +45,25 @@
   import SearchBox from "../../../../../components/SearchBox.svelte";
   import { DateTime, Settings } from "luxon";
   import { sortContacts, sortVenues } from "./sort";
+  import type { Contact, GigContact, Venue } from "./types";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   let checkValid = createValidityChecker();
 
-  let venue;
+  let venue: Venue | undefined | { name?: string; id?: string };
   let displayVenueEditor = false;
   let displayContactEditor = false;
-  let editingSubvenue = false;
+  let editingSubvenue: boolean | undefined = false;
   let recentlySavedOpacity = tweened(0, { duration: 150 });
   let recentlySavedTimer = () => recentlySavedOpacity.set(0);
-  let runningTimer = null;
-  let venueListElement,
-    clientListElement,
-    callerListElement,
-    selectedClient,
-    selectedCaller,
-    contactToEdit,
-    editContactType,
+  let runningTimer: number | undefined = undefined;
+  let venueListElement: HTMLSelectElement,
+    clientListElement: HTMLSelectElement,
+    callerListElement: HTMLSelectElement,
+    selectedClient: string | null,
+    selectedCaller: string | null,
+    contactToEdit: { caller: boolean; name?: string; id?: string } | null,
+    editContactType: object,
     clearVenueSearch: () => void;
   let previewSummary = false;
   time = time && DateTime.fromISO(`1970-01-01T${time}`).toFormat("HH:mm"); // Remove seconds from time if they are present
@@ -71,10 +72,10 @@
   let finish_time_date = (finish_time && DateTime.fromISO(finish_time).toFormat("yyyy-LL-dd")) || null;
   let finish_time_time = (finish_time && DateTime.fromISO(finish_time).toFormat("HH:mm")) || null;
   let fields = {
-    finish_time_date: null as HTMLImageElement | null,
-    finish_time_time: null as HTMLImageElement | null,
-    arrive_time_time: null as HTMLImageElement | null,
-    arrive_time_date: null as HTMLImageElement | null,
+    finish_time_date: null as HTMLInputElement | null,
+    finish_time_time: null as HTMLInputElement | null,
+    arrive_time_time: null as HTMLInputElement | null,
+    arrive_time_date: null as HTMLInputElement | null,
     quote_date: null as HTMLInputElement | null,
     time: null as HTMLInputElement | null,
     end_date: null as HTMLInputElement | null,
@@ -90,7 +91,9 @@
       finish_time &&
       DateTime.fromISO(arrive_time) < DateTime.fromISO(finish_time).minus({ hours: 6 }) &&
       "Gig is longer than 6 hours. Have you accidentally put a time in the morning rather than the evening?",
-    arrive_time &&
+    date &&
+      arrive_time &&
+      arrive_time_date &&
       arrive_time_time === time &&
       DateTime.fromISO(date).equals(DateTime.fromISO(arrive_time_date)) &&
       "Arrive time is the same as start time.",
@@ -109,32 +112,47 @@
   $: potentialClients = allContacts.filter((contact) => !clientSet.has(contact.id));
   $: potentialCallers = allContacts.filter((contact) => contact.caller && !callerSet.has(contact.id));
 
+  // TODO unit test me
+  const dateHasChanged = (oldValue: string | null | undefined, newValue: string | null | undefined): boolean => {
+    if (oldValue) {
+      if (newValue) {
+        return !DateTime.fromISO(oldValue).equals(DateTime.fromISO(newValue));
+      } else {
+        // value has been deleted as oldValue is truthy, but newValue isn't
+        return true;
+      }
+    } else {
+      // oldValue is falsy: if newValue is also falsy, nothing has changed
+      return !!newValue;
+    }
+  };
+
+  // TODO unit test me
+  const timeHasChanged = (oldValue: string | null | undefined, newValue: string | null | undefined): boolean =>
+    dateHasChanged(oldValue && `1970-01-01T${oldValue}`, newValue && `1970-01-01T${newValue}`);
+
   $: saved =
     lastSaved.type === type_id &&
     lastSaved.title === title.trim() &&
     lastSaved.date === ((typeCode !== "calendar" && date) || null) &&
     lastSaved.venue === venue_id &&
-    (lastSaved.summary ?? "") === (summary ?? ("" && summary.trim())) &&
+    (lastSaved.summary ?? "") === (summary || "").trim() &&
     lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
     lastSaved.notes_band === (notes_band && notes_band.trim()) &&
-    ((!lastSaved.arrive_time && !arrive_time) ||
-      DateTime.fromISO(lastSaved.arrive_time).equals(DateTime.fromISO(arrive_time))) &&
-    ((!lastSaved.finish_time && !finish_time) ||
-      DateTime.fromISO(lastSaved.finish_time).equals(DateTime.fromISO(finish_time))) &&
-    ((!lastSaved.time && !time) ||
-      DateTime.fromISO(`1970-01-01T${lastSaved.time}`).equals(DateTime.fromISO(`1970-01-01T${time}`))) &&
+    !dateHasChanged(lastSaved.arrive_time, arrive_time) &&
+    !dateHasChanged(lastSaved.finish_time, finish_time) &&
+    !timeHasChanged(lastSaved.time, time) &&
     lastSaved.admins_only === admins_only &&
     lastSaved.advertise === advertise &&
     lastSaved.allow_signups === allow_signups &&
     lastSaved.food_provided === food_provided &&
-    ((!lastSaved.quote_date && !quote_date) ||
-      DateTime.fromISO(lastSaved.quote_date).hasSame(DateTime.fromISO(quote_date), "day")) &&
+    !dateHasChanged(lastSaved.quote_date, quote_date) &&
     lastSaved.finance == (finance && finance.trim()) &&
     lastSaved.finance_deposit_received == finance_deposit_received &&
     lastSaved.finance_payment_received == finance_payment_received &&
     lastSaved.finance_caller_paid == finance_caller_paid;
 
-  $: typeCode = type_id && gigTypes.find((type) => type_id === type.id).code;
+  $: typeCode = type_id && gigTypes.find((type) => type_id === type.id)?.code;
   $: cancelled = typeCode === "gig_cancelled";
 
   $: venue = venues.find((venue) => venue.id === venue_id);
@@ -149,17 +167,17 @@
     admins_only,
     allow_signups: typeCode !== "calendar" && allow_signups,
     food_provided: typeCode !== "calendar" && food_provided,
-    notes_admin: notes_admin && notes_admin.trim(),
-    notes_band: notes_band && notes_band.trim(),
-    summary: summary && summary.trim(),
+    notes_admin: (notes_admin && notes_admin.trim()) || "",
+    notes_band: (notes_band && notes_band.trim()) || "",
+    summary: (summary && summary.trim()) || "",
     arrive_time:
       typeCode === "calendar"
-        ? DateTime.fromISO(arrive_time_date).toJSDate()
-        : DateTime.fromISO(arrive_time).toJSDate(),
+        ? (arrive_time_date && DateTime.fromISO(arrive_time_date).toJSDate()) || null
+        : (arrive_time && DateTime.fromISO(arrive_time).toJSDate()) || null,
     finish_time:
       typeCode === "calendar"
-        ? DateTime.fromISO(finish_time_date).toJSDate()
-        : DateTime.fromISO(finish_time).toJSDate(),
+        ? (finish_time_date && DateTime.fromISO(finish_time_date).toJSDate()) || null
+        : (finish_time && DateTime.fromISO(finish_time).toJSDate()) || null,
     time: time || null,
     contacts,
     lineup: [],
@@ -171,7 +189,7 @@
     quote_date,
   };
 
-  function unloadIfSaved(e) {
+  function unloadIfSaved(e: BeforeUnloadEvent) {
     if (saved || "Cypress" in window) {
       delete e["returnValue"];
     } else {
@@ -180,17 +198,17 @@
     }
   }
 
-  function selectVenueSearch(e) {
+  function selectVenueSearch(e: CustomEvent<{ id: string }>) {
     venue_id = e.detail.id;
     venueListElement.focus();
   }
 
-  function selectClientSearch(e) {
+  function selectClientSearch(e: CustomEvent<{ id: string }>) {
     selectedClient = e.detail.id;
     clientListElement.focus();
   }
 
-  function selectCallerSearch(e) {
+  function selectCallerSearch(e: CustomEvent<{ id: string }>) {
     selectedCaller = e.detail.id;
     callerListElement.focus();
   }
@@ -201,8 +219,11 @@
   }
 
   function newSubvenue() {
-    venue = { name: venues.find((venue) => venue.id === venue_id).name };
-    editVenue();
+    if (venue) {
+      // TODO does this want to copy more information from the existing venue
+      venue = { name: venue.name };
+      editVenue();
+    }
   }
 
   function editVenue() {
@@ -212,25 +233,27 @@
     displayVenueEditor = true;
   }
 
-  function contactDisplayName(contact) {
-    return contact.name
-      ? contact.organization
-        ? `${contact.name} @ ${contact.organization}`
-        : contact.name
-      : contact.organization;
+  function contactDisplayName(contact: Contact): string {
+    return (
+      (contact.name
+        ? contact.organization
+          ? `${contact.name} @ ${contact.organization}`
+          : contact.name
+        : contact.organization) || ""
+    );
   }
 
-  function venueDisplayName(venue) {
+  function venueDisplayName(venue: Venue): string {
     return venue.subvenue ? `${venue.name} | ${venue.subvenue}` : venue.name;
   }
 
-  async function updateVenue(e) {
+  async function updateVenue(e: CustomEvent<{ venue: Venue }>) {
     venue = e.detail.venue;
     venue_id = venue.id;
-    venues = [...venues.filter((elem) => elem.id !== venue.id), venue];
+    // @ts-ignore
+    venues = [...venues.filter((elem) => elem.id !== venue_id), venue];
     sortVenues(venues);
     venues = venues;
-    lastSaved.venue = venue;
     displayVenueEditor = false;
     await tick();
     await tick();
@@ -245,12 +268,14 @@
     venueListElement.focus();
   }
 
-  async function saveGig(_e) {
-    for (let field of Object.values(fields).filter((x) => x)) {
-      field.dispatchEvent(new Event("change"));
-      if (field.checkValidity && !field.checkValidity()) {
-        field.reportValidity();
-        return;
+  async function saveGig(_: Event) {
+    for (let field of Object.values(fields)) {
+      if (field) {
+        field.dispatchEvent(new Event("change"));
+        if (field.checkValidity && !field.checkValidity()) {
+          field.reportValidity();
+          return;
+        }
       }
     }
     try {
@@ -267,10 +292,10 @@
         notes_admin: notes_admin && notes_admin.trim(),
         notes_band: notes_band && notes_band.trim(),
         summary: summary && summary.trim(),
-        arrive_time: typeCode === "calendar" ? DateTime.fromISO(arrive_time_date) : arrive_time,
-        finish_time: typeCode === "calendar" ? DateTime.fromISO(finish_time_date) : finish_time,
+        arrive_time: typeCode === "calendar" ? arrive_time_date && DateTime.fromISO(arrive_time_date) : arrive_time,
+        finish_time: typeCode === "calendar" ? finish_time_date && DateTime.fromISO(finish_time_date) : finish_time,
         time: time || null,
-        quote_date,
+        quote_date: quote_date || null,
         finance: finance && finance.trim(),
         finance_deposit_received,
         finance_payment_received,
@@ -297,9 +322,9 @@
     }
   }
 
-  function keyboardShortcuts(e) {
+  function keyboardShortcuts(e: KeyboardEvent) {
     // Alt + S
-    if (e.altKey && e.which === 83) {
+    if (e.altKey && e.key === "s") {
       e.preventDefault();
       saveGig(e);
     }
@@ -310,23 +335,23 @@
     CLIENT: {},
   };
 
-  async function selectContact(contactType, _) {
-    let contact_id, existingContact;
+  async function selectContact(contactType: object, _: unknown) {
+    let contact_id: string, existingContact;
     let is_client, is_calling;
     if (contactType === contactTypes.CLIENT) {
-      contact_id = selectedClient;
-      existingContact = contacts.find((contact) => (contact.id || contact.contact.id) === contact_id);
+      contact_id = selectedClient as string;
+      existingContact = contacts.find((contact) => contact.contact.id === contact_id);
       is_client = true;
       is_calling = (existingContact || false) && existingContact.calling;
     } else {
-      contact_id = selectedCaller;
-      existingContact = contacts.find((contact) => (contact.id || contact.contact.id) === contact_id);
+      contact_id = selectedCaller as string;
+      existingContact = contacts.find((contact) => contact.contact.id === contact_id);
       is_calling = true;
       is_client = (existingContact || false) && existingContact.client;
     }
     try {
       const body = {
-        contact: contact_id.toString(),
+        contact: contact_id,
         client: is_client,
         calling: is_calling,
       };
@@ -345,7 +370,7 @@
           sortContacts(contactsClone);
           contacts = contactsClone;
         }
-        contactType === contactTypes.CLIENT ? (selectedClient = undefined) : (selectedCaller = undefined);
+        contactType === contactTypes.CLIENT ? (selectedClient = null) : (selectedCaller = null);
       }
     } catch (e) {
       // TODO error handling (#43)
@@ -353,11 +378,11 @@
     }
   }
 
-  let selectClient = (e) => selectContact(contactTypes.CLIENT, e);
-  let selectCaller = (e) => selectContact(contactTypes.CALLER, e);
+  let selectClient = (e: MouseEvent) => selectContact(contactTypes.CLIENT, e);
+  let selectCaller = (e: MouseEvent) => selectContact(contactTypes.CALLER, e);
 
-  async function removeContact(contactType, contact_id, _) {
-    let existingContact = contacts.find((contact) => (contact.id || contact.contact.id) === contact_id);
+  async function removeContact(contactType: object, contact_id: string, _: Event) {
+    let existingContact = contacts.find((contact) => contact.contact.id === contact_id) as GigContact;
     if (existingContact.client && existingContact.calling) {
       let client, calling;
       // Only removing a role, so update the existing entry
@@ -404,18 +429,21 @@
     }
   }
 
-  let removeClient = (id) => (e) => removeContact(contactTypes.CLIENT, id, e);
-  let removeCaller = (id) => (e) => removeContact(contactTypes.CALLER, id, e);
+  let removeClient = (id: string) => (e: MouseEvent) => removeContact(contactTypes.CLIENT, id, e);
+  let removeCaller = (id: string) => (e: MouseEvent) => removeContact(contactTypes.CALLER, id, e);
 
-  function editContact(contact_id, contactType) {
-    return (_) => {
+  function editContact(contact_id: string, contactType: object) {
+    return (_: MouseEvent) => {
       editContactType = contactType;
-      contactToEdit = { ...contacts.find((contact) => contact.contact.id === contact_id).contact, id: contact_id };
+      contactToEdit = {
+        ...(contacts.find((contact) => contact.contact.id === contact_id) as GigContact).contact,
+        id: contact_id,
+      };
       displayContactEditor = true;
     };
   }
 
-  async function updateContact(e) {
+  async function updateContact(e: CustomEvent<{ contact: Contact }>) {
     let updatedContact = e.detail.contact;
     let currentContact = allContacts.find((contact) => contact.id === updatedContact.id);
     if (currentContact) {
@@ -424,7 +452,7 @@
       currentContact.organization = updatedContact.organization;
       currentContact.notes = updatedContact.notes;
       currentContact.caller = updatedContact.caller;
-      let gigContact = contacts.find((contact) => contact.contact.id === updatedContact.id);
+      let gigContact = contacts.find((contact) => contact.contact.id === updatedContact.id) as GigContact;
       gigContact.contact = { ...updatedContact };
       sortContacts(allContacts);
       allContacts = allContacts;
@@ -463,30 +491,30 @@
     displayContactEditor = true;
   }
 
-  async function fillArriveDate(e) {
+  async function fillArriveDate(e: Event & { force?: boolean }) {
     if (arrive_time_date && !e.force) return;
     if (!arrive_time_time) return;
     if (!time || DateTime.fromISO(`1970-01-01T${arrive_time_time}`) <= DateTime.fromISO(`1970-01-01T${time}`)) {
-      arrive_time_date = date;
+      arrive_time_date = date ?? null;
     } else {
-      arrive_time_date = DateTime.fromISO(date).minus({ days: 1 }).toFormat("yyyy-LL-dd");
+      arrive_time_date = (date && DateTime.fromISO(date).minus({ days: 1 }).toFormat("yyyy-LL-dd")) ?? null;
     }
     await tick();
-    fields.arrive_time_date.dispatchEvent(new Event("change"));
-    fields.arrive_time_time.dispatchEvent(new Event("change"));
+    fields.arrive_time_date?.dispatchEvent(new Event("change"));
+    fields.arrive_time_time?.dispatchEvent(new Event("change"));
   }
 
-  async function fillFinishDate(e) {
+  async function fillFinishDate(e: Event & { force?: boolean }) {
     if (finish_time_date && !e.force) return;
     if (!finish_time_time) return;
     if (!time || DateTime.fromISO(`1970-01-01T${finish_time_time}`) >= DateTime.fromISO(`1970-01-01T${time}`)) {
-      finish_time_date = date;
+      finish_time_date = date ?? null;
     } else {
-      finish_time_date = DateTime.fromISO(date).plus({ days: 1 }).toFormat("yyyy-LL-dd");
+      finish_time_date = (date && DateTime.fromISO(date).plus({ days: 1 }).toFormat("yyyy-LL-dd")) ?? null;
     }
     await tick();
-    fields.finish_time_date.dispatchEvent(new Event("change"));
-    fields.finish_time_time.dispatchEvent(new Event("change"));
+    fields.finish_time_date?.dispatchEvent(new Event("change"));
+    fields.finish_time_time?.dispatchEvent(new Event("change"));
   }
 
   $: venueFuse = new Fuse(venues, {

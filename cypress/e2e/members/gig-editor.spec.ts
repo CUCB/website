@@ -379,6 +379,7 @@ describe("gig editor", () => {
         .should("have.focus")
         .find(":selected")
         .contains("Mog on the Tyne");
+      cy.contains("unsaved changes").should("be.visible");
 
       cy.get(`[data-test=gig-edit-${gig.id}-create-venue]`).click();
       cy.get(`[data-test=venue-editor-name]`).click().type("Cog on the Line", { delay: 0 });
