@@ -54,6 +54,8 @@ services:
       - ./static/static:/srv/static
       - ${BLOCK_STORAGE}/images:/srv/images
       - ./docs:/srv/docs
+      - caddy_config:/config
+      - caddy_data:/data
     logging:
       driver: "json-file"
       options:
@@ -61,4 +63,5 @@ services:
 
 volumes:
   db_data:
-  caddy:
+  caddy_config:
+  caddy_data:
