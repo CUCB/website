@@ -25,12 +25,6 @@ function applyTimezone(date: string | Date): string {
   }
 }
 
-interface Gig {
-  arrive_time?: string | Date | null;
-  finish_time?: string | Date | null;
-  date?: string;
-}
-
 function startEndTimes(gig: GigSummary): { start: string; end: string | null } {
   let start = gig.arrive_time && applyTimezone(gig.arrive_time);
   let end = (gig.finish_time && applyTimezone(gig.finish_time)) ?? null;
