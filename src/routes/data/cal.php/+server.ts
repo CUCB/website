@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import icalPkg from "ical-generator";
+import { ICalCalendar, ICalCalendarMethod } from "ical-generator";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import { sortLineup } from "../../../components/Gigs/sort";
@@ -12,14 +12,8 @@ import { fetchMultiGigSummary, fetchSpecificGigSummary } from "../../members/gig
 import { VIEW_GIG_ADMIN_NOTES } from "$lib/permissions";
 import type { GigSummary } from "../../members/types";
 import { User } from "$lib/entities/User";
-const { ICalCalendar, ICalCalendarMethod } = icalPkg;
 
 dotenv.config();
-
-const SESSION_SECRET_HASH = crypto
-  .createHash("sha512")
-  .update(Buffer.from(env["SESSION_SECRET"] as string))
-  .digest("hex");
 
 const CALENDAR_SECRET = env["CALENDAR_SECRET"];
 
@@ -31,48 +25,59 @@ function applyTimezone(date: string | Date): string {
   }
 }
 
-function startEndTimes(gig) {
-  let start = applyTimezone(gig.arrive_time);
-  let end = applyTimezone(gig.finish_time);
-  if (start === end || end === null || start === null) {
-    // Either an all day event, or we don't have both start and finish times, so make it appear as an all day event
-    start = gig.date;
-    end = null;
-  }
-  return { start, end };
+interface Gig {
+  arrive_time?: string | Date | null;
+  finish_time?: string | Date | null;
+  date?: string;
 }
 
-function linkTo(gig, baseUrl: string): string {
+function startEndTimes(gig: GigSummary): { start: string; end: string | null } {
+  let start = gig.arrive_time && applyTimezone(gig.arrive_time);
+  let end = (gig.finish_time && applyTimezone(gig.finish_time)) ?? null;
+  if (start === end || end === null || start === null) {
+    // Either an all day event, or we don't have both start and finish times, so make it appear as an all day event
+    // @ts-ignore
+    start = DateTime.fromJSDate(gig.date).toISO({ includeOffset: false });
+    end = null;
+  }
+  return { start: start as string, end };
+}
+
+function linkTo(gig: GigSummary, baseUrl: string): string {
   return `${baseUrl}/members/gigs/${gig.id}`;
 }
 
-function authFor({ type, gig, uid }: { type: string; gig?: number; uid: number }): string {
+function authFor({ type, gig, uid }: { type: string; gig?: string | null; uid: string }): string {
   return crypto
     .createHash("md5")
     .update(Buffer.from(`${CALENDAR_SECRET}${uid}type=${type}${gig ? `&gig=${gig}` : ""}`))
     .digest("hex");
 }
 
-function testAuthLink(query: URLSearchParams) {
+function testAuthLink(query: URLSearchParams): string | null {
   try {
     const type = query.get("type");
-    const gig = parseInt(query.get("gig"));
-    const uid = parseInt(query.get("_cal_uid"));
+    const gig = query.get("gig");
+    const uid = query.get("_cal_uid");
     const a = query.get("_cal_auth");
 
-    const auth = authFor({ type, gig, uid });
+    if (type && uid) {
+      const auth = authFor({ type, gig, uid });
 
-    return auth == a;
+      return auth == a ? uid : null;
+    } else {
+      throw error(404, "Invalid query parameters");
+    }
   } catch (e) {
     // TODO better error
-    console.error(e);
+    console.trace(e);
     throw error(404, "Invalid query parameters");
   }
 }
 
 class GigCalendar {
   baseUrl: string;
-  calendar: typeof ICalCalendar;
+  calendar: ICalCalendar;
   // TODO does the secret actually want to be stored in the code??
   constructor(name: string, description: string, baseUrl: string) {
     this.baseUrl = baseUrl;
@@ -176,6 +181,8 @@ export async function allGigs(ipAddress: string, baseUrl: string, session: Sessi
   const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
   const gigs = await fetchMultiGigSummary(session, {
     $or: [{ date: { $gte: twoDaysAgo } }, { arrive_time: { $gte: twoDaysAgo } }],
+    // TODO define some constants so that I don't keep putting type: "1" everywhere
+    type: "1",
   });
   const hidden = VIEW_GIG_ADMIN_NOTES.guard(session);
   const update = (await orm()).em.fork().upsert(CalendarSubscription, {
@@ -254,40 +261,43 @@ export async function myGigs(ipAddress: string, baseUrl: string, session: Sessio
     await update;
   } catch (e) {
     console.trace(e);
-    // TODO same as above
-    throw handleErrors(e);
+    throw error(500, "Something went wrong");
   }
   return calendar.generate();
 }
 
-export async function singleGig(gig_id: string, baseUrl: string, session: Session) {
-  const gig = await fetchSpecificGigSummary(session, gig_id);
+export async function singleGig(gig_id: string | null, baseUrl: string, session: Session) {
+  if (gig_id) {
+    const gig = await fetchSpecificGigSummary(session, gig_id);
 
-  const calendar = new GigCalendar(
-    `Gig: ${gig.title} [${gig_id}]`,
-    `Auto-generated information for gig ID ${gig_id}`,
-    baseUrl,
-  );
+    const calendar = new GigCalendar(
+      `Gig: ${gig.title} [${gig_id}]`,
+      `Auto-generated information for gig ID ${gig_id}`,
+      baseUrl,
+    );
 
-  calendar.addGig(gig);
-  return calendar.generate();
+    calendar.addGig(gig);
+    return calendar.generate();
+  } else {
+    throw error(404, "Missing gig id");
+  }
 }
 
 export function calendarUrl(params: URLSearchParams): string {
   return `/data/cal.php?${params.toString()}`;
 }
 
-export function gigCalendarUrl(id: number, user_id: number): string {
+export function gigCalendarUrl(gig: string, user_id: string): string {
   const params = new URLSearchParams({
     type: "gig",
-    gig: id.toString(),
-    _cal_uid: user_id.toString(),
-    _cal_auth: authFor({ type: "gig", gig: id, uid: user_id }),
+    gig: gig,
+    _cal_uid: user_id,
+    _cal_auth: authFor({ type: "gig", gig, uid: user_id }),
   });
   return calendarUrl(params);
 }
 
-export function allgigsCalendarUrl(user_id: number): string {
+export function allgigsCalendarUrl(user_id: string): string {
   const params = new URLSearchParams({
     type: "allgigs",
     _cal_uid: user_id.toString(),
@@ -296,7 +306,7 @@ export function allgigsCalendarUrl(user_id: number): string {
   return calendarUrl(params);
 }
 
-export function mygigsCalendarUrl(user_id: number): string {
+export function mygigsCalendarUrl(user_id: string): string {
   const params = new URLSearchParams({
     type: "mygigs",
     _cal_uid: user_id.toString(),
@@ -305,16 +315,25 @@ export function mygigsCalendarUrl(user_id: number): string {
   return calendarUrl(params);
 }
 
-export async function GET({ url, request, locals: { session } }: RequestEvent): Promise<Response> {
+export async function GET({ url, request }: RequestEvent): Promise<Response> {
   let { host, "x-forwarded-proto": proto, "x-forwarded-for": ipAddress } = Object.fromEntries(request.headers);
   if (!ipAddress) {
     ipAddress = request.headers.get("x-real-ip") || "127.0.0.1";
+    proto = "http";
   }
-  console.log(ipAddress);
   const baseUrl = `${proto}://${host}`;
+  const userId = testAuthLink(url.searchParams);
   // TODO add test for this
-  if (!testAuthLink(url.searchParams)) {
+  if (!userId) {
     throw error(401, "Incorrect token");
+  }
+
+  const user = await (await orm()).em.fork().findOne(User, { id: userId });
+  let session: Session;
+  if (user) {
+    session = { firstName: user.first, lastName: user.last, userId: user.id, role: user.adminType.role };
+  } else {
+    throw error(401, "Unknown user");
   }
 
   let body, filename;
