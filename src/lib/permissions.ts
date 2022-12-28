@@ -32,6 +32,7 @@ export const UPDATE_INSTRUMENTS = (userId: string) =>
   HAS_ROLE(Union(ROLES.webmaster, ROLES.president, ROLES.secretary)).Or(IS_SELF(userId));
 export const UPDATE_ADMIN_STATUS = (userId: string) =>
   HAS_ROLE(ROLES.webmaster).withConstraint((session: { userId: string }) => session.userId != userId);
+export const UPDATE_LIST042 = HAS_ROLE(ROLES.webmaster.Or(ROLES.president));
 export const UPDATE_GIG_DETAILS = HAS_ROLE(
   Union(ROLES.webmaster, ROLES.president, ROLES.secretary, ROLES.treasurer, ROLES.equipment, ROLES.gigEditor),
 );
