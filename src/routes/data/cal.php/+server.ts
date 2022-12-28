@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import icalPkg from "ical-generator";
 import dotenv from "dotenv";
 import crypto from "crypto";
-import { sortLineup } from "../../../components/Gigs/_sort";
+import { sortLineup } from "../../../components/Gigs/sort";
 import { error } from "@sveltejs/kit";
 import orm from "$lib/database";
 import { CalendarSubscription, CalendarSubscriptionType } from "$lib/entities/CalendarSubscription";
