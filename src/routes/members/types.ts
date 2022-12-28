@@ -56,6 +56,7 @@ export interface SignupSummaryEntry {
 }
 
 export interface GigSummary {
+  id: string;
   title: string;
   time: string | null;
   arrive_time: Date | null;

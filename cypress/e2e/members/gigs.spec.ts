@@ -518,17 +518,18 @@ describe("iCal files", () => {
       });
     });
 
+    it("does not require cookies to be set to access generated calendar link", () => {
+      cy.request(`/members/gigs/calendar/links`).then((res) => {
+        const links = res.body;
+        cy.clearAllCookies();
+        cy.request(links.allgigs).then((res) => ICAL.parse(res.body));
+        cy.request(links.mygigs).then((res) => ICAL.parse(res.body));
+      });
+    });
+
     it("can be generated for my gigs", () => {
       const expectedSummary = "GIG: Gig of excitement";
       cy.request("POST", `/members/gigs/${gig.id}/signup`, { user_available: true, user_only_if_necessary: false });
-
-      cy.request(`/members/gigs/calendar/my`).then((res) => {
-        const data = ICAL.parse(res.body);
-        const comp = new ICAL.Component(data);
-        const events = comp.getAllSubcomponents("vevent").map((vevent) => new ICAL.Event(vevent));
-        const event = events.find((event) => event.summary === expectedSummary);
-        expect(event).to.be.undefined;
-      });
 
       cy.request(`/members/gigs/calendar/my`).then((res) => {
         const data = ICAL.parse(res.body);
@@ -594,6 +595,15 @@ describe("iCal files", () => {
       });
     });
 
+    it("does not require cookies to be set to access generated calendar link", () => {
+      cy.request(`/members/gigs/calendar/links`).then((res) => {
+        const links = res.body;
+        cy.clearAllCookies();
+        cy.request(links.allgigs).then((res) => ICAL.parse(res.body));
+        cy.request(links.mygigs).then((res) => ICAL.parse(res.body));
+      });
+    });
+
     it("can be generated for my gigs", () => {
       const expectedSummary = "GIG: Gig of excitement";
       cy.request(`/members/gigs/calendar/my`).then((res) => {
@@ -638,4 +648,3 @@ describe("iCal files", () => {
 });
 
 import ICAL from "ical.js";
-import { IANAZone } from "luxon";
