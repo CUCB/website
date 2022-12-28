@@ -2,25 +2,29 @@
   import { createEventDispatcher } from "svelte";
   import { Tuple, Number } from "runtypes";
 
-  export let id: string,
-    name: string,
-    subvenue: string,
-    map_link: string,
-    distance_miles: string,
-    notes_admin: string,
-    notes_band: string | null,
-    address: string | null,
-    postcode: string | null,
-    latitude: number | null,
-    longitude: number | null,
+  export let id: string | undefined = undefined,
+    name: string | undefined = undefined,
+    subvenue: string | null | undefined = undefined,
+    map_link: string | null | undefined = undefined,
+    distance_miles: string | null | undefined = undefined,
+    notes_admin: string | null | undefined = undefined,
+    notes_band: string | null | undefined = undefined,
+    address: string | null | undefined = undefined,
+    postcode: string | null | undefined = undefined,
+    latitude: number | null = null,
+    longitude: number | null = null,
     nameEditable = true;
   let initiated = false;
 
   const dispatch = createEventDispatcher();
-  const latLngFrom = (map_link: string): [number | null, number | null] => {
-    try {
-      return Tuple(Number, Number).check(map_link.split(/@/)[1].split(/,/).slice(0, 2).map(parseFloat));
-    } catch {
+  const latLngFrom = (map_link: string | undefined | null): [number | null, number | null] => {
+    if (typeof map_link === "string") {
+      try {
+        return Tuple(Number, Number).check(map_link.split(/@/)[1].split(/,/).slice(0, 2).map(parseFloat));
+      } catch {
+        return [null, null];
+      }
+    } else {
       return [null, null];
     }
   };

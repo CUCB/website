@@ -1,14 +1,13 @@
 export interface Contact {
-  id: number;
+  id: string;
   name: string;
   caller: boolean;
-  email: string;
-  organization: string;
-  notes: string;
+  email?: string | null;
+  organization?: string | null;
+  notes?: string | null;
 }
 
 export interface GigContact {
-  id: number;
   contact: Contact;
   client: boolean;
   calling: boolean;
@@ -16,37 +15,44 @@ export interface GigContact {
 
 export interface Gig {
   title: string;
-  date: string;
-  time: string;
-  posting_time: string;
-  posting_user: User;
-  editing_time: string;
-  editing_user: User;
-  venue_id: number;
-  venue: Venue;
-  type_id: number;
-  id: number;
+  date?: string | null;
+  time?: string | null;
+  posting_time?: string;
+  posting_user?: User;
+  editing_time?: string;
+  editing_user?: User;
+  venue?: string;
+  id: string;
   admins_only: boolean;
   advertise: boolean;
   allow_signups: boolean;
   food_provided: boolean;
-  notes_admin: string;
-  notes_band: string;
-  summary: string;
+  notes_admin?: string;
+  notes_band?: string;
+  summary?: string;
   contacts: GigContact[];
-  arrive_time: string;
-  finish_time: string;
-  finance: string;
-  finance_deposit_received: boolean;
-  finance_payment_received: boolean;
-  finance_caller_paid: boolean;
-  quote_date: string;
+  arrive_time?: string | null;
+  finish_time?: string | null;
+  finance?: string | null;
+  finance_deposit_received?: boolean;
+  finance_payment_received?: boolean;
+  finance_caller_paid?: boolean;
+  quote_date?: string | null;
+  type: string;
 }
 
 export interface Venue {
-  id: number;
+  id: string;
   name: string;
-  subvenue: string;
+  subvenue?: string | null;
+  map_link?: string | null;
+  distance_miles?: string | null;
+  notes_admin?: string | null;
+  notes_band?: string | null;
+  address?: string | null;
+  postcode?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface User {
@@ -56,7 +62,7 @@ export interface User {
 }
 
 export interface GigType {
-  id: number;
+  id: string;
   title: string;
   code: string;
 }
