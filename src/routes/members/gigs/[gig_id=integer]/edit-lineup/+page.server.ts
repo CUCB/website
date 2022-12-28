@@ -1,7 +1,6 @@
 import { assertLoggedIn } from "../../../../../client-auth.js";
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import type { UserInstrument } from "../../../users/[id=integer]/types";
 import { PopulateHint, type EntityManager } from "@mikro-orm/core";
 import { Gig } from "$lib/entities/Gig";
 import orm from "$lib/database";
@@ -9,13 +8,7 @@ import { SELECT_GIG_LINEUPS } from "$lib/permissions";
 import { User } from "$lib/entities/User";
 import { wrap } from "@mikro-orm/core";
 import { extractAttributes } from "./attributes";
-
-interface UserName {
-  id: string;
-  first: string;
-  last: string;
-  gig_notes: string;
-}
+import type { LineupInstrument, Person, UserName } from "./types.js";
 
 interface PersonQuery {
   user: {
@@ -34,24 +27,6 @@ interface PersonQuery {
   user_only_if_necessary?: boolean;
   approved?: boolean | null;
   user_instruments: LineupInstrument[];
-  leader: boolean;
-  equipment: boolean;
-  money_collector: boolean;
-  money_collector_notified: boolean;
-}
-
-interface Person {
-  user: {
-    first: string;
-    last: string;
-    id: string;
-    attributes: string[];
-    gig_notes: string;
-  };
-  user_available?: boolean;
-  user_only_if_necessary?: boolean;
-  approved?: boolean | null;
-  user_instruments: Record<string, LineupInstrument>;
   leader: boolean;
   equipment: boolean;
   money_collector: boolean;
@@ -118,12 +93,6 @@ export const load: PageServerLoad = async ({ params: { gig_id }, parent }) => {
     throw error(403, "You're not allowed to do that");
   }
 };
-
-interface LineupInstrument {
-  user_instrument: UserInstrument;
-  approved?: boolean | null;
-  deleted?: boolean;
-}
 
 function userInstrumentsById(instrument_list: LineupInstrument[]): Record<string, LineupInstrument> {
   return Object.fromEntries(instrument_list.map((instrument) => [instrument.user_instrument.id, instrument]));
