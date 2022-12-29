@@ -208,6 +208,8 @@
     finance_payment_received,
     finance_caller_paid,
     quote_date: (quote_date && DateTime.fromISO(quote_date).toJSDate()) || null,
+    posting_time: (posting_time && DateTime.fromISO(posting_time).toJSDate()) || null,
+    posting_user,
   };
 
   function unloadIfSaved(e: BeforeUnloadEvent) {
