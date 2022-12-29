@@ -1,5 +1,3 @@
-import type { DateTime } from "luxon";
-
 export interface User {
   id: string;
   first: string;
