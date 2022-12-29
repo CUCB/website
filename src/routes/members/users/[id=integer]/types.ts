@@ -15,6 +15,8 @@ export interface AggregateInstrument {
   name: string;
   novelty: boolean;
   parent_only: boolean;
+  parent?: undefined;
+  user_instruments?: undefined;
   parent_id: string | null;
   count: string;
 }
@@ -35,9 +37,9 @@ export interface User {
   first: string;
   last: string;
   bio?: string;
-  bioChangedDate?: Date;
-  lastLoginDate?: Date;
-  joinDate?: Date;
+  bioChangedDate?: Date | null;
+  lastLoginDate?: Date | null;
+  joinDate?: Date | null;
   mobileContactInfo?: string;
   locationInfo?: string;
   email?: string;
@@ -53,10 +55,10 @@ export interface User {
     gig: {
       id: string;
       title: string;
-      date?: Date;
+      date?: Date | null;
       venue?: {
         name: string;
-        subvenue?: string;
+        subvenue?: string | null;
       };
     };
     user_instruments: {
@@ -84,7 +86,6 @@ export interface LoadOutput {
   canEdit: boolean;
   canEditInstruments: boolean;
   allInstruments: AggregateInstrument[];
-  currentUser: boolean;
   allPrefs: Pref[];
   profilePictureUpdated: string;
   canEditAdminStatus: boolean;

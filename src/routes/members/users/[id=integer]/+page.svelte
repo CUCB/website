@@ -30,7 +30,7 @@
     return luxonDate.toFormat("MMMM yyyy");
   }
 
-  function displayBioMonth(date: Date | undefined): string {
+  function displayBioMonth(date: Date | null | undefined): string {
     return date ? `, ${displayMonth(date)}` : ``;
   }
 
