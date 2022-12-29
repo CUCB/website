@@ -9,26 +9,8 @@ import {
   fetchSpecificGigSummary,
 } from "../queries";
 
-// TODO refine me a bit
-interface Props {
-  gig: { title: string; arrive_time?: Date; finish_time?: Date };
-  signupGig: any;
-  userInstruments: unknown[];
-  signupSummary: SignupSummary | null;
-}
-
-type SignupSummary = {
-  user: {
-    first: string;
-    last: string;
-  };
-  user_available?: boolean | null;
-  user_only_if_necessary?: boolean | null;
-}[];
-
-export const load: PageServerLoad = async ({ params: { gig_id }, parent }): Promise<Props> => {
-  const { session } = await parent();
-  assertLoggedIn(session);
+export const load: PageServerLoad = async ({ params: { gig_id }, locals }) => {
+  const session = assertLoggedIn(locals.session);
 
   if (NOT_MUSIC_ONLY.guard(session)) {
     const [gig, signupGig, userInstruments, signupSummary] = await Promise.all([
@@ -43,7 +25,8 @@ export const load: PageServerLoad = async ({ params: { gig_id }, parent }): Prom
         gig,
         signupGig,
         userInstruments,
-        signupSummary: gig && gig.allow_signups && signupSummary,
+        signupSummary: (gig && gig.allow_signups && signupSummary) || null,
+        session: { ...session, save: undefined, destroy: undefined },
       };
     } else {
       throw error(404, "Gig not found");

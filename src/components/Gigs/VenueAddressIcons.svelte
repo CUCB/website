@@ -3,9 +3,9 @@
   export let venue: Venue;
 
   interface Venue {
-    address: string | null;
-    postcode: string | null;
-    map_link: string | null;
+    address?: string | null | undefined;
+    postcode?: string | null | undefined;
+    map_link?: string | null | undefined;
   }
 
   const address = [venue.address, venue.postcode].filter((line) => line).join("\n");
