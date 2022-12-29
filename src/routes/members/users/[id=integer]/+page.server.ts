@@ -117,7 +117,6 @@ export const load: PageServerLoad = async ({ locals, params: { id }, fetch }): P
       canEdit,
       canEditInstruments,
       allInstruments,
-      currentUser: id === session.userId,
       allPrefs,
       profilePictureUpdated,
       canEditAdminStatus,
