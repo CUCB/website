@@ -27,7 +27,7 @@
   import { String, Null, Literal, Union, Boolean } from "runtypes";
   import type { Static } from "runtypes";
 
-  export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null, session;
+  export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null, session: { userId: string };
 
   class ViewSettings extends Record({
     accentOpen: false,
