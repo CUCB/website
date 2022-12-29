@@ -127,6 +127,23 @@
     }
   };
 
+  const dateHasChangedIgnoringTime = (
+    oldValue: string | null | undefined,
+    newValue: string | null | undefined,
+  ): boolean => {
+    if (oldValue) {
+      if (newValue) {
+        return !DateTime.fromISO(oldValue).hasSame(DateTime.fromISO(newValue), "day");
+      } else {
+        // value has been deleted as oldValue is truthy, but newValue isn't
+        return true;
+      }
+    } else {
+      // oldValue is falsy: if newValue is also falsy, nothing has changed
+      return !!newValue;
+    }
+  };
+
   // TODO unit test me
   const timeHasChanged = (oldValue: string | null | undefined, newValue: string | null | undefined): boolean =>
     dateHasChanged(oldValue && `1970-01-01T${oldValue}`, newValue && `1970-01-01T${newValue}`);
@@ -146,7 +163,11 @@
     lastSaved.advertise === advertise &&
     lastSaved.allow_signups === allow_signups &&
     lastSaved.food_provided === food_provided &&
-    !dateHasChanged(lastSaved.quote_date, quote_date) &&
+    // TODO the reason why this needs to ignore time can probably be reproduced with a test
+    // I couldn't work it out
+    // If I hit save on a gig from the mysql dump of the old prod database, it would say
+    // unsaved changes, despite me not having changed anything and hit save
+    !dateHasChangedIgnoringTime(lastSaved.quote_date, quote_date) &&
     lastSaved.finance == (finance && finance.trim()) &&
     lastSaved.finance_deposit_received == finance_deposit_received &&
     lastSaved.finance_payment_received == finance_payment_received &&
@@ -283,8 +304,8 @@
         id,
         title: title.trim(),
         date: (typeCode !== "calendar" && date) || null,
-        venue_id,
-        type_id,
+        venue: venue_id,
+        type: type_id,
         advertise,
         admins_only,
         allow_signups: typeCode !== "calendar" && allow_signups,
