@@ -3,7 +3,6 @@ import type { Actions, PageServerLoad } from "./$types";
 import { login } from "../../../auth";
 import { String, Record as RuntypeRecord, Optional } from "runtypes";
 import { error } from "@sveltejs/kit";
-import { assertLoggedIn } from "../../../client-auth";
 import type { CookieSerializeOptions } from "cookie";
 
 const NonEmptyString = String.withConstraint((str) => str.trim().length > 0);
@@ -16,7 +15,7 @@ const LoginBody = RuntypeRecord({
 
 export const actions: Actions = {
   default: async ({ request, locals, cookies }) => {
-    if (locals.session.userId) {
+    if ("userId" in locals.session) {
       throw redirect(303, "/members");
     }
     const body = Object.fromEntries(await request.formData());
