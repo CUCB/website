@@ -47,8 +47,9 @@ const fetchAllContacts = (em: EntityManager): Promise<Contact[]> =>
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
   let { gig_id } = params;
 
-  const { session: tmpSession }: { session: {} | { userId: string; firstName: string; lastName: string } } =
-    await parent();
+  const {
+    session: tmpSession,
+  }: { session: {} | { userId: string; firstName: string; lastName: string; role: string } } = await parent();
   const session = assertLoggedIn(tmpSession);
 
   if (UPDATE_GIG_DETAILS.guard(session)) {

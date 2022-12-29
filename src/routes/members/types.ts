@@ -77,7 +77,7 @@ export interface GigSummary {
     title: string;
   };
   venue?: SignupGigVenue | undefined;
-  finance?: string;
+  finance?: string | null;
   finance_deposit_received?: boolean;
   finance_payment_received?: boolean;
   finance_caller_paid?: boolean;
@@ -99,7 +99,7 @@ export interface SummaryContact {
   contact: {
     id: string;
     name: string;
-    organization?: string;
+    organization?: string | null;
   };
   client?: boolean;
   calling: boolean;
