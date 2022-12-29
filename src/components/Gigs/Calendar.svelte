@@ -1,4 +1,13 @@
-<script lang="ts" context="module">
+<script lang="ts">
+  import { createEventDispatcher } from "svelte";
+  import { goto } from "$app/navigation";
+  import TooltipText from "../TooltipText.svelte";
+  import { Set, Map } from "immutable";
+  import { themeName } from "../../view";
+  import { DateTime, Settings } from "luxon";
+  import Select from "../Forms/Select.svelte";
+  import type { GigSummary } from "../../routes/members/types";
+
   interface GigType {
     code: string;
     title: string;
@@ -11,17 +20,7 @@
     arrive_time?: Date | null | undefined;
     finish_time?: Date | null | undefined;
   }
-</script>
 
-<script lang="ts">
-  import { createEventDispatcher } from "svelte";
-  import { goto } from "$app/navigation";
-  import TooltipText from "../TooltipText.svelte";
-  import { Set, Map } from "immutable";
-  import { themeName } from "../../view";
-  import { DateTime, Settings } from "luxon";
-  import Select from "../Forms/Select.svelte";
-  import type { GigSummary } from "../../routes/members/types";
   Settings.defaultZoneName = "Europe/London";
   Settings.defaultLocale = "en-gb";
 
