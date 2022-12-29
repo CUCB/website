@@ -140,7 +140,6 @@ textarea {
   background: var(--background);
 }
 
-
 input[type="email"]:focus,
 input[type="text"]:focus,
 input[type="number"]:focus,
@@ -155,13 +154,13 @@ input[type="submit"]:focus {
   outline: 0;
 }
 
-input[type="email"]:invalid,
-input[type="text"]:invalid,
-input[type="number"]:invalid,
-input[type="password"]:invalid,
-input[type="date"]:invalid,
-input[type="time"]:invalid,
-textarea:invalid,
+input[type="email"]:invalid:not(:placeholder-shown),
+input[type="text"]:invalid:not(:placeholder-shown),
+input[type="number"]:invalid:not(:placeholder-shown),
+input[type="password"]:invalid:not(:placeholder-shown),
+input[type="date"]:invalid:not(:placeholder-shown),
+input[type="time"]:invalid:not(:placeholder-shown),
+textarea:invalid:not(:placeholder-shown),
 button:invalid,
 input[type="submit"]:invalid {
   box-shadow: 0px 0px 4px 1px var(--negative);
