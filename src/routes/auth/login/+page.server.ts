@@ -1,11 +1,13 @@
 import { fail, redirect } from "@sveltejs/kit";
-import type { Actions } from "./$types";
+import type { Actions, PageServerLoad } from "./$types";
 import { login } from "../../../auth";
-import { String, Record, Optional } from "runtypes";
+import { String, Record as RuntypeRecord, Optional } from "runtypes";
 import { error } from "@sveltejs/kit";
+import { assertLoggedIn } from "../../../client-auth";
+import type { CookieSerializeOptions } from "cookie";
 
 const NonEmptyString = String.withConstraint((str) => str.trim().length > 0);
-const LoginBody = Record({
+const LoginBody = RuntypeRecord({
   username: NonEmptyString,
   password: NonEmptyString,
   theme: Optional(String),
@@ -14,7 +16,7 @@ const LoginBody = Record({
 
 export const actions: Actions = {
   default: async ({ request, locals, cookies }) => {
-    if (locals.session.userId) {
+    if (assertLoggedIn(locals.session)) {
       throw redirect(303, "/members");
     }
     const body = Object.fromEntries(await request.formData());
@@ -22,17 +24,25 @@ export const actions: Actions = {
       let loginResult;
       try {
         loginResult = await login(body);
+        const session = locals.session as {
+          userId: string;
+          role: string;
+          firstName: string;
+          lastName: string;
+          theme?: Record<string, string>;
+          save(): Promise<[string, string, CookieSerializeOptions]>;
+        };
 
-        locals.session.userId = loginResult.user_id.toString();
-        locals.session.role = loginResult.adminType.role;
-        locals.session.firstName = loginResult.first;
-        locals.session.lastName = loginResult.last;
+        session.userId = loginResult.user_id.toString();
+        session.role = loginResult.adminType.role;
+        session.firstName = loginResult.first;
+        session.lastName = loginResult.last;
 
         if (body.theme) {
           const theme = JSON.parse(body.theme);
-          locals.session.theme = theme?.[locals.session.userId];
+          session.theme = theme?.[session.userId];
         }
-        let [name, value, opts] = await locals.session.save();
+        let [name, value, opts] = await session.save();
         cookies.set(name, value, opts);
       } catch (e) {
         if (e.status === 401) {
@@ -51,7 +61,7 @@ export const actions: Actions = {
   },
 };
 
-export const load = async ({ parent }) => {
+export const load: PageServerLoad = async ({ parent }) => {
   const { session } = await parent();
   if (session.userId) {
     throw redirect(302, "/members");
