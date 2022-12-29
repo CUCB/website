@@ -346,6 +346,11 @@ describe("list042 editor", () => {
     cy.get("ul").contains("bcd234@cam.ac.uk").should("be.visible");
     cy.get("ul").contains("someone@example.com").should("be.visible");
   });
+
+  it("cannot be accessed by a normal user", () => {
+    cy.login("cypress_user", "abc123");
+    cy.request({ url: "/members/list042", failOnStatusCode: false }).its("status").should("eq", 403);
+  });
 });
 
 describe("registration page", () => {
