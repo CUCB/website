@@ -710,7 +710,7 @@
       Event type
       <Select bind:value="{type_id}">
         {#each gigTypes as gigType}
-          <option value="{gigType.id}">{gigType.title}</option>
+          <option value="{gigType.id}" selected="{gigType.id === type_id}">{gigType.title}</option>
         {/each}
       </Select>
     </label>
