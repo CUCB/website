@@ -3,7 +3,8 @@
   import { committee, createValidityChecker } from "../../../view";
   import Mailto from "../../../components/Mailto.svelte";
   import LoginForm from "../../../components/LoginForm.svelte";
-  import type { ActionData, PageData } from "./$types";
+  import type { PageData } from "./$types";
+  import type { ActionData } from "../login/$types";
 
   const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
   const checkValid = createValidityChecker();
