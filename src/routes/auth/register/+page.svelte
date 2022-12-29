@@ -1,16 +1,3 @@
-<script context="module">
-  export async function load({ session }) {
-    if (session.userId !== undefined) {
-      return {
-        status: 302,
-        redirect: "/members",
-      };
-    } else {
-      return {};
-    }
-  }
-</script>
-
 <script lang="ts">
   import { createValidityChecker, makeTitle, themeName, committee } from "../../../view";
   import Mailto from "../../../components/Mailto.svelte";
@@ -18,11 +5,11 @@
   let fields: Record<string, HTMLInputElement> = {};
   let checkValid = createValidityChecker();
 
-  let firstName, lastName, username, password, passwordConfirm;
+  let firstName: string, lastName: string, username: string, password: string, passwordConfirm: string;
   firstName = lastName = username = password = passwordConfirm = "";
   let submitted = false;
-  const regexString = (regexp) => regexp.toString().slice(1, regexp.toString().length - 1);
-  let errors = [];
+  const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
+  let errors: string[] = [];
 
   async function submit() {
     for (let field of Object.values(fields).filter((x) => x)) {
@@ -90,7 +77,7 @@
   <Mailto person="{$committee.webmaster}">{$committee.webmaster.name}</Mailto>!
 </p>
 
-<form on:submit|preventDefault="{submit}" class:submitted class="theme-{$themeName}">
+<form on:submit|preventDefault="{submit}" class:submitted="{submitted}" class="theme-{$themeName}">
   {#if errors.length > 0}
     <ul class="errors" data-test="errors">
       {#each errors as error}
