@@ -1,4 +1,3 @@
-// TODO combine this and data.ts?
 export interface SignupGig {
   id: string;
   lineup: SignupGigLineup[];
@@ -83,6 +82,17 @@ export interface GigSummary {
   finance_caller_paid?: boolean;
   advertise: boolean;
   quote_date?: Date | null;
+  posting_time: Date;
+  posting_user?: {
+    id: string;
+    first: string;
+    last: string;
+  };
+  editing_user?: {
+    id: string;
+    first: string;
+    last: string;
+  };
 }
 
 export interface SummaryLineupEntry {

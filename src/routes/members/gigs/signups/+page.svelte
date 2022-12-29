@@ -28,7 +28,8 @@
       : noLineup;
 
   const hasNoLineup = (gig: Gig) => gig.lineup.filter((person: LineupEntry) => person.approved).length === 0;
-  const isInFuture = (gig: Gig) => DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
+  const isInFuture = (gig: Gig) =>
+    gig.date && DateTime.local().startOf("day") < DateTime.fromISO(gig.date).startOf("day");
 </script>
 
 <style>

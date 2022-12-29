@@ -7,7 +7,7 @@ import type { Static } from "runtypes";
 import type { ThemedProperty, Committee } from "./layout.types";
 
 // TODO improve typing
-function fromSessionTheme(session: { theme?: any } | null, name: string): string | undefined {
+function fromSessionTheme(session: { theme?: Record<string, string> } | null, name: string): string | undefined {
   if (session && session.theme && session.theme[name]) {
     try {
       return JSON.parse(session.theme[name]);
@@ -21,7 +21,11 @@ function fromSessionTheme(session: { theme?: any } | null, name: string): string
 
 export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
   const downloadedCommittee = {};
-  let session = { ...locals.session, save: undefined, destroy: undefined };
+  let session = {
+    ...locals.session,
+    save: undefined,
+    destroy: undefined,
+  };
 
   try {
     const res = await fetch("/committee.json").then((r) => r.json());

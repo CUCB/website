@@ -1,14 +1,15 @@
 <script lang="ts" context="module">
   interface GigType {
     code: string;
+    title: string;
   }
   interface CalendarGig {
-    id: number;
+    id: string;
     type: GigType;
     admins_only?: boolean;
-    date: Date;
-    arrive_time: Date;
-    finish_time: Date;
+    date?: Date | null | undefined;
+    arrive_time?: Date | null | undefined;
+    finish_time?: Date | null | undefined;
   }
 </script>
 
@@ -16,29 +17,14 @@
   import { createEventDispatcher } from "svelte";
   import { goto } from "$app/navigation";
   import TooltipText from "../TooltipText.svelte";
-  import { Map, Set } from "immutable";
+  import { Set, Map } from "immutable";
   import { themeName } from "../../view";
   import { DateTime, Settings } from "luxon";
   import Select from "../Forms/Select.svelte";
+  import type { GigSummary } from "../../routes/members/types";
   Settings.defaultZoneName = "Europe/London";
   Settings.defaultLocale = "en-gb";
 
-  export let gigs: CalendarGig[];
-  export let displayedMonth = DateTime.local();
-  export let startDay = "mon";
-  let dispatchEvent = createEventDispatcher();
-  let showKey = false;
-  let showSelection = false;
-
-  function generateKeyItems(gigs) {
-    let types = Set(gigs.filter((gig) => gig.type.code !== "gig").map((gig) => Map({ ...gig.type })));
-    let standardOrHiddenGigs = Set(
-      gigs.filter((gig) => gig.type.code === "gig").map((gig) => Map({ ...gig.type, admins_only: gig.admins_only })),
-    );
-    return types.union(standardOrHiddenGigs);
-  }
-
-  $: keyItems = generateKeyItems(gigs);
   let dayOffsets = {
     mon: 1,
     tue: 2,
@@ -47,20 +33,38 @@
     fri: 5,
     sat: 6,
     sun: 0,
-  };
+  } as const;
+  type Day = keyof typeof dayOffsets;
+
+  export let gigs: CalendarGig[];
+  export let displayedMonth = DateTime.local();
+  export let startDay: Day = "mon";
+  let dispatchEvent = createEventDispatcher();
+  let showKey = false;
+  let showSelection = false;
+
+  function generateKeyItems(gigs: CalendarGig[]): (GigType & { admins_only?: boolean })[] {
+    let types = Set(gigs.filter((gig) => gig.type.code !== "gig").map((gig) => Map({ ...gig.type })));
+    let standardOrHiddenGigs = Set(
+      gigs.filter((gig) => gig.type.code === "gig").map((gig) => Map({ ...gig.type, admins_only: gig.admins_only })),
+    );
+    return [...types.toJS(), ...standardOrHiddenGigs.toJS()] as (GigType & { admins_only?: boolean })[];
+  }
+
+  $: keyItems = generateKeyItems(gigs);
   $: dayOffset = dayOffsets[startDay || "mon"];
-  $: startOfWeek = function (date) {
+  $: startOfWeek = function (date: DateTime) {
     const day = date.weekday % 7; // convert to 0=sunday .. 6=saturday
     const dayAdjust = day >= dayOffset ? -day + dayOffset : -day + dayOffset - 7;
     return date.plus({ days: dayAdjust });
   };
 
-  $: rotate = (array) => [...array.slice(dayOffset - 1), ...array.slice(0, dayOffset - 1)];
+  $: rotate = <T>(array: T[]): T[] => [...array.slice(dayOffset - 1), ...array.slice(0, dayOffset - 1)];
 
-  $: dayOfWeek = (date) => (DateTime.fromISO(date).weekday - 1 + dayOffset) % 7;
+  $: dayOfWeek = (date: DateTime) => (date.weekday - 1 + dayOffset) % 7;
 
-  function daysInMonth(month) {
-    let currentDate = startOfWeek(DateTime.fromISO(month).startOf("month"));
+  function daysInMonth(month: DateTime) {
+    let currentDate = startOfWeek(month.startOf("month"));
     let currentWeek = [...Array(7).keys()].map((offset) => currentDate.plus({ days: offset }));
     let result = [currentWeek];
     currentDate = currentDate.plus({ weeks: 1 });
@@ -72,7 +76,7 @@
   }
   $: weeks =
     startDay &&
-    dayOffset &&
+    dayOffset !== undefined &&
     daysInMonth(displayedMonth).map((week) =>
       week.map((date) => ({
         inCurrentMonth: date.month === displayedMonth.month,
@@ -85,13 +89,15 @@
           (gig) =>
             (gig.date && DateTime.fromJSDate(gig.date).hasSame(date, "day")) ||
             ((gig.type.code === "calendar" || gig.date === null) &&
-              DateTime.fromJSDate(gig.arrive_time).startOf("day") <= DateTime.fromISO(date).startOf("day") &&
-              DateTime.fromJSDate(gig.finish_time).startOf("day") >= DateTime.fromISO(date).startOf("day")),
+              gig.arrive_time &&
+              DateTime.fromJSDate(gig.arrive_time).startOf("day") <= date.startOf("day") &&
+              gig.finish_time &&
+              DateTime.fromJSDate(gig.finish_time).startOf("day") >= date.startOf("day")),
         ),
       })),
     );
 
-  let prefixGigType = (gig) => {
+  let prefixGigType = (gig: GigSummary) => {
     if (gig.type.code === "gig_cancelled") {
       return `Cancelled: ${gig.title}`;
     } else if (gig.type.code === "gig_enquiry") {
@@ -406,31 +412,33 @@
       <th>{dayName}</th>
     {/each}
   </tr>
-  {#each weeks as week}
-    <tr>
-      {#each week as day (day.id)}
-        <td
-          class:different-month="{!day.inCurrentMonth}"
-          id="{day.id}"
-          class="calendar-entry theme-{$themeName}"
-          class:today="{DateTime.local().hasSame(day.luxonDate, 'day')}"
-        >
-          {#if day.gigs.length > 0}
-            <TooltipText content="{day.gigs.map(prefixGigType).join('\n')}">{day.number}</TooltipText>
-          {:else}{day.number}{/if}
-          <div class="events">
-            {#each day.gigs as gig}
-              <div
-                class="gigtype-{gig.type.code} theme-{$themeName} calendar-entry"
-                class:admins-only="{gig.admins_only}"
-                on:click="{() => goto(`/members/gigs/${gig.id}`)}"
-              ></div>
-            {/each}
-          </div>
-        </td>
-      {/each}
-    </tr>
-  {/each}
+  {#if weeks}
+    {#each weeks as week}
+      <tr>
+        {#each week as day (day.id)}
+          <td
+            class:different-month="{!day.inCurrentMonth}"
+            id="{day.id}"
+            class="calendar-entry theme-{$themeName}"
+            class:today="{DateTime.local().hasSame(day.luxonDate, 'day')}"
+          >
+            {#if day.gigs.length > 0}
+              <TooltipText content="{day.gigs.map(prefixGigType).join('\n')}">{day.number}</TooltipText>
+            {:else}{day.number}{/if}
+            <div class="events">
+              {#each day.gigs as gig}
+                <div
+                  class="gigtype-{gig.type.code} theme-{$themeName} calendar-entry"
+                  class:admins-only="{gig.admins_only}"
+                  on:click="{() => goto(`/members/gigs/${gig.id}`)}"
+                ></div>
+              {/each}
+            </div>
+          </td>
+        {/each}
+      </tr>
+    {/each}
+  {/if}
 </table>
 <button class="key-toggle" on:click="{() => (showKey = !showKey)}">
   {#if !showKey}Show key{:else}Hide key{/if}
@@ -438,7 +446,7 @@
 <div class="key" class:hidden="{!showKey}">
   <p class="key-title">Key:</p>
   <ul class="key">
-    {#each keyItems.toJS() as item, n}
+    {#each keyItems as item, n}
       <li
         style="--delay: {n * 0.1}s"
         class="gigtype-{item.code} theme-{$themeName} key-entry"
