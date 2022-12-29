@@ -16,7 +16,7 @@ const LoginBody = RuntypeRecord({
 
 export const actions: Actions = {
   default: async ({ request, locals, cookies }) => {
-    if (assertLoggedIn(locals.session)) {
+    if (locals.session.userId) {
       throw redirect(303, "/members");
     }
     const body = Object.fromEntries(await request.formData());
