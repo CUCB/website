@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { ICalCalendar, ICalCalendarMethod } from "ical-generator";
+import pkg from "ical-generator";
 import dotenv from "dotenv";
 import crypto from "crypto";
 import { sortLineup } from "../../../components/Gigs/sort";
@@ -12,6 +12,8 @@ import { fetchMultiGigSummary, fetchSpecificGigSummary } from "../../members/gig
 import { VIEW_GIG_ADMIN_NOTES } from "$lib/permissions";
 import type { GigSummary } from "../../members/types";
 import { User } from "$lib/entities/User";
+// @ts-ignore
+const { ICalCalendar, ICalCalendarMethod } = pkg;
 
 dotenv.config();
 

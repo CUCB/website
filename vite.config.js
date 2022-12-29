@@ -6,7 +6,7 @@ import { wasm } from "@rollup/plugin-wasm";
 const config = {
   plugins: [wasm(), sveltekit()],
   ssr: {
-    noExternal: ["photon-web", "ical-generator"],
+    noExternal: ["photon-web"],
   },
 
   define: {
