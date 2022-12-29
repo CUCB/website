@@ -1,6 +1,6 @@
 <script lang="ts">
   import { DateTime } from "luxon";
-  import type { User, Instrument } from "../../../routes/members/users[id=integer]/types";
+  import type { User, Instrument } from "../../../routes/members/users/[id=integer]/types";
 
   export let user: User;
   function percentage(a: number, b: number): string {
@@ -27,7 +27,7 @@
     return n + (s[(v - 20) % 10] || s[v] || s[0]);
   }
 
-  function displayDate(date: Date | null): string | null {
+  function displayDate(date: Date | null | undefined): string | null {
     if (date == null) return null;
     const luxonDate = DateTime.fromJSDate(date);
     const day = luxonDate.day;
@@ -86,7 +86,7 @@
   {#if login_date}was last seen online {login_date}.{:else}hasn't been seen in a long time.{/if}
 </p>
 
-{#if gig_count > 0}
+{#if gig_count > 0 && last_gig}
   Since joining CUCB,
   {user.first}
   has played
