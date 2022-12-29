@@ -27,7 +27,7 @@
   import { String, Null, Literal, Union, Boolean } from "runtypes";
   import type { Static } from "runtypes";
 
-  export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null, session: { userId: string };
+  export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null, session: { userId: string } | {};
 
   class ViewSettings extends Record({
     accentOpen: false,
@@ -110,13 +110,17 @@
 
   let updateSession = (_: Settings): void => {};
   const propLocalStorage = (name: LocalStorageProperty): string | null | boolean => {
-    const value = localStorage.getItem(`${name}_${session.userId}`);
-    try {
-      return String.Or(Null)
-        .Or(Boolean)
-        .check(JSON.parse(String.check(value)));
-    } catch {
-      return value;
+    if ("userId" in session) {
+      const value = localStorage.getItem(`${name}_${session.userId}`);
+      try {
+        return String.Or(Null)
+          .Or(Boolean)
+          .check(JSON.parse(String.check(value)));
+      } catch {
+        return value;
+      }
+    } else {
+      return null;
     }
   };
 
@@ -200,7 +204,7 @@
     }
 
     updateLocalStorage = (settings) => {
-      if (session.userId) {
+      if ("userId" in session) {
         for (let prop of updateProps) {
           if (isColoredProperty(prop)) {
             let [setting, color] = prop.split("_") as [ColorableProperty, ThemeColor];
