@@ -305,6 +305,49 @@ describe("registration form", () => {
   });
 });
 
+describe("list042 editor", () => {
+  before(() => {
+    cy.task("db:create_login_users");
+  });
+
+  beforeEach(() => {
+    cy.task("db:delete_from_list042", {});
+  });
+
+  it("can add single emails and crsids", () => {
+    cy.login("cypress", "abc123");
+    cy.visit("/members/list042");
+    cy.waitForFormInteractive();
+    cy.get("ul").contains("jar95@cam.ac.uk").should("not.exist");
+    cy.get('[data-test="add-single"] > [name="email"]').type("jar95");
+    cy.get('[data-test="add-single"] > [type="submit"]').click();
+    cy.get(".success").should("have.text", "Successfully added jar95@cam.ac.uk to the list.");
+    cy.get("li").contains("jar95@cam.ac.uk").should("be.visible");
+    cy.get('[data-test="add-single"] > [name="email"]').type("jar95@cam.ac.uk");
+    cy.get('[data-test="add-single"] > [type="submit"]').click();
+    cy.contains("That email is already on the list.").should("be.visible");
+  });
+
+  it("can merge existing entries with a copy of the mailing list", () => {
+    cy.login("cypress", "abc123");
+    cy.visit("/members/list042");
+    cy.waitForFormInteractive();
+    cy.get('[data-test="merge-with-file"] > [name=file]').selectFile("cypress/fixtures/emails.txt");
+    cy.get('[data-test="merge-with-file"] > [type="submit"]').click();
+    cy.get('[data-test="merge-with-file"]').contains("Found 3 new emails.").should("be.visible");
+    cy.get("ul").contains("abc123@cam.ac.uk").should("be.visible");
+    cy.get("ul").contains("bcd234@cam.ac.uk").should("be.visible");
+    cy.get('[data-test="merge-with-file"] > [name=file]').selectFile("cypress/fixtures/emails.txt");
+    cy.get('[data-test="merge-with-file"] > [type="submit"]').click();
+    cy.get('[data-test="merge-with-file"]').contains("Found 0 new emails.").should("be.visible");
+    cy.get("ul").contains("abc123@cam.ac.uk").should("be.visible");
+    cy.reload();
+    cy.get("ul").contains("abc123@cam.ac.uk").should("be.visible");
+    cy.get("ul").contains("bcd234@cam.ac.uk").should("be.visible");
+    cy.get("ul").contains("someone@example.com").should("be.visible");
+  });
+});
+
 describe("registration page", () => {
   before(() => {
     cy.task("db:create_login_users");
