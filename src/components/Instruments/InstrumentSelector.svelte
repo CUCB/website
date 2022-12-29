@@ -1,14 +1,14 @@
 <script lang="ts">
-  import type { Instrument } from "../../routes/members/users[id=integer]/types";
+  import type { AggregateInstrument, Instrument } from "../../routes/members/users/[id=integer]/types";
 
   import { createEventDispatcher } from "svelte";
 
-  export let allInstruments: Instrument[];
+  export let allInstruments: AggregateInstrument[];
 
   let parents = allInstruments.filter((i) => i.parent_id === null);
-  let instrumentsByParent: Record<string, Instrument[]> = {};
+  let instrumentsByParent: Record<string, AggregateInstrument[]> = {};
   parents.forEach((i) => (instrumentsByParent[i.id] = []));
-  allInstruments.filter((i) => i.parent_id !== null).forEach((i) => instrumentsByParent[i.parent_id].push(i));
+  allInstruments.filter((i) => i.parent_id !== null).forEach((i) => instrumentsByParent[i.parent_id as string].push(i));
 
   const dispatch = createEventDispatcher();
 
