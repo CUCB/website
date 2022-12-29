@@ -1,27 +1,28 @@
 <script lang="ts">
   import { themeName } from "../../../../view";
-  import tippy from "tippy.js";
+  import tippy, { type Instance } from "tippy.js";
   import "tippy.js/dist/tippy.css";
   import { onMount } from "svelte";
   import type { PageData } from "./$types";
   export let data: PageData;
   let { canEditGigs, calendarLinks, scheme, host } = data;
-  let allCalendarTippy, myCalendarTippy;
+
+  let allCalendarButton: Element, myCalendarButton: Element;
+
+  type Tippy = Instance;
+
+  let allCalendarTippy: Tippy, myCalendarTippy: Tippy;
   onMount(() => {
     const args = {
       content: "Copied to clipboard",
       trigger: "none",
       arrow: false,
     };
-    allCalendarTippy = tippy(document.querySelector("#allCalendarButton"), args);
-    myCalendarTippy = tippy(document.querySelector("#myCalendarButton"), args);
+    allCalendarTippy = tippy(allCalendarButton, args);
+    myCalendarTippy = tippy(myCalendarButton, args);
   });
-  let runningTimer;
+  let runningTimer: number;
 
-  interface CalendarLinks {
-    allgigs: string;
-    mygigs: string;
-  }
   function copyAllGigLink() {
     navigator.clipboard.writeText(`${scheme}://${host}${calendarLinks.allgigs}`);
     myCalendarTippy?.hide();
@@ -261,8 +262,12 @@ we end up at the top of the page, so I'm using an id instead -->
     Copy the relevant calendar link by clicking one of the buttons below.
 
     <p>
-      <button on:click="{copyAllGigLink}" id="allCalendarButton">All gig calendar feed</button>
-      <button on:click="{copyMyGigLink}" id="myCalendarButton">My gig calendar feed</button>
+      <button on:click="{copyAllGigLink}" bind:this="{allCalendarButton}" id="allCalendarButton"
+        >All gig calendar feed</button
+      >
+      <button on:click="{copyMyGigLink}" bind:this="{myCalendarButton}" id="myCalendarButton"
+        >My gig calendar feed</button
+      >
     </p>
   </li>
   <li>Paste the link into the <em>URL</em> box in Google Calendar, then click <em>Add Calendar</em>.</li>
