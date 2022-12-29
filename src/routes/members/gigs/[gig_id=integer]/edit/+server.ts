@@ -8,7 +8,7 @@ import { DateTime } from "luxon";
 
 const UPDATABLE_FIELDS = [
   "type",
-  "venue_id",
+  "venue",
   "admins_only",
   "advertise",
   "allow_signups",
@@ -46,10 +46,7 @@ export const POST = async ({ locals, params, request }: RequestEvent): Promise<R
         orderBy: { contacts: { contact: { name: "ASC" } } },
       },
     );
-    const gig = wrap(savedGig).toObject();
-    gig.type_id = parseInt(gig.type.id);
-    gig.venue_id = parseInt(gig.venue.id);
-    gig.date = DateTime.fromJSDate(gig.date).toISODate();
+    const gig = { ...wrap(savedGig).toObject(), date: savedGig.date && DateTime.fromJSDate(savedGig.date).toISODate() };
     return json(gig);
   } else {
     throw error(403, "You're not allowed to do that!");
