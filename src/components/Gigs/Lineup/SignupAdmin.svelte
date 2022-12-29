@@ -20,10 +20,7 @@
     return hash;
   };
 
-  interface GigSignup extends Gig {
-    lineup: undefined;
-    signup: LineupEntry;
-  }
+  type GigSignup = Omit<Gig, "lineup"> & { lineup: undefined; signup?: LineupEntry };
 </script>
 
 <script lang="ts">
@@ -34,24 +31,25 @@
   import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups/types";
   export let gigs: Gig[] = [];
   gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
-  let sortedBy = null;
+  let sortedBy: string | null = null;
   // TODO use groupby to clean this up
   $: people = List(
     Map(
       gigs.flatMap((gig: Gig) =>
-        gig.lineup.map<[number, User]>((person: LineupEntry) => [person.user.id, person.user]),
+        gig.lineup.map<[string, User]>((person: LineupEntry) => [person.user.id, person.user]),
       ),
     ).values(),
   );
   $: people && (sortedBy = null);
   $: sortedPeople = people.sortBy((v) => `${v.first} ${v.last}`);
-  $: gigsForPerson = Map<number, GigSignup[]>(
+  $: sortedPeopleJS = sortedPeople.toJS() as User[];
+  $: gigsForPerson = Map<string, GigSignup[]>(
     people.map((user: User) => [
       user.id,
       gigs.map((gig: Gig) => ({
         ...gig,
         lineup: undefined,
-        signup: gig.lineup && gig.lineup.find((signup) => user.id === signup.user.id),
+        signup: gig.lineup.find((signup) => user.id === signup.user.id),
       })),
     ]),
   );
@@ -116,8 +114,8 @@
     sortedBy = gig.id;
   }
 
-  function hash(id) {
-    return id * ("" + gigs.map((gig) => gig.id).reduce((a, b) => a + b, 0)).hashCode();
+  function hash(id: string) {
+    return parseInt(id) * ("" + gigs.map((gig) => parseInt(gig.id)).reduce((a, b) => a + b, 0)).hashCode();
   }
 </script>
 
@@ -238,17 +236,19 @@
             on:click="{() => availabilitySort(gig)}"
             data-test="gig-title-{gig.id}"
             aria-selected="{sortedBy === gig.id ? true : false}"
-            ><div tabindex="-1">{DateTime.fromISO(gig.date).toFormat("dd LLL")}&#32;{gig.title}</div></button
+            ><div tabindex="-1">
+              {gig.date && DateTime.fromISO(gig.date).toFormat("dd LLL")}&#32;{gig.title}
+            </div></button
           >
         </th>
       {/each}
     </tr>
   </thead>
   <tbody>
-    {#each sortedPeople.toJS() as person (hash(person.id))}
+    {#each sortedPeopleJS as person (hash(person.id))}
       <tr>
         <th class="name" data-test="person-name" scope="row">{person.first}&nbsp;{person.last}</th>
-        {#each gigsForPerson.get(person.id) as gig}
+        {#each gigsForPerson.get(person.id) || [] as gig}
           <td class="person {signupStatus(gig)} {lineupStatus(gig)}">
             {#if signupStatus(gig) || lineupStatus(gig)}
               <TooltipText
@@ -260,17 +260,17 @@
                 data-test="signup-details-{person.id}-{gig.id}"
               >
                 <div style="width:100%; height: 100%">
-                  {#if gig.signup.user_available}
-                    {#if gig.signup.user_only_if_necessary}
+                  {#if gig.signup?.user_available}
+                    {#if gig.signup?.user_only_if_necessary}
                       <i class="las la-question"></i>
                     {:else}<i class="las la-check"></i>{/if}
-                  {:else if gig.signup.user_available === false}
+                  {:else if gig.signup?.user_available === false}
                     <i class="las la-times"></i>
                   {:else}
                     &nbsp;
                     <!-- Add some content to hover over for tooltip-->
                   {/if}
-                  {#if gig.signup.user_notes || gig.signup.user.gig_notes}<i class="las la-comment"></i>{/if}
+                  {#if gig.signup?.user_notes || gig.signup?.user.gig_notes}<i class="las la-comment"></i>{/if}
                 </div>
               </TooltipText>
             {/if}
