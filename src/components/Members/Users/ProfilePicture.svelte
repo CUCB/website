@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from "svelte";
 
-  import type { User } from "../../../routes/members/users[id=integer]/types";
+  import type { User } from "../../../routes/members/users/[id=integer]/types";
   import { themeName } from "../../../view";
   import MinSizeCropper from "../../MinSizeCropper.svelte";
   import { getCroppedImg } from "./canvasUtils";
@@ -52,6 +52,7 @@
     message = "Loading, please wait...";
     await tick();
     // TODO consider using runtypes here to make TS happy
+    // @ts-ignore
     let imageFile = e.target?.files?.[0];
     if (imageFile) {
       let reader = new FileReader();
