@@ -7,6 +7,7 @@
   import { DateTime, Settings } from "luxon";
   import Select from "../Forms/Select.svelte";
   import type { GigSummary } from "../../routes/members/types";
+  import { rotateBy } from "./array";
 
   interface GigType {
     code: string;
@@ -58,7 +59,7 @@
     return date.plus({ days: dayAdjust });
   };
 
-  $: rotate = <T>(array: T[]): T[] => [...array.slice(dayOffset - 1), ...array.slice(0, dayOffset - 1)];
+  $: rotate = rotateBy(dayOffset);
 
   $: dayOfWeek = (date: DateTime) => (date.weekday - 1 + dayOffset) % 7;
 

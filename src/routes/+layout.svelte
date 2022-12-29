@@ -14,7 +14,7 @@
   export let data: LayoutData;
   export let committee: Committee = data.committee;
   export let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty } = data.settingsWithoutMaps;
-  export let session: { userId?: number } = data.session;
+  export let session: { userId?: string } = data.session;
   let settings = new Settings({
     ...settingsWithoutMaps,
     accent: Map(Object.entries(settingsWithoutMaps.accent)) as Map<ThemeColor, HexValue>,
@@ -112,12 +112,22 @@
 <svelte:window on:resize="{correctMobileHeight}" bind:innerWidth="{windowWidth}" />
 
 <div class="layout theme-{$themeName}">
-  <Header user="{session}" bind:navVisible bind:showSettings spinnyLogo="{settings.spinnyLogo}" />
+  <Header
+    user="{session}"
+    bind:navVisible="{navVisible}"
+    bind:showSettings="{showSettings}"
+    spinnyLogo="{settings.spinnyLogo}"
+  />
 
   <main>
     <slot />
   </main>
 
   <Footer committee="{committee}" />
-  <Customiser bind:settings bind:showSettings bind:settingsPopup session="{session}" />
+  <Customiser
+    bind:settings="{settings}"
+    bind:showSettings="{showSettings}"
+    bind:settingsPopup="{settingsPopup}"
+    session="{session}"
+  />
 </div>

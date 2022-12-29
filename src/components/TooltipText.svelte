@@ -5,7 +5,7 @@
   import { onDestroy, onMount } from "svelte";
   import { escape } from "html-escaper";
   import { themeName } from "../view";
-  export let content;
+  export let content: string;
 
   function makeid(length: number): string {
     let result = "";
@@ -17,7 +17,7 @@
     return result;
   }
   let id = makeid(30);
-  let tooltip = undefined;
+  let tooltip: Instance[] | undefined = undefined;
 
   onMount(() => {
     tooltip = tippy(`#tooltip-${id}`, {
@@ -47,6 +47,7 @@
   }
 </style>
 
+<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
 <span id="{`tooltip-${id}`}" class="tooltip-text theme-{$themeName}" tabindex="0" data-test="{$$props['data-test']}">
   <slot />
 </span>
