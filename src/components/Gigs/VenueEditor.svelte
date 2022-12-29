@@ -41,7 +41,7 @@
   $: updateLatLng(latLngFromLink);
 
   const saveVenue = async () => {
-    if (!name.trim()) {
+    if (!name?.trim()) {
       return;
     }
     let variables = {

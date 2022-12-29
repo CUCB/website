@@ -16,6 +16,7 @@ export interface SignupGigLineup {
   user_notes?: string | null;
   user_instruments: SignupUserInstrument[];
   user: { id: string; gig_notes: string };
+  user_id?: string;
 }
 
 export interface SignupUserInstrument {
@@ -34,6 +35,7 @@ export interface SignupGigVenue {
 }
 
 export interface AvailableUserInstrument {
+  approved?: boolean;
   id: string;
   nickname?: string | null;
   instrument: {

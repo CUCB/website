@@ -16,6 +16,7 @@
     AvailableUserInstrument,
     SignupGig,
     SignupGigLineup,
+    SignupGigVenue,
     SignupUserInstrument,
   } from "../../routes/members/types";
   import VenueAddressIcons from "./VenueAddressIcons.svelte";
@@ -98,7 +99,6 @@
           {
             user_available,
             user_only_if_necessary,
-            // @ts-ignore
             user_notes: null,
             user_id: session.userId,
             user_instruments: [],
@@ -186,11 +186,9 @@
     edit = false;
   };
 
-  const instrumentTooltip = (_) => {
+  const instrumentTooltip = (_: HTMLLabelElement) => {
     tippy(".disabled", { content: "This instrument is selected as part of a lineup, you can't remove it." });
   };
-
-  const address = (venue) => [venue.address, venue.postcode].filter((line) => line).join("\n");
 </script>
 
 <style lang="scss">
