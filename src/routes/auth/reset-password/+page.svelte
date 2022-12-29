@@ -3,11 +3,12 @@
   import { committee, createValidityChecker } from "../../../view";
   import Mailto from "../../../components/Mailto.svelte";
   import LoginForm from "../../../components/LoginForm.svelte";
+  import type { ActionData, PageData } from "./$types";
 
   const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
   const checkValid = createValidityChecker();
 
-  export let data, form;
+  export let data: PageData, form: ActionData;
   let { validToken, token } = { validToken: data.valid, token: data.token };
 
   let username: string | undefined;

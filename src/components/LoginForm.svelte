@@ -1,7 +1,8 @@
 <script lang="ts">
-  export let redirectTo, form;
+  export let redirectTo: string, form: ActionData;
   import { browser } from "$app/environment";
   import { applyAction, enhance } from "$app/forms";
+  import type { ActionData } from "../routes/auth/login/$types";
 
   let username = form?.username || "";
   let password = "";
@@ -21,16 +22,17 @@
   $: theme = browser ? themeFromLocalStorage() : null;
   $: themeString = JSON.stringify(theme);
 
-  const themeFromLocalStorage = () => {
-    let res = {};
+  const themeFromLocalStorage = (): Record<number, Record<string, string>> | null => {
+    let res: Record<number, Record<string, string>> = {};
     let regexp = new RegExp(`^(?<prop>${updateProps.map((name) => `${name}`).join("|")})_(?<userId>[0-9]+)$`);
     for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
+      const key = localStorage.key(i) as string;
       const match = key.match(regexp);
       if (match) {
-        const { prop } = match.groups;
-        const userId = parseInt(match.groups.userId);
-        const newEntry = { [prop]: localStorage.getItem(key) };
+        const groups = match.groups as { prop: string; userId: string };
+        const { prop } = groups;
+        const userId = parseInt(groups.userId);
+        const newEntry = { [prop]: localStorage.getItem(key) as string };
         res[userId] = userId in res ? { ...res[userId], ...newEntry } : newEntry;
       }
     }
