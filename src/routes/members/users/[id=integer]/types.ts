@@ -53,7 +53,7 @@ export interface User {
     gig: {
       id: string;
       title: string;
-      date?: string;
+      date?: Date;
       venue?: {
         name: string;
         subvenue?: string;
