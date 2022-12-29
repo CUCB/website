@@ -1,12 +1,9 @@
 <script lang="ts">
   // TODO how does control flow work here? What happens if I change a nickname, don't hit save, but then hit "add instrument"?
   // Does it remember the new nicename, or does it forget it? Does anyone care?
-
-  // TODO parameterise client so we use current user/admin client correctly
   import { createEventDispatcher } from "svelte";
 
   export let instrument: UserInstrument;
-  export let currentUser: boolean;
   export let user: { id: string };
 
   interface UserInstrument {

@@ -20,7 +20,6 @@
     canEditAdminStatus,
     allInstruments,
     allAdminStatuses,
-    currentUser,
     allPrefs,
     profilePictureUpdated,
   } = data;
@@ -266,8 +265,7 @@
       border: none;
     }
   }
-  .link:focus,
-  .link > span:focus {
+  .link:focus {
     outline: none;
     box-shadow: none;
   }
@@ -286,20 +284,8 @@
     width: auto;
   }
 
-  .link:focus > span {
-    outline: 2px solid;
-    @include themeify($themes) {
-      outline-color: themed("textColor");
-    }
-    outline-offset: 0.15em;
-  }
   .deleted-instrument {
     text-decoration: line-through;
-  }
-  img {
-    @include themeifyThemeElement($themes) {
-      box-shadow: shadow(themed("text"));
-    }
   }
 </style>
 
@@ -455,7 +441,6 @@
     <UserInstrumentEditor
       instrument="{editingInstrument.currentlyEditing}"
       user="{user}"
-      currentUser="{currentUser}"
       on:save="{completeEditInstrument}"
       on:cancel="{cancelEditInstrument}"
     />

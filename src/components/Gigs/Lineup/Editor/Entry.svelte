@@ -221,7 +221,6 @@
       <div class="roles">
         {#each Object.entries(roles) as [role, { name, value, disabled }]}
           <button
-            role="button"
             disabled="{disabled}"
             aria-pressed="{value ? 'true' : 'false'}"
             on:click="{() => updateEntry.setRole(role, !value)}"

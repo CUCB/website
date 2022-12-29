@@ -20,8 +20,7 @@
 <style lang="scss">
   // TODO extract this out into somewhere where it can be reused
   @import "../../sass/themes.scss";
-  .link:focus,
-  .link > span:focus {
+  .link:focus {
     outline: none;
     box-shadow: none;
   }
@@ -38,14 +37,6 @@
     padding-right: 0;
     height: auto;
     width: auto;
-  }
-
-  .link:focus > span {
-    outline: 2px solid;
-    @include themeify($themes) {
-      outline-color: themed("textColor");
-    }
-    outline-offset: 0.15em;
   }
 </style>
 
