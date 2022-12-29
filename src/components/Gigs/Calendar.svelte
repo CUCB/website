@@ -68,7 +68,7 @@
     let currentWeek = [...Array(7).keys()].map((offset) => currentDate.plus({ days: offset }));
     let result = [currentWeek];
     currentDate = currentDate.plus({ weeks: 1 });
-    for (; currentDate.month === DateTime.fromISO(month).month; currentDate = currentDate.plus({ weeks: 1 })) {
+    for (; currentDate.month === month.month; currentDate = currentDate.plus({ weeks: 1 })) {
       currentWeek = [...Array(7).keys()].map((offset) => currentDate.plus({ days: offset }));
       result.push(currentWeek);
     }
