@@ -45,7 +45,7 @@
   import SearchBox from "../../../../../components/SearchBox.svelte";
   import { DateTime, Settings } from "luxon";
   import { sortContacts, sortVenues } from "./sort";
-  import type { Contact, GigContact, Venue } from "./types";
+  import type { Contact, GigContact, GigType, Venue } from "./types";
   Settings.defaultZoneName = "Europe/London"; // https://moment.github.io/luxon/docs/manual/zones#changing-the-default-zone
 
   let checkValid = createValidityChecker();
@@ -183,7 +183,7 @@
     date: (typeCode !== "calendar" && date && DateTime.fromISO(date).toJSDate()) || null,
     venue_id,
     type_id,
-    type: gigTypes.find((type) => type_id === type.id),
+    type: gigTypes.find((type) => type_id === type.id) as GigType,
     advertise,
     admins_only,
     allow_signups: typeCode !== "calendar" && allow_signups,
@@ -202,12 +202,12 @@
     time: time || null,
     contacts,
     lineup: [],
-    venue,
+    venue: venue as Venue,
     finance: finance && finance.trim(),
     finance_deposit_received,
     finance_payment_received,
     finance_caller_paid,
-    quote_date,
+    quote_date: (quote_date && DateTime.fromISO(quote_date).toJSDate()) || null,
   };
 
   function unloadIfSaved(e: BeforeUnloadEvent) {
@@ -363,12 +363,12 @@
       contact_id = selectedClient as string;
       existingContact = contacts.find((contact) => contact.contact.id === contact_id);
       is_client = true;
-      is_calling = (existingContact || false) && existingContact.calling;
+      is_calling = existingContact?.calling || false;
     } else {
       contact_id = selectedCaller as string;
       existingContact = contacts.find((contact) => contact.contact.id === contact_id);
       is_calling = true;
-      is_client = (existingContact || false) && existingContact.client;
+      is_client = existingContact?.client || false;
     }
     try {
       const body = {
@@ -436,7 +436,7 @@
       }
     } else {
       try {
-        const res = await fetch("contacts", {
+        await fetch("contacts", {
           method: "DELETE",
           body: JSON.stringify({ contact: contact_id }),
           headers: { "Content-Type": "application/json" },
@@ -782,9 +782,9 @@
     <label data-test="gig-edit-{id}-venue-select">
       Venue
       <Select bind:value="{venue_id}" bind:select="{venueListElement}" disabled="{cancelled}">
-        <option selected="{true}" disabled value="{undefined}">--- SELECT A VENUE ---</option>
+        <option selected="{!venue_id}" disabled value="{undefined}">--- SELECT A VENUE ---</option>
         {#each venues as venue}
-          <option value="{venue.id}">
+          <option value="{venue.id}" selected="{venue.id === venue_id}">
             {venue.name}
             {#if venue.subvenue}| {venue.subvenue}{/if}
           </option>

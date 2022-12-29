@@ -9,29 +9,33 @@
   import { DateTime, Settings } from "luxon";
   import type { AvailableUserInstrument, GigSummary, SignupGig } from "../../routes/members/types";
   import VenueAddressIcons from "./VenueAddressIcons.svelte";
+  import { SELECT_GIG_LINEUPS, UPDATE_GIG_DETAILS } from "../../lib/permissions";
   Settings.defaultZoneName = "Europe/London";
 
   export let gig: GigSummary,
     signupGig: Writable<SignupGig | undefined> = writable(undefined),
     userInstruments: AvailableUserInstrument[] | undefined = undefined,
     displayLinks = true,
-    signups: unknown[] = undefined,
-    session: { userId: string },
+    signups: unknown[] | null = null,
+    session: { userId: string; role: string },
     initialUserNotes: string | undefined = undefined;
   export let linkHeading = false;
 
   let showSignup = false;
   let showDetails = !linkHeading;
-  const formatCalendarDate = (date) => date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
-  const formatTimeOnly = (date) => date.toFormat("HH:mm");
-  const formatTimeWithDate = (date) => date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");
+  const formatCalendarDate = (date: DateTime) =>
+    date.toFormat("cccc d") + suffix(date.day) + date.toFormat(" LLLL yyyy");
+  const formatTimeOnly = (date: DateTime) => date.toFormat("HH:mm");
+  const formatTimeWithDate = (date: DateTime) =>
+    date.toFormat("HH:mm (cccc d") + suffix(date.day) + date.toFormat(" LLL)");
   const midnight = { hour: 0, minute: 0, second: 0 };
   $: arrive_time = gig.arrive_time && DateTime.fromJSDate(gig.arrive_time);
   $: finish_time = gig.finish_time && DateTime.fromJSDate(gig.finish_time);
   $: date = gig.date && DateTime.fromJSDate(gig.date);
+  $: quote_date = gig.quote_date && DateTime.fromJSDate(gig.quote_date);
   $: clients = gig.contacts.filter((c) => c.client);
   $: callers = gig.contacts.filter((c) => c.calling);
-  signups = signups || gig.signupSummary;
+  signups = signups;
 </script>
 
 <style lang="scss">
@@ -275,13 +279,13 @@
         <VenueAddressIcons venue="{gig.venue}" />
       </h3>
     {/if}
-    {#if displayLinks && ["webmaster", "president", "secretary", "treasurer", "gig_editor"].indexOf(session.role) > -1}
+    {#if displayLinks && UPDATE_GIG_DETAILS.guard(session)}
       <a href="/members/gigs/{gig.id}/edit" class="main-detail">Edit gig</a>
     {/if}
-    {#if displayLinks && ["webmaster", "president"].indexOf(session.role) > -1 && gig.type.code === "gig"}
+    {#if displayLinks && SELECT_GIG_LINEUPS.guard(session) && gig.type.code === "gig"}
       <a href="/members/gigs/{gig.id}/edit-lineup" class="main-detail">Edit lineup</a>
     {/if}
-    <a href="/members/gigs/{gig.id}/calendar" rel="external" target="_blank">Download iCal</a>
+    <a href="/members/gigs/{gig.id}/calendar" rel="external noopener noreferrer" target="_blank">Download iCal</a>
     {#if gig.type.code !== "calendar" && gig.date}
       <p class="date main-detail">{formatCalendarDate(DateTime.fromJSDate(gig.date))}</p>
     {/if}
@@ -290,7 +294,7 @@
     {/if}
     <div class="gig-timings">
       {#if gig.date}
-        {#if gig.arrive_time}
+        {#if arrive_time}
           <p>
             <b>Arrive time:&nbsp;</b>
             {#if date && arrive_time.hasSame(date, "day")}
@@ -319,12 +323,12 @@
         {/if}
       {:else if arrive_time && finish_time && !arrive_time.set(midnight).equals(finish_time.set(midnight))}
         <p>
-          {formatCalendarDate(DateTime.fromJSDate(gig.arrive_time))}
+          {formatCalendarDate(arrive_time)}
           &ndash;
-          {formatCalendarDate(DateTime.fromJSDate(gig.finish_time))}
+          {formatCalendarDate(finish_time)}
         </p>
-      {:else if gig.arrive_time}
-        <p>{formatCalendarDate(DateTime.fromJSDate(gig.arrive_time))}</p>
+      {:else if arrive_time}
+        <p>{formatCalendarDate(arrive_time)}</p>
       {/if}
     </div>
     <ul class="tasks main-detail">
@@ -338,7 +342,7 @@
         {/if}
       </li>
       <li>
-        {#if gig.finance_payment_received !== undefined && DateTime.fromJSDate(gig.date) < DateTime.local() && gig.finance_payment_received !== null}
+        {#if gig.finance_payment_received !== undefined && date && date < DateTime.local() && gig.finance_payment_received !== null}
           {#if gig.finance_payment_received}
             <div class="task-summary color-positive"><i class="las la-money-bill-wave"></i> Payment received</div>
           {:else}
@@ -347,7 +351,7 @@
         {/if}
       </li>
       <li>
-        {#if gig.finance_caller_paid !== undefined && DateTime.fromJSDate(gig.date) < DateTime.local() && gig.finance_caller_paid !== null}
+        {#if gig.finance_caller_paid !== undefined && date && date < DateTime.local() && gig.finance_caller_paid !== null}
           {#if gig.finance_caller_paid}
             <div class="task-summary color-positive caller"><i class="las la-money-bill-wave"></i> Caller paid</div>
           {:else}
@@ -386,15 +390,15 @@
     {#if gig.finance}
       <div class="gig-finance main-detail"><b>Finance:&nbsp;</b> {gig.finance.trim()}</div>
     {/if}
-    {#if gig.gig_type === "gig_enquiry"}Quote date: {gig.quote_date}{/if}
+    {#if gig.type.code === "gig_enquiry" && quote_date}<b>Quote date:&nbsp;</b>{quote_date.toISODate()}{/if}
     {#if clients.length > 0}
       <p>
         <b>
           {#if clients.length === 1}Contact:&nbsp;{:else}Contacts:&nbsp;{/if}
         </b>
         <!-- TODO debodge and add test with multiple clients -->
-        {#each clients as client, i (client.id || client.contact.id)}
-          <a href="/members/gigs/contacts/{client.id || client.contact.id}"
+        {#each clients as client, i (client.contact.id)}
+          <a href="/members/gigs/contacts/{client.contact.id}"
             >{client.contact.name}{#if client.contact.organization}&nbsp;@ {client.contact.organization}{/if}</a
           >{#if i + 1 < clients.length},&nbsp;{/if}
         {/each}
@@ -404,8 +408,8 @@
       <p>
         <b>Calling:&nbsp;</b>
         <!-- TODO debodge and add test with multiple callers -->
-        {#each callers as caller, i (caller.id || caller.contact.id)}
-          <a href="/members/gigs/contacts/{caller.id || caller.contact.id}">{caller.contact.name}</a
+        {#each callers as caller, i (caller.contact.id)}
+          <a href="/members/gigs/contacts/{caller.contact.id}">{caller.contact.name}</a
           >{#if i + 1 < callers.length},&nbsp;{/if}
         {/each}
       </p>
@@ -419,15 +423,15 @@
       </button>
     {/if}
   </div>
-{:else}
+{:else if $signupGig}
   <button class="signup" on:click="{() => (showSignup = !showSignup)}" data-test="show-summary-{gig.id}">
     Show summary
   </button>
   <!-- TODO fix type errors -->
   <Signup
     bind:gig="{$signupGig}"
-    initialUserNotes="{initialUserNotes}"
-    userInstruments="{userInstruments?.map((user_instrument) => ({ user_instrument }))}"
+    initialUserNotes="{initialUserNotes || ''}"
+    userInstruments="{userInstruments?.map((user_instrument) => ({ user_instrument })) || []}"
     showLink="{false}"
     session="{session}"
   />

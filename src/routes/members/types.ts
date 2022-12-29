@@ -8,6 +8,7 @@ export interface SignupGig {
   date?: Date | null;
   title: string;
   venue?: SignupGigVenue | null;
+  allow_signups: boolean;
 }
 
 export interface SignupGigLineup {
@@ -27,10 +28,10 @@ export interface SignupUserInstrument {
 export interface SignupGigVenue {
   id: string;
   name: string;
-  map_link?: string | null;
-  subvenue?: string | null;
-  address?: string | null;
-  postcode?: string | null;
+  map_link?: string | null | undefined;
+  subvenue?: string | null | undefined;
+  address?: string | null | undefined;
+  postcode?: string | null | undefined;
 }
 
 export interface AvailableUserInstrument {
@@ -58,15 +59,30 @@ export interface SignupSummaryEntry {
 export interface GigSummary {
   id: string;
   title: string;
-  time: string | null;
-  arrive_time: Date | null;
-  finish_time: Date | null;
-  date: Date | null;
-  summary: string;
-  notes_band: string;
-  notes_admin: string;
+  time?: string | null;
+  arrive_time?: Date | null;
+  finish_time?: Date | null;
+  date?: Date | null;
+  summary?: string;
+  notes_band?: string;
+  notes_admin?: string;
   contacts: SummaryContact[];
   lineup: SummaryLineupEntry[];
+  allow_signups?: boolean;
+  admins_only?: boolean;
+  food_provided: boolean;
+  type: {
+    id: string;
+    code: string;
+    title: string;
+  };
+  venue?: SignupGigVenue | undefined;
+  finance?: string;
+  finance_deposit_received?: boolean;
+  finance_payment_received?: boolean;
+  finance_caller_paid?: boolean;
+  advertise: boolean;
+  quote_date?: Date | null;
 }
 
 export interface SummaryLineupEntry {
@@ -81,7 +97,9 @@ export interface SummaryLineupEntry {
 
 export interface SummaryContact {
   contact: {
+    id: string;
     name: string;
+    organization?: string;
   };
   client?: boolean;
   calling: boolean;
