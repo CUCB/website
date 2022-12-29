@@ -12,7 +12,7 @@ import { EntityManager, wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import type { Contact, Gig, Venue } from "./types";
 
-export const fetchGig = (em: EntityManager, id: string): Promise<Gig | null> =>
+const fetchGig = (em: EntityManager, id: string): Promise<Gig | null> =>
   em
     .fork()
     .findOne(
@@ -38,10 +38,10 @@ export const fetchGig = (em: EntityManager, id: string): Promise<Gig | null> =>
         },
     );
 
-export const fetchAllVenues = (em: EntityManager): Promise<Venue[]> =>
+const fetchAllVenues = (em: EntityManager): Promise<Venue[]> =>
   em.find(DbVenue, {}).then((e) => e.map((e) => wrap(e).toPOJO()));
 
-export const fetchAllContacts = (em: EntityManager): Promise<Contact[]> =>
+const fetchAllContacts = (em: EntityManager): Promise<Contact[]> =>
   em.find(DbContact, {}).then((e) => e.map((e) => wrap(e).toPOJO()));
 
 export const load: PageServerLoad = async ({ params, fetch, parent }) => {
