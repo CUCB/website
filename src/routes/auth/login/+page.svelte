@@ -1,21 +1,8 @@
-<script context="module">
+<script lang="ts">
   import LoginForm from "../../../components/LoginForm.svelte";
   import { makeTitle } from "../../../view";
-
-  // TODO migrate me
-  export async function load({ session }) {
-    if (session.userId !== undefined) {
-      return {
-        redirect: "/members",
-        status: 302,
-      };
-    }
-    return {};
-  }
-</script>
-
-<script>
-  export let form;
+  import type { ActionData } from "./$types";
+  export let form: ActionData;
 </script>
 
 <svelte:head>
