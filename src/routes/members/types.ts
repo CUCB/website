@@ -82,7 +82,7 @@ export interface GigSummary {
   finance_caller_paid?: boolean;
   advertise: boolean;
   quote_date?: Date | null;
-  posting_time: Date;
+  posting_time?: Date | null;
   posting_user?: {
     id: string;
     first: string;
