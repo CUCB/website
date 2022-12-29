@@ -1,17 +1,17 @@
 <script lang="ts" context="module">
   interface Person {
     committee: {
-      pic_folder: string;
+      pic_folder?: string;
     };
     pic?: string;
-    april_fools_dir: string;
-    email_obfus: string;
+    april_fools_dir?: string | null;
+    email_obfus?: string | null;
     name: string;
     position: {
       name: string;
     };
-    sub_position: string;
-    comments?: string;
+    sub_position?: string | null;
+    comments?: string | null;
   }
 </script>
 
@@ -79,7 +79,8 @@
   <person-details>
     <span class="name">
       {#if person.email_obfus && showEmail}
-        <Mailto person="{person}">
+        <!-- I have to do this weird destructuring to satisfy TypeScript -->
+        <Mailto person="{{ ...person, email_obfus: person.email_obfus }}">
           {@html person.name}
         </Mailto>
       {:else}
