@@ -13,7 +13,7 @@ export async function load({ parent }) {
     );
     const dbPrefs = user?.prefs?.toArray();
 
-    let prefs_ = {};
+    let prefs_: Record<string, boolean> = {};
     // TODO test I work if no prefs are set
     for (let pref of dbPrefs || []) {
       prefs_[pref.pref_type.name] = pref.value;

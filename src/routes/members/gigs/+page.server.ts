@@ -14,11 +14,10 @@ import {
   inFuture,
 } from "./queries";
 
-export const load: PageServerLoad = async ({ locals: { session }, parent }) => {
+export const load: PageServerLoad = async ({ locals }) => {
   Settings.defaultZoneName = "Europe/London";
 
-  await parent();
-  assertLoggedIn(session);
+  const session = { ...assertLoggedIn(locals.session), save: undefined, destroy: undefined };
 
   if (NOT_MUSIC_ONLY.guard(session)) {
     // Sort the gigs before rendering since the database can't sort by computed field
@@ -50,6 +49,7 @@ export const load: PageServerLoad = async ({ locals: { session }, parent }) => {
           [currentCalendarMonth]: gigsInCurrentMonth,
         },
         currentCalendarMonth,
+        session,
       };
     } else {
       throw error(500, "Couldn't retrieve gig details");

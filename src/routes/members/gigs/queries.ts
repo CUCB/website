@@ -32,6 +32,8 @@ const generalFields: EntityField<Gig, string>[] = [
   "notes_band",
   "advertise",
   "food_provided",
+  "posting_time",
+  { posting_user: ["id", "first", "last"] },
 ];
 
 const lineupFields: EntityField<GigLineupEntry, string>[] = [
@@ -133,6 +135,7 @@ export const fetchMultiGigSummary = (session: Session, filter: ObjectQuery<Gig>)
       gigs
         .map((gig_) => {
           const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
+          // @ts-expect-error
           return gig && applyArrayFilter(gig, { ...contactResultFilter(session), ...lineupResultFilter });
         })
         .sort(bySortDate),
@@ -157,6 +160,7 @@ export const fetchMultiGigSignup = (session: Session, filter: ObjectQuery<Gig>):
       gigs
         .map((gig_) => {
           const gig = { ...wrap(gig_)?.toPOJO(), sort_date: gig_.sort_date };
+          // @ts-expect-error
           return gig && applyArrayFilter(gig, { lineup: { user: { id: session.userId } } });
         })
         .sort(bySortDate),

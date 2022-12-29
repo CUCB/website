@@ -253,8 +253,8 @@ we end up at the top of the page, so I'm using an id instead -->
 
 <ol>
   <li>
-    Open <a href="https://calendar.google.com" target="_blank">Google Calendar</a>. (This has to be done via a web
-    interface and not an app).
+    Open <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer">Google Calendar</a>. (This has
+    to be done via a web interface and not an app).
   </li>
   <li>Find <em>Other calendars</em> at the left of the screen, and click the "+" icon next to it.</li>
   <li>Click <em>From URL</em></li>

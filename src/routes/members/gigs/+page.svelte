@@ -6,8 +6,7 @@
   import { writable } from "svelte/store";
   import type { Writable } from "svelte/store";
   import type { PageData } from "./$types";
-  import type { Gig } from "./+page.server";
-  import type { SignupGig } from "../types";
+  import type { GigSummary, SignupGig } from "../types";
   export let data: PageData;
   let { gigs, calendarGigs, currentCalendarMonth, userInstruments, userNotes, initialSignupGigs, session, signups } =
     data;
@@ -24,7 +23,7 @@
   }
 
   $: reloadSignupGigs(gigs);
-  function reloadSignupGigs(gigs: Gig[]) {
+  function reloadSignupGigs(gigs: GigSummary[]) {
     let newlyMerged: ([string, Writable<SignupGig>] | [])[] = gigs.map((gig) => {
       let signupGig = signupGigs[gig.id];
       return gig.id in signupGigs && isNotStore(signupGig)
@@ -42,7 +41,7 @@
   let allUpcoming = gigs;
   let drafts = gigs.filter((gig) => gig.type.code === "draft");
   $: currentCalendarMonthLuxon = DateTime.fromFormat(currentCalendarMonth, "yyyy-LL");
-  let displaying = "allUpcoming";
+  let displaying: "byMonth" | "allUpcoming" = "allUpcoming";
 
   const display = (toDisplay: "byMonth" | "allUpcoming") => {
     if (toDisplay === "byMonth") {
@@ -56,11 +55,17 @@
 
   $: currentCalendarMonth && display(displaying);
 
-  let gotoDate = (newDate) => async () => {
+  let gotoDate = (newDate: string) => async () => {
     if (!(newDate in calendarGigs)) {
       const isoToJS = (date: string | null): Date | null => (date !== null ? DateTime.fromISO(date).toJSDate() : null);
       const gigs = await fetch(`/members/gigs.json?inMonth=${newDate}`).then((res) => res.json());
-      calendarGigs[newDate] = gigs.map((gig) => ({
+      type GigWithStringDates = Omit<GigSummary, "arrive_time" | "finish_time" | "sort_date" | "date"> & {
+        arrive_time: string | null;
+        finish_time: string | null;
+        sort_date: string | null;
+        date: string | null;
+      };
+      calendarGigs[newDate] = gigs.map((gig: GigWithStringDates) => ({
         ...gig,
         arrive_time: isoToJS(gig.arrive_time),
         finish_time: isoToJS(gig.finish_time),
@@ -187,9 +192,9 @@
       {#each drafts as gig}
         <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || "Unnamed draft"}</a>
         [created
-        {DateTime.fromISO(gig.posting_time).toFormat("HH:mm, dd/LL")}
+        {(gig.posting_time && DateTime.fromJSDate(gig.posting_time).toFormat("HH:mm, dd/LL")) || "somewhen?"}
         by
-        {(gig.user && gig.user.first) || "someone?"}],
+        {(gig.posting_user && gig.posting_user.first) || "someone?"}],
       {/each}
       so please don't leave them here forever
     {/if}
@@ -210,7 +215,7 @@
           All upcoming gigs (currently shown)
         {:else}
           <button class="link" on:click="{() => display('allUpcoming')}" data-test="gigview-all-upcoming">
-            <span tabindex="-1" on:click>All upcoming gigs</span>
+            <span tabindex="-1" on:click on:keypress="{() => display('allUpcoming')}">All upcoming gigs</span>
           </button>
         {/if}
       </li>
@@ -219,7 +224,7 @@
           Gigs by month (currently shown)
         {:else}
           <button class="link" on:click="{() => display('byMonth')}" data-test="gigview-by-month">
-            <span tabindex="-1" on:click>Gigs by month</span>
+            <span tabindex="-1" on:click on:keypress="{() => display('byMonth')}">Gigs by month</span>
           </button>
         {/if}
       </li>
