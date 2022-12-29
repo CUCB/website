@@ -60,8 +60,8 @@
   let venueListElement: HTMLSelectElement,
     clientListElement: HTMLSelectElement,
     callerListElement: HTMLSelectElement,
-    selectedClient: string | null,
-    selectedCaller: string | null,
+    selectedClient: string | undefined,
+    selectedCaller: string | undefined,
     contactToEdit: { caller: boolean; name?: string; id?: string } | null,
     editContactType: object,
     clearVenueSearch: () => void;
@@ -370,7 +370,7 @@
           sortContacts(contactsClone);
           contacts = contactsClone;
         }
-        contactType === contactTypes.CLIENT ? (selectedClient = null) : (selectedCaller = null);
+        contactType === contactTypes.CLIENT ? (selectedClient = undefined) : (selectedCaller = undefined);
       }
     } catch (e) {
       // TODO error handling (#43)
