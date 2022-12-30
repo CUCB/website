@@ -124,8 +124,8 @@
       with your name and the name(s) of the list(s) you would like to sign up to.
     </p>
     <form on:submit|preventDefault="{submit}">
-      <label> Name <input type="text" required bind:value="{name}" /> </label>
-      <label> Email <input type="email" required bind:value="{email}" /> </label>
+      <label> Name <input type="text" required bind:value="{name}" placeholder=" " /> </label>
+      <label> Email <input type="email" required bind:value="{email}" placeholder=" " /> </label>
       <p>I want to join:</p>
       <div class="options">
         {#each lists as list}

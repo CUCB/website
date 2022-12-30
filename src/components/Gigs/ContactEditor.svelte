@@ -58,7 +58,9 @@
 </style>
 
 <form on:submit|preventDefault="{save}">
-  <label> Name <input type="text" bind:value="{name}" required data-test="contact-editor-name" /> </label>
+  <label>
+    Name <input type="text" bind:value="{name}" required data-test="contact-editor-name" placeholder=" " />
+  </label>
   <label>
     Organization
     <input type="text" bind:value="{organization}" data-test="contact-editor-organization" />

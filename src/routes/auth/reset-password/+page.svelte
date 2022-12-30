@@ -79,6 +79,7 @@
           }}"
           pattern="{regexString(CRSID_PATTERN)}|{regexString(EMAIL_PATTERN)}"
           required="{true}"
+          placeholder=" "
         /></label
       >
       <input type="submit" value="Reset password" data-test="submit" />
@@ -102,6 +103,7 @@
           bind:value="{password}"
           use:checkValid="{{ bothEqual: { id: 'password', error: 'Passwords do not match' } }}"
           required="{true}"
+          placeholder=" "
         /></label
       >
       <label
@@ -111,6 +113,7 @@
           bind:value="{passwordConfirm}"
           use:checkValid="{{ bothEqual: { id: 'password', error: 'Passwords do not match' } }}"
           required="{true}"
+          placeholder=" "
         /></label
       >
       <input type="submit" value="Change password" data-test="submit" />

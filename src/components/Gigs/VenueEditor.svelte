@@ -100,7 +100,14 @@
 <form on:submit|preventDefault>
   <label>
     Name
-    <input type="text" bind:value="{name}" disabled="{!nameEditable}" required data-test="venue-editor-name" />
+    <input
+      type="text"
+      bind:value="{name}"
+      disabled="{!nameEditable}"
+      required
+      data-test="venue-editor-name"
+      placeholder=" "
+    />
   </label>
   <label> Subvenue <input type="text" bind:value="{subvenue}" data-test="venue-editor-subvenue" /> </label>
   <label> Map link <input type="text" bind:value="{map_link}" data-test="venue-editor-map-link" /> </label>
