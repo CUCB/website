@@ -108,7 +108,7 @@
       bind:this="{fields.password}"
       use:checkValid="{{
         validityErrors: { tooShort: 'Password should be at least 8 characters long' },
-        bothEqual: { id: 'password-confirm', error: 'Password and password confirmation do not match' },
+        bothEqual: { id: 'password', error: 'Password and password confirmation do not match' },
       }}"
       bind:value="{password}"
       minlength="8"
