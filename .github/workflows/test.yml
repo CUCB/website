@@ -18,6 +18,8 @@ jobs:
       - name: Create dummy .env file
         run: |
           echo "SESSION_SECRET=somethingreallynotsecret" > .env
+          echo "HCAPTCHA_SECRET=somethingreallynotsecret" >> .env
+          echo "EMAIL_PORT=1025" >> .env
       - name: Run check script
         run: |
           npm ci
