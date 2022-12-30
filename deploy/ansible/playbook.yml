@@ -15,6 +15,7 @@
         - install-dependencies
         - setup-global-environment
         - update-code
+        - initialise-profile-pictures
         - create-env-file
         - configure-timezone
         - configure-cron

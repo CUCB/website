@@ -7,7 +7,7 @@ export const GET: RequestHandler = async ({ locals, params: { id } }) => {
 
   try {
     const statResult = await stat(image_path(id));
-    return new Response(statResult.mtime.toDateString());
+    return new Response(statResult.mtime.toISOString());
   } catch (e) {
     return new Response("");
   }

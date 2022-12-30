@@ -1,0 +1,31 @@
+- name: Lookup block storage directory
+  find:
+    paths: ["/mnt"]
+    patterns: "website_*"
+    file_type: directory
+  register: block_storage
+
+- name: Check if block storage contains files
+  find:
+    paths: ["{{ block_storage.files[0].path }}"]
+    file_type: any
+  register: block_storage_files
+  when: block_storage.matched == 1
+
+- name: Mount block storage directory if not already done
+  include_role:
+    name: mount-block-storage
+  when: block_storage.matched != 1 or block_storage_files.matched == 0
+
+- name: Lookup block storage directory if newly mounted
+  find:
+    paths: ["/mnt"]
+    patterns: "website_*"
+    file_type: directory
+  register: block_storage_again
+  when: block_storage.matched != 1 or block_storage_files.matched == 0
+
+- name: Fail if block storage could not be uniquely identified
+  fail:
+    msg: Block storage location could not be uniquely identified
+  when: block_storage.matched != 1 or ('matched' in block_storage_again and block_storage_again.matched != 1)

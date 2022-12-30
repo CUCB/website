@@ -1,0 +1,14 @@
+- name: Find block storage location, mounting if necessary
+  include_role:
+    name: detect-mounted-block-storage
+
+- name: Ensure profile pictures directory exists
+  file:
+    path: "{{ block_storage.files[0].path }}"
+    state: directory
+  when: block_storage.matched == 1
+
+- name: Copy none.jpg from repository to block storage
+  copy:
+    src: "{{ repo_root }}/images/users/none.jpg"
+    dest: "{{ block_storage.files[0].path }}/images/users/none.jpg"
