@@ -59,11 +59,15 @@
     if (!(newDate in calendarGigs)) {
       const isoToJS = (date: string | null): Date | null => (date !== null ? DateTime.fromISO(date).toJSDate() : null);
       const gigs = await fetch(`/members/gigs.json?inMonth=${newDate}`).then((res) => res.json());
-      type GigWithStringDates = Omit<GigSummary, "arrive_time" | "finish_time" | "sort_date" | "date"> & {
+      type GigWithStringDates = Omit<
+        GigSummary,
+        "arrive_time" | "finish_time" | "sort_date" | "date" | "quote_date"
+      > & {
         arrive_time: string | null;
         finish_time: string | null;
         sort_date: string | null;
         date: string | null;
+        quote_date: string | null;
       };
       calendarGigs[newDate] = gigs.map((gig: GigWithStringDates) => ({
         ...gig,
@@ -71,6 +75,7 @@
         finish_time: isoToJS(gig.finish_time),
         sort_date: isoToJS(gig.sort_date),
         date: isoToJS(gig.date),
+        quote_date: isoToJS(gig.quote_date),
       }));
     }
     currentCalendarMonth = newDate;
