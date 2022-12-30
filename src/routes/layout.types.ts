@@ -1,9 +1,7 @@
 import type { Static } from "runtypes";
-import type { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
+import type { HexValue, ThemeColor } from "../components/Members/runtypes";
 import { Record, String } from "runtypes";
 
-export type ThemeColor = Static<typeof ThemeColor>;
-export type HexValue = Static<typeof HexValue>;
 export interface ThemedProperty {
   default?: HexValue;
   light?: HexValue;

@@ -73,7 +73,7 @@ function testAuthLink(query: URLSearchParams): string | null {
 
 class GigCalendar {
   baseUrl: string;
-  calendar: ICalCalendar;
+  calendar: typeof ICalCalendar;
   // TODO does the secret actually want to be stored in the code??
   constructor(name: string, description: string, baseUrl: string) {
     this.baseUrl = baseUrl;

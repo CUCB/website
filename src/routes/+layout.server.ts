@@ -1,5 +1,5 @@
 import { fallbackPeople } from "./committee";
-import { HexValue, ThemeColor } from "../components/Members/Customiser.svelte";
+import { HexValue, ThemeColor } from "../components/Members/runtypes";
 import { Day } from "../view";
 import type { LayoutServerLoad } from "./$types";
 import { CommitteeRT } from "./layout.types";
@@ -70,5 +70,5 @@ export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
     settings.logo[color] = logo;
   }
 
-  return { settingsWithoutMaps: settings, committee, session };
+  return { settingsWithoutMaps: settings, committee, optionalSession: session };
 };

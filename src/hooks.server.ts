@@ -1,11 +1,12 @@
 import { randomBytes } from "crypto";
 import signature from "cookie-signature";
 import dotenv from "dotenv";
-import type { Cookies } from "@sveltejs/kit";
+import type { Cookies, Handle } from "@sveltejs/kit";
 import { Session } from "./lib/entities/Session";
 import orm from "./lib/database";
 import { User } from "./lib/entities/User";
 import { env } from "$env/dynamic/private";
+import type { CookieSerializeOptions } from "cookie";
 
 dotenv.config();
 const SESSION_SECRET = env["SESSION_SECRET"];
@@ -14,11 +15,10 @@ if (!SESSION_SECRET) {
   process.exit(1);
 }
 
-/** @type {import('@sveltejs/kit').Handle} */
-export async function handle({ event, resolve }) {
+export const handle: Handle = async ({ event, resolve }) => {
   const cookies: Cookies = event.cookies;
   let session = undefined;
-  let sessionId = "";
+  let sessionId: string | false = "";
   const cookie = cookies.get("connect.sid");
   const sessionRepository = (await orm()).em.fork().getRepository(Session);
   if (cookie) {
@@ -32,19 +32,20 @@ export async function handle({ event, resolve }) {
     cookies.delete("connect.sid", { path: "/" });
   }
 
-  event.locals = await sessionFromHeaders(cookies, event.request);
+  event.locals = await sessionFromHeaders(cookies);
 
   return await resolve(event);
-}
+};
 
-async function sessionFromHeaders(cookies, request: Request) {
+async function sessionFromHeaders(cookies: Cookies) {
   let session = undefined;
-  let sessionId = null;
+  let sessionId: string | false = false;
   const em = (await orm()).em.fork();
   const userRepository = em.getRepository(User);
   const sessionRepository = em.getRepository(Session);
-  if (cookies.get("connect.sid")) {
-    sessionId = signature.unsign(cookies.get("connect.sid"), SESSION_SECRET);
+  const cookie = cookies.get("connect.sid");
+  if (cookie) {
+    sessionId = signature.unsign(cookie, SESSION_SECRET);
   }
 
   if (sessionId) {
@@ -52,14 +53,14 @@ async function sessionFromHeaders(cookies, request: Request) {
   }
 
   if (!session) {
-    sessionId = null;
+    sessionId = false;
   }
 
   return {
     session: {
       ...session,
       cookie: undefined,
-      async save() {
+      async save(): Promise<[string, string, CookieSerializeOptions] | null> {
         if (!sessionId) {
           const sessionId = randomBytes(24).toString("base64");
           try {
@@ -82,24 +83,16 @@ async function sessionFromHeaders(cookies, request: Request) {
             };
             const insert = sessionRepository.nativeInsert({ sid: sessionId, sess, expire });
             const updateLoginDate = userRepository.findOne({ id: this.userId }).then((user) => {
-              user.lastLoginDate = new Date();
-              return userRepository.persistAndFlush(user);
+              if (user) {
+                user.lastLoginDate = new Date();
+                return userRepository.persistAndFlush(user);
+              }
             });
             const deleteExpiredSessions = sessionRepository.nativeDelete({
               expire: { $lte: new Date() },
             });
             await Promise.all([insert, updateLoginDate, deleteExpiredSessions]);
-            return [
-              "connect.sid",
-              signature.sign(sessionId, SESSION_SECRET),
-              {
-                // maxAge: 2592000000,
-                // secure: false,
-                // httpOnly: true,
-                path: "/",
-                // sameSite: "strict",
-              },
-            ];
+            return ["connect.sid", signature.sign(sessionId, SESSION_SECRET), { path: "/" }];
           } catch (e) {
             throw e;
           }
@@ -125,8 +118,7 @@ async function sessionFromHeaders(cookies, request: Request) {
                 session.sess = sess;
                 return sessionRepository.persistAndFlush(session);
               } else {
-                console.warn(`failed to find session with id ${sessionId} for user ${this.userId}`);
-                return sessionRepository.create(sess);
+                throw `failed to find session with id ${sessionId} for user ${this.userId}`;
               }
             });
             const deleteExpiredSessions = sessionRepository.nativeDelete({ expire: { $lte: new Date() } });
@@ -135,16 +127,16 @@ async function sessionFromHeaders(cookies, request: Request) {
             console.trace(e);
             throw e;
           }
-          return [];
+          return null;
         }
       },
-      async destroy() {
+      async destroy(): Promise<[string, CookieSerializeOptions] | null> {
         if (sessionId) {
           await sessionRepository.nativeDelete({ sid: sessionId });
           return ["connect.sid", { path: "/" }];
         } else {
           // TODO throw exception
-          return [];
+          return null;
         }
       },
     },

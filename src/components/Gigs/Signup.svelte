@@ -16,7 +16,6 @@
     AvailableUserInstrument,
     SignupGig,
     SignupGigLineup,
-    SignupGigVenue,
     SignupUserInstrument,
   } from "../../routes/members/types";
   import VenueAddressIcons from "./VenueAddressIcons.svelte";

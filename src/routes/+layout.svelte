@@ -2,19 +2,20 @@
   import Header from "../components/Global/Header.svelte";
   import Footer from "../components/Global/Footer.svelte";
   import Customiser from "../components/Members/Customiser.svelte";
-  import { Settings } from "../components/Members/Customiser.svelte";
+  import { Settings } from "../components/Members/runtypes";
   import { onMount } from "svelte";
   import { makeTitle, themeName, committee as committeeStore } from "../view";
   import { disableBodyScroll, enableBodyScroll } from "body-scroll-lock";
   import { Map } from "immutable";
   import type Popup from "../components/Popup.svelte";
   import type { LayoutData } from "./$types";
-  import type { Committee, HexValue, ThemeColor, ThemedProperty } from "./layout.types";
+  import type { Committee, ThemedProperty } from "./layout.types";
+  import type { HexValue, ThemeColor } from "../components/Members/runtypes";
 
   export let data: LayoutData;
   export let committee: Committee = data.committee;
   export let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty } = data.settingsWithoutMaps;
-  export let session: { userId?: string } = data.session;
+  export let session: { userId?: string } = data.optionalSession;
   let settings = new Settings({
     ...settingsWithoutMaps,
     accent: Map(Object.entries(settingsWithoutMaps.accent)) as Map<ThemeColor, HexValue>,

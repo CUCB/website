@@ -1,32 +1,15 @@
-<script context="module" lang="ts">
-  import type { Day } from "../../view";
-  export const ThemeColor = Union(Literal("default"), Literal("light"), Literal("dark"));
-  export const HexValue = String.withConstraint((s) => s.match(/^[A-F0-9]{6}$/i) !== null);
-
-  const BLACK = HexValue.check("000000");
-  type HexValue = Static<typeof HexValue>;
-  type ThemeColor = Static<typeof ThemeColor>;
-  type Font = "default" | "hacker";
-  export class Settings extends Record({
-    color: "default" as ThemeColor,
-    accent: Map() as Map<ThemeColor, HexValue>,
-    logo: Map() as Map<ThemeColor, HexValue>,
-    font: "default" as Font,
-    calendarStartDay: "mon" as Day,
-    spinnyLogo: false,
-  }) {}
-</script>
-
 <script lang="ts">
   import Popup from "../Popup.svelte";
   import Select from "../Forms/Select.svelte";
   import { HsvPicker } from "svelte-color-picker";
   import { onMount } from "svelte";
-  import { accentCss, calendarStartDay, logoCss, themeName } from "../../view";
-  import { Record, Map } from "immutable";
+  import { accentCss, calendarStartDay, Day, logoCss, themeName } from "../../view";
+  import { Record } from "immutable";
   import { String, Null, Literal, Union, Boolean } from "runtypes";
   import type { Static } from "runtypes";
+  import { type Settings, type Font, HexValue, ThemeColor } from "./runtypes";
 
+  const BLACK = HexValue.check("000000");
   export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null, session: { userId: string } | {};
 
   class ViewSettings extends Record({

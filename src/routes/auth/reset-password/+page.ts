@@ -9,8 +9,8 @@ type PreloadProps =
 
 const isSuccessful = (status: number) => status >= 200 && status < 300;
 export const load: PageLoad<PreloadProps> = async ({ url, fetch, parent }) => {
-  const { session } = await parent();
-  if (session.userId !== undefined) {
+  const { optionalSession } = await parent();
+  if (optionalSession.userId !== undefined) {
     throw redirect(302, "/members");
   }
 

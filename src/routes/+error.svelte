@@ -1,6 +1,5 @@
 <script>
   import { page } from "$app/stores";
-  import { dev } from "$app/environment";
   import MembersNav from "../components/Members/Nav.svelte";
   export let data;
 </script>

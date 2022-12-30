@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { committee, makeTitle } from "../../../view";
+  import { makeTitle } from "../../../view";
   import Person from "../../../components/Committee/Person.svelte";
   import type { PageData } from "./$types";
   import { DateTime } from "luxon";

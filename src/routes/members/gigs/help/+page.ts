@@ -6,8 +6,8 @@ import { Record, String } from "runtypes";
 const calendarLinksTy = Record({ allgigs: String, mygigs: String });
 
 export const load: PageLoad = async ({ fetch, parent, url }) => {
-  const { session } = await parent();
-  assertLoggedIn(session);
+  const { optionalSession } = await parent();
+  const session = assertLoggedIn(optionalSession);
   let calendarLinks = calendarLinksTy.check(await (await fetch("/members/gigs/calendar/links")).json());
 
   const canEditGigs = UPDATE_GIG_DETAILS.guard(session);

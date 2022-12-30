@@ -10,7 +10,7 @@ const testFilter = (res: any, filter: any): boolean => {
   }
 };
 
-const applyArrayFilterUntyped = <T>(res: T, filter: any): T => {
+const applyArrayFilterUntyped = (res: any, filter: any): any => {
   if (Array.isArray(res)) {
     for (const [key, value] of Object.entries(filter)) {
       if (typeof value === "object") {
@@ -79,7 +79,7 @@ if (import.meta.vitest) {
           { approved: true, id: "4" },
         ],
         { approved: true },
-      ).map((i) => i.id),
+      ).map((i: { id: string }) => i.id),
     ).toStrictEqual(["1", "4"]);
   });
 

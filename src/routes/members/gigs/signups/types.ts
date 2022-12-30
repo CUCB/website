@@ -5,7 +5,7 @@ export interface User {
   gig_notes: string;
 }
 export interface LineupEntry {
-  approved?: boolean;
+  approved?: boolean | null;
   user: User;
   user_available?: boolean;
   user_only_if_necessary?: boolean;
@@ -13,7 +13,7 @@ export interface LineupEntry {
 }
 export interface Gig {
   id: string;
-  date?: string;
+  date?: string | null;
   sort_date: Date;
   lineup: LineupEntry[];
   title: string;

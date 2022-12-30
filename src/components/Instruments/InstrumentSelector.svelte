@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { AggregateInstrument, Instrument } from "../../routes/members/users/[id=integer]/types";
+  import type { AggregateInstrument } from "../../routes/members/users/[id=integer]/types";
 
   import { createEventDispatcher } from "svelte";
 

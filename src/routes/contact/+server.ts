@@ -13,19 +13,19 @@ dotenv.config();
 export const POST: RequestHandler = async ({ request }) => {
   const { name, email, bookingEnquiry, occasion, dates, times, venue, message, captchaKey } = Object.fromEntries(
     await request.formData(),
-  );
-  let hcaptcha;
+  ) as Record<string, string>;
+  let hcaptcha: { success: boolean } | {};
   const body = new URLSearchParams();
   body.append("response", captchaKey.toString());
   body.append("secret", env["HCAPTCHA_SECRET"]);
   try {
-    hcaptcha = await fetch("https://hcaptcha.com/siteverify", {
+    hcaptcha = (await fetch("https://hcaptcha.com/siteverify", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
       },
       body,
-    }).then((res) => res.json());
+    }).then((res) => res.json())) as typeof hcaptcha;
   } catch (e) {
     console.error(e);
     throw error(
@@ -34,29 +34,29 @@ export const POST: RequestHandler = async ({ request }) => {
     );
   }
 
-  if (hcaptcha.success) {
-    let secretaries;
-    try {
-      const committeeRepository = (await orm()).em.fork().getRepository(Committee);
-      secretaries = await committeeRepository
-        .findOne(
-          { started: { $lte: "now()" }, members: { lookup_name: { name: "secretary" } } },
-          {
-            fields: ["members.casual_name", "members.email", "members.lookup_name", "members.lookup_name.name"],
-            strategy: LoadStrategy.JOINED,
-          },
-        )
-        .then((committee) => committee?.members?.toArray());
-    } catch (e) {
-      // We deal with not found anyway, don't worry about it
-      console.error("Failed to find secretary email");
-      console.error(e);
-    }
-    const secretary = {
-      casualName: secretaries?.[0].casual_name || "Secretary",
-      email: secretaries?.[0].email || "secretary@cucb.co.uk",
-    };
+  let secretaries;
+  try {
+    const committeeRepository = (await orm()).em.fork().getRepository(Committee);
+    secretaries = await committeeRepository
+      .findOne(
+        { started: { $lte: "now()" }, members: { lookup_name: { name: "secretary" } } },
+        {
+          fields: ["members.casual_name", "members.email", "members.lookup_name", "members.lookup_name.name"],
+          strategy: LoadStrategy.JOINED,
+        },
+      )
+      .then((committee) => committee?.members?.toArray());
+  } catch (e) {
+    // We deal with not found anyway, don't worry about it
+    console.error("Failed to find secretary email");
+    console.error(e);
+  }
+  const secretary = {
+    casualName: secretaries?.[0].casual_name || "Secretary",
+    email: secretaries?.[0].email || "secretary@cucb.co.uk",
+  };
 
+  if ("success" in hcaptcha && hcaptcha.success) {
     const client = new SMTPClient({
       host: env["EMAIL_HOST"],
       ssl: env["EMAIL_SSL"] !== "true" ? false : undefined,

@@ -1,7 +1,7 @@
 import { assertLoggedIn } from "../../../../../client-auth";
 import { error } from "@sveltejs/kit";
 import { sortContacts, sortVenues } from "./sort";
-import type { PageServerLoad } from "./$types";
+import type { PageServerLoadEvent } from "./$types";
 import { UPDATE_GIG_DETAILS } from "$lib/permissions";
 import orm from "$lib/database";
 import { Gig as DbGig } from "$lib/entities/Gig";
@@ -44,13 +44,10 @@ const fetchAllVenues = (em: EntityManager): Promise<Venue[]> =>
 const fetchAllContacts = (em: EntityManager): Promise<Contact[]> =>
   em.find(DbContact, {}).then((e) => e.map((e) => wrap(e).toPOJO()));
 
-export const load: PageServerLoad = async ({ params, fetch, parent }) => {
+export const load = async ({ params, locals }: PageServerLoadEvent) => {
   let { gig_id } = params;
 
-  const {
-    session: tmpSession,
-  }: { session: {} | { userId: string; firstName: string; lastName: string; role: string } } = await parent();
-  const session = assertLoggedIn(tmpSession);
+  const session = assertLoggedIn(locals.session);
 
   if (UPDATE_GIG_DETAILS.guard(session)) {
     const em = (await orm()).em.fork();
@@ -70,7 +67,7 @@ export const load: PageServerLoad = async ({ params, fetch, parent }) => {
         venues,
         gigTypes,
         allContacts,
-        session,
+        session: { ...session, save: undefined, destroy: undefined },
       };
     } else {
       throw error(404, "Gig not found");

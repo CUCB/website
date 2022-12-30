@@ -6,6 +6,7 @@ export class Session {
   sid!: string;
 
   @Property({ columnType: "json", type: "json" })
+  // TODO add types
   sess!: any;
 
   @Index({ name: "IDX_session_expire" })
