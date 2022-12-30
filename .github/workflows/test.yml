@@ -6,7 +6,6 @@ on:
 
 jobs:
   svelte-check:
-    if: false
     name: Type-check svelte and typescript
     runs-on: ubuntu-latest
     steps:
