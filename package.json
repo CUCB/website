@@ -25,6 +25,7 @@
     "build_start2": "vite dev --host 0.0.0.0",
     "build_start": "vite build; node ./build",
     "svelte-check": "svelte-check",
+    "check": "svelte-check && tsc --noEmit",
     "prepare": "husky install",
     "orm": "env NODE_OPTIONS='--loader ts-node/esm' npx mikro-orm"
   },

@@ -2,7 +2,7 @@ import { fallbackPeople } from "./committee";
 import { HexValue, ThemeColor } from "../components/Members/runtypes";
 import { Day } from "../view";
 import type { LayoutServerLoad } from "./$types";
-import { CommitteeRT } from "./layout.types";
+import { CommitteeRT, type CommitteeMember } from "./layout.types";
 import type { Static } from "runtypes";
 import type { ThemedProperty, Committee } from "./layout.types";
 
@@ -20,7 +20,7 @@ function fromSessionTheme(session: { theme?: Record<string, string> } | null, na
 }
 
 export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
-  const downloadedCommittee = {};
+  const downloadedCommittee: Record<string, CommitteeMember> = {};
   let session = {
     ...locals.session,
     save: undefined,
@@ -28,7 +28,7 @@ export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
   };
 
   try {
-    const res = await fetch("/committee.json").then((r) => r.json());
+    const res: { committee: CommitteeMember[] } = await fetch("/committee.json").then((r) => r.json());
 
     for (let person of res.committee) {
       downloadedCommittee[person.lookup_name.name] = {

@@ -7,7 +7,7 @@ on:
 jobs:
   svelte-check:
     if: false
-    name: Type-check svelte
+    name: Type-check svelte and typescript
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -19,10 +19,10 @@ jobs:
       - name: Create dummy .env file
         run: |
           echo "SESSION_SECRET=somethingreallynotsecret" > .env
-      - name: Run svelte-check
+      - name: Run check script
         run: |
           npm ci
-          npm run svelte-check
+          npm run check
   unit-test:
     name: Run unit tests
     runs-on: ubuntu-latest
@@ -106,7 +106,7 @@ jobs:
     needs:
       - test
       - unit-test
-      # - svelte-check
+      - svelte-check
     name: Build and push docker image for deploy
     runs-on: ubuntu-latest
     steps:
