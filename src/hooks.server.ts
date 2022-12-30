@@ -150,7 +150,3 @@ async function sessionFromHeaders(cookies, request: Request) {
     },
   };
 }
-
-export async function getSession({ locals }) {
-  return { ...locals.session, save: undefined, destroy: undefined };
-}
