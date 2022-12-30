@@ -118,7 +118,7 @@
   };
 
   function selectableMonths() {
-    return [...Array(12).keys()];
+    return [...Array(12).keys()].map((x) => x + 1);
   }
 
   function selectableYears() {
@@ -392,14 +392,14 @@
 </div>
 {#if showSelection}
   <div class="month-selector">
-    <Select on:change="{changeMonth}">
+    <Select on:change="{changeMonth}" value="{displayedMonth.month}">
       {#each selectableMonths() as month (month)}
         <option value="{month}" selected="{month === displayedMonth.month}">
           {DateTime.local().set({ month }).toFormat("LLLL")}
         </option>
       {/each}
     </Select>
-    <Select on:change="{changeYear}">
+    <Select on:change="{changeYear}" value="{displayedMonth.year}">
       {#each selectableYears() as year (year)}
         <option value="{year}" selected="{year === displayedMonth.year}">{year}</option>
       {/each}
