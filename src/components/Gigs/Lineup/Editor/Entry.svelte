@@ -25,8 +25,6 @@
     delete roles["money_collector_notified"];
   }
 
-  let content;
-
   const save = () => {
     updateEntry.setAdminNotes(editAdminNotes && (editAdminNotes.trim() || null));
   };
@@ -152,7 +150,7 @@
   }
 </style>
 
-<div class="container" bind:this="{content}" data-test="member-{person.user.id}">
+<div class="container" data-test="member-{person.user.id}">
   <div class="name">
     {person.user.first}&#32;{person.user.last}&#32;
     {#if person.user.attributes.length > 0}

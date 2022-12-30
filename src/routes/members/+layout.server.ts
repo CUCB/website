@@ -1,9 +1,11 @@
 import orm from "$lib/database";
 import { prefs } from "../../state";
 import { User } from "$lib/entities/User";
+import type { LayoutServerLoadEvent } from "./$types";
+import { assertLoggedIn } from "../../client-auth";
 
-export async function load({ parent }) {
-  const { session } = await parent();
+export async function load({ locals }: LayoutServerLoadEvent) {
+  const session = { ...assertLoggedIn(locals.session), save: undefined, destroy: undefined };
 
   try {
     const userRepository = (await orm()).em.fork().getRepository(User);
@@ -25,5 +27,6 @@ export async function load({ parent }) {
     // Don't properly fail as it's not critical info
     console.trace(e);
   }
+
   return { session };
 }

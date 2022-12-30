@@ -1,22 +1,31 @@
-export function sortVenues(venues): void {
+import type { Contact, GigContact, Venue } from "./types";
+
+export function sortVenues(venues: Venue[]): Venue[] {
   return venues.sort(
     (a, b) => (a.name || "").localeCompare(b.name || "") || (a.subvenue || "").localeCompare(b.subvenue || ""),
   );
 }
 
-export function sortContacts(contacts): void {
+// TODO unit test
+export function sortContacts(contacts: (Contact | GigContact)[]): void {
   contacts.sort((a, b) => {
-    a = a.contact ? a.contact : a;
-    b = b.contact ? b.contact : b;
-    a = { name: a.name && a.name.toLowerCase(), organization: a.organization && a.organization.toLowerCase() };
-    b = { name: b.name && b.name.toLowerCase(), organization: b.organization && b.organization.toLowerCase() };
-    return a.name < b.name
+    let contactA: Contact = "contact" in a ? a.contact : a;
+    let contactB: Contact = "contact" in b ? b.contact : b;
+    const compA = {
+      name: contactA.name?.toLowerCase() || "",
+      organization: contactA.organization?.toLowerCase() || "",
+    };
+    const compB = {
+      name: contactB.name?.toLowerCase() || "",
+      organization: contactB.organization?.toLowerCase() || "",
+    };
+    return compA.name < compB.name
       ? -1
-      : b.name < a.name
+      : compB.name < compA.name
       ? 1
-      : a.organization < b.organization
+      : compA.organization < compB.organization
       ? -1
-      : b.organization < a.organization
+      : compB.organization < compA.organization
       ? 1
       : 0;
   });

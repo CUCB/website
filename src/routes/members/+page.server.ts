@@ -1,10 +1,10 @@
 import { assertLoggedIn } from "../../client-auth.js";
-import type { PageServerLoad } from "./$types";
+import type { PageServerLoadEvent } from "./$types";
 import { NOT_MUSIC_ONLY } from "$lib/permissions";
 import { redirect } from "@sveltejs/kit";
 import { fetchAllInstrumentsForUser, fetchMultiGigSignup, fetchUserNotes } from "./gigs/queries.js";
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load = async ({ locals }: PageServerLoadEvent) => {
   const session = { ...assertLoggedIn(locals.session), save: undefined, destroy: undefined };
 
   if (NOT_MUSIC_ONLY.guard(session)) {

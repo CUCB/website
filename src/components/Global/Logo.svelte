@@ -91,6 +91,8 @@
         viewBox="-10 15 230 225"
         on:mouseover="{triggerRotation}"
         on:mouseout="{triggerDerotation}"
+        on:focus="{triggerRotation}"
+        on:blur="{triggerDerotation}"
         data-test="logo"
         bind:this="{self}"
         style="transform:rotate({$rotation}deg)"

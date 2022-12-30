@@ -29,7 +29,7 @@ export const actions: Actions = {
           firstName: string;
           lastName: string;
           theme?: Record<string, string>;
-          save(): Promise<[string, string, CookieSerializeOptions]>;
+          save(): Promise<[string, string, CookieSerializeOptions] | null>;
         };
 
         session.userId = loginResult.user_id.toString();
@@ -41,8 +41,10 @@ export const actions: Actions = {
           const theme = JSON.parse(body.theme);
           session.theme = theme?.[session.userId];
         }
-        let [name, value, opts] = await session.save();
-        cookies.set(name, value, opts);
+        const cookie = await session.save();
+        if (cookie) {
+          cookies.set(...cookie);
+        }
       } catch (e) {
         if (e.status === 401) {
           return fail(401, { username: body.username, message: "Incorrect username or password" });
@@ -61,8 +63,8 @@ export const actions: Actions = {
 };
 
 export const load: PageServerLoad = async ({ parent }) => {
-  const { session } = await parent();
-  if (session.userId) {
+  const { optionalSession } = await parent();
+  if (optionalSession.userId) {
     throw redirect(302, "/members");
   }
 };

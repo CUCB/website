@@ -2,38 +2,37 @@ import type { RequestHandler } from "./$types";
 import { readFile, writeFile, rename, rm } from "fs/promises";
 import { error } from "@sveltejs/kit";
 import { UPDATE_BIO } from "$lib/permissions";
+import { assertLoggedIn } from "../../../../../client-auth";
 
 export function image_path(id: string): string {
   return `images/users/${id}.jpg`;
 }
 
-let NONE = null;
+let NONE: Buffer | null = null;
 
 export const GET: RequestHandler = async ({ locals, params: { id } }) => {
-  if (!locals.session.userId) {
-    throw error(401, "Not logged in");
-  } else {
+  assertLoggedIn(locals.session);
+
+  try {
+    const file = await readFile(image_path(id));
+    return new Response(file, { headers: { "content-type": "image/jpeg" } });
+  } catch (e) {
     try {
-      const file = await readFile(image_path(id));
-      return new Response(file, { headers: { "content-type": "image/jpeg" } });
-    } catch (e) {
-      try {
-        if (!NONE) {
-          NONE = await readFile(image_path("none"));
-        }
-        return new Response(NONE, { headers: { "content-type": "image/jpeg" } });
-      } catch (e) {
-        console.error(e);
-        throw error(500, "Internal error");
+      if (!NONE) {
+        NONE = await readFile(image_path("none"));
       }
+      return new Response(NONE, { headers: { "content-type": "image/jpeg" } });
+    } catch (e) {
+      console.error(e);
+      throw error(500, "Internal error");
     }
   }
 };
 
 export const POST: RequestHandler = async ({ locals, params: { id }, request }) => {
-  if (!locals.session.userId) {
-    throw error(401, "Not logged in");
-  } else if (UPDATE_BIO(id).guard(locals.session)) {
+  const session = assertLoggedIn(locals.session);
+
+  if (UPDATE_BIO(id).guard(session)) {
     const body = await request.text();
     const imageBase64Data = body.split(",")[1];
     await writeFile(`${image_path(id)}.tmp`, imageBase64Data, { encoding: "base64" });
@@ -46,9 +45,9 @@ export const POST: RequestHandler = async ({ locals, params: { id }, request }) 
 };
 
 export const DELETE: RequestHandler = async ({ locals, params: { id } }) => {
-  if (!locals.session.userId) {
-    throw error(401, "Not logged in");
-  } else if (UPDATE_BIO(id).guard(locals.session)) {
+  const session = assertLoggedIn(locals.session);
+
+  if (UPDATE_BIO(id).guard(session)) {
     try {
       await rm(image_path(id));
       return new Response();
