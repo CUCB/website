@@ -104,11 +104,11 @@
   <form on:submit|preventDefault="{submit}">
     <label>
       Your name
-      <input type="text" bind:value="{name}" required data-test="booking-name" />
+      <input type="text" bind:value="{name}" required data-test="booking-name" placeholder=" " />
     </label>
     <label>
       Your e-mail address
-      <input type="email" bind:value="{email}" required data-test="booking-email" />
+      <input type="email" bind:value="{email}" required data-test="booking-email" placeholder=" " />
     </label>
     <label class="checkbox">
       Interested in booking us?
