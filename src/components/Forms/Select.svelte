@@ -61,7 +61,8 @@
     background: rgba(0, 0, 0, 0) !important; /* "transparent" doesn't work with Opera */
     border: 0;
     border-radius: 0;
-    -webkit-appearance: none;
+    appearance: none;
+    padding-right: 2.5ch;
   }
 
   .dropdown-select:focus {
@@ -155,14 +156,14 @@
   }
 </style>
 
-<div class="dropdown dropdown-{$themeName}" disabled="{disabled}">
+<div class="dropdown dropdown-{$themeName}">
   <select
     class="dropdown-select"
     data-test="select-box"
     aria-label="{$$props['aria-label']}"
     on:change
     on:blur
-    bind:value
+    bind:value="{value}"
     bind:this="{select}"
     disabled="{disabled}"
   >
