@@ -12,3 +12,4 @@
   copy:
     src: "{{ repo_root }}/images/users/none.jpg"
     dest: "{{ block_storage.files[0].path }}/images/users/none.jpg"
+    remote_src: true
