@@ -21,6 +21,7 @@ jobs:
       - name: Run check script
         run: |
           npm ci
+          npx svelte-kit sync
           npm run check
   unit-test:
     name: Run unit tests
