@@ -4,7 +4,7 @@
 
 - name: Ensure profile pictures directory exists
   file:
-    path: "{{ block_storage.files[0].path }}"
+    path: "{{ block_storage.files[0].path }}/images/users"
     state: directory
   when: block_storage.matched == 1
 
