@@ -469,7 +469,7 @@ describe("iCal files", () => {
         let tz = comp.getFirstProperty("timezone-id").getFirstValue();
         expect(tz).to.eq("Europe/London");
         const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined });
-        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined });
+        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._normalize()._time, isDate: undefined });
         expect(event.summary).to.eq(`GIG: Gig of excitement`);
         expect(event.description).to.contain("Leady Lead").and.contain("[Eigenharp, Wind Synth]");
         expect(startDate.equals(Cypress.DateTime.fromJSDate(gig.arrive_time))).to.be.true;
@@ -511,7 +511,7 @@ describe("iCal files", () => {
         const tz = comp.getFirstProperty("timezone-id").getFirstValue();
         expect(tz).to.eq("Europe/London");
         const startDate = Cypress.DateTime.fromObject({ ...event.startDate._time, isDate: undefined });
-        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._time, isDate: undefined });
+        const endDate = Cypress.DateTime.fromObject({ ...event.endDate._normalize()._time, isDate: undefined });
         const midnight = { hour: 0, minute: 0, second: 0, millisecond: 0 };
         expect(startDate.equals(adminOnlyGig.date.set(midnight))).to.be.true;
         expect(endDate.equals(adminOnlyGig.date.set(midnight).plus({ days: 1 }))).to.be.true;
