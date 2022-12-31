@@ -237,7 +237,7 @@
   </div>
 </div>
 
-{#each gigs as gig (gig.id)}
+{#each gigs.filter((gig) => gig.type.code !== "draft") as gig (gig.id)}
   {@const signupGig = signupGigs[gig.id]}
   {#if gig.id in signupGigs && isStore(signupGig)}
     <!-- TODO ensure tests cover the fact that the signup summary that should exist here -->
