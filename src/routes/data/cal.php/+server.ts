@@ -33,7 +33,9 @@ function startEndTimes(gig: GigSummary): { start: string; end: string | null } {
   if (start === end || end === null || start === null) {
     // Either an all day event, or we don't have both start and finish times, so make it appear as an all day event
     // @ts-ignore
-    start = DateTime.fromJSDate(gig.date).toISO({ includeOffset: false });
+    if (gig.date != null) {
+      start = DateTime.fromJSDate(gig.date).toISO({ includeOffset: false });
+    }
     end = null;
   }
   return { start: start as string, end };
