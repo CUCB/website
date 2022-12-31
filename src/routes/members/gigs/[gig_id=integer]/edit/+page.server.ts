@@ -54,7 +54,7 @@ export const load = async ({ params, locals }: PageServerLoadEvent) => {
     const [gig, venues, gigTypes, allContacts] = await Promise.all([
       fetchGig(em, gig_id),
       fetchAllVenues(em),
-      em.find(DbGigType, {}).then((e) => e.map((e) => wrap(e).toPOJO())),
+      em.find(DbGigType, {}, { orderBy: { id: "ASC" } }).then((e) => e.map((e) => wrap(e).toPOJO())),
       fetchAllContacts(em),
     ]);
     if (gig) {
