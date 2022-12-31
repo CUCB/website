@@ -10,7 +10,18 @@
   import { type Settings, type Font, HexValue, ThemeColor } from "./runtypes";
 
   const BLACK = HexValue.check("000000");
-  export let settings: Settings, showSettings: boolean, settingsPopup: Popup | null, session: { userId: string } | {};
+  export let settings: Settings,
+    showSettings: boolean,
+    settingsPopup: Popup | null,
+    session: { userId?: string; role?: string },
+    alternativeRoles: AlternativeRole[] | undefined,
+    alternativeRole: string | null;
+
+  interface AlternativeRole {
+    id: string;
+    title: string;
+    role: string;
+  }
 
   class ViewSettings extends Record({
     accentOpen: false,
@@ -91,7 +102,7 @@
   $: $calendarStartDay = settings.calendarStartDay;
   let updateLocalStorage = (_: Settings): void => {};
 
-  let updateSession = (_: Settings): void => {};
+  let updateSession = (): void => {};
   const propLocalStorage = (name: LocalStorageProperty): string | null | boolean => {
     if ("userId" in session) {
       const value = localStorage.getItem(`${name}_${session.userId}`);
@@ -211,6 +222,9 @@
       for (let prop of updateProps) {
         theme.append(prop, JSON.stringify(propLocalStorage(prop)));
       }
+      if (alternativeRoles) {
+        theme.append("alternativeRole", JSON.stringify(alternativeRole));
+      }
       fetch("/updatetheme", {
         method: "POST",
         body: theme,
@@ -238,7 +252,7 @@
   <Popup
     on:close="{() => {
       showSettings = false;
-      updateSession(settings);
+      updateSession();
     }}"
     bind:this="{settingsPopup}"
   >
@@ -307,6 +321,18 @@
     >
       Set day
     </button>
+    <br />
+    <br />
+    {#if alternativeRoles}
+      <label for="select-alternative-role">
+        View as (close this popup and reload the page to apply the changes)
+        <Select bind:value="{alternativeRole}" id="select-alternative-role">
+          {#each alternativeRoles as alternativeRole (alternativeRole.id)}
+            <option value="{alternativeRole.role}">{alternativeRole.title}</option>
+          {/each}
+        </Select>
+      </label>
+    {/if}
   </Popup>
   {#if viewSettings.accentOpen}
     <Popup
@@ -322,4 +348,15 @@
       <HsvPicker startColor="{logoColor}" on:colorChange="{(event) => debounceColor('logo', event.detail)}" />
     </Popup>
   {/if}
+{/if}
+{#if alternativeRole && alternativeRole !== session.role}
+  <div style="position:absolute; top: 1em; right: 1em;">
+    Viewing as {alternativeRoles?.find((t) => t.role === alternativeRole)?.title}
+    <button
+      on:click="{() => {
+        alternativeRole = null;
+        updateSession();
+      }}">Click here to restore your previous permissions</button
+    >
+  </div>
 {/if}

@@ -96,6 +96,7 @@ const gigQueryFilter = (session: { userId: string }): ObjectQuery<Gig> =>
 const signupQueryFilter = (session: { userId: string }): ObjectQuery<Gig> => ({
   admins_only: false,
   allow_signups: true,
+  type: { code: { $in: ["gig"] } },
 });
 
 const contactResultFilter = (session: { userId: string }) =>

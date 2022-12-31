@@ -13,9 +13,12 @@
   import type { HexValue, ThemeColor } from "../components/Members/runtypes";
 
   export let data: LayoutData;
-  export let committee: Committee = data.committee;
-  export let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty } = data.settingsWithoutMaps;
-  export let session: { userId?: string } = data.optionalSession;
+  let committee: Committee = data.committee;
+  let settingsWithoutMaps: { accent: ThemedProperty; logo: ThemedProperty } = data.settingsWithoutMaps;
+  let session: { userId?: string } = data.optionalSession;
+  let alternativeRole = data.alternativeRole;
+  let alternativeRoles = data.alternativeRoles;
+
   let settings = new Settings({
     ...settingsWithoutMaps,
     accent: Map(Object.entries(settingsWithoutMaps.accent)) as Map<ThemeColor, HexValue>,
@@ -130,5 +133,7 @@
     bind:showSettings="{showSettings}"
     bind:settingsPopup="{settingsPopup}"
     session="{session}"
+    alternativeRole="{alternativeRole}"
+    alternativeRoles="{alternativeRoles}"
   />
 </div>

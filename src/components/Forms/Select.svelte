@@ -2,7 +2,8 @@
   import { themeName } from "../../view";
   export let value: any = undefined,
     select: HTMLSelectElement | undefined = undefined,
-    disabled: boolean = false;
+    disabled: boolean = false,
+    id: string | undefined = undefined;
 </script>
 
 <style lang="scss">
@@ -166,6 +167,7 @@
     bind:value="{value}"
     bind:this="{select}"
     disabled="{disabled}"
+    id="{id}"
   >
     <slot />
   </select>

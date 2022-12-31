@@ -32,6 +32,7 @@ export const UPDATE_INSTRUMENTS = (userId: string) =>
   HAS_ROLE(Union(ROLES.webmaster, ROLES.president, ROLES.secretary)).Or(IS_SELF(userId));
 export const UPDATE_ADMIN_STATUS = (userId: string) =>
   HAS_ROLE(ROLES.webmaster).withConstraint((session: { userId: string }) => session.userId != userId);
+export const IMPERSONATE_OTHER_ROLES = Record({ role: ROLES.webmaster });
 export const UPDATE_LIST042 = HAS_ROLE(ROLES.webmaster.Or(ROLES.president));
 export const UPDATE_GIG_DETAILS = HAS_ROLE(
   Union(ROLES.webmaster, ROLES.president, ROLES.secretary, ROLES.treasurer, ROLES.equipment, ROLES.gigEditor),
@@ -111,6 +112,28 @@ if (import.meta.vitest) {
 
     it("rejects a gig editor", () => {
       expect(sut.guard(userWithRole("gig_editor"))).to.be.false;
+    });
+  });
+
+  describe("IMPERSONATE_OTHER_ROLES", () => {
+    const sut = IMPERSONATE_OTHER_ROLES;
+
+    it("accepts a webmaster without an alternative role set", () => {
+      expect(sut.guard(userWithRole("webmaster"))).to.be.true;
+    });
+
+    it("accepts a webmaster with an alternative role set", () => {
+      const user = { ...userWithRole("webmaster"), alternativeRole: "user" };
+      expect(sut.guard(user)).to.be.true;
+    });
+
+    it("accepts a president without an alternative role set", () => {
+      expect(sut.guard(userWithRole("president"))).to.be.false;
+    });
+
+    it("rejects a president with an alternative role set", () => {
+      const user = { ...userWithRole("president"), alternativeRole: "user" };
+      expect(sut.guard(user)).to.be.false;
     });
   });
 }

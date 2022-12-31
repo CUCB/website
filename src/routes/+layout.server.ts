@@ -5,6 +5,10 @@ import type { LayoutServerLoad } from "./$types";
 import { CommitteeRT, type CommitteeMember } from "./layout.types";
 import type { Static } from "runtypes";
 import type { ThemedProperty, Committee } from "./layout.types";
+import { IMPERSONATE_OTHER_ROLES } from "../lib/permissions";
+import orm from "$lib/database";
+import { wrap } from "@mikro-orm/core";
+import { AuthUserType } from "../lib/entities/AuthUserType";
 
 // TODO improve typing
 function fromSessionTheme(session: { theme?: Record<string, string> } | null, name: string): string | undefined {
@@ -70,5 +74,23 @@ export const load: LayoutServerLoad = async function ({ url, fetch, locals }) {
     settings.logo[color] = logo;
   }
 
-  return { settingsWithoutMaps: settings, committee, optionalSession: session };
+  let alternativeRole: string | null = null;
+  let alternativeRoles: AlternativeRole[] | undefined = undefined;
+  if (IMPERSONATE_OTHER_ROLES.guard(session)) {
+    alternativeRole = session?.alternativeRole || null;
+    alternativeRoles = await (
+      await orm()
+    ).em
+      .fork()
+      .find(AuthUserType, {}, { orderBy: { id: "ASC" } })
+      .then((e) => e.map((e) => wrap(e).toPOJO()));
+  }
+
+  return { settingsWithoutMaps: settings, committee, optionalSession: session, alternativeRoles, alternativeRole };
 };
+
+interface AlternativeRole {
+  id: string;
+  title: string;
+  role: string;
+}

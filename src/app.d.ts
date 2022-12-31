@@ -9,6 +9,7 @@ declare namespace App {
           role: string;
           firstName: string;
           lastName: string;
+          alternativeRole: string | null;
           theme: Record<string, string>;
           save(): Promise<[string, string, import("cookie").CookieSerializeOptions] | null>;
           destroy(): Promise<[string, import("cookie").CookieSerializeOptions] | null>;
