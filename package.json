@@ -27,7 +27,8 @@
     "svelte-check": "svelte-check",
     "check": "svelte-check && tsc --noEmit",
     "prepare": "husky install",
-    "orm": "env NODE_OPTIONS='--loader ts-node/esm' npx mikro-orm"
+    "orm": "env NODE_OPTIONS='--loader ts-node/esm' npx mikro-orm",
+    "resetdb": "npm run orm -- migration:fresh && npm run orm -- seeder:run"
   },
   "watch": {
     "dev": {

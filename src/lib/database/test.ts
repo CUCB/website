@@ -6,8 +6,8 @@ export const makeOrm = async (env: Record<string, string | undefined>) => {
   if (!orm) {
     orm = await MikroORM.init(makeConfig(env));
     await orm.migrator.up();
-    const { NecessaryDataSeeder } = await import("../../seeders/NecessaryDataSeeder");
-    await orm.seeder.seed(NecessaryDataSeeder);
+    const { DatabaseSeeder } = await import("../../seeders/DatabaseSeeder");
+    await orm.seeder.seed(DatabaseSeeder);
   }
   return orm.em.fork();
 };

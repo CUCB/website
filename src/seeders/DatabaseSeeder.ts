@@ -1,17 +1,17 @@
 import type { EntityManager } from "@mikro-orm/core";
 import { Seeder } from "@mikro-orm/seeder";
-import { AuthActionType } from "../lib/entities/AuthActionType";
-import { AuthBitmasksPermission } from "../lib/entities/AuthBitmasksPermission";
-import { AuthUserType } from "../lib/entities/AuthUserType";
-import { CommitteeKey } from "../lib/entities/CommitteeKey";
-import { CommitteePosition } from "../lib/entities/CommitteePosition";
-import { ConnectionType } from "../lib/entities/ConnectionType";
-import { GigType } from "../lib/entities/GigType";
-import { Instrument } from "../lib/entities/Instrument";
-import { MusicType } from "../lib/entities/MusicType";
-import { UserPrefType } from "../lib/entities/UserPrefType";
+import { AuthActionType } from "../lib/entities/AuthActionType.js";
+import { AuthBitmasksPermission } from "../lib/entities/AuthBitmasksPermission.js";
+import { AuthUserType } from "../lib/entities/AuthUserType.js";
+import { CommitteeKey } from "../lib/entities/CommitteeKey.js";
+import { CommitteePosition } from "../lib/entities/CommitteePosition.js";
+import { ConnectionType } from "../lib/entities/ConnectionType.js";
+import { GigType } from "../lib/entities/GigType.js";
+import { Instrument } from "../lib/entities/Instrument.js";
+import { MusicType } from "../lib/entities/MusicType.js";
+import { UserPrefType } from "../lib/entities/UserPrefType.js";
 
-export class NecessaryDataSeeder extends Seeder {
+export class DatabaseSeeder extends Seeder {
   async run(em: EntityManager): Promise<void> {
     await Promise.all([
       em.upsert(AuthBitmasksPermission, { id: "1", phpTitle: "AUTH_VIEW_HIDDEN_GIGS", bitmask: "127" }),
