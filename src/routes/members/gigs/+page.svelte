@@ -195,7 +195,7 @@
     {#if drafts.length > 0}
       There are some drafts lying around:
       {#each drafts as gig}
-        <a style="font-style: italic" href="/members/gigs/{gig.id}">{gig.title || "Unnamed draft"}</a>
+        <a style="font-style: italic" href="/members/gigs/{gig.id}/edit">{gig.title || "Unnamed draft"}</a>
         [created
         {(gig.posting_time && DateTime.fromJSDate(gig.posting_time).toFormat("HH:mm, dd/LL")) || "somewhen?"}
         by
