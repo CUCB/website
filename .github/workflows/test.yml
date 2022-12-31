@@ -206,10 +206,16 @@ jobs:
           python-version: "3.x"
           architecture: "x64"
 
-      - name: Install dependencies
+      - name: Insall ansible
         run: |
           pip install ansible
-          ansible-galaxy collection install -r deploy/ansible/requirements.yml
+
+      - name: Install ansible dependencies
+        uses: nick-fields/retry@v2
+        with:
+          timeout_minutes: 10
+          max_attempts: 5
+          command: ansible-galaxy collection install -r deploy/ansible/requirements.yml
 
       - name: Write deploy key to disk
         run: echo "$DEPLOY_PULL_KEY" > deploy/ansible/deploy_pull
