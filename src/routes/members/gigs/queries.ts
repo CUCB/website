@@ -91,7 +91,7 @@ const signupFields: EntityField<Gig, string>[] = [
 // TODO document why separate query filters and result filters are needed
 // TODO add motivating tests
 const gigQueryFilter = (session: { userId: string }): ObjectQuery<Gig> =>
-  !VIEW_HIDDEN_GIGS.guard(session) ? { admins_only: false } : {};
+  !VIEW_HIDDEN_GIGS.guard(session) ? { admins_only: false, type: { code: { $in: ["gig", "calendar"] } } } : {};
 
 const signupQueryFilter = (session: { userId: string }): ObjectQuery<Gig> => ({
   admins_only: false,
