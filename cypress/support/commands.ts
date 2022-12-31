@@ -7,7 +7,7 @@ declare global {
     interface Cypress {
       DateTime: typeof DateTime;
     }
-    interface Chainable<Subject> {
+    interface Chainable {
       login(username: string, password: string, options?: Partial<RequestOptions>): void;
       loginWithoutCySession(username: string, password: string, options?: Partial<RequestOptions>): void;
       searchEmails(limit?: number, start?: number): Chainable<{ items: Email[] }>;
@@ -28,7 +28,7 @@ declare global {
       selectNextMonth(): void;
       selectPreviousMonth(): void;
       // From cypress-plugin-tab
-      tab(): Chainable<Subject>;
+      tab(): Chainable;
     }
 
     interface Chainer<Subject> {
