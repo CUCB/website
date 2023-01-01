@@ -4,7 +4,8 @@ import type { RequestEvent } from "./$types";
 import orm from "$lib/database";
 import { UserInstrument } from "$lib/entities/UserInstrument";
 import { error, json } from "@sveltejs/kit";
-import { Literal, Null, Record, String } from "runtypes";
+import { Literal, Null, Record, String, Undefined } from "runtypes";
+import { Instrument } from "$lib/entities/Instrument";
 
 export const DELETE = async ({ request, params: { id }, locals: { session } }: RequestEvent): Promise<Response> => {
   assertLoggedIn(session);
@@ -36,7 +37,11 @@ export const DELETE = async ({ request, params: { id }, locals: { session } }: R
 
 const RESTORE_DELETED = Record({ deleted: Literal(false), userInstrumentId: String });
 const CREATE = Record({ nickname: String.Or(Null), instrument_id: String });
-const UPDATE_NICKNAME = Record({ nickname: String.Or(Null), userInstrumentId: String });
+const UPDATE_EXISTING_INSTRUMENT = Record({
+  nickname: String.Or(Null),
+  userInstrumentId: String,
+  instrument: String.Or(Undefined),
+});
 
 export const POST = async ({
   request,
@@ -58,12 +63,17 @@ export const POST = async ({
       } else {
         throw error(400, "Unrecognised user instrument");
       }
-    } else if (UPDATE_NICKNAME.guard(body)) {
+    } else if (UPDATE_EXISTING_INSTRUMENT.guard(body)) {
       const id = body.userInstrumentId;
-      const userInstrument = await em.findOne(UserInstrument, { id }, { populate: ["instrument"] });
+      let userInstrument = await em.findOne(UserInstrument, { id }, { populate: ["instrument"] });
       if (userInstrument) {
-        userInstrument.nickname = body.nickname || undefined;
+        userInstrument.nickname = body.nickname;
+        if (body.instrument) {
+          const instrument = await em.findOneOrFail(Instrument, { id: body.instrument });
+          userInstrument.instrument = instrument;
+        }
         await em.persistAndFlush(userInstrument);
+        userInstrument = await em.findOneOrFail(UserInstrument, { id }, { populate: ["instrument"] });
         return json(userInstrument);
       } else {
         throw error(400, "Unrecognised user instrument");
@@ -71,7 +81,7 @@ export const POST = async ({
     } else if (CREATE.guard(body)) {
       const newUserInstrument = em.create(UserInstrument, {
         instrument: body.instrument_id,
-        nickname: body.nickname || undefined,
+        nickname: body.nickname,
         user: userId,
       });
       await em.persistAndFlush(newUserInstrument);

@@ -24,7 +24,7 @@ export class UserInstrument {
   instrument!: Instrument;
 
   @Property({ length: 128, nullable: true, type: "varchar" })
-  nickname?: string;
+  nickname?: string | null;
 
   @Property({ default: false, type: "boolean" })
   deleted: boolean = false;

@@ -75,6 +75,7 @@
     EditingExisting,
     AddingNew,
     NotEditing,
+    ChangeTypeOfExisting,
   }
 
   type EditableUserInstrument = Omit<UserInstrument, "id"> & { id: string | undefined };
@@ -82,7 +83,8 @@
   type EditInstrument =
     | { state: EditInstrumentState.AddingNew }
     | { state: EditInstrumentState.NotEditing }
-    | { state: EditInstrumentState.EditingExisting; currentlyEditing: EditableUserInstrument };
+    | { state: EditInstrumentState.EditingExisting; currentlyEditing: EditableUserInstrument }
+    | { state: EditInstrumentState.ChangeTypeOfExisting; currentlyEditing: UserInstrument };
 
   let editingInstrument: EditInstrument = {
     state: EditInstrumentState.NotEditing,
@@ -139,6 +141,23 @@
       }
     };
   }
+
+  function changeInstrumentType(u_i_id?: string) {
+    return async (_: Event) => {
+      const instrument = user.instruments.find((ui) => ui.id === u_i_id);
+      if (instrument) {
+        editingInstrument = {
+          state: EditInstrumentState.ChangeTypeOfExisting,
+          currentlyEditing: instrument,
+        };
+      } else {
+        editingInstrument = {
+          state: EditInstrumentState.AddingNew,
+        };
+      }
+    };
+  }
+
   function editNewInstrument(e: CustomEvent<{ id: string }>) {
     const instr_id = e.detail.id;
     const instrument = allInstruments.find((i) => i.id === instr_id);
@@ -156,6 +175,22 @@
       throw `Could not find instrument with id: ${instr_id}`;
     }
   }
+
+  const editExistingInstrument = (existingInstrument: EditableUserInstrument) => (e: CustomEvent<{ id: string }>) => {
+    const instr_id = e.detail.id;
+    const instrument = allInstruments.find((i) => i.id === instr_id);
+    if (instrument) {
+      editingInstrument = {
+        state: EditInstrumentState.EditingExisting,
+        currentlyEditing: {
+          ...existingInstrument,
+          instrument,
+        },
+      };
+    } else {
+      throw `Could not find instrument with id: ${instr_id}`;
+    }
+  };
 
   function completeEditInstrument(e: CustomEvent<{ instrument: UserInstrument }>) {
     const instrument = e.detail.instrument;
@@ -442,10 +477,17 @@
       instrument="{editingInstrument.currentlyEditing}"
       user="{user}"
       on:save="{completeEditInstrument}"
+      on:changeInstrumentType="{changeInstrumentType(editingInstrument.currentlyEditing.id)}"
       on:cancel="{cancelEditInstrument}"
     />
   {:else if editingInstrument.state === EditInstrumentState.AddingNew}
     <InstrumentSelector allInstruments="{allInstruments}" on:select="{editNewInstrument}" />
+    <button on:click="{cancelAddInstrument}" data-test="add-instrument">Cancel</button>
+  {:else if editingInstrument.state === EditInstrumentState.ChangeTypeOfExisting}
+    <InstrumentSelector
+      allInstruments="{allInstruments}"
+      on:select="{editExistingInstrument(editingInstrument.currentlyEditing)}"
+    />
     <button on:click="{cancelAddInstrument}" data-test="add-instrument">Cancel</button>
   {:else if user.instruments?.length}
     <table>

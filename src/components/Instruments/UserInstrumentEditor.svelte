@@ -24,7 +24,11 @@
   }
 
   async function updateExistingInstrument() {
-    const variables = { userInstrumentId: instrument.id, nickname: nickname.trim() || null };
+    const variables = {
+      userInstrumentId: instrument.id,
+      nickname: nickname.trim() || null,
+      instrument: instrument.instrument.id,
+    };
     const body = JSON.stringify(variables);
 
     return await fetch(`/members/users/${user.id}/instruments`, { method: "POST", body }).then((res) => res.json());
@@ -47,6 +51,7 @@
     } else {
       result = await createNewInstrument();
     }
+    console.log(result);
     dispatch("save", { instrument: result });
   }
 
@@ -57,7 +62,9 @@
 
 <p>
   Instrument type: <em>{instrument.instrument.name}</em>.
-  <button class="link" on:click="{changeInstrumentType}">Click here</button> to change it.
+  <button class="link" on:click="{changeInstrumentType}" data-test="change-instrument-type"
+    >Click here to change the instrument type</button
+  >.
 </p>
 
 <p>You're editing the information for this <em>{instrument.instrument.name}</em>.</p>
@@ -70,5 +77,5 @@
   {:else}
     <button data-test="save-instrument-details" class="link" type="submit">Add instrument</button>
   {/if}
-  <button data-test="cancel-instrument-details" class="link" on:click="{cancel}">Cancel</button>
+  <button data-test="cancel-instrument-details" class="link" type="button" on:click="{cancel}">Cancel</button>
 </form>
