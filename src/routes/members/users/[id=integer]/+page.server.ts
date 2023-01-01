@@ -23,7 +23,7 @@ const PUBLIC_FIELDS: EntityField<User, string>[] = [
   "lastLoginDate",
   "joinDate",
   "instruments",
-  { instruments: ["instrument", { instrument: ["id", "name", "novelty"] }, "deleted"] },
+  { instruments: ["instrument", { instrument: ["id", "name", "novelty"] }, "deleted", "nickname"] },
 ];
 
 const SENSITIVE_FIELDS: EntityField<User, string>[] = [
@@ -42,7 +42,7 @@ const GIG_LINEUP_FIELDS: EntityField<GigLineupEntry, string>[] = [
     gig: ["id", "title", "date"],
     user_instruments: [
       "user_instrument",
-      { user_instrument: ["instrument", { instrument: ["id", "name", "novelty"] }] },
+      { user_instrument: ["instrument", { instrument: ["id", "name", "novelty"] }, "nickname"] },
     ],
   },
 ];
