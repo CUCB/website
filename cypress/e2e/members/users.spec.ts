@@ -3,6 +3,16 @@
 import { HASHED_PASSWORDS } from "../../database/users";
 import { String } from "runtypes";
 
+const gig = {
+  id: "5765456",
+  type: "1",
+  title: "A gig to sign up to",
+  admins_only: false,
+  allow_signups: true,
+  date: Cypress.DateTime.local().plus({ months: 1 }).toJSDate(),
+  time: "21:00",
+};
+
 const userWithFullInfo: User & { password: string } = {
   id: "282947",
   first: "Furry",
@@ -195,18 +205,111 @@ describe("User page", () => {
 
   describe("instrument editor", () => {
     beforeEach(() => {
+      cy.task("db:delete_instruments_for_user", Role.user.id);
+      cy.task("db:create_gig", gig);
       loginAs(Role.user);
       cy.visit("/members/users");
+      cy.waitForFormInteractive();
     });
-    it("can add new instruments", () => {});
 
-    it("can hard delete an instrument that's never been used", () => {});
+    it("can add new instruments", () => {
+      cy.get('[data-test="add-instrument"]').click();
+      cy.get('[data-test="add-instrument-41"]').click();
+      cy.get('[data-test="cancel-instrument-details"]').click();
+      cy.get(".s-7IPF32Wcq3s8 > :nth-child(14)").should("have.text", "No instruments found.");
+      cy.get('[data-test="add-instrument"]').click();
+      cy.get('[data-test="add-instrument-41"]').click();
+      cy.get('[data-test="save-instrument-details"]').click();
+      cy.get('[data-test="add-instrument"]').click();
+      cy.get('[data-test="add-instrument-57"]').click();
+      cy.get("#nickname").type("Parpy McParpface");
+      cy.get('[data-test="save-instrument-details"]').click();
 
-    it("can soft delete an instrument that's been played at a gig", () => {});
+      cy.get('[data-test="name"]').contains('"Parpy McParpface" [Baritone Saxophone]').should("be.visible");
+      cy.get('[data-test="name"]').contains("Cello").should("be.visible");
 
-    it("can change the nicknames of existing instruments", () => {});
+      cy.reload();
 
-    it("can change the type of existing instruments", () => {});
+      cy.get('[data-test="name"]').contains('"Parpy McParpface" [Baritone Saxophone]').should("be.visible");
+      cy.get('[data-test="name"]').contains("Cello").should("be.visible");
+    });
+
+    it("can hard delete an instrument that's never been used", () => {
+      cy.get('[data-test="add-instrument"]').click();
+      cy.get('[data-test="add-instrument-41"]').click();
+      cy.get('[data-test="save-instrument-details"]').click();
+
+      cy.get('[data-test="name"]').contains("Cello").should("be.visible");
+      cy.get('[data-test^="delete-instrument-"]').click();
+      cy.get('[data-test="name"]').should("not.exist");
+    });
+
+    it("can soft delete an instrument that's been played at a gig", () => {
+      cy.get('[data-test="add-instrument"]').click();
+      cy.get('[data-test="add-instrument-41"]').click();
+      cy.get('[data-test="save-instrument-details"]').click();
+      cy.get('[data-test="name"]')
+        .contains("Cello")
+        .parent()
+        .invoke("attr", "data-test")
+        .then((s) => s && s.split("user-instrument-")[1])
+        .then((id) => {
+          cy.request("POST", `/members/gigs/${gig.id}/signup`, { user_available: true, user_only_if_necessary: false });
+          cy.request("POST", `/members/gigs/${gig.id}/signup`, { insert: [{ id }], delete: [] });
+          cy.get(`[data-test="delete-instrument-${id}"]`).click();
+          cy.get(`[data-test="delete-instrument-${id}"]`).contains("Restore").should("be.visible");
+          cy.get("[data-test=name]")
+            .contains("Cello")
+            .should("have.regexCSS", "text-decoration", /line-through/);
+          cy.reload();
+          cy.get("[data-test=name]")
+            .contains("Cello")
+            .should("have.regexCSS", "text-decoration", /line-through/);
+          cy.waitForFormInteractive();
+          cy.get(`[data-test="delete-instrument-${id}"]`).contains("Restore").click();
+          cy.get("[data-test=name]")
+            .contains("Cello")
+            .should("not.have.regexCSS", "text-decoration", /line-through/);
+        });
+    });
+
+    it("can change the nicknames of existing instruments", () => {
+      cy.get('[data-test="add-instrument"]').click();
+      cy.get('[data-test="add-instrument-57"]').click();
+      cy.get('[data-test="save-instrument-details"]').click();
+      cy.get('[data-test="name"]').contains("Baritone Saxophone").should("be.visible");
+
+      cy.get("[data-test=name]").parent().contains("Edit").click();
+      cy.get("#nickname").type("Parpy McParpface");
+      cy.get('[data-test="save-instrument-details"]').click();
+
+      cy.get('[data-test="name"]').contains('"Parpy McParpface" [Baritone Saxophone]').should("be.visible");
+
+      cy.reload();
+
+      cy.get('[data-test="name"]').contains('"Parpy McParpface" [Baritone Saxophone]').should("be.visible");
+      cy.waitForFormInteractive();
+      cy.get("[data-test=name]").parent().contains("Edit").click();
+      cy.get("#nickname").clear();
+      cy.get('[data-test="save-instrument-details"]').click();
+      cy.get("[data-test=name]").should("have.text", "Baritone Saxophone");
+    });
+
+    it("can change the type of existing instruments", () => {
+      cy.get('[data-test="add-instrument"]').click();
+      cy.get('[data-test="add-instrument-57"]').click();
+      cy.get('[data-test="save-instrument-details"]').click();
+      cy.get('[data-test="name"]').contains("Baritone Saxophone").should("be.visible");
+
+      cy.get("[data-test=name]").parent().contains("Edit").click();
+      cy.get('[data-test="change-instrument-type"]').click();
+      cy.get('[data-test="add-instrument-55"]').click();
+      cy.get("#nickname").type("Less Parpy");
+      cy.get('[data-test="save-instrument-details"]').click();
+      cy.get('[data-test="name"]').should("have.text", '"Less Parpy" [Tenor Saxophone]');
+      cy.reload();
+      cy.get('[data-test="name"]').should("have.text", '"Less Parpy" [Tenor Saxophone]');
+    });
   });
 
   describe("details form", () => {
