@@ -34,7 +34,7 @@ services:
       EMAIL_PORT: 1025
       EMAIL_SSL: "false"
     command: >
-      bash -c "cd /home/node/app; npm ci; npm run build; chmod a+x wait-for-it.sh; npm run start:ci"
+      bash -c "cd /home/node/app; npm ci; npm run build; npm run start:ci"
 
   caddy:
     image: caddy:latest
