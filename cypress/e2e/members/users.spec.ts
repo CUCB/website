@@ -216,7 +216,7 @@ describe("User page", () => {
       cy.get('[data-test="add-instrument"]').click();
       cy.get('[data-test="add-instrument-41"]').click();
       cy.get('[data-test="cancel-instrument-details"]').click();
-      cy.get(".s-7IPF32Wcq3s8 > :nth-child(14)").should("have.text", "No instruments found.");
+      cy.contains("No instruments found.").should("be.visible");
       cy.get('[data-test="add-instrument"]').click();
       cy.get('[data-test="add-instrument-41"]').click();
       cy.get('[data-test="save-instrument-details"]').click();
