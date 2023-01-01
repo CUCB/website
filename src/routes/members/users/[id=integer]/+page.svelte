@@ -367,6 +367,7 @@
   <p><b>Location info:</b> {user.locationInfo}</p>
 {/if}
 
+<h3>Profile Picture</h3>
 <ProfilePicture user="{user}" canEdit="{canEdit}" lastUpdated="{profilePictureUpdated}" />
 
 {#if canEdit}

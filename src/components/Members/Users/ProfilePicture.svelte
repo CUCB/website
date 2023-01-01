@@ -10,7 +10,7 @@
   import { browser } from "$app/environment";
   import { Null, String } from "runtypes";
 
-  export let user: User;
+  export let user: Pick<User, "id" | "first" | "last">;
   export let canEdit: boolean;
   export let lastUpdated: string;
 
@@ -138,9 +138,11 @@
     max-width: 600px;
     height: 400px;
   }
+  img {
+    box-shadow: 0 0 4px 1px var(--footer_color);
+  }
 </style>
 
-<h3>Profile Picture</h3>
 {#if status === Status.NotUploading}
   <img
     class="theme-{$themeName}"
