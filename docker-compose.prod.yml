@@ -31,7 +31,7 @@ services:
       HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
     ports:
-      - "3001:3000"
+      - "127.0.0.1:3001:3000"
     volumes:
       - ./static:/usr/src/app/static
       - ${BLOCK_STORAGE}/images:/usr/src/app/images
