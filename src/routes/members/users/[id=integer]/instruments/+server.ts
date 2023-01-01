@@ -73,7 +73,7 @@ export const POST = async ({
           userInstrument.instrument = instrument;
         }
         await em.persistAndFlush(userInstrument);
-        userInstrument = await em.findOneOrFail(UserInstrument, { id }, { populate: ["instrument"] });
+        userInstrument = await em.findOne(UserInstrument, { id }, { populate: ["instrument"] });
         return json(userInstrument);
       } else {
         throw error(400, "Unrecognised user instrument");

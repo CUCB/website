@@ -24,7 +24,7 @@ export interface AggregateInstrument {
 export interface UserInstrument {
   instrument: Instrument;
   deleted: boolean;
-  nickname?: string;
+  nickname?: string | null;
   id: string;
 }
 

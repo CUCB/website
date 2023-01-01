@@ -8,7 +8,7 @@
 
   interface UserInstrument {
     id?: string;
-    nickname?: string;
+    nickname?: string | null;
     instrument: {
       id: string;
       name: string;
