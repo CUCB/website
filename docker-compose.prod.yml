@@ -30,6 +30,7 @@ services:
       EMAIL_PORT: 587
       HCAPTCHA_SITE_KEY: ${HCAPTCHA_SITE_KEY}
       HCAPTCHA_SECRET: ${HCAPTCHA_SECRET}
+      CALENDAR_SECRET: ${CALENDAR_SECRET}
     ports:
       - "127.0.0.1:3001:3000"
     volumes:
