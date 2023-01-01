@@ -270,6 +270,16 @@ const config = defineConfig({
           await em.upsertMany(Contact, contacts);
           return null;
         },
+        async "db:instruments_for_user"(user) {
+          const em = await makeOrm(process.env);
+          return await em.find(UserInstrument, { user }, { populate: ["instrument"] });
+        },
+        async "db:clear_lineup_for_gig"(gig) {
+          const em = await makeOrm(process.env);
+          await em.nativeDelete(GigLineupEntry, { gig });
+          await em.nativeDelete(GigLineupInstrument, { gig_id: gig });
+          return null;
+        },
       });
 
       return config;

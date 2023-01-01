@@ -68,10 +68,11 @@ export const load: PageServerLoad = async ({ locals, params: { id }, fetch }): P
     em.findOne(User, id, { fields: userFields }),
     em.fork().find(
       GigLineupEntry,
-      { user: { id }, user_instruments: { approved: true } },
+      { user: { id }, user_instruments: { approved: true }, gig: { type: { code: "gig" } } },
       {
         fields: GIG_LINEUP_FIELDS,
         populateWhere: PopulateHint.INFER,
+        orderBy: { gig: { date: "ASC" } },
       },
     ),
     em.find(UserPrefType, {}, { filters: ["attribute"] }).then((arr) => arr.map((obj) => wrap(obj).toJSON())),

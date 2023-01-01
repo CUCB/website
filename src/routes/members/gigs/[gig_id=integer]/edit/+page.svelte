@@ -149,29 +149,29 @@
     dateHasChanged(oldValue && `1970-01-01T${oldValue}`, newValue && `1970-01-01T${newValue}`);
 
   $: saved =
-    lastSaved.type === type_id &&
-    lastSaved.title === title.trim() &&
-    lastSaved.date === ((typeCode !== "calendar" && date) || null) &&
-    lastSaved.venue === venue_id &&
-    (lastSaved.summary ?? "") === (summary || "").trim() &&
-    lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
-    lastSaved.notes_band === (notes_band && notes_band.trim()) &&
-    !dateHasChanged(lastSaved.arrive_time, arrive_time) &&
-    !dateHasChanged(lastSaved.finish_time, finish_time) &&
-    !timeHasChanged(lastSaved.time, time) &&
-    lastSaved.admins_only === admins_only &&
-    lastSaved.advertise === advertise &&
-    lastSaved.allow_signups === allow_signups &&
-    lastSaved.food_provided === food_provided &&
-    // TODO the reason why this needs to ignore time can probably be reproduced with a test
-    // I couldn't work it out
-    // If I hit save on a gig from the mysql dump of the old prod database, it would say
-    // unsaved changes, despite me not having changed anything and hit save
-    !dateHasChangedIgnoringTime(lastSaved.quote_date, quote_date) &&
-    lastSaved.finance == (finance && finance.trim()) &&
-    lastSaved.finance_deposit_received == finance_deposit_received &&
-    lastSaved.finance_payment_received == finance_payment_received &&
-    lastSaved.finance_caller_paid == finance_caller_paid;
+    lastSaved.type === type_id && lastSaved.title === title.trim() && typeCode !== "calendar"
+      ? !dateHasChangedIgnoringTime(lastSaved.date, date)
+      : true &&
+        lastSaved.venue === venue_id &&
+        (lastSaved.summary ?? "") === (summary || "").trim() &&
+        lastSaved.notes_admin === (notes_admin && notes_admin.trim()) &&
+        lastSaved.notes_band === (notes_band && notes_band.trim()) &&
+        !dateHasChanged(lastSaved.arrive_time, arrive_time) &&
+        !dateHasChanged(lastSaved.finish_time, finish_time) &&
+        !timeHasChanged(lastSaved.time, time) &&
+        lastSaved.admins_only === admins_only &&
+        lastSaved.advertise === advertise &&
+        lastSaved.allow_signups === allow_signups &&
+        lastSaved.food_provided === food_provided &&
+        // TODO the reason why this needs to ignore time can probably be reproduced with a test
+        // I couldn't work it out
+        // If I hit save on a gig from the mysql dump of the old prod database, it would say
+        // unsaved changes, despite me not having changed anything and hit save
+        !dateHasChangedIgnoringTime(lastSaved.quote_date, quote_date) &&
+        lastSaved.finance == (finance && finance.trim()) &&
+        lastSaved.finance_deposit_received == finance_deposit_received &&
+        lastSaved.finance_payment_received == finance_payment_received &&
+        lastSaved.finance_caller_paid == finance_caller_paid;
 
   $: typeCode = type_id && gigTypes.find((type) => type_id === type.id)?.code;
   $: cancelled = typeCode === "gig_cancelled";

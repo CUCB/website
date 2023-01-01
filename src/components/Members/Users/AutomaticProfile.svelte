@@ -91,8 +91,7 @@
   {user.first}
   has played
   {gig_count}
-  {gig_count > 1 ? "gigs" : "gig"}
-  {#if gig_count > 1}, most recently{/if}
+  {#if gig_count > 1}gigs, most recently{:else} gig{/if}
   on the
   <a href="{gigLink(last_gig.gig.id)}">{last_gig_date}</a>.
   {#if gig_count > 1}The first one was back on the <a href="{gigLink(first_gig.gig.id)}">{first_gig_date}</a>.{/if}

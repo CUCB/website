@@ -13,6 +13,16 @@ const gig = {
   time: "21:00",
 };
 
+const secondGig = {
+  id: `${parseInt(gig.id) + 1}`,
+  type: "1",
+  title: "A gig in the past",
+  admins_only: false,
+  allow_signups: false,
+  date: "2019-05-01",
+  time: "20:00",
+};
+
 const userWithFullInfo: User & { password: string } = {
   id: "282947",
   first: "Furry",
@@ -23,7 +33,7 @@ const userWithFullInfo: User & { password: string } = {
   username: "fur23521",
   password: "abc123",
   email: "fur23521@cam.ac.uk",
-  user_instruments: [["Guitar", "Strummy"], "Whistle(s)"],
+  user_instruments: [["Guitar", "Strummy"], "Whistle(s)", "HTML Editor"],
   user_prefs: ["soundtech", "leader", "tshirt", "folder"],
   mobileContactInfo: "07123456789",
 };
@@ -410,6 +420,39 @@ describe("User page", () => {
   });
 
   describe("automatic biography", () => {
+    before(() => {
+      insertUser(userWithFullInfo);
+      cy.task("db:create_gig", gig);
+      cy.task("db:create_gig", secondGig);
+      cy.task("db:instruments_for_user", userWithFullInfo.id).then((instruments: any) => {
+        const instrumentsByName = new Map(instruments.map((i) => [i.instrument.name, i.id]));
+        cy.task("db:create_lineup", {
+          gig: gig.id,
+          entries: [
+            {
+              approved: true,
+              user: userWithFullInfo.id,
+              user_instruments: [{ user_instrument: instrumentsByName.get("Guitar"), approved: true }],
+            },
+          ],
+        });
+        cy.task("db:create_lineup", {
+          gig: secondGig.id,
+          entries: [
+            {
+              approved: true,
+              user: userWithFullInfo.id,
+              user_instruments: [
+                { user_instrument: instrumentsByName.get("Guitar"), approved: true },
+                { user_instrument: instrumentsByName.get("Whistle(s)"), approved: true },
+                { user_instrument: instrumentsByName.get("HTML Editor"), approved: true },
+              ],
+            },
+          ],
+        });
+      });
+    });
+
     describe("basic details", () => {
       beforeEach(() => {
         cy.task("db:update_user", [userWithFullInfo.id, { joinDate: null, lastLoginDate: null }]);
@@ -440,18 +483,61 @@ describe("User page", () => {
     describe("instruments", () => {
       visitOnceAs(urlFor(userWithFullInfo), Role.user);
 
-      it("specifies their primary intrument");
+      it("specifies their primary intrument", () => {
+        cy.contains("Furry's instrument of choice would seem to be Guitar").should("be.visible");
+      });
 
-      it("lists secondary instruments");
+      it("lists secondary instruments", () => {
+        cy.contains(/Apart from that, they have been known to play .* Whistle\(s\)/).should("be.visible");
+      });
 
-      it("shows footnote for novelty instruments if they exist");
+      it("shows footnote for novelty instruments if they exist", () => {
+        cy.contains("HTML Editor*").should("be.visible");
+        cy.contains("[*] We don't always take ourselves too seriously");
+      });
     });
   });
 
   describe("past gig details", () => {
+    before(() => {
+      insertUser(userWithFullInfo);
+      cy.task("db:create_gig", { ...gig, date: "2019-12-12" });
+      cy.task("db:create_gig", secondGig);
+      cy.task("db:instruments_for_user", userWithFullInfo.id).then((instruments: any) => {
+        const instrumentsByName = new Map(instruments.map((i) => [i.instrument.name, i.id]));
+        cy.task("db:create_lineup", {
+          gig: gig.id,
+          entries: [
+            {
+              approved: true,
+              user: userWithFullInfo.id,
+              user_instruments: [{ user_instrument: instrumentsByName.get("Guitar"), approved: true }],
+            },
+          ],
+        });
+        cy.task("db:create_lineup", {
+          gig: secondGig.id,
+          entries: [
+            {
+              approved: true,
+              user: userWithFullInfo.id,
+              user_instruments: [
+                { user_instrument: instrumentsByName.get("Guitar"), approved: true },
+                { user_instrument: instrumentsByName.get("Whistle(s)"), approved: true },
+                { user_instrument: instrumentsByName.get("HTML Editor"), approved: true },
+              ],
+            },
+          ],
+        });
+      });
+    });
+
     visitOnceAs(urlFor(userWithFullInfo), userWithFullInfo);
 
-    it("shows a list of past gigs with links to the gig pages");
+    it("shows a list of past gigs with links to the gig pages", () => {
+      cy.contains("Furry has played 2 gigs, most recently on the 12th December 2019").should("be.visible");
+      cy.contains("The first one was back on the 1st May 2019").should("be.visible");
+    });
 
     it("shows a list of who the user has played gigs with");
   });
