@@ -3,6 +3,7 @@
   import { enhance } from "$app/forms";
   import Fuse from "fuse.js";
   import SearchBox from "../../../components/SearchBox.svelte";
+  import { makeTitle } from "../../../view";
   import { CRSID_PATTERN, EMAIL_PATTERN } from "../../auth/_register";
   import type { ActionData, PageServerData } from "./$types";
   const regexString = (regexp: RegExp) => regexp.toString().slice(1, regexp.toString().length - 1);
@@ -42,6 +43,10 @@
     font-style: italic;
   }
 </style>
+
+<svelte:head>
+  <title>{makeTitle("Update Authorized Emails")}</title>
+</svelte:head>
 
 <h1>Update authorized emails</h1>
 

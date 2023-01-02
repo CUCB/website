@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import ProfilePicture from "../../../components/Members/Users/ProfilePicture.svelte";
+  import { makeTitle } from "../../../view";
   import type { PageData } from "./$types";
   export let data: PageData;
   $: ({ currentPage, totalPages, users, profilePicturesUpdated, sort } = data);
@@ -53,6 +54,10 @@
 </style>
 
 <svelte:window on:keyup="{keyNavigation}" />
+
+<svelte:head>
+  <title>{makeTitle("Who's who")}</title>
+</svelte:head>
 
 <h1>Who's who in CUCB</h1>
 
