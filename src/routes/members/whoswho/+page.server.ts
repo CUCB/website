@@ -50,5 +50,13 @@ export const load: PageServerLoad = async ({ url, fetch }) => {
   const profilePicturesUpdated = await Promise.all(
     users.map((user) => fetch(`/members/users/${user.id}/modified`).then((res) => res.text())),
   );
-  return { totalPages, currentPage, users, profilePicturesUpdated, sort };
+  const allNames = await em
+    .fork()
+    .find(
+      User,
+      { adminType: { role: { $ne: "music_only" } } },
+      { fields: ["id", "first", "last", "username"], orderBy: { first: QueryOrder.ASC, last: QueryOrder.ASC } },
+    )
+    .then((users) => users.map((user) => wrap(user).toPOJO()));
+  return { totalPages, currentPage, users, profilePicturesUpdated, sort, allNames };
 };

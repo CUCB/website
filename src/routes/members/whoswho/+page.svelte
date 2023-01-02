@@ -1,15 +1,22 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import Fuse from "fuse.js";
   import ProfilePicture from "../../../components/Members/Users/ProfilePicture.svelte";
+  import SearchBox from "../../../components/SearchBox.svelte";
   import { makeTitle } from "../../../view";
   import type { PageData } from "./$types";
   export let data: PageData;
-  $: ({ currentPage, totalPages, users, profilePicturesUpdated, sort } = data);
-  $: console.log(sort);
+  $: ({ currentPage, totalPages, users, profilePicturesUpdated, sort, allNames } = data);
 
   $: sortByQuery = (sort && `sort=${sort}`) ?? "";
   $: nextPage = `?${sortByQuery}&page=${currentPage + 1}`;
   $: previousPage = `?${sortByQuery}&page=${currentPage - 1}`;
+
+  $: fuse = new Fuse(allNames, {
+    ignoreLocation: true,
+    threshold: 0.35,
+    keys: ["first", "last", "username"],
+  });
 
   $: keyNavigation = (e: KeyboardEvent) =>
     e.key === "ArrowLeft" && currentPage > 1
@@ -72,6 +79,14 @@
 {:else}
   <p><a href="?sort=login">Sort by most recent login instead.</a> Sorted by name.</p>
 {/if}
+
+<SearchBox
+  on:select="{(e) => goto(`/members/users/${e.detail.id}`)}"
+  placeholder=""
+  fuse="{fuse}"
+  toDisplayName="{(i) => `${i.first} ${i.last}`}"
+  toId="{(i) => i.id}"
+/>
 
 <div class="people">
   {#each users as user, n (user.id)}
