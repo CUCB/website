@@ -223,6 +223,11 @@ jobs:
         run: echo "$DEPLOY_PULL_KEY" > deploy/ansible/deploy_pull
         env:
           DEPLOY_PULL_KEY: ${{ secrets.DEPLOY_PULL_KEY }}
+          
+      - name: Write deploy key to disk
+        run: echo "$KEY" > deploy/ansible/deploy_music_pull
+        env:
+          KEY: ${{ secrets.MUSIC_PULL_KEY }}
 
       # Source https://stackoverflow.com/a/58035262
       - name: Extract branch name

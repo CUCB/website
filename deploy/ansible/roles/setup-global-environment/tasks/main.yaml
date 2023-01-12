@@ -4,6 +4,12 @@
     dest: ~/.ssh/deploy_pull
     mode: "600"
 
+- name: Copy private key for music repository
+  copy:
+    src: "{{ playbook_dir }}/deploy_music_pull"
+    dest: ~/.ssh/deploy_music_pull
+    mode: "600"
+
 - name: Save docker variables to environment file
   include_role:
     name: create-variable
