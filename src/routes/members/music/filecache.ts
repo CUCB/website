@@ -1,4 +1,3 @@
-import { LS_COLORS } from "$env/static/private";
 import { stat, utimes, readdir, rm } from "fs/promises";
 import { DateTime } from "luxon";
 
