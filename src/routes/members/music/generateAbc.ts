@@ -39,7 +39,7 @@ export const singleAbcFile = async (
   const params = parseQuery(searchParams);
 
   let abc = await readFile(abcPath, { encoding: "utf-8" });
-  abcPath = `/tmp/abc/test.abc`;
+  abcPath = `/tmp/processing.abc`;
   await writeFile(abcPath, abc);
   if (params.clef && params.clef !== "treble") {
     abc = decommentClefPreTranspose(params.clef, abc);
@@ -62,7 +62,7 @@ export const singleAbcFile = async (
       },
     });
   } else if (isAudioFormat(outputType)) {
-    const midiPath = `/tmp/music/this.midi`;
+    const midiPath = `/tmp/music-this.midi`;
     const abc2midi = new Abc2midi(env["BINARY_ROOT"]);
     await abc2midi.convertToMidi(abcPath, midiPath);
     if (outputType === "midi") {
@@ -73,7 +73,7 @@ export const singleAbcFile = async (
         },
       });
     } else {
-      const mp3Path = `/tmp/music/this.mp3`;
+      const mp3Path = `/tmp/music-this.mp3`;
       const timidity = new Timidity(env["BINARY_ROOT"]);
       await timidity.convertTo(outputType, midiPath, mp3Path);
       return new Response(await readFile(mp3Path), {
@@ -84,7 +84,7 @@ export const singleAbcFile = async (
       });
     }
   } else {
-    const psPath = `/tmp/music/this.ps`;
+    const psPath = `/tmp/music-this.ps`;
     const abcm2ps = new Abcm2ps(env["BINARY_ROOT"]);
     await abcm2ps.convertToPs(abcPath, psPath);
     if (outputType === "ps") {
@@ -95,7 +95,7 @@ export const singleAbcFile = async (
         },
       });
     } else if (outputType === "pdf") {
-      const pdfPath = `/tmp/music/this.pdf`;
+      const pdfPath = `/tmp/music-this.pdf`;
       const ps2pdf = new Ps2pdf(env["BINARY_ROOT"]);
       await ps2pdf.convertToPdf(psPath, pdfPath);
       return new Response(await readFile(pdfPath), {
@@ -134,7 +134,7 @@ export const multipleAbcFiles = async (
     ),
   );
   // TODO make me random
-  let abcPath = `/tmp/abc/test.abc`;
+  let abcPath = `/tmp/processing.abc`;
   // TODO (unit) test that I get written to before abc2abc is invoked
   await writeFile(abcPath, abc);
 
@@ -161,7 +161,7 @@ export const multipleAbcFiles = async (
       },
     });
   } else {
-    const psPath = `/tmp/music/this.ps`;
+    const psPath = `/tmp/music-this.ps`;
     const abcm2ps = new Abcm2ps(env["BINARY_ROOT"]);
     await abcm2ps.convertToPs(abcPath, psPath);
     if (outputType === "ps") {
@@ -184,10 +184,10 @@ export const multipleAbcFiles = async (
       const info = pdfInfo(folder);
       const bookmarks = await generateBookmarks(titleToType, psPath, setTypes);
       const pdfIndex = [info, ...bookmarks].join("");
-      const pdfPath = `/tmp/music/this.pdf`;
+      const pdfPath = `/tmp/music-this.pdf`;
       const infoPath = `${pdfPath}.info`;
       await writeFile(infoPath, pdfIndex);
-      const bookmarkedPath = `/tmp/music/that.pdf`;
+      const bookmarkedPath = `/tmp/music-that.pdf`;
 
       const ps2pdf = new Ps2pdf(env["BINARY_ROOT"]);
       await ps2pdf.convertToPdf(psPath, pdfPath);

@@ -42,6 +42,7 @@
   copy:
     src: /usr/bin/{{ item }}
     dest: "{{ repo_root }}/bin/{{ item }}"
+    mode: preserve
     remote_src: true
   with_items:
     - abc2abc
