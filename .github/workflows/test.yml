@@ -23,6 +23,7 @@ jobs:
           echo "EMAIL_PORT=1025" >> .env
           echo "MUSIC_PATH=music" >> .env
           echo "SENTRY_DSN=dsn" >> .env
+          echo "SENTRY_ENVIRONMENT=ci_type_check" >> .env
       - name: Run check script
         run: |
           npm ci
@@ -69,6 +70,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Create .env file
+        run: |
+          echo "SENTRY_DSN=$SENTRY_DSN" >> .env
+          echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> .env
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENVIRONMENT: ci_cypress_test
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
@@ -125,10 +133,12 @@ jobs:
         run: |
           echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
           echo "SENTRY_DSN=$SENTRY_DSN" >> build.env
+          echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> build.env
           docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENVIRONMENT: production
 
       - name: Push image to registry
         run: docker push $CI_REGISTRY/cucb/$IMAGE_NAME:slim
