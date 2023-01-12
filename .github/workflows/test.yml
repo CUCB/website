@@ -22,6 +22,7 @@ jobs:
           echo "BINARY_ROOT=bin" >> .env
           echo "EMAIL_PORT=1025" >> .env
           echo "MUSIC_PATH=music" >> .env
+          echo "SENTRY_DSN=dsn" >> .env
       - name: Run check script
         run: |
           npm ci
@@ -123,9 +124,11 @@ jobs:
       - name: Build and tag image
         run: |
           echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
+          echo "SENTRY_DSN=$SENTRY_DSN" >> build.env
           docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
       - name: Push image to registry
         run: docker push $CI_REGISTRY/cucb/$IMAGE_NAME:slim
