@@ -3,8 +3,8 @@ import type { Transpose } from "./abc";
 
 class ProcessCommandRunner {
   run(command: string, args?: string[]): Promise<{ stdout: string; stderr: string; combined: string }> {
+    const process = spawn(command, args);
     return new Promise((resolve, reject) => {
-      const process = spawn(command, args);
       let stdout = "",
         stderr = "",
         combined = "";
@@ -132,10 +132,16 @@ export class Timidity {
     const output = type === "mp3" ? spawn(this.lame, ["-", outputPath]) : spawn(this.oggenc, ["-", "-o", outputPath]);
 
     return new Promise((resolve, reject) => {
+      let stderr = "";
       timidity.stdout.on("data", (data) => output.stdin.write(data));
+      timidity.stderr.on("data", (data) => (stderr += data.toString()));
       timidity.on("close", (code) => {
         output.stdout.emit("close");
-        resolve();
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(`Process exited with error code ${code}.\nStderr: ${stderr}`);
+        }
       });
     });
   }
