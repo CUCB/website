@@ -20,8 +20,9 @@ RUN echo "SESSION_SECRET=somethingreallynotsecret" >> .env
 RUN npx svelte-kit sync
 RUN npm run build
 
-FROM node:16.14-alpine AS app
+FROM node:16.14 AS app
 WORKDIR /usr/src/app
+RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi pdftk-java
 # Copy package.json to ensure "type":"module" is set
 COPY --from=build-app /usr/src/app/package.json ./
 COPY --from=build-app /usr/src/app/build ./build
