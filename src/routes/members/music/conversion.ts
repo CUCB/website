@@ -9,6 +9,8 @@ class ProcessCommandRunner {
         stderr = "",
         combined = "";
 
+      process.on("error", (err) => reject(err));
+
       process.stdout.on("data", (data) => {
         stdout += data.toString();
         combined += data.toString();
@@ -133,6 +135,8 @@ export class Timidity {
 
     return new Promise((resolve, reject) => {
       let stderr = "";
+      timidity.on("error", (err) => reject(err));
+      output.on("error", (err) => reject(err));
       timidity.stdout.on("data", (data) => output.stdin.write(data));
       timidity.stderr.on("data", (data) => (stderr += data.toString()));
       timidity.on("close", (code) => {
