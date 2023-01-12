@@ -15,6 +15,13 @@
       - git
       - cockpit
       - nullmailer
+      - lame
+      - vorbis-tools
+      - ghostscript
+      - timidity
+      - abcm2ps
+      - abcmidi # abc2abc and abcmidi
+      - pdftk-java
     update_cache: yes
 
 - name: Configure nullmailer SMTP settings
@@ -25,3 +32,22 @@
 - name: Install Python Dropbox sdk
   pip:
     name: dropbox
+
+- name: Ensure bin directory exists
+  file:
+    name: "{{ repo_root }}/bin"
+    state: directory
+
+- name: Copy music page dependencies to bin folder
+  copy:
+    src: /usr/bin/{{ item }}
+    dest: "{{ repo_root }}/bin/{{ item }}"
+  with_items:
+    - abc2abc
+    - abc2midi
+    - abcm2ps
+    - lame
+    - oggenc
+    - pdftk
+    - ps2pdf
+    - timidity

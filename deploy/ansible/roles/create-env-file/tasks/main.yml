@@ -63,3 +63,19 @@
     env_file: "{{ repo_root }}/.env"
     name: CALENDAR_SECRET
     value: "{{ calendar_secret }}"
+
+- name: Create binary root variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: BINARY_ROOT
+    value: "bin"
+
+- name: Create music path variable
+  include_role:
+    name: create-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: MUSIC_PATH
+    value: "music"

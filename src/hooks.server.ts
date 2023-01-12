@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import signature from "cookie-signature";
 import dotenv from "dotenv";
-import type { Cookies, Handle } from "@sveltejs/kit";
+import type { Cookies, Handle, HandleServerError } from "@sveltejs/kit";
 import { Session } from "./lib/entities/Session";
 import orm from "./lib/database";
 import { User } from "./lib/entities/User";
@@ -36,6 +36,11 @@ export const handle: Handle = async ({ event, resolve }) => {
 
   return await resolve(event);
 };
+
+// export const handleError: HandleServerError = ({ error, event }) => {
+//   const errorId = crypto.randomUUID();
+
+// }
 
 async function sessionFromHeaders(cookies: Cookies) {
   let session = undefined;

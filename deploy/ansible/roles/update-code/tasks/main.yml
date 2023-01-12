@@ -6,6 +6,14 @@
     key_file: ~/.ssh/deploy_pull
     version: "{{ ci_commit_branch }}"
 
+- name: Clone the music repository
+  git:
+    repo: ssh://git@github.com/cucb/music.git
+    dest: "{{ repo_root }}/music"
+    accept_hostkey: yes
+    key_file: ~/.ssh/deploy_pull
+    version: "{{ ci_commit_branch }}"
+
 - name: Install backup script dependencies
   community.general.npm:
     path: "{{ repo_root }}/deploy/js"

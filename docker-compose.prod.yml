@@ -36,6 +36,8 @@ services:
     volumes:
       - ./static:/usr/src/app/static
       - ${BLOCK_STORAGE}/images:/usr/src/app/images
+      - ./bin:/usr/src/app/bin
+      - ./music:/usr/src/app/music
     restart: always
     command: "node build"
     logging:
