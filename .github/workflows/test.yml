@@ -21,7 +21,7 @@ jobs:
           echo "HCAPTCHA_SECRET=somethingreallynotsecret" >> .env
           echo "BINARY_ROOT=bin" >> .env
           echo "EMAIL_PORT=1025" >> .env
-          echo "MUSIC_ROOT=music" >> .env
+          echo "MUSIC_PATH=music" >> .env
       - name: Run check script
         run: |
           npm ci
