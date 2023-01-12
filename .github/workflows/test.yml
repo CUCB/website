@@ -208,7 +208,7 @@ jobs:
           python-version: "3.x"
           architecture: "x64"
 
-      - name: Insall ansible
+      - name: Install ansible
         run: |
           pip install ansible
 
