@@ -6,9 +6,10 @@ import { Session } from "./lib/entities/Session";
 import orm from "./lib/database";
 import { User } from "./lib/entities/User";
 import { env } from "$env/dynamic/private";
-import { SENTRY_DSN } from "$env/static/private";
+import { SENTRY_DSN, SENTRY_ENVIRONMENT } from "$env/static/private";
 import type { CookieSerializeOptions } from "cookie";
 import * as Sentry from "@sentry/node";
+import { Record, String } from "runtypes";
 
 dotenv.config();
 const SESSION_SECRET = env["SESSION_SECRET"];
@@ -41,10 +42,13 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 Sentry.init({
   dsn: SENTRY_DSN,
+  environment: SENTRY_ENVIRONMENT,
 });
 
 export const handleError: HandleServerError = ({ error, event }) => {
-  Sentry.captureException(error);
+  if (!(Record({ message: String }).guard(error) && error.message.includes("Not found"))) {
+    Sentry.captureException(error);
+  }
 };
 
 async function sessionFromHeaders(cookies: Cookies) {
