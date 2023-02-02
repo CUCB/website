@@ -30,6 +30,8 @@ const sentryConfig = !process.env["SKIP_SENTRY"] && {
   ignore: ["node_modules", "vite.config.js"],
 };
 
+console.log(`Sentry config: ${JSON.stringify(sentryConfig)}`);
+
 const plugins = [wasm(), sveltekit()];
 
 /** @type {import('vite').UserConfig} */
