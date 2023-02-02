@@ -44,6 +44,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 Sentry.init({
   dsn: SENTRY_DSN,
   environment: SENTRY_ENVIRONMENT,
+  ...import.meta.sentry,
 });
 
 export const handleError: HandleServerError = ({ error, event }) => {

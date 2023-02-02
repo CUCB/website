@@ -20,3 +20,10 @@ declare namespace App {
 
   interface Platform {}
 }
+
+interface ImportMeta {
+  readonly sentry: {
+    dist: string;
+    release: string;
+  };
+}
