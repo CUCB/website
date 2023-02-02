@@ -1,10 +1,10 @@
 # This stage installs the runtime dependencies.
-FROM node:16.14 AS build-runtime
+FROM node:19 AS build-runtime
 WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 RUN npm ci --production --unsafe-perm
 
-FROM node:16.14 AS build-app
+FROM node:19 AS build-app
 WORKDIR /usr/src/app
 COPY package*.json ./
 COPY --from=build-runtime /usr/src/app/node_modules ./node_modules
@@ -22,9 +22,9 @@ RUN echo "SESSION_SECRET=somethingreallynotsecret" >> .env
 RUN npx svelte-kit sync
 RUN npm run build
 
-FROM node:16.14 AS app
+FROM node:19 AS app
 WORKDIR /usr/src/app
-RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi pdftk-java
+RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi :pdftk-java
 RUN mkdir bin/
 RUN cp /usr/bin/abc2abc ./bin/
 RUN cp /usr/bin/abc2midi ./bin/
