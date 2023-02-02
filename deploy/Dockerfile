@@ -25,14 +25,15 @@ RUN npm run build
 FROM node:16.14 AS app
 WORKDIR /usr/src/app
 RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi pdftk-java
-COPY /bin/abc2abc ./bin/
-COPY /bin/abc2midi ./bin/
-COPY /bin/abcm2ps ./bin/
-COPY /bin/lame ./bin/
-COPY /bin/oggenc ./bin/
-COPY /bin/pdftk ./bin/
-COPY /bin/ps2pdf ./bin/
-COPY /bin/timidity ./bin/
+RUN mkdir bin/
+RUN cp /usr/bin/abc2abc ./bin/
+RUN cp /usr/bin/abc2midi ./bin/
+RUN cp /usr/bin/abcm2ps ./bin/
+RUN cp /usr/bin/lame ./bin/
+RUN cp /usr/bin/oggenc ./bin/
+RUN cp /usr/bin/pdftk ./bin/
+RUN cp /usr/bin/ps2pdf ./bin/
+RUN cp /usr/bin/timidity ./bin/
 # Copy package.json to ensure "type":"module" is set
 COPY --from=build-app /usr/src/app/package.json ./
 COPY --from=build-app /usr/src/app/build ./build
