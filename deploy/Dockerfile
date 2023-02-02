@@ -10,6 +10,7 @@ COPY package*.json ./
 COPY --from=build-runtime /usr/src/app/node_modules ./node_modules
 RUN sed -i "s/^.*cypress.*$//" package.json
 RUN npm install --no-audit --unsafe-perm
+RUN pkg install git
 COPY src ./src
 # copy static files for service worker to be populated correctly
 COPY static ./static
@@ -22,7 +23,7 @@ RUN npm run build
 
 FROM node:16.14 AS app
 WORKDIR /usr/src/app
-RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi pdftk-java musl git
+RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi pdftk-java musl
 # Copy package.json to ensure "type":"module" is set
 COPY --from=build-app /usr/src/app/package.json ./
 COPY --from=build-app /usr/src/app/build ./build
