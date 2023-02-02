@@ -24,7 +24,7 @@ RUN npm run build
 
 FROM node:19 AS app
 WORKDIR /usr/src/app
-RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi :pdftk-java
+RUN apt update && apt install -y lame vorbis-tools ghostscript timidity abcm2ps abcmidi pdftk-java
 RUN mkdir bin/
 RUN cp /usr/bin/abc2abc ./bin/
 RUN cp /usr/bin/abc2midi ./bin/
