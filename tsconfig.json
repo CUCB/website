@@ -11,6 +11,6 @@
     "emitDecoratorMetadata": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
-    "types": ["vitest/importMeta", "vite-plugin-sentry/client"]
+    "types": ["vitest/importMeta"]
   }
 }
