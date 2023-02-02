@@ -77,7 +77,7 @@ jobs:
         run: |
           echo "SENTRY_DSN=$SENTRY_DSN" >> .env
           echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> .env
-          echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> build.env
+          echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> .env
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: ci_cypress_test

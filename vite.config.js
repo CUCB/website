@@ -8,7 +8,7 @@ import { execSync } from "child_process";
 dotenv.config();
 
 /** @type {import('@sentry/vite-plugin').SentryVitePluginOptions} */
-const sentryConfig = !process.env["SKIP_SENTRY"] && {
+const sentryConfig = !process.env["SENTRY_SKIP"] && {
   url: "https://sentry.io",
   authToken: process.env["SENTRY_AUTH_TOKEN"],
   org: "cucb",
@@ -29,9 +29,6 @@ const sentryConfig = !process.env["SKIP_SENTRY"] && {
   },
   ignore: ["node_modules", "vite.config.js"],
 };
-
-console.log(`Process env: ${JSON.stringify(process.env)}`);
-console.log(`Sentry config: ${JSON.stringify(sentryConfig)}`);
 
 const plugins = [wasm(), sveltekit()];
 
