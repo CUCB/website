@@ -13,7 +13,7 @@ const sentryConfig = !process.env["SENTRY_SKIP"] && {
   authToken: process.env["SENTRY_AUTH_TOKEN"],
   org: "cucb",
   project: "website",
-  release: "0.1.0",
+  release: "0.1.1",
   dist: execSync("git rev-parse HEAD").toString().trim(),
   include: ".",
   deploy: {
