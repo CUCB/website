@@ -32,6 +32,8 @@ const sentryConfig = !process.env["SENTRY_SKIP"] && {
 
 const plugins = [wasm(), sveltekit()];
 
+console.log(sentryConfig);
+
 /** @type {import('vite').UserConfig} */
 const config = {
   plugins: sentryConfig ? [...plugins, sentryVitePlugin(sentryConfig)] : plugins,
