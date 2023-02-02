@@ -11,6 +11,7 @@ COPY --from=build-runtime /usr/src/app/node_modules ./node_modules
 RUN sed -i "s/^.*cypress.*$//" package.json
 RUN npm install --no-audit --unsafe-perm
 RUN apk add git
+COPY .git ./.git
 COPY src ./src
 # copy static files for service worker to be populated correctly
 COPY static ./static
