@@ -8,6 +8,7 @@ import { Committee } from "$lib/entities/Committee";
 import orm from "$lib/database";
 import { LoadStrategy } from "@mikro-orm/core";
 import { env } from "$env/dynamic/private";
+import { captureException } from "@sentry/node";
 dotenv.config();
 
 export const POST: RequestHandler = async ({ request }) => {
@@ -27,7 +28,7 @@ export const POST: RequestHandler = async ({ request }) => {
       body,
     }).then((res) => res.json())) as typeof hcaptcha;
   } catch (e) {
-    console.error(e);
+    captureException(e, { tags: { action: "send-booking-email", hcaptcha: true } });
     throw error(
       500,
       `Sorry, we had a problem sending an email. Please email the secretary directly at <a href="mailto:secretary@cucb.co.uk">secretary@cucb.co.uk</a>.`,
@@ -49,6 +50,7 @@ export const POST: RequestHandler = async ({ request }) => {
   } catch (e) {
     // We deal with not found anyway, don't worry about it
     console.error("Failed to find secretary email");
+    captureException(e, { tags: { action: "query-secretary-email" } });
     console.error(e);
   }
   const secretary = {
@@ -76,59 +78,41 @@ export const POST: RequestHandler = async ({ request }) => {
         ? `Booking enquiry information:\n\tOccasion:\t${occasion}\n\tDates:\t\t${dates}\n\tTimes:\t\t${times}\n\tVenue:\t\t${venue}\n\n`
         : `Booking enquiry information:\tNone\n\n`;
 
-    const sendSecretaryEmail = new Promise((resolve, reject) =>
-      client.send(
-        {
-          from: `CUCB Online Contact Form <${env["EMAIL_SEND_ADDRESS"]}>`,
-          "reply-to": `${name.trim()} <${email.trim()}>`,
-          to: `CUCB Secretary <${secretary.email}>`,
-          subject: `${name} — Online Enquiry`,
-          text: `Hello ${
-            secretary.casualName
-          }!\n\nYou have been sent the following enquiry by ${name} (${email}).\n\n${enquiryInformation}Message:\n\n\n-----------------------\n\n${escapeHtml(
-            message,
-          )}\n\n-----------------------\n\nMany thanks!\n`,
-        },
-        (err, _message) => {
-          if (err) {
-            console.error(err);
-            reject(
-              error(
-                503,
-                `Sorry, we had a problem sending an email. Please email the secretary directly at <a href="mailto:${secretary.email}">${secretary.email}</a>.`,
-              ),
-            );
-          } else {
-            resolve(null);
-          }
-        },
-      ),
-    );
-    const sendClientEmail = new Promise((resolve, reject) =>
-      client.send(
-        {
-          from: `CUCB Online Contact Form <${env["EMAIL_SEND_ADDRESS"]}>`,
-          "reply-to": `CUCB Secretary <${secretary.email}>`,
-          to: `${email}`,
-          subject: `[Cambridge University Ceilidh Band] Confirmation of Message`,
-          text: `Dear ${name},\n\nThank you for your e-mail.\n\n Our secretary will be in touch as soon as possible!\n\nThe Cambridge University Ceilidh Band\n\nFor your reference:\n\n${enquiryInformation}Message:\n\n\n-----------------------\n\n${escapeHtml(
-            message,
-          )}\n\n-----------------------\n`,
-        },
-        (err, _message) => {
-          if (err) {
-            reject(
-              error(
-                400,
-                `We successfully sent an email to our secretary, but failed to send a receipt to the email address you provided (${email}). If this is incorrect, please email the secretary at ${secretary.email} so they can reply to the correct place.`,
-              ),
-            );
-          } else {
-            resolve(null);
-          }
-        },
-      ),
-    );
+    const sendSecretaryEmail = client
+      .sendAsync({
+        from: `CUCB Online Contact Form <${env["EMAIL_SEND_ADDRESS"]}>`,
+        "reply-to": `${name.trim()} <${email.trim()}>`,
+        to: `CUCB Secretary <${secretary.email}>`,
+        subject: `${name} — Online Enquiry`,
+        text: `Hello ${
+          secretary.casualName
+        }!\n\nYou have been sent the following enquiry by ${name} (${email}).\n\n${enquiryInformation}Message:\n\n\n-----------------------\n\n${escapeHtml(
+          message,
+        )}\n\n-----------------------\n\nMany thanks!\n`,
+      })
+      .catch((err) => {
+        console.error(err);
+        throw error(
+          503,
+          `Sorry, we had a problem sending an email. Please email the secretary directly at <a href="mailto:${secretary.email}">${secretary.email}</a>.`,
+        );
+      });
+    const sendClientEmail = client
+      .sendAsync({
+        from: `CUCB Online Contact Form <${env["EMAIL_SEND_ADDRESS"]}>`,
+        "reply-to": `CUCB Secretary <${secretary.email}>`,
+        to: `${email}`,
+        subject: `[Cambridge University Ceilidh Band] Confirmation of Message`,
+        text: `Dear ${name},\n\nThank you for your e-mail.\n\n Our secretary will be in touch as soon as possible!\n\nThe Cambridge University Ceilidh Band\n\nFor your reference:\n\n${enquiryInformation}Message:\n\n\n-----------------------\n\n${escapeHtml(
+          message,
+        )}\n\n-----------------------\n`,
+      })
+      .catch((err) => {
+        throw error(
+          400,
+          `We successfully sent an email to our secretary, but failed to send a receipt to the email address you provided (${email}). If this is incorrect, please email the secretary at ${secretary.email} so they can reply to the correct place.`,
+        );
+      });
 
     await sendSecretaryEmail;
     await sendClientEmail;

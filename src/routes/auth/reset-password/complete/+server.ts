@@ -1,3 +1,4 @@
+import { captureException } from "@sentry/node";
 import type { RequestHandler } from "@sveltejs/kit";
 import { error } from "@sveltejs/kit";
 import { Record, String } from "runtypes";
@@ -21,8 +22,7 @@ export const POST: RequestHandler = async ({ request }) => {
       if (e.status) {
         throw error(e.status, e.message);
       } else {
-        console.trace(e);
-        throw error(500, "Something went wrong");
+        throw e;
       }
     }
   } else if ("password" in body && String.check(body["password"])) {

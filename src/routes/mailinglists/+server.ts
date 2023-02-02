@@ -87,8 +87,8 @@ async function realpost(request: Request) {
       );
     }
 
-    const emailPromise = new Promise((resolve, reject) =>
-      client.send(
+    await client
+      .sendAsync(
         new Message({
           from: `CUCB Website <${env["EMAIL_SEND_ADDRESS"]}>`,
           to: `CUCB Webmaster <${webmaster.email}>`,
@@ -99,25 +99,16 @@ async function realpost(request: Request) {
             .map((list) => `\t${list}`)
             .join(",\n")}`,
         }),
-        (err, message) => {
-          // TODO process the error and feed back to the client
-          if (err) {
-            console.error("Error sending mailing list email");
-            console.error(err);
-            reject(
-              error(
-                503,
-                `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
-              ),
-            );
-          } else {
-            resolve(null);
-          }
-        },
-      ),
-    );
+      )
+      .catch((err) => {
+        console.error("Error sending mailing list email");
+        console.error(err);
+        throw error(
+          503,
+          `Sorry, we encountered a problem. Please email the webmaster directly at <a href="mailto:${webmaster.email}">${webmaster.email}</a> giving your name, email address and the names of the lists you wish to join, plus your reason for joining (if relevant).`,
+        );
+      });
 
-    await emailPromise;
     return new Response("");
   } else {
     console.error("Failed to verify captcha response: " + captchaKey);

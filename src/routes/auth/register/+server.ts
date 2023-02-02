@@ -4,6 +4,7 @@ import { String, Record as RuntypeRecord } from "runtypes";
 import { error } from "@sveltejs/kit";
 import type { RequestEvent } from "./$types";
 import type { CookieSerializeOptions } from "cookie";
+import { captureException } from "@sentry/node";
 
 function passwordIsValid(password: string): Boolean {
   return password.length >= 8;
@@ -65,10 +66,9 @@ export async function POST({ request, cookies, locals }: RequestEvent): Promise<
       } catch (e) {
         if (e.message) {
           let { message, status } = e;
-          console.log(e);
           throw error(status, message);
         } else {
-          console.trace(e);
+          captureException(e, { tags: { action: "register" } });
           throw error(500, "Internal error");
         }
       }

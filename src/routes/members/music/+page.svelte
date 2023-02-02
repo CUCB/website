@@ -80,19 +80,22 @@
             title="ABC file"
             target="_blank"
             rel="noreferrer"
-            href="/members/music/current/{set.filename}.abc?{queryString}"><i class="las la-lg la-file-alt"></i></a
+            href="/members/music/{set.current ? 'current' : 'archived'}/{set.filename}.abc?{queryString}"
+            ><i class="las la-lg la-file-alt"></i></a
           >
           <a
             title="PDF file"
             target="_blank"
             rel="noreferrer"
-            href="/members/music/current/{set.filename}.pdf?{queryString}"><i class="las la-lg la-file-pdf"></i></a
+            href="/members/music/{set.current ? 'current' : 'archived'}/{set.filename}.pdf?{queryString}"
+            ><i class="las la-lg la-file-pdf"></i></a
           >
           <a
             title="MP3 file"
             target="_blank"
             rel="noreferrer"
-            href="/members/music/current/{set.filename}.mp3?{queryString}"><i class="las la-lg la-file-audio"></i></a
+            href="/members/music/{set.current ? 'current' : 'archived'}/{set.filename}.mp3?{queryString}"
+            ><i class="las la-lg la-file-audio"></i></a
           >
           <!-- TODO add midi player -->
         </li>

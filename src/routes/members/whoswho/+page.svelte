@@ -74,6 +74,13 @@
   same on <a href="/members/users">your settings page</a>.
 </p>
 
+<p>
+  If you need to get in touch with someone about something to do with the band, check out the
+  <a href="/committee">committee page</a>.
+</p>
+
+<h2>Everybody ever!</h2>
+
 {#if (sort ?? "login") === "login"}
   <p>Sorted by most recent login. <a href="?sort=name">Sort by name instead.</a></p>
 {:else}

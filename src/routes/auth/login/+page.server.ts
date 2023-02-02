@@ -4,6 +4,7 @@ import { login } from "../../../auth";
 import { String, Record as RuntypeRecord, Optional } from "runtypes";
 import { error } from "@sveltejs/kit";
 import type { CookieSerializeOptions } from "cookie";
+import { captureException } from "@sentry/node";
 
 const NonEmptyString = String.withConstraint((str) => str.trim().length > 0);
 const LoginBody = RuntypeRecord({
@@ -51,7 +52,7 @@ export const actions: Actions = {
         } else if (e.status) {
           throw error(e.status, e.message);
         } else {
-          console.trace(e);
+          captureException(e, { tags: { action: "login" } });
           throw error(500, "Something went wrong");
         }
       }

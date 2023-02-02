@@ -83,6 +83,7 @@
     "@percy/cli": "^1.13.0",
     "@percy/cypress": "^3.1.0",
     "@rollup/plugin-wasm": "^6.0.1",
+    "@sentry/vite-plugin": "^0.3.0",
     "@types/bcrypt": "^5.0.0",
     "@types/body-scroll-lock": "^2.6.1",
     "@types/compression": "^1.7.0",

@@ -10,6 +10,7 @@ import { SENTRY_DSN, SENTRY_ENVIRONMENT } from "$env/static/private";
 import type { CookieSerializeOptions } from "cookie";
 import * as Sentry from "@sentry/node";
 import { Record, String } from "runtypes";
+import { LOGGED_IN } from "./lib/permissions";
 
 dotenv.config();
 const SESSION_SECRET = env["SESSION_SECRET"];
@@ -46,8 +47,13 @@ Sentry.init({
 });
 
 export const handleError: HandleServerError = ({ error, event }) => {
+  const session = event.locals.session;
+  let userId: string | undefined = undefined;
+  if (LOGGED_IN.guard(session)) {
+    userId = session.userId;
+  }
   if (!(Record({ message: String }).guard(error) && error.message.includes("Not found"))) {
-    Sentry.captureException(error);
+    Sentry.captureException(error, { user: { id: userId } });
   }
 };
 

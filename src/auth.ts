@@ -1,5 +1,4 @@
 import bcrypt from "bcrypt";
-import crypto from "crypto";
 import { SMTPClient } from "emailjs";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
@@ -9,6 +8,7 @@ import orm from "$lib/database";
 import { User } from "./lib/entities/User";
 import { List042 } from "./lib/entities/List042";
 import { env } from "$env/dynamic/private";
+import * as Sentry from "@sentry/node";
 
 dotenv.config();
 if (typeof env["SESSION_SECRET"] === "undefined") {
@@ -88,6 +88,7 @@ export const login: (details: LoginData) => Promise<SessionData> = async ({ user
     }
   } catch (e) {
     if (e.status) throw e;
+    Sentry.captureException(e);
     console.trace(e);
     throw errors.INTERNAL_ERROR;
   }
@@ -133,6 +134,7 @@ export const createAccount: (details: CreateAccountDetails) => Promise<NewAccoun
       if (e.detail.match(/already exists/i)) {
         throw errors.ACCOUNT_ALREADY_EXISTS;
       } else {
+        Sentry.captureException(e, { tags: { action: "register-user" } });
         console.trace(e);
         throw errors.INTERNAL_ERROR;
       }
@@ -193,6 +195,7 @@ CUCB Webmaster\n`,
       ],
     });
   } catch (err) {
+    Sentry.captureException(err, { tags: { email: true, action: "reset-password" } });
     console.error(`Error sending password reset email: ${err.message}`);
     throw errors.INTERNAL_ERROR;
   }
@@ -218,7 +221,7 @@ export async function completePasswordReset({ password, token }: { password: str
       const userRepository = (await orm()).em.fork().getRepository(User);
       await userRepository.nativeUpdate({ id: decoded.id }, { saltedPassword });
     } catch (e) {
-      console.trace(e);
+      Sentry.captureException(e, { tags: { action: "reset-password" } });
       throw errors.INTERNAL_ERROR;
     }
   } else {
