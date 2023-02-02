@@ -39,6 +39,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16"
+      - name: Create .env file to disable sentry
+        run: |
+          echo "SENTRY_SKIP=true" > .env
       - name: Run unit tests
         run: |
           npm ci
@@ -74,9 +77,11 @@ jobs:
         run: |
           echo "SENTRY_DSN=$SENTRY_DSN" >> .env
           echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> .env
+          echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> build.env
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: ci_cypress_test
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
@@ -134,11 +139,13 @@ jobs:
           echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
           echo "SENTRY_DSN=$SENTRY_DSN" >> build.env
           echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> build.env
+          echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> build.env
           docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: production
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       - name: Push image to registry
         run: docker push $CI_REGISTRY/cucb/$IMAGE_NAME:slim
