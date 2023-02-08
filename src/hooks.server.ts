@@ -41,11 +41,13 @@ export const handle: Handle = async ({ event, resolve }) => {
   return await resolve(event);
 };
 
-Sentry.init({
-  dsn: SENTRY_DSN,
-  environment: SENTRY_ENVIRONMENT,
-  ...import.meta.sentry,
-});
+if (!env["SENTRY_SKIP"]) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    environment: SENTRY_ENVIRONMENT,
+    ...import.meta.sentry,
+  });
+}
 
 export const handleError: HandleServerError = ({ error, event }) => {
   const session = event.locals.session;
@@ -54,7 +56,11 @@ export const handleError: HandleServerError = ({ error, event }) => {
     userId = session.userId;
   }
   if (!(Record({ message: String }).guard(error) && error.message.includes("Not found"))) {
-    Sentry.captureException(error, { user: { id: userId } });
+    if (!env["SENTRY_SKIP"]) {
+      Sentry.captureException(error, { user: { id: userId } });
+    } else {
+      console.error(error);
+    }
   }
 };
 
