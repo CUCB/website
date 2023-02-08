@@ -21,6 +21,7 @@ const sentryConfig = !process.env["SENTRY_SKIP"] && {
   },
   setCommits: {
     auto: true,
+    ignoreMissing: true,
   },
   sourceMaps: {
     include: ["./dist/assets"],
