@@ -272,7 +272,7 @@
     </h2>
     {#if gig.venue}
       <h3 class="main-detail venue-title">
-        <a href="/members/gigs/venue/{gig.venue.id}" class="venue-link">
+        <a href="/members/gigs/venues/{gig.venue.id}" class="venue-link">
           {gig.venue.name}{#if gig.venue.subvenue}&nbsp;| {gig.venue.subvenue}{/if}
         </a>
         <VenueAddressIcons venue="{gig.venue}" />

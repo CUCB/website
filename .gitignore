@@ -5,6 +5,7 @@ build
 yarn-error.log
 /cypress/screenshots/
 /cypress/downloads/
+/cypress/videos/
 /cypress/fixtures/example.json
 .env
 db_restore

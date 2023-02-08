@@ -1,0 +1,6 @@
+- name: "Create or update variable {{ name }}"
+  lineinfile:
+    path: "{{ env_file }}"
+    regexp: "^{{ name }}="
+    line: "{{ name }}={{ value }}"
+    create: yes

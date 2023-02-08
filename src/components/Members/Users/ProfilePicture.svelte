@@ -139,7 +139,7 @@
     height: 400px;
   }
   img {
-    box-shadow: 0 0 4px 1px var(--footer_color);
+    box-shadow: 0 0 4px 1px #000000aa;
   }
 </style>
 

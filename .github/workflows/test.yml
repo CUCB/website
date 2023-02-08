@@ -277,6 +277,7 @@ jobs:
             --extra-vars ${{ format('email_host={0}', 'smtp.sendgrid.net') }}
             --extra-vars ${{ format('"calendar_secret=''{0}''"', secrets.CALENDAR_SECRET) }}
             --extra-vars ${{ format('domain_name="{0}"', needs.pulumi.outputs.domain_name) }}
+            --extra-vars ${{ format('google_maps_api_key={0}', secrets.GOOGLE_MAPS_API_KEY)}}
         env:
           ANSIBLE_HOST_KEY_CHECKING: "false"
           ANSIBLE_DEPRECATION_WARNINGS: "false"

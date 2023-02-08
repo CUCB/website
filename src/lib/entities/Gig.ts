@@ -97,12 +97,15 @@ export class Gig {
   lineup = new Collection<GigLineupEntry>(this);
 
   get sort_date(): Date {
-    return (
-      (this.arrive_time && DateTime.fromJSDate(this.arrive_time)) ||
-      utcFromDateAndTime(this.date || new Date(), this.time || "00:00")
-    ).toJSDate();
+    return sortDate(this);
   }
 }
 
 const utcFromDateAndTime = (date: Date, time: String): DateTime =>
   DateTime.fromISO(`${DateTime.fromJSDate(date).toISODate()}T${time}Z`);
+
+export const sortDate = (gig: Pick<Gig, "date" | "time" | "arrive_time">): Date =>
+  (
+    (gig.arrive_time && DateTime.fromJSDate(gig.arrive_time)) ||
+    utcFromDateAndTime(gig.date || new Date(), gig.time || "00:00")
+  ).toJSDate();

@@ -1,4 +1,5 @@
-import { Entity, PrimaryKey, Property } from "@mikro-orm/core";
+import { Collection, Entity, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
+import { Gig } from "./Gig";
 
 @Entity({ schema: "cucb", tableName: "gig_venues" })
 export class GigVenue {
@@ -34,4 +35,7 @@ export class GigVenue {
 
   @Property({ columnType: "float8", nullable: true, type: "double" })
   longitude?: number | null;
+
+  @OneToMany({ entity: () => Gig, mappedBy: "venue" })
+  gigs = new Collection<Gig>(this);
 }

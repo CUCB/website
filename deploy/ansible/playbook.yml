@@ -1,4 +1,5 @@
-- hosts: all
+- name: Deploy CUCB website
+  hosts: all
   remote_user: root
   vars:
     repo_root: /var/www
@@ -9,7 +10,7 @@
     domain_name: dev.cucb.co.uk
   tasks:
     - name: Configure and run server
-      include_role:
+      ansible.builtin.include_role:
         name: "{{ configuration_step }}"
       loop:
         - install-dependencies

@@ -79,3 +79,11 @@
     env_file: "{{ repo_root }}/.env"
     name: MUSIC_PATH
     value: "music"
+
+- name: Create Google maps api key variable
+  include_role:
+    name: create-or-update-variable
+  vars:
+    env_file: "{{ repo_root }}/.env"
+    name: PUBLIC_GOOGLE_MAPS_API_KEY
+    value: "{{ google_maps_api_key }}"
