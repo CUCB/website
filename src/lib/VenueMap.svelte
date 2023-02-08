@@ -1,13 +1,13 @@
 <script>
   import { Loader } from "@googlemaps/js-api-loader";
   import { onMount } from "svelte";
-  import { PUBLIC_GOOGLE_MAPS_API_KEY } from "$env/static/public";
+  import { env } from "$env/dynamic/public";
   export let lat, lng, venues;
   let mapElem;
 
   onMount(() => {
     const loader = new Loader({
-      apiKey: PUBLIC_GOOGLE_MAPS_API_KEY,
+      apiKey: env.PUBLIC_GOOGLE_MAPS_API_KEY,
       version: "weekly",
     });
     let map;

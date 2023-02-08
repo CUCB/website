@@ -24,7 +24,6 @@ jobs:
           echo "MUSIC_PATH=music" >> .env
           echo "SENTRY_DSN=dsn" >> .env
           echo "SENTRY_ENVIRONMENT=ci_type_check" >> .env
-          echo "PUBLIC_GOOGLE_MAPS_API_KEY=notarealkey" >> .env
       - name: Run check script
         run: |
           npm ci
@@ -81,7 +80,6 @@ jobs:
           echo "SENTRY_DSN=$SENTRY_DSN" >> .env
           echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> .env
           echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> .env
-          echo "PUBLIC_GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> .env
         env:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: ci_cypress_test
@@ -147,7 +145,6 @@ jobs:
           echo "SENTRY_DSN=$SENTRY_DSN" >> build.env
           echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> build.env
           echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> build.env
-          echo "PUBLIC_GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> build.env
           docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}

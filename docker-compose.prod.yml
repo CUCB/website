@@ -33,6 +33,7 @@ services:
       CALENDAR_SECRET: ${CALENDAR_SECRET}
       BINARY_ROOT: ${BINARY_ROOT}
       MUSIC_PATH: ${MUSIC_PATH}
+      PUBLIC_GOOGLE_MAPS_API_KEY: ${PUBLIC_GOOGLE_MAPS_API_KEY}
     ports:
       - "127.0.0.1:3001:3000"
     volumes:
