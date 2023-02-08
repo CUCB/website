@@ -7,10 +7,9 @@
 
   onMount(() => {
     const loader = new Loader({
-      apiKey: env["PUBLIC_GOOGLE_MAPS_API_KEY"],
+      apiKey: env.PUBLIC_GOOGLE_MAPS_API_KEY,
       version: "weekly",
     });
-    console.log(lat, lng);
     let map;
     loader.load().then(() => {
       map = new google.maps.Map(mapElem, { center: { lat, lng }, zoom: 15 });
