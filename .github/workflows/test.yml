@@ -154,7 +154,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: production
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          GOOGLE_MAPS_API_KEY": ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Push image to registry
         run: docker push $CI_REGISTRY/cucb/$IMAGE_NAME:slim
