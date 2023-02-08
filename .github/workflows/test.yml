@@ -86,7 +86,7 @@ jobs:
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
           SENTRY_ENVIRONMENT: ci_cypress_test
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          GOOGLE_MAPS_API_KEY": ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
