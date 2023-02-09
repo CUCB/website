@@ -82,4 +82,4 @@
   }
 </style>
 
-<div bind:this="{mapElem}" height="400" width="400"></div>
+<div bind:this="{mapElem}"></div>
