@@ -1,20 +1,40 @@
-<script>
+<script lang="ts">
   import { Loader } from "@googlemaps/js-api-loader";
   import { onMount } from "svelte";
   import { env } from "$env/dynamic/public";
-  export let lat, lng, venues;
-  let mapElem;
+  export let lat: number,
+    lng: number,
+    venues: {
+      id: string;
+      name: string;
+      subvenue?: string;
+      mapLink?: string;
+      totalEvents: number;
+      currentUserEvents: number;
+      latitude: number;
+      longitude: number;
+    }[];
+  let mapElem: HTMLDivElement;
+  let map: google.maps.Map;
+  let infoWindow: google.maps.InfoWindow;
+
+  $: recenter(lat, lng);
+
+  function recenter(lat: number, lng: number): void {
+    if (map) {
+      map.panTo({ lat, lng });
+      infoWindow.close();
+    }
+  }
 
   onMount(() => {
     const loader = new Loader({
       apiKey: env.PUBLIC_GOOGLE_MAPS_API_KEY,
       version: "weekly",
     });
-    let map;
     loader.load().then(() => {
       map = new google.maps.Map(mapElem, { center: { lat, lng }, zoom: 15 });
-
-      const infoWindow = new google.maps.InfoWindow();
+      infoWindow = new google.maps.InfoWindow();
 
       for (const venue of venues) {
         const html = `<a data-sveltekit-noscroll data-sveltekit-preload-data="hover" href="/members/gigs/venues/${

@@ -4,8 +4,8 @@ import { NOT_MUSIC_ONLY } from "$lib/permissions";
 import type { PageServerLoad } from "./$types";
 import orm from "$lib/database";
 import { GigVenue } from "$lib/entities/GigVenue";
-import { wrap } from "@mikro-orm/core";
-import { Gig, sortDate } from "../../../../../lib/entities/Gig";
+import { QueryOrder, wrap } from "@mikro-orm/core";
+import { Gig, sortDate } from "$lib/entities/Gig";
 import { List } from "immutable";
 import type { EntityManager } from "@mikro-orm/postgresql";
 
@@ -76,72 +76,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
           ),
         )
         .sort(byCountDescending);
-      const queryAllVenues = em.createQueryBuilder(Gig, "g");
-      queryAllVenues
-        .where({ type: { code: { $in: ["gig", "calendar"] } } })
-        .joinAndSelect("g.venue", "gv")
-        .groupBy(["gv.id"])
-        .select(["count(g.id)", "gv.latitude", "gv.longitude", "gv.map_link", "gv.name", "gv.subvenue", "gv.id"]);
-      const queryMyVenues = em.createQueryBuilder(Gig, "g");
-      queryMyVenues
-        .join("g.lineup", "gl")
-        // TODO this should probably filter for only past gigs (and maybe only gigs)
-        .where({ lineup: { user: session.userId, approved: true } })
-        .joinAndSelect("g.venue", "gv")
-        .groupBy(["gv.id"])
-        .select(["count(g.id)", "gv.id"]);
-      const myVenues = await queryMyVenues.execute("all");
-      const myVenueCounts: Map<string, string> = new Map(
-        myVenues.map((venue: { id: string; count: string }) => [venue.id, venue.count]),
-      );
-      const queryUnusedVenues = em.createQueryBuilder(GigVenue, "gv");
-      queryUnusedVenues
-        .leftJoin("gv.gigs", "g")
-        .where({ gigs: { $exists: false } })
-        .select(["gv.latitude", "gv.longitude", "gv.map_link", "gv.name", "gv.subvenue", "gv.id"]);
-      const allVenues = await queryAllVenues
-        .execute("all")
-        .then((venues) =>
-          queryUnusedVenues
-            .execute("all")
-            .then((unused) => [...venues, ...unused.map((v: object) => ({ ...v, count: "0" }))]),
-        )
-        .then((venues) =>
-          venues.map(
-            ({
-              map_link: mapLink,
-              count: totalEvents,
-              name,
-              id,
-              latitude,
-              longitude,
-              subvenue,
-            }: {
-              map_link: string;
-              count: string;
-              name: string;
-              id: string;
-              latitude: string;
-              longitude: string;
-              subvenue: string;
-            }) => ({
-              id,
-              name,
-              totalEvents: parseInt(totalEvents),
-              currentUserEvents: parseInt(myVenueCounts.get(id) || "0"),
-              mapLink,
-              latitude: parseFloat(latitude),
-              longitude: parseFloat(longitude),
-              subvenue,
-            }),
-          ),
-        );
       return {
         venue,
         session: { ...session, save: undefined, destroy: undefined },
         lineupPeople,
         contacts,
-        allVenues,
         subvenues,
       };
     } else {

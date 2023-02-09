@@ -1,11 +1,21 @@
 <script lang="ts">
   import { DateTime } from "luxon";
-  import VenueMap from "$lib/VenueMap.svelte";
   import type { PageServerData } from "./$types";
   import { makeTitle } from "../../../../../view";
+  import { goto } from "$app/navigation";
+  import VenueEditor from "../../../../../components/Gigs/VenueEditor.svelte";
+  import { UPDATE_GIG_DETAILS } from "../../../../../lib/permissions";
+  import { mapCentre, mapTitle, pageTitle, selectedVenue } from "../+layout.svelte";
 
   export let data: PageServerData;
-  $: ({ venue, session, lineupPeople, contacts, allVenues, subvenues } = data);
+  $: pageTitle.set(`Venue info: ${venue.name}${venue.subvenue ? ` | ${venue.subvenue}` : ""}`);
+  mapTitle.set("Map near the venue!");
+  $: mapCentre.set((venue.latitude && venue.longitude && { lat: venue.latitude, lng: venue.longitude }) || null);
+  $: selectedVenue.set(venue.id);
+
+  let editing: Omit<typeof data.venue, "gigs"> | {} | null = null;
+  let confirmDelete = false;
+  $: ({ venue, session, lineupPeople, contacts, subvenues } = data);
   const marks = (gig: { contacts: { contact: { user?: { id: string } } }[]; lineup: { user: { id: string } }[] }) =>
     [
       gig.contacts.find((u) => u.contact.user?.id && session.userId && u.contact.user.id === session.userId) && "C",
@@ -32,17 +42,51 @@
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
+
+  button {
+    margin-right: 0.5em;
+  }
 </style>
 
 <svelte:head>
   <title>{makeTitle(`Venue: ${venue.name}`)}</title>
 </svelte:head>
 
-<h1>
-  Venue info: {venue.name}{#if venue.subvenue}{` | ${venue.subvenue}`}{/if}
-</h1>
-
-<!-- TODO dropdown/seach/(add/edit buttons) -->
+{#if UPDATE_GIG_DETAILS.guard(session)}
+  {#if editing}
+    <VenueEditor
+      {...editing}
+      on:saved="{(e) => {
+        const gigs = venue.gigs;
+        venue = e.detail.venue;
+        venue.gigs = gigs;
+        $selectedVenue = venue.id;
+        goto(venue.id);
+        editing = null;
+      }}"
+      on:cancel="{() => (editing = null)}"
+    />
+  {:else if confirmDelete}
+    <p>Are you sure you wish to delete <em>{venue.name}{venue.subvenue ? ` | ${venue.subvenue}` : ""}</em>?</p>
+    <button
+      on:click="{async () => {
+        const res = await fetch('', { method: 'DELETE' });
+        if (res.status >= 300) {
+          // TODO sentry
+          console.error('Oh shit');
+          confirmDelete = false;
+        } else {
+          await goto('.');
+        }
+      }}">Confirm</button
+    >
+    <button on:click="{() => (confirmDelete = false)}">Cancel</button>
+  {:else}
+    <button on:click="{() => (editing = {})}">Create new venue</button>
+    <button on:click="{() => (editing = { ...venue })}">Edit this venue</button>
+    <button on:click="{() => (confirmDelete = true)}">Delete this venue</button>
+  {/if}
+{/if}
 
 <p>
   Venue name: {#if venue.subvenue}<b>{venue.subvenue}</b> within {/if}<b>{venue.name}</b>. {#if venue.map_link}A map is <a
@@ -144,10 +188,4 @@
       {/each}
     </tbody>
   </table>
-{/if}
-
-{#if venue.latitude && venue.longitude}
-  <h2>Map near the venue!</h2>
-  <p>Let the webmaster know if you find any mistakes!</p>
-  <VenueMap lat="{venue.latitude}" lng="{venue.longitude}" venues="{allVenues}" />
 {/if}
