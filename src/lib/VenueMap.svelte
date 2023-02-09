@@ -29,7 +29,8 @@
 
   onMount(() => {
     const loader = new Loader({
-      apiKey: env.PUBLIC_GOOGLE_MAPS_API_KEY,
+      // TODO this should probably send an error to sentry if it doesn't exist (although maybe not every time someone loads the page)
+      apiKey: env.PUBLIC_GOOGLE_MAPS_API_KEY || "",
       version: "weekly",
     });
     loader.load().then(() => {
