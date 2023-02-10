@@ -1,4 +1,5 @@
 <script>
+  import Map from "../../components/Map.svelte";
   import { makeTitle, themeName } from "../../view";
 </script>
 
@@ -66,12 +67,14 @@
   <h2>Rehearsals</h2>
   <section>
     <p>
-      We rehearse every Thursday of term-time, usually from 8pm to 10pm. We are anticipating being able to continue
-      rehearsals in Michaelmas 2020 that comply with social distancing guidelines. Currently, we are establishing the
-      exact details of this, including the venue, so please sign up to the
-      <a href="/mailinglists">official list</a>
-      for up-to-date details ahead of each rehearsal.
+      We rehearse every Thursday of term-time from 8pm to 10pm, usually in Downing Place United Reform Church. We've
+      provided a map, but do check any emails from the <a href="/mailinglists">official list</a> before turning up in case
+      of a change of venue.
     </p>
+    <Map
+      title="Downing Place URC"
+      src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d9780.856344412003!2d0.1226766!3d52.2031569!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47d8709795e5f1b3%3A0xe55f073c45be606d!2sDowning%20Place%20United%20Reformed%20Church!5e0!3m2!1sen!2suk!4v1675987369309!5m2!1sen!2suk"
+    />
   </section>
 
   <h2>Gigs</h2>
