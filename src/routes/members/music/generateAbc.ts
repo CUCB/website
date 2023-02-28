@@ -34,7 +34,6 @@ export const singleAbcFile = async (
   } catch {
     throw error(404, "Set not found");
   }
-  // TODO ensure we don't have a path traversal vulnerability
   let abcPath = `${env["MUSIC_PATH"]}/${pathForAbcFile(music)}`;
   const params = parseQuery(searchParams);
 
@@ -53,7 +52,8 @@ export const singleAbcFile = async (
   }
   await writeFile(abcPath, abc);
 
-  // TODO cleanup files
+  // TODO Add logic to delete old files
+  // TODO make the files unique so concurrent users don't clobber each other
   if (outputType === "abc") {
     return new Response(abc, {
       headers: {
@@ -106,7 +106,6 @@ export const singleAbcFile = async (
       });
     }
   }
-  // TODO make me unique
 };
 
 export const multipleAbcFiles = async (
@@ -203,5 +202,4 @@ export const multipleAbcFiles = async (
       });
     }
   }
-  // TODO make me unique
 };

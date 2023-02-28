@@ -5,22 +5,16 @@
   export let data: PageData;
   $: ({ archivedSets, currentSets, types } = data);
 
-  $: archivedSetsByType = archivedSets.reduce(
-    (map: Map<string, unknown[]>, set) => map.set(set.type.id, [...(map.get(set.type.id) ?? []), set]),
-    new Map(),
-  );
+  const groupByTypeId = (map: Map<string, unknown[]>, set: { type: { id: string } }) =>
+    map.set(set.type.id, [...(map.get(set.type.id) ?? []), set]);
 
-  $: currentSetsByType = currentSets.reduce(
-    (map: Map<string, unknown[]>, set) => map.set(set.type.id, [...(map.get(set.type.id) ?? []), set]),
-    new Map(),
-  );
+  $: archivedSetsByType = archivedSets.reduce(groupByTypeId, new Map());
+
+  $: currentSetsByType = currentSets.reduce(groupByTypeId, new Map());
 
   $: allSetsByType = [...archivedSets, ...currentSets]
     .sort((a, b) => a.type.name.localeCompare(b.type.name) || a.title.localeCompare(b.title))
-    .reduce(
-      (map: Map<string, unknown[]>, set) => map.set(set.type.id, [...(map.get(set.type.id) ?? []), set]),
-      new Map(),
-    );
+    .reduce(groupByTypeId, new Map());
 
   let selectedView: "current" | "archived" | "all" = "current";
   $: setsByType = {
