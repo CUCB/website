@@ -48,7 +48,7 @@
     let standardOrHiddenGigs = Set(
       gigs.filter((gig) => gig.type.code === "gig").map((gig) => Map({ ...gig.type, admins_only: gig.admins_only })),
     );
-    return [...types.toJS(), ...standardOrHiddenGigs.toJS()] as (GigType & { admins_only?: boolean })[];
+    return [...types.toJS(), ...standardOrHiddenGigs.toJS()] as unknown as (GigType & { admins_only?: boolean })[];
   }
 
   $: keyItems = generateKeyItems(gigs);
