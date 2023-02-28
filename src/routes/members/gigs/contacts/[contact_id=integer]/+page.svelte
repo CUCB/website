@@ -32,6 +32,10 @@
   <p>This person is a <b>caller</b>.</p>
 {/if}
 
+{#if contact.email}
+  <p>Their e-mail address is <a href="mailto:{contact.email}">{contact.email}</a></p>
+{/if}
+
 {#if VIEW_HIDDEN_GIGS.guard(session) && bookedGigs}
   <h2>Gigs Booked</h2>
   <p>There are {bookedGigs.length} gig(s) booked/handled by {contact.name}.</p>

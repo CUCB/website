@@ -10,12 +10,15 @@ import { VIEW_HIDDEN_GIGS, VIEW_GIG_CONTACT_DETAILS } from "$lib/permissions";
 export const load: PageServerLoad = async ({ locals, params: { contact_id } }) => {
   const session = assertLoggedIn(locals.session);
   const em = (await orm()).em.fork();
-  // TODO fields
+  const nonAdminFilter = VIEW_GIG_CONTACT_DETAILS.guard(session) ? {} : { caller: true };
+  const adminFields = VIEW_GIG_CONTACT_DETAILS.guard(session) ? (["email", "notes"] as const) : [];
   const contact = await em
     .findOne(
       Contact,
-      { id: contact_id, ...(VIEW_GIG_CONTACT_DETAILS.guard(session) ? {} : { caller: true }) },
-      { fields: ["user.id", "caller", "name", "organization"] },
+      { id: contact_id, ...nonAdminFilter },
+      {
+        fields: ["user.id", "caller", "name", "organization", ...adminFields],
+      },
     )
     .then((res) => wrap(res).toPOJO());
   if (contact) {
@@ -48,7 +51,19 @@ export const load: PageServerLoad = async ({ locals, params: { contact_id } }) =
       )
       .then((res) => res.map((res) => wrap(res).toPOJO().gig));
 
-    return { contact, bookedGigs, calledGigs, session: { ...session, save: undefined, destroy: undefined } };
+    const allContacts = await em
+      .find(Contact, nonAdminFilter, {
+        fields: ["caller", "name", "organization", ...adminFields],
+      })
+      .then((contacts) => contacts.map((res) => wrap(res).toPOJO()));
+
+    return {
+      contact,
+      bookedGigs,
+      calledGigs,
+      session: { ...session, save: undefined, destroy: undefined },
+      allContacts,
+    };
   } else {
     throw error(404, "Contact not found");
   }
