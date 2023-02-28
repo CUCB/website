@@ -175,7 +175,7 @@ async function firstSuccess<T>(promises: Promise<T>[]): Promise<T | null> {
 
 type Session = { firstName: string; lastName: string; role: string; userId: string };
 
-export async function allGigs(ipAddress: string, baseUrl: string, session: Session) {
+async function allGigs(ipAddress: string, baseUrl: string, session: Session) {
   const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
   const gigs = await fetchMultiGigSummary(session, {
     $or: [{ date: { $gte: twoDaysAgo } }, { arrive_time: { $gte: twoDaysAgo } }],
@@ -216,7 +216,7 @@ export async function allGigs(ipAddress: string, baseUrl: string, session: Sessi
   return calendar.generate();
 }
 
-export async function myGigs(ipAddress: string, baseUrl: string, session: Session) {
+async function myGigs(ipAddress: string, baseUrl: string, session: Session) {
   const twoDaysAgo = DateTime.local().minus({ days: 2 }).toISO();
   const userGigs = await (await orm()).em.fork().findOne(
     User,
@@ -264,7 +264,7 @@ export async function myGigs(ipAddress: string, baseUrl: string, session: Sessio
   return calendar.generate();
 }
 
-export async function singleGig(gig_id: string | null, baseUrl: string, session: Session) {
+async function singleGig(gig_id: string | null, baseUrl: string, session: Session) {
   if (gig_id) {
     const gig = await fetchSpecificGigSummary(session, gig_id);
 
@@ -281,11 +281,11 @@ export async function singleGig(gig_id: string | null, baseUrl: string, session:
   }
 }
 
-export function calendarUrl(params: URLSearchParams): string {
+function calendarUrl(params: URLSearchParams): string {
   return `/data/cal.php?${params.toString()}`;
 }
 
-export function gigCalendarUrl(gig: string, user_id: string): string {
+export function _gigCalendarUrl(gig: string, user_id: string): string {
   const params = new URLSearchParams({
     type: "gig",
     gig: gig,
@@ -295,7 +295,7 @@ export function gigCalendarUrl(gig: string, user_id: string): string {
   return calendarUrl(params);
 }
 
-export function allgigsCalendarUrl(user_id: string): string {
+export function _allgigsCalendarUrl(user_id: string): string {
   const params = new URLSearchParams({
     type: "allgigs",
     _cal_uid: user_id.toString(),
@@ -304,7 +304,7 @@ export function allgigsCalendarUrl(user_id: string): string {
   return calendarUrl(params);
 }
 
-export function mygigsCalendarUrl(user_id: string): string {
+export function _mygigsCalendarUrl(user_id: string): string {
   const params = new URLSearchParams({
     type: "mygigs",
     _cal_uid: user_id.toString(),
@@ -359,7 +359,6 @@ export async function GET({ url, request }: RequestEvent): Promise<Response> {
 
   return new Response(body, {
     headers: {
-      filename: "allgigs.ics",
       "Content-Type": "text/calendar; charset=UTF-8",
       "Content-Disposition": `attachment; filename="${filename}"`,
       // These are all just copied from the old PHP code. I assume they do the right thing

@@ -1,10 +1,7 @@
-import { captureException } from "@sentry/node";
 import type { RequestHandler } from "@sveltejs/kit";
 import { error } from "@sveltejs/kit";
 import { Record, String } from "runtypes";
 import { completePasswordReset } from "../../../../auth";
-
-type PostRequest = Request & { body: FormData };
 
 const Body = Record({
   password: String.withConstraint((value) => value.length >= 6),
