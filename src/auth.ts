@@ -88,7 +88,7 @@ export const login: (details: LoginData) => Promise<SessionData> = async ({ user
     }
   } catch (e) {
     if (e.status) throw e;
-    Sentry.captureException(e);
+    Sentry.captureException(e, { tags: { action: "login-user" } });
     console.trace(e);
     throw errors.INTERNAL_ERROR;
   }
@@ -195,7 +195,7 @@ CUCB Webmaster\n`,
       ],
     });
   } catch (err) {
-    Sentry.captureException(err, { tags: { email: true, action: "reset-password" } });
+    Sentry.captureException(err, { tags: { email: true, action: "reset-password", subaction: "send-email" } });
     console.error(`Error sending password reset email: ${err.message}`);
     throw errors.INTERNAL_ERROR;
   }
@@ -221,7 +221,7 @@ export async function completePasswordReset({ password, token }: { password: str
       const userRepository = (await orm()).em.fork().getRepository(User);
       await userRepository.nativeUpdate({ id: decoded.id }, { saltedPassword });
     } catch (e) {
-      Sentry.captureException(e, { tags: { action: "reset-password" } });
+      Sentry.captureException(e, { tags: { action: "reset-password", subaction: "update-db" } });
       throw errors.INTERNAL_ERROR;
     }
   } else {
