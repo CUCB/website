@@ -1,9 +1,17 @@
 <script context="module" lang="ts">
-  import { writable, type Writable } from "svelte/store";
+  import { get, writable, type Writable } from "svelte/store";
   export const mapTitle = writable("");
   export const pageTitle = writable("");
   export const mapCentre: Writable<null | { lat: number; lng: number }> = writable(null);
   export const selectedVenue: Writable<string | null> = writable(null);
+
+  export async function gotoVenue(selectedVenue: string) {
+    if (get(page).params.venue_id) {
+      goto(selectedVenue);
+    } else {
+      goto(`venues/${selectedVenue}`);
+    }
+  }
 </script>
 
 <script lang="ts">
@@ -12,22 +20,11 @@
   import { goto } from "$app/navigation";
   import SearchBox from "../../../../components/SearchBox.svelte";
   import Fuse from "fuse.js";
-  import VenueEditor from "../../../../components/Gigs/VenueEditor.svelte";
-  import { UPDATE_GIG_DETAILS } from "$lib/permissions";
   import type { LayoutServerData } from "./$types";
   import { page } from "$app/stores";
 
   export let data: LayoutServerData;
-  let editing: {} | null = null;
-  $: ({ session, allVenues, allVenueNames } = data);
-
-  async function gotoVenue(selectedVenue: string) {
-    if ($page.params.venue_id) {
-      goto(selectedVenue);
-    } else {
-      goto(`venues/${selectedVenue}`);
-    }
-  }
+  $: ({ allVenues, allVenueNames } = data);
 
   let fuse = new Fuse(data.allVenueNames, {
     threshold: 0.35,
@@ -72,21 +69,6 @@
     toDisplayName="{(venue) => [venue.name, venue.subvenue].filter((i) => i != null).join(' | ')}"
   />
 </p>
-
-{#if UPDATE_GIG_DETAILS.guard(session)}
-  {#if editing}
-    <VenueEditor
-      {...editing}
-      on:saved="{(e) => {
-        $selectedVenue = e.detail.venue.id;
-        editing = null;
-      }}"
-      on:cancel="{() => (editing = null)}"
-    />
-  {:else}
-    <button on:click="{() => (editing = {})}">Create new venue</button>
-  {/if}
-{/if}
 
 <slot />
 

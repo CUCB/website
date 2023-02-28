@@ -60,7 +60,6 @@
         const gigs = venue.gigs;
         venue = e.detail.venue;
         venue.gigs = gigs;
-        $selectedVenue = venue.id;
         goto(venue.id);
         editing = null;
       }}"
