@@ -7,7 +7,7 @@ yarn-error.log
 /cypress/downloads/
 /cypress/videos/
 /cypress/fixtures/example.json
-.env
+*.local
 db_restore
 # .gitignore is really annoyingly painful with this: https://stackoverflow.com/a/14731573
 images/users/*

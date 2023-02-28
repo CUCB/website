@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { HCAPTCHA_SITE_KEY } from "../../view";
+  import { PUBLIC_HCAPTCHA_SITE_KEY } from "$env/static/public";
   import { createEventDispatcher, onMount } from "svelte";
 
   let dispatch = createEventDispatcher<{ verified: { key: string } }>();
@@ -30,9 +30,9 @@
       // Swallow error for old safari compatibility
     }
     loadHCaptcha(() =>
-      ((window as unknown) as WithScript).hcaptcha.render(captchaElement, {
+      (window as unknown as WithScript).hcaptcha.render(captchaElement, {
         theme,
-        sitekey: HCAPTCHA_SITE_KEY,
+        sitekey: PUBLIC_HCAPTCHA_SITE_KEY,
         callback,
       }),
     );

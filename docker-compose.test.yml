@@ -27,7 +27,7 @@ services:
       PG_DATABASE: postgres
       PG_PORT: 5432
       PG_PASSWORD: ${PG_PASSWORD}
-      VITE_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
+      PUBLIC_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
       HCAPTCHA_SECRET: "0x0000000000000000000000000000000000000000"
       EMAIL_HOST: mailhog
       EMAIL_SEND_ADDRESS: webmaster@cucb.co.uk
@@ -35,6 +35,7 @@ services:
       EMAIL_SSL: "false"
       SENTRY_DSN: ${SENTRY_DSN}
       SENTRY_ENVIRONMENT: ${SENTRY_ENVIRONMENT}
+      SKIP_CHECK_ORIGIN: "true"
       PUBLIC_GOOGLE_MAPS_API_KEY: ${PUBLIC_GOOGLE_MAPS_API_KEY}
     command: >
       bash -c "cd /home/node/app; npm ci; npm run build; npm run start:ci"

@@ -17,7 +17,7 @@ COPY src ./src
 COPY static ./static
 COPY *.js ./
 COPY *.json ./
-COPY build.env ./.env
+COPY .env.production ./.env.production
 RUN echo "SESSION_SECRET=somethingreallynotsecret" >> .env
 RUN npx svelte-kit sync
 RUN npm run build

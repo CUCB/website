@@ -1,5 +1,4 @@
 import { defineConfig } from "cypress";
-import dotenv from "dotenv";
 import { DateTime } from "luxon";
 import { makeOrm } from "./src/lib/database/test";
 import { Committee } from "./src/lib/entities/Committee";
@@ -17,7 +16,7 @@ import { UserPrefType } from "./src/lib/entities/UserPrefType";
 import { Instrument } from "./src/lib/entities/Instrument";
 import { UserPref } from "./src/lib/entities/UserPref";
 import { GigType } from "./src/lib/entities/GigType";
-dotenv.config();
+import { loadEnv } from "vite";
 
 const config = defineConfig({
   projectId: "u67py9",
@@ -31,6 +30,8 @@ const config = defineConfig({
   experimentalStudio: true,
   e2e: {
     setupNodeEvents(on, config) {
+      process.env = loadEnv("development", "", "");
+
       config.env.PG_PASSWORD = config.env.PG_PASSWORD || process.env.PG_PASSWORD;
       config.env.PG_HOST = config.env.PG_HOST || process.env.PG_HOST;
       config.env.PG_DATABASE = config.env.PG_DATABASE || process.env.PG_DATABASE;
@@ -232,8 +233,7 @@ const config = defineConfig({
           if (gig.venue) {
             await em.upsert(GigVenue, gig.venue);
           }
-          let upsertGig = { ...gig, venue: gig.venue?.id };
-          delete upsertGig["lineup"];
+          let { lineup, ...upsertGig } = { ...gig, venue: gig.venue?.id };
           await em.upsert(Gig, upsertGig);
           if (gig.lineup) {
             await addGigLineup(em, gig.lineup, gig.id);

@@ -1,6 +1,6 @@
 # CUCB Website
 
-This is the new rewrite of the CUCB website, which uses [SvelteKit](https://kit.svelte.dev) to do the frontend, and [hasura](https://hasura.io/) for the backend.
+This is the new (as of February 2023) CUCB website, which uses [SvelteKit](https://kit.svelte.dev) (for both the frontend and backend).
 
 ## Dependencies
 
@@ -15,13 +15,14 @@ For some tips on how to get best set up if you're running Windows, see [the rele
 ## Getting started
 
 1. Clone the repository
-2. Install the recommended extensions. Press `ctrl+shift+p` (or probably `cmd+shift+p` on Mac) and search for "show recommended extensions" (without the quotes) and press enter to select the option that appears. Install all the extensions under the heading "Workspace recommended extensions".
-3. Run `npm install`. This will install the dependencies locally, including Cypress (the test runner), hasura-cli (which is used to manage database migrations), prettier (a code formatter), and a git hook via husky (which will format the code with prettier when making a git commit)
-4. Run `npm run docker:start` (in VSCode, this should be possible by just pressing Ctrl+Shift+B, or right clicking the file `docker-compose.yml` and selecting "Compose up").
+2. Open the repository in VSCode
+3. Install the recommended extensions. Press `ctrl+shift+p` (or probably `cmd+shift+p` on Mac) and search for "show recommended extensions" (without the quotes) and press enter to select the option that appears. Install all the extensions under the heading "Workspace recommended extensions".
+4. Run `npm install`. This will install the dependencies locally, including Cypress (the test runner), hasura-cli (which is used to manage database migrations), prettier (a code formatter), and a git hook via husky (which will format the code with prettier when making a git commit)
+5. Run `npm run docker:start` (in VSCode, this should be possible by just pressing Ctrl+Shift+B, or right clicking the file `docker-compose.yml` and selecting "Compose up").
 
 ### Running the tests
 
-The project uses the [cypress](https://cypress.io) testing framework. It is set up to run the tests in CI, using `docker-compose` in order to create a real database and Hasura backend for proper end-to-end testing. This should work automatically, and there are custom commands set up in cypress to e.g. run SQL scripts and login to the site. There are a couple of ways to run the tests locally.
+The project uses the [Cypress](https://cypress.io) testing framework. It is set up to run the tests in CI, using `docker-compose` in order to create a real database and Hasura backend for proper end-to-end testing. This should work automatically, and there are custom commands set up in cypress to e.g. run SQL scripts and login to the site. There are a couple of ways to run the tests locally.
 
 #### Run them locally
 
@@ -68,39 +69,35 @@ docker volume rm <DB_DATA_NAME>
 
 where `<DB_DATA_NAME>` is the volume with `db_data_test` at the end of the name. This will delete the entire database. When you run the app, Hasura will once again apply the migrations (all the metadata Hasura needs is stored in postgres).
 
+#### Unit tests
+
+There are also a few unit tests, these can be run with:
+
+```
+npm run test:unit
+```
+
 ## Things to note
-
-### SSR/Non SSR
-
-Sapper is awesome in doing server-side rendering, Which really improves the user experience navigating the site, making pages load faster and stopping flashes as content loads sporadically. But this does cause some pain points when doing things like connecting to Hasura, which is quite different on the server (in `preload` functions) and on the client. See the [Auth](#Authentication/Authorization) section below on exactly how this should be done and more detail as to why.
 
 ### Environment Variables
 
-The project uses a `.env` file in the root of the repo. There is a `.env.template` file to help you fill it out, and `.env` is gitignored as it contains secrets.
+It's often useful to be able to configure things at runtime, like database connection details, rather than hard-coding them into the website. This is particularly important with secrets which we don't want to share with the world by committing them to this repository! We achieve this by using things called environment variables.
 
-**Important**: Please create and fill out `.env` before running the server
+When running the development server, SvelteKit will read the file called `.env.development`. This sets a bunch of default values for the environment variables, connecting SvelteKit to postgres and mailhog as they are set up to run in the default `docker-compose.yml` file.
 
-Since environment variables will only work server side, and not client side, the project uses [@rollup/plugin-replace](https://github.com/rollup/plugins/tree/master/packages/replace). This does text replacement for the variables specified in `rollup.config.js`, and this causes a couple of slight differences in how they can be used:
-
-- You cannot use them directly in template string (e.g. `MY_VAR is ${process.env.MY_VAR}`), so assign a variable to the value `process.env.MY_VAR` and reference that instead
-- You cannot destructure e.g. `const { MY_VARIABLE } = process.env`, do `const MY_VARIABLE = process.env.MY_VARIABLE` instead
+There are also a (very small) number (as I write this, one) of variables that need to be set manually. These are defined in `.env.local.template`. Copy this file to `.env.local` and then fill in the appropriate values for the variables.
 
 ### Docker
 
-The project should now be set up correctly to use `docker-compose`. This should allow you to run the database, backend, and frontend all with one command. It also makes sure they can all communicate as intended; **if you run sapper from outside docker, Hasura will not be able to connect to it for the auth hook**. Follow the instructions [here](https://docs.docker.com/compose/) to install it, and then run
+**NB** you don't _need_ to run docker to run the development server these days, but you will have to instead run postgres and mailhog locally, which may or may correspond with your definition of fun. Bear in mind we're not building any of the site in docker, and we're making very few database queries, so even if docker performance leaves a bit to be desired on your shiny new `/M[1-9][0-9]* Mac/`, it shouldn't cause any problems.
+
+The project should now be set up correctly to use `docker-compose`. This should allow you to run the database, mailhog and caddy (the frontend server) all with one command. The development server is seperate since it is useful to see error messages and have an easy way to kick it when things break. It also means that you don't have to build anything in docker locally, which will probably save a lot of effort. Follow the instructions [here](https://docs.docker.com/compose/) to install it, and then run
 
 ```bash
 npm run docker:start
 ```
 
-from the root of the repository. This will run postgres, Hasura, and sapper. You probably only want to see the sapper logs though, the others don't really log generally useful stuff, and tend to work pretty reliably. In this instance, run:
-
-```bash
-docker-compose up -d postgres graphql-engine
-docker-compose up sapper
-```
-
-which will run postgres and Hasura in detached (ie headless) mode and sapper normally, so it displays the logs. To stop the server, press Ctrl+C and then run
+from the root of the repository. This will run postgres, mailhog, and caddy. To stop the server run
 
 ```bash
 npm run docker:stop
@@ -114,26 +111,12 @@ If docker gives an error message starting something, try replacing `up` with `do
 
 ### Authentication/Authorization
 
-Authentication is handled by the server, the login function is in `auth.js`. This makes its own direct connection to the database and the session, which is database backed, also accesses the same database pool. There should be **no** other part of the website that needs to do this.
-
-Hasura is authenticated using a webhook, the location of which is configured when starting Hasura. The hook is accessed at `/auth/hook` and just uses the session to retrieve the user ID and their permissions. Hasura then manages authorization for us (and magically exposes only that API to the user). How to actually make this all work is a bit complicated and depends on whether the data is being fetched from the server (which doesn't have the cookie itself but does have session information) or the client (ie the user's browser, where the cookie lives).
-
-#### Making this actually work on the client side
-
-Since the session information is identified from a cookie, the cookie must be sent to Hasura. This is achieved through a _reverse-proxy_ in `server.js`, which allows the client side to connect to Hasura as if it's connecting to the same domain it is accessing the site through.
-
-**To connect** import the `client` variable from `src/graphql/client.js`. This is a [svelte store](https://svelte.dev/tutorial/writable-stores). It is writable, **do not write to it** --- it is set for you in `src/routes/_layout.svelte`. This should mean you never have to manually connect to GraphQL from the client side.
-
-#### Making this actually work on the server side
-
-Sapper provides [this.fetch](https://sapper.svelte.dev/docs#Preloading), which allows the server to make requests with the client's session. We just need to use `this.fetch` when connecting to Hasura.
-
-**To connect** import the `GraphQLClient` class from `src/graphql/client.ts` and call `new GraphQLClient(this.fetch)`, which will return the client.
-
-### Updating stuff
-
-[svelte:options](https://svelte.dev/tutorial/svelte-options) is really useful. Telling svelte our thing is immutable helps make things even faster by avoiding updating unnecessary content. You need to be slightly careful with how the parent of an immutable component is implemented to make sure it doesn't accidentally reload everything after every update. _Try using flash.js_ from the example on the svelte immutability tutorial section (_[click here](https://svelte.dev/tutorial/svelte-options)_); it's _really_ helpful in working out what's going on! `src/state` contains a `cache` function. This takes a function and returns a modified function which will return a cached result if it has seen the arguments before, and otherwise compute the result using the function provided.
+Authentication is handled by the server, the login function is in `src/auth.ts`. The permissions are defined in `src/lib/permissions.ts` (and also in the database, kinda, which I really should clarify). When a user logs in, we first create a session in the database, which basically just keeps track of what user is logged in (along with a few per-device settings) and set a cookie in their browser which is an encrypted version of a session token in the database (yes I know lots of people seem to like JWTs in local storage or some other solution, [they're wrong](http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/)). The magic of cookies is they are sent with every request, so then we can just use a hook to check if this matches a valid session, and then pass that session to any handlers we have.
 
 ### Emails on the dev server
 
 A few things send emails, e.g. the booking form and the mailing list form. When running from `docker-compose.yml`, the site is configured to use [MailHog](https://github.com/mailhog/MailHog). This catches all the email that are "sent" from the site and allows you to access them at [http://localhost:8025](http://localhost:8025). Some of the Cypress tests use the MailHog API to test email sending.
+
+### Updating stuff
+
+[svelte:options](https://svelte.dev/tutorial/svelte-options) is really useful. Telling svelte our thing is immutable helps make things even faster by avoiding updating unnecessary content. You need to be slightly careful with how the parent of an immutable component is implemented to make sure it doesn't accidentally reload everything after every update. _Try using flash.js_ from the example on the svelte immutability tutorial section (_[click here](https://svelte.dev/tutorial/svelte-options)_); it's _really_ helpful in working out what's going on! `src/state` contains a `cache` function. This takes a function and returns a modified function which will return a cached result if it has seen the arguments before, and otherwise compute the result using the function provided.

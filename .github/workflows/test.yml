@@ -15,15 +15,16 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16"
-      - name: Create dummy .env file
+      - name: Define required environment variables
         run: |
-          echo "SESSION_SECRET=somethingreallynotsecret" > .env
-          echo "HCAPTCHA_SECRET=somethingreallynotsecret" >> .env
-          echo "BINARY_ROOT=bin" >> .env
-          echo "EMAIL_PORT=1025" >> .env
-          echo "MUSIC_PATH=music" >> .env
-          echo "SENTRY_DSN=dsn" >> .env
-          echo "SENTRY_ENVIRONMENT=ci_type_check" >> .env
+          echo "SESSION_SECRET=somethingreallynotsecret" > .env.local
+          echo "HCAPTCHA_SECRET=somethingreallynotsecret" >> .env.local
+          echo "BINARY_ROOT=bin" >> .env.local
+          echo "EMAIL_PORT=1025" >> .env.local
+          echo "MUSIC_PATH=music" >> .env.local
+          echo "SENTRY_DSN=dsn" >> .env.local
+          echo "SENTRY_ENVIRONMENT=ci_type_check" >> .env.local
+          echo "PUBLIC_HCAPTCHA_SITE_KEY=10000000-ffff-ffff-ffff-000000000001" >> .env.local
       - name: Run check script
         run: |
           npm ci
@@ -141,10 +142,10 @@ jobs:
 
       - name: Build and tag image
         run: |
-          echo "VITE_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> build.env
-          echo "SENTRY_DSN=$SENTRY_DSN" >> build.env
-          echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> build.env
-          echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> build.env
+          echo "PUBLIC_HCAPTCHA_SITE_KEY=$HCAPTCHA_SITE_KEY" >> .env.production
+          echo "SENTRY_DSN=$SENTRY_DSN" >> .env.production
+          echo "SENTRY_ENVIRONMENT=$SENTRY_ENVIRONMENT" >> .env.production
+          echo "SENTRY_AUTH_TOKEN=$SENTRY_AUTH_TOKEN" >> .env.production
           docker build -t $CI_REGISTRY/cucb/$IMAGE_NAME:slim -f deploy/Dockerfile .
         env:
           HCAPTCHA_SITE_KEY: ${{ secrets.HCAPTCHA_SITE_KEY }}

@@ -20,8 +20,18 @@ export default {
   kit: {
     adapter: node(),
     csrf: {
-      checkOrigin: false,
+      checkOrigin: process.env.NODE_ENV !== "development" && !process.env.SKIP_CHECK_ORIGIN,
     },
   },
   extensions: [".svelte", ".svx"],
+  vitePlugin: {
+    experimental: {
+      inspector: {
+        toggleKeyCombo: "meta-shift",
+        holdMode: true,
+        showToggleButton: "always",
+        toggleButtonPos: "bottom-right",
+      },
+    },
+  },
 };
