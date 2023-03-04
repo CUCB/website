@@ -8,10 +8,10 @@
 </script>
 
 <style>
-  :global(faq-content p) {
+  faq-content :global(p) {
     margin-top: 0em;
   }
-  :global(faq-content h3) {
+  faq-content :global(h3) {
     font-style: oblique;
     margin-bottom: 0em !important;
   }

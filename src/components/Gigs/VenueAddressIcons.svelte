@@ -16,20 +16,22 @@
     font-size: 1.3em;
   }
 
-  :global(.tooltip-text) {
+  div :global(.tooltip-text) {
     margin: 0 0.25em;
   }
 </style>
 
-{#if address}
-  <TooltipText content="{address}" data-test="venue-address">
-    <i class="las la-map-marked-alt"></i>
-  </TooltipText>
-{/if}
-{#if venue.map_link}
-  <TooltipText content="Google maps">
-    <a href="{venue.map_link}" data-test="venue-map-link" target="_blank" rel="noopener noreferrer"
-      ><i class="las la-directions"></i></a
-    >
-  </TooltipText>
-{/if}
+<div>
+  {#if address}
+    <TooltipText content="{address}" data-test="venue-address">
+      <i class="las la-map-marked-alt"></i>
+    </TooltipText>
+  {/if}
+  {#if venue.map_link}
+    <TooltipText content="Google maps">
+      <a href="{venue.map_link}" data-test="venue-map-link" target="_blank" rel="noopener noreferrer"
+        ><i class="las la-directions"></i></a
+      >
+    </TooltipText>
+  {/if}
+</div>
