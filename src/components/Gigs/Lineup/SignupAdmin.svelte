@@ -121,6 +121,52 @@
 
 <style lang="scss">
   @import "../../../sass/themes.scss";
+
+  table {
+    border-collapse: collapse;
+    margin-top: -2em;
+  }
+
+  thead th {
+    transform: translate(100%, 0) rotate(-135deg) translate(0, 100%);
+    transform-origin: bottom left;
+    writing-mode: vertical-lr;
+    vertical-align: top;
+    height: 1em !important;
+  }
+  thead td {
+    border: unset;
+    background: none !important;
+  }
+
+  th div {
+    white-space: nowrap;
+    text-align: start;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    // margin-left: -0.5em;
+    width: 2em;
+    min-width: 2em;
+  }
+
+  tbody td {
+    border: 0.1em solid #666;
+  }
+  tbody th {
+    border: 0.1em solid #666;
+  }
+  th button {
+    height: max-content;
+    border-left: 0.1em solid #666;
+    max-height: 35ch;
+    text-overflow: ellipsis;
+    background: unset;
+    border-radius: unset;
+    margin-top: -0.05em;
+    margin-left: -0.08em;
+    margin-right: 1em;
+  }
+
   .person {
     &.status-available {
       @include themeify($themes) {
@@ -139,9 +185,15 @@
     }
     &.status-approved {
       @include themeify($themes) {
-        border: 2px solid themed("positive");
+        outline: 3px solid themed("positive");
+        outline-offset: -2.5px;
+        border: unset;
+        border-radius: unset;
       }
     }
+  }
+  td {
+    min-width: 4.5em;
   }
   button {
     font-family: unset;
@@ -183,48 +235,24 @@
     align-self: center;
     padding-right: 10px;
   }
-  .table {
-    display: grid;
-    grid-auto-columns: min-content;
-    grid-auto-flow: dense;
-    max-width: 95vw;
-    overflow: auto;
-    grid-row-gap: 5px;
-    thead {
-      display: contents;
-    }
-
-    tbody {
-      display: contents;
-    }
-
-    & tr {
-      display: contents;
-    }
-  }
-  th {
-    align-self: center;
-  }
   tr:nth-child(2n) th[scope="row"],
   tr:nth-child(2n) td {
     background: lightgray;
-    // outline: solid 1px red;
-  }
-  .name,
-  .gap {
-    grid-column: 1;
-  }
-  .gap {
-    grid-row: 1;
-  }
-  th:not([scope="row"]) {
-    grid-row: 1;
   }
 </style>
 
 <svelte:head>
   <title>{makeTitle("Gig signups")}</title>
 </svelte:head>
+
+{#if sortedBy}
+  <p>
+    Showing people signed up for "<a href="/members/gigs/{sortedBy}">{gigs.find((gig) => gig.id === sortedBy)?.title}</a
+    >".
+  </p>
+{:else}
+  <p>Click a gig title to sort the people by who's available for that gig.</p>
+{/if}
 
 <table class="table theme-{$themeName}">
   <thead>
@@ -259,7 +287,7 @@
                 }${gig?.signup?.user?.gig_notes ? `\nGeneral notes: ${gig.signup.user.gig_notes}` : ``}`}"
                 data-test="signup-details-{person.id}-{gig.id}"
               >
-                <div style="width:100%; height: 100%">
+                <div>
                   {#if gig.signup?.user_available}
                     {#if gig.signup?.user_only_if_necessary}
                       <i class="las la-question"></i>

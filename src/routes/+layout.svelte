@@ -81,13 +81,13 @@
     }
   }
 
-  :global(footer) {
+  div :global(footer) {
     max-width: 40em;
     justify-self: center;
   }
 
   @media (max-width: 600px) {
-    :global(footer) {
+    div :global(footer) {
       padding-bottom: 2.5rem;
     }
   }
