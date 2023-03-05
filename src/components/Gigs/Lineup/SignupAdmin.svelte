@@ -29,9 +29,16 @@
   import { DateTime } from "luxon";
   import { List, Map } from "immutable";
   import type { Gig, LineupEntry, User } from "../../../routes/members/gigs/signups/types";
+  import { createEventDispatcher } from "svelte";
   export let gigs: Gig[] = [];
+  export let sortedBy: string | null = null;
   gigs = gigs.sort((gigA, gigB) => new Date(gigA.sort_date).getTime() - new Date(gigB.sort_date).getTime());
-  let sortedBy: string | null = null;
+
+  const dispatch = createEventDispatcher();
+
+  $: sortedByGig = gigs.find((gig) => sortedBy === gig.id);
+  $: sortedBy && sortedByGig && sortedPeople && availabilitySort(sortedByGig);
+
   // TODO use groupby to clean this up
   $: people = List(
     Map(
@@ -40,7 +47,7 @@
       ),
     ).values(),
   );
-  $: people && (sortedBy = null);
+  // $: people && (sortedBy = null);
   $: sortedPeople = people.sortBy((v) => `${v.first} ${v.last}`);
   $: sortedPeopleJS = sortedPeople.toJS() as User[];
   $: gigsForPerson = Map<string, GigSignup[]>(
@@ -112,6 +119,7 @@
       .sortBy((person) => availabilities.get(person.id) || 4)
       .sortBy((person) => approvedLineup.get(person.id) || 2);
     sortedBy = gig.id;
+    dispatch("select", { gig: sortedBy });
   }
 
   function hash(id: string) {
@@ -237,7 +245,9 @@
   }
   tr:nth-child(2n) th[scope="row"],
   tr:nth-child(2n) td {
-    background: lightgray;
+    @include themeify($themes) {
+      background: themed("formColor");
+    }
   }
 </style>
 
@@ -245,10 +255,10 @@
   <title>{makeTitle("Gig signups")}</title>
 </svelte:head>
 
-{#if sortedBy}
+{#if sortedByGig}
   <p>
-    Showing people signed up for "<a href="/members/gigs/{sortedBy}">{gigs.find((gig) => gig.id === sortedBy)?.title}</a
-    >".
+    Showing people signed up for <a href="/members/gigs/{sortedBy}">{gigs.find((gig) => gig.id === sortedBy)?.title}</a>
+    [<a href="/members/gigs/{sortedBy}/edit-lineup">Edit lineup</a>].
   </p>
 {:else}
   <p>Click a gig title to sort the people by who's available for that gig.</p>
@@ -261,11 +271,11 @@
       {#each gigs as gig (hash(gig.id))}
         <th scope="col">
           <button
-            on:click="{() => availabilitySort(gig)}"
+            on:click="{() => (sortedBy = gig.id)}"
             data-test="gig-title-{gig.id}"
             aria-selected="{sortedBy === gig.id ? true : false}"
             ><div tabindex="-1">
-              {gig.date && DateTime.fromISO(gig.date).toFormat("dd LLL")}&#32;{gig.title}
+              {gig.date && DateTime.fromISO(gig.date).toFormat("ccc dd LLL")}:&#32;{gig.title}
             </div></button
           >
         </th>

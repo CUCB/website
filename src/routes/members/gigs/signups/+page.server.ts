@@ -10,7 +10,16 @@ import { EntityManager, wrap } from "@mikro-orm/core";
 
 const fetchSignupsOpen = (em: EntityManager): Promise<Gig[]> =>
   em
-    .find(DbGig, { allow_signups: { $eq: true }, admins_only: { $eq: false } }, { populate: ["lineup", "lineup.user"] })
+    .find(
+      DbGig,
+      {
+        allow_signups: {
+          $eq: true,
+        },
+        admins_only: { $eq: false },
+      },
+      { populate: ["lineup", "lineup.user"] },
+    )
     .then((arr) =>
       arr.map((e) => ({
         ...wrap(e).toPOJO(),
@@ -26,7 +35,13 @@ const fetchSinceOneMonth = (em: EntityManager): Promise<Gig[]> =>
   em
     .find(
       DbGig,
-      { date: { $gt: DateTime.local().minus({ months: 1 }).toISO() } },
+      {
+        date: {
+          $gt: DateTime.local().minus({ months: 1 }).toISO(),
+          $lte: DateTime.local().plus({ months: 1 }).toISO(),
+        },
+        admins_only: { $eq: false },
+      },
       { populate: ["lineup", "lineup.user"] },
     )
     .then((arr) =>
@@ -47,6 +62,8 @@ export const load: PageServerLoad = async ({ locals }) => {
   if (SELECT_GIG_LINEUPS.guard(session)) {
     const em = (await orm()).em.fork();
     const [signupsOpen, sinceOneMonth] = await Promise.all([fetchSignupsOpen(em), fetchSinceOneMonth(em)]);
+    signupsOpen.sort((a, b) => a.sort_date.getTime() - b.sort_date.getTime());
+    sinceOneMonth.sort((a, b) => a.sort_date.getTime() - b.sort_date.getTime());
 
     return {
       sinceOneMonth,
