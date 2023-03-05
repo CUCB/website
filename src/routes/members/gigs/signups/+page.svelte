@@ -7,7 +7,6 @@
   import type { PageData } from "./$types";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-  import { destroy_block } from "svelte/internal";
 
   export let data: PageData;
   let { sinceOneMonth, signupsOpen } = data;
@@ -22,7 +21,7 @@
     .sortBy((gig: Gig) => gig.sort_date)
     .toJS() as typeof signupsOpen;
   const VIEWS = { signupsOpen: {}, sinceOneMonth: {}, noLineup: {} };
-  $: view = VIEWS[$page.url.searchParams.get("view") || "signupsOpen"] || VIEWS.signupsOpen;
+  $: view = (VIEWS as Record<string, object>)[$page.url.searchParams.get("view") || ""] || VIEWS.signupsOpen;
   $: gigs =
     view === VIEWS.signupsOpen
       ? signupsOpenOrLineupSelectedForFuture
@@ -63,7 +62,7 @@
   <p>
     Showing all upcoming gigs.
     <a href="{links.noLineup}" use:localLink data-test="show-upcoming-no-lineup"
-      >Seememehow only upcoming gigs without a lineup</a
+      >Show only upcoming gigs without a lineup</a
     >
     &#32;|
     <a href="{links.sinceOneMonth}" use:localLink data-test="show-past-month">Show all gigs since one month back</a>

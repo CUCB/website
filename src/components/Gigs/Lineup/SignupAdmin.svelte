@@ -138,7 +138,6 @@
   thead th {
     transform: translate(100%, 0) rotate(-135deg) translate(0, 100%);
     transform-origin: bottom left;
-    writing-mode: vertical-lr;
     vertical-align: top;
     height: 1em !important;
   }
@@ -152,9 +151,16 @@
     text-align: start;
     text-overflow: ellipsis;
     overflow: hidden;
-    // margin-left: -0.5em;
+    writing-mode: vertical-lr;
     width: 2em;
     min-width: 2em;
+  }
+
+  th div span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-height: 35ch;
+    display: block;
   }
 
   tbody td {
@@ -275,7 +281,9 @@
             data-test="gig-title-{gig.id}"
             aria-selected="{sortedBy === gig.id ? true : false}"
             ><div tabindex="-1">
-              {gig.date && DateTime.fromISO(gig.date).toFormat("ccc dd LLL")}:&#32;{gig.title}
+              <span>
+                {gig.date && DateTime.fromISO(gig.date).toFormat("ccc dd LLL")}:&#32;{gig.title}
+              </span>
             </div></button
           >
         </th>
