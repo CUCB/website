@@ -32,10 +32,10 @@ const config = defineConfig({
     setupNodeEvents(on, config) {
       process.env = loadEnv("development", "", "");
 
-      config.env.PG_PASSWORD = config.env.PG_PASSWORD || process.env.PG_PASSWORD;
-      config.env.PG_HOST = config.env.PG_HOST || process.env.PG_HOST;
-      config.env.PG_DATABASE = config.env.PG_DATABASE || process.env.PG_DATABASE;
-      config.env.PG_USER = config.env.PG_USER || process.env.PG_USER;
+      config.env.POSTGRES_PASSWORD = config.env.POSTGRES_PASSWORD || process.env.POSTGRES_PASSWORD;
+      config.env.POSTGRES_HOST = config.env.POSTGRES_HOST || process.env.POSTGRES_HOST;
+      config.env.POSTGRES_DATABASE = config.env.POSTGRES_DATABASE || process.env.POSTGRES_DATABASE;
+      config.env.POSTGRES_USER = config.env.POSTGRES_USER || process.env.POSTGRES_USER;
       config.env.MAILHOG_HOST = "http://" + (process.env.EMAIL_HOST || "localhost") + ":8025";
       config.env.SESSION_SECRET = process.env.SESSION_SECRET || "somethingrandom";
 

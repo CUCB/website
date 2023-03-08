@@ -4,11 +4,10 @@ services:
   postgres:
     image: postgres:12
     restart: always
+    env_file: .env.development
     volumes:
       - db_data:/var/lib/postgresql/data
       - ./db_restore:/backups
-    environment:
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
     ports:
       - "5432:5432"
   caddy:

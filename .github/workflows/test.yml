@@ -110,11 +110,11 @@ jobs:
           PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
           PERCY_BRANCH: ${{ github.head_ref }}
           COMMIT_INFO_BRANCH: ${{ github.head_ref }}
-          PG_USER: postgres
-          PG_HOST: localhost
-          PG_DATABASE: postgres
-          PG_PORT: 5432
-          PG_PASSWORD: postgrespassword
+          POSTGRES_USER: postgres
+          POSTGRES_HOST: localhost
+          POSTGRES_DATABASE: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_PASSWORD: postgrespassword
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
         if: always()

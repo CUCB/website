@@ -6,7 +6,7 @@
     name: "{{ secret_name }}"
     value: "{{ lookup('password', '/dev/null length=40') }}"
   loop:
-    - PG_PASSWORD
+    - POSTGRES_PASSWORD
     - SESSION_SECRET
   loop_control:
     loop_var: secret_name

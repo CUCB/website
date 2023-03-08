@@ -6,7 +6,7 @@ services:
     volumes:
       - db_data_test:/var/lib/postgresql/data
     environment:
-      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
   sveltekit:
@@ -22,11 +22,11 @@ services:
       - "127.0.0.1:3001:3000"
     environment:
       SESSION_SECRET: notarealsecret
-      PG_USER: postgres
-      PG_HOST: postgres
-      PG_DATABASE: postgres
-      PG_PORT: 5432
-      PG_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_USER: postgres
+      POSTGRES_HOST: postgres
+      POSTGRES_DATABASE: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PUBLIC_HCAPTCHA_SITE_KEY: "10000000-ffff-ffff-ffff-000000000001"
       HCAPTCHA_SECRET: "0x0000000000000000000000000000000000000000"
       EMAIL_HOST: mailhog
