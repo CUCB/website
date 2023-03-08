@@ -13,3 +13,4 @@ db_restore
 images/users/*
 !images/users/none.jpg
 .svelte-kit
+docs/

@@ -17,12 +17,12 @@ For some tips on how to get best set up if you're running Windows, see [the rele
 1. Clone the repository
 2. Open the repository in VSCode
 3. Install the recommended extensions. Press `ctrl+shift+p` (or probably `cmd+shift+p` on Mac) and search for "show recommended extensions" (without the quotes) and press enter to select the option that appears. Install all the extensions under the heading "Workspace recommended extensions".
-4. Run `npm install`. This will install the dependencies locally, including Cypress (the test runner), hasura-cli (which is used to manage database migrations), prettier (a code formatter), and a git hook via husky (which will format the code with prettier when making a git commit)
-5. Run `npm run docker:start` (in VSCode, this should be possible by just pressing Ctrl+Shift+B, or right clicking the file `docker-compose.yml` and selecting "Compose up").
+4. Run `npm install`. This will install the dependencies locally, including Cypress (the test runner), prettier (a code formatter), and a git hook via husky (which will format the code with prettier when making a git commit)
+5. Run `npm run docker:start`(in VSCode, this should be possible by just pressing Ctrl+Shift+B). This runs two commands `docker-compose up -d` and `npm run start`. See the [Docker section](#docker) for what `docker-compose up -d` does, and `npm run start` runs the SvelteKit development server (i.e. the frontend and backend of the website).
 
 ### Running the tests
 
-The project uses the [Cypress](https://cypress.io) testing framework. It is set up to run the tests in CI, using `docker-compose` in order to create a real database and Hasura backend for proper end-to-end testing. This should work automatically, and there are custom commands set up in cypress to e.g. run SQL scripts and login to the site. There are a couple of ways to run the tests locally.
+The project uses the [Cypress](https://cypress.io) testing framework. It is set up to run the tests in CI, using `docker-compose` in order to create a real database and run caddy for proper end-to-end testing. This should work automatically, and there are custom commands set up in cypress to e.g. run SQL scripts and login to the site. There are a couple of ways to run the tests locally.
 
 #### Run them locally
 
@@ -43,32 +43,6 @@ This will open a window with a list of the test files. Click on a filename to ru
 }
 ```
 
-#### Run them as if they're in CI
-
-This involves using the CI docker-compose file, which is called `docker-compose.test.yml`. Simply run
-
-```bash
-npm run docker:test
-```
-
-to run the tests. This won't give you a GUI, but should allow you to see which tests will pass and fail. If there is a discrepancy between your local test results and GitLab CI's test results, it's probably due to data still lurking in your database (but this should be cleaned up properly ([before the tests run](https://docs.cypress.io/guides/references/best-practices.html#Using-after-or-afterEach-hooks)) and recreated as necessary for the tests).
-
-To solve this using VSCode, go into the Docker panel and find the volumes section. There should be a volume called `<DIR>_db_data_test`, where `<DIR>` is the name of the directory the repository is cloned into. Right click this volume and select delete. Hopefully there shouldn't be too many issues with the test database, it's separate from the general dev server database, so your local data shouldn't make a difference to how it runs.
-
-To do this manually with the command line, run
-
-```bash
-docker volume ls
-```
-
-to list volumes, and then
-
-```bash
-docker volume rm <DB_DATA_NAME>
-```
-
-where `<DB_DATA_NAME>` is the volume with `db_data_test` at the end of the name. This will delete the entire database. When you run the app, Hasura will once again apply the migrations (all the metadata Hasura needs is stored in postgres).
-
 #### Unit tests
 
 There are also a few unit tests, these can be run with:
@@ -76,6 +50,10 @@ There are also a few unit tests, these can be run with:
 ```
 npm run test:unit
 ```
+
+### Deploying
+
+The site currently runs on DigitalOcean. Pushing or merging changes to master should deploy everything automagically after running the tests.
 
 ## Things to note
 
@@ -89,7 +67,7 @@ There are also a (very small) number (as I write this, one) of variables that ne
 
 ### Docker
 
-**NB** you don't _need_ to run docker to run the development server these days, but you will have to instead run postgres and mailhog locally, which may or may correspond with your definition of fun. Bear in mind we're not building any of the site in docker, and we're making very few database queries, so even if docker performance leaves a bit to be desired on your shiny new `/M[1-9][0-9]* Mac/`, it shouldn't cause any problems.
+**NB** you don't _need_ to run docker to run the development server these days, but you will have to instead run postgres and mailhog locally, which may or may not correspond with your definition of fun. Bear in mind we're not building any of the site in docker, and we're making very few database queries, so even if docker performance leaves a bit to be desired on your shiny new `/M[1-9][0-9]* Mac/`, it shouldn't cause any problems.
 
 The project should now be set up correctly to use `docker-compose`. This should allow you to run the database, mailhog and caddy (the frontend server) all with one command. The development server is seperate since it is useful to see error messages and have an easy way to kick it when things break. It also means that you don't have to build anything in docker locally, which will probably save a lot of effort. Follow the instructions [here](https://docs.docker.com/compose/) to install it, and then run
 
@@ -97,13 +75,11 @@ The project should now be set up correctly to use `docker-compose`. This should 
 npm run docker:start
 ```
 
-from the root of the repository. This will run postgres, mailhog, and caddy. To stop the server run
+from the root of the repository. This will start postgres, mailhog, and caddy in the background, and run the dev server in the forground. To stop the server, press `Ctrl+C` (yes `Ctrl`, even if you're on a Mac) then run
 
 ```bash
-npm run docker:stop
+npm run docker:down
 ```
-
-The Hasura image is the cli version, which means it will automatically run migrations from the `hasura/migrations` directory when it starts up.
 
 #### Fixing Docker issues
 
@@ -111,12 +87,8 @@ If docker gives an error message starting something, try replacing `up` with `do
 
 ### Authentication/Authorization
 
-Authentication is handled by the server, the login function is in `src/auth.ts`. The permissions are defined in `src/lib/permissions.ts` (and also in the database, kinda, which I really should clarify). When a user logs in, we first create a session in the database, which basically just keeps track of what user is logged in (along with a few per-device settings) and set a cookie in their browser which is an encrypted version of a session token in the database (yes I know lots of people seem to like JWTs in local storage or some other solution, [they're wrong](http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/)). The magic of cookies is they are sent with every request, so then we can just use a hook to check if this matches a valid session, and then pass that session to any handlers we have.
+Authentication is handled by the server, the login function is in `src/auth.ts`. The permissions are defined in `src/lib/permissions.ts` (and also in the database, kinda, see `src/seeders/DatabaseSeeders.ts` for the bits that are added to the database, and https://github.com/CUCB/website/issues/127 has been created to fix this). When a user logs in, we first create a session in the database, which basically just keeps track of what user is logged in (along with a few per-device settings) and set a cookie in their browser which is an encrypted version of a session token in the database (yes I know lots of people seem to like JWTs in local storage or some other solution, [they're wrong](http://cryto.net/~joepie91/blog/2016/06/13/stop-using-jwt-for-sessions/)). The magic of cookies is they are sent with every request, so then we can just use a hook to check if this matches a valid session, and then pass that session to any handlers we have.
 
 ### Emails on the dev server
 
 A few things send emails, e.g. the booking form and the mailing list form. When running from `docker-compose.yml`, the site is configured to use [MailHog](https://github.com/mailhog/MailHog). This catches all the email that are "sent" from the site and allows you to access them at [http://localhost:8025](http://localhost:8025). Some of the Cypress tests use the MailHog API to test email sending.
-
-### Updating stuff
-
-[svelte:options](https://svelte.dev/tutorial/svelte-options) is really useful. Telling svelte our thing is immutable helps make things even faster by avoiding updating unnecessary content. You need to be slightly careful with how the parent of an immutable component is implemented to make sure it doesn't accidentally reload everything after every update. _Try using flash.js_ from the example on the svelte immutability tutorial section (_[click here](https://svelte.dev/tutorial/svelte-options)_); it's _really_ helpful in working out what's going on! `src/state` contains a `cache` function. This takes a function and returns a modified function which will return a cached result if it has seen the arguments before, and otherwise compute the result using the function provided.
