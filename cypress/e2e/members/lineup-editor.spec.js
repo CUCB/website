@@ -801,7 +801,7 @@ describe("signup admin", () => {
         expect(names.slice(0, 2)).to.contain("Sleepy Prince", "Teeny Mug");
         expect(names.slice(2, 5)).to.eql(["Sparkly Tiger", "L'il Cherio", "Floofy Beggar"]);
       });
-      cy.get("[data-test=show-past-month]").click();
+      cy.get("[data-test=show-past-month]").click().should("not.exist");
       cy.get("[data-test=person-name]").then((elements) => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names).to.be.ascending;
@@ -811,23 +811,23 @@ describe("signup admin", () => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names.slice(0, 2)).to.eql(["Sparkly Tiger", "Sleepy Prince"]);
       });
-      cy.get("[data-test=gig-title-52349]").click();
+      cy.get("[data-test=gig-title-52349]").click().should("have.attr", "aria-selected", "true");
       cy.get("[data-test=person-name]").then((elements) => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names.slice(0, 2)).to.contain("Floofy Beggar", "Sleepy Prince");
         expect(names[2]).to.equal("Sparkly Tiger");
       });
-      cy.get("[data-test=show-upcoming-no-lineup]").click();
+      cy.get("[data-test=show-upcoming-no-lineup]").click().should("not.exist");
       cy.get("[data-test=person-name]").then((elements) => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names).to.be.ascending;
       });
-      cy.get("[data-test=gig-title-52350]").click();
+      cy.get("[data-test=gig-title-52350]").click().should("have.attr", "aria-selected", "true");
       cy.get("[data-test=person-name]").then((elements) => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names.slice(0, 2)).to.eql(["Floofy Beggar", "Sparkly Tiger"]);
       });
-      cy.get("[data-test=gig-title-52349]").click();
+      cy.get("[data-test=gig-title-52349]").click().should("have.attr", "aria-selected", "true");
       cy.get("[data-test=person-name]").then((elements) => {
         let names = Cypress.$.map(elements, (e) => e.innerHTML.replace(/&nbsp;/, " "));
         expect(names.slice(0, 2)).to.contain("Floofy Beggar", "Sleepy Prince");
