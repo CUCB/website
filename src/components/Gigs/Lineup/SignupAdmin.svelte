@@ -153,7 +153,7 @@
     overflow: hidden;
     writing-mode: vertical-lr;
     width: 2em;
-    min-width: 2em;
+    min-width: 2.25em;
   }
 
   th div span {
@@ -231,6 +231,7 @@
   th button {
     white-space: initial;
   }
+
   .person div {
     display: flex;
     justify-content: center;
@@ -279,7 +280,7 @@
           <button
             on:click="{() => (sortedBy = gig.id)}"
             data-test="gig-title-{gig.id}"
-            aria-selected="{sortedBy === gig.id ? true : false}"
+            aria-selected="{sortedBy === gig.id}"
             ><div tabindex="-1">
               <span>
                 {gig.date && DateTime.fromISO(gig.date).toFormat("ccc dd LLL")}:&#32;{gig.title}
