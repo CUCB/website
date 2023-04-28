@@ -20,7 +20,8 @@ export default {
   kit: {
     adapter: node(),
     csrf: {
-      checkOrigin: process.env.NODE_ENV !== "development" && !process.env.SKIP_CHECK_ORIGIN,
+      checkOrigin: false,
+      //process.env.NODE_ENV !== "development" && !process.env.SKIP_CHECK_ORIGIN,
     },
   },
   extensions: [".svelte", ".svx"],
