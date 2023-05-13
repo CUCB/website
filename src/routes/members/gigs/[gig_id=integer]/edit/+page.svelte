@@ -34,6 +34,7 @@
     session,
   } = data;
   import { makeTitle, themeName, createValidityChecker } from "../../../../../view";
+  import toast, { Toaster } from "svelte-french-toast";
   import Select from "../../../../../components/Forms/Select.svelte";
   import VenueEditor from "../../../../../components/Gigs/VenueEditor.svelte";
   import ContactEditor from "../../../../../components/Gigs/ContactEditor.svelte";
@@ -54,8 +55,6 @@
   let displayVenueEditor = false;
   let displayContactEditor = false;
   let editingSubvenue: boolean | undefined = false;
-  let recentlySavedOpacity = tweened(0, { duration: 150 });
-  let recentlySavedTimer = () => recentlySavedOpacity.set(0);
   let runningTimer: number | undefined = undefined;
   let venueListElement: HTMLSelectElement,
     clientListElement: HTMLSelectElement,
@@ -331,9 +330,7 @@
       }).then((r) => r.json());
       if (res) {
         window.clearTimeout(runningTimer);
-        recentlySavedOpacity.set(0, { duration: 50 });
-        runningTimer = window.setTimeout(recentlySavedTimer, 2000);
-        recentlySavedOpacity.set(1);
+        toast.success("Saved", { position: "top-center" });
         lastSaved = { ...res };
       }
       editing_user = { id: session.userId, first: session.firstName, last: session.lastName };
@@ -723,9 +720,7 @@
 <h3>
   {#if !displayVenueEditor}Main details{:else}Edit venue{/if}
 </h3>
-{#if $recentlySavedOpacity}
-  <div class="temporary-message heading-font" style="opacity:{$recentlySavedOpacity}">Saved</div>
-{/if}
+<Toaster />
 <form on:submit|preventDefault class="theme-{$themeName}">
   {#if !displayVenueEditor}
     <!-- svelte-ignore a11y-label-has-associated-control -->
@@ -945,20 +940,6 @@
     <label>
       Arrive time
       <input
-        type="date"
-        bind:value="{arrive_time_date}"
-        bind:this="{fields.arrive_time_date}"
-        use:checkValid="{{
-          validityErrors: { rangeOverflow: 'Arrive time should be before start time and finish time' },
-          bothPresent: { id: 'arrive_time', error: 'Arrive time needs both date and time' },
-        }}"
-        max="{date || finish_time_date}"
-        pattern="\d{4}-\d{2}-\d{2}"
-        placeholder="YYYY-MM-DD"
-        data-test="gig-edit-{id}-arrive-time-date"
-        disabled="{cancelled}"
-      />
-      <input
         type="time"
         bind:value="{arrive_time_time}"
         bind:this="{fields.arrive_time_time}"
@@ -973,6 +954,20 @@
           ? finish_time_time
           : undefined}"
         data-test="gig-edit-{id}-arrive-time-time"
+        disabled="{cancelled}"
+      />
+      <input
+        type="date"
+        bind:value="{arrive_time_date}"
+        bind:this="{fields.arrive_time_date}"
+        use:checkValid="{{
+          validityErrors: { rangeOverflow: 'Arrive time should be before start time and finish time' },
+          bothPresent: { id: 'arrive_time', error: 'Arrive time needs both date and time' },
+        }}"
+        max="{date || finish_time_date}"
+        pattern="\d{4}-\d{2}-\d{2}"
+        placeholder="YYYY-MM-DD"
+        data-test="gig-edit-{id}-arrive-time-date"
         disabled="{cancelled}"
       />
     </label>
@@ -1002,18 +997,6 @@
     <label>
       Finish time
       <input
-        type="date"
-        bind:value="{finish_time_date}"
-        bind:this="{fields.finish_time_date}"
-        min="{date || arrive_time_date}"
-        use:checkValid="{{
-          validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
-          bothPresent: { id: 'finish_time', error: 'Date and time must be specified' },
-        }}"
-        data-test="gig-edit-{id}-finish-time-date"
-        disabled="{cancelled}"
-      />
-      <input
         type="time"
         bind:value="{finish_time_time}"
         bind:this="{fields.finish_time_time}"
@@ -1027,6 +1010,18 @@
           ? arrive_time_time
           : undefined}"
         data-test="gig-edit-{id}-finish-time-time"
+        disabled="{cancelled}"
+      />
+      <input
+        type="date"
+        bind:value="{finish_time_date}"
+        bind:this="{fields.finish_time_date}"
+        min="{date || arrive_time_date}"
+        use:checkValid="{{
+          validityErrors: { rangeUnderflow: 'Finish time should be after start time and arrive time' },
+          bothPresent: { id: 'finish_time', error: 'Date and time must be specified' },
+        }}"
+        data-test="gig-edit-{id}-finish-time-date"
         disabled="{cancelled}"
       />
     </label>

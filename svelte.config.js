@@ -26,13 +26,6 @@ export default {
   },
   extensions: [".svelte", ".svx"],
   vitePlugin: {
-    experimental: {
-      inspector: {
-        toggleKeyCombo: "meta-shift",
-        holdMode: true,
-        showToggleButton: "always",
-        toggleButtonPos: "bottom-right",
-      },
-    },
+    inspector: {},
   },
 };
