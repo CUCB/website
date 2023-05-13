@@ -1,6 +1,6 @@
 import type { RequestHandler } from "./$types";
 import { stat } from "fs/promises";
-import { image_path } from "../+server";
+import { image_path } from "../path";
 import { assertLoggedIn } from "../../../../../../client-auth";
 export const GET: RequestHandler = async ({ locals, params: { id } }) => {
   assertLoggedIn(locals.session);
