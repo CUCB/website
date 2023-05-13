@@ -3,10 +3,7 @@ import { readFile, writeFile, rename, rm } from "fs/promises";
 import { error } from "@sveltejs/kit";
 import { UPDATE_BIO } from "$lib/permissions";
 import { assertLoggedIn } from "../../../../../client-auth";
-
-export function image_path(id: string): string {
-  return `images/users/${id}.jpg`;
-}
+import { image_path } from "./path";
 
 let NONE: Buffer | null = null;
 
