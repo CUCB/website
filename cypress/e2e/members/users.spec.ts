@@ -1,7 +1,10 @@
 /// <reference types="Cypress" />
 
-import { HASHED_PASSWORDS } from "../../database/users";
 import { String } from "runtypes";
+
+const HASHED_PASSWORDS = {
+  abc123: "$2b$10$fsfeK3cSN/04rNTVm3dkNuKaaFzo/Xj6HBBzgi1uooabY7XX1vABq",
+};
 
 const gig = {
   id: "5765456",

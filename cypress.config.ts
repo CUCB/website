@@ -3,7 +3,6 @@ import { DateTime } from "luxon";
 import { makeOrm } from "./src/lib/database/test";
 import { Committee } from "./src/lib/entities/Committee";
 import { User } from "./src/lib/entities/User";
-import { HASHED_PASSWORDS } from "./cypress/database/users";
 import { CommitteeMember } from "./src/lib/entities/CommitteeMember";
 import { List042 } from "./src/lib/entities/List042";
 import { Gig } from "./src/lib/entities/Gig";
@@ -17,6 +16,10 @@ import { Instrument } from "./src/lib/entities/Instrument";
 import { UserPref } from "./src/lib/entities/UserPref";
 import { GigType } from "./src/lib/entities/GigType";
 import { loadEnv } from "vite";
+
+const HASHED_PASSWORDS = {
+  abc123: "$2b$10$fsfeK3cSN/04rNTVm3dkNuKaaFzo/Xj6HBBzgi1uooabY7XX1vABq",
+};
 
 const config = defineConfig({
   projectId: "u67py9",
@@ -64,9 +67,17 @@ const config = defineConfig({
           delete insertEntry["user_instruments"];
           await em.upsert(GigLineupEntry, insertEntry);
           if (entry.user_instruments) {
-            await em.upsertMany(
+            // TODO this used to work with upsertMany rather than delete then insert, but it broke in mikro-orm 5.6.16?
+            await em.nativeDelete(GigLineupInstrument, {
+              $or: entry.user_instruments.map((ui) => ({ ...ui, gig_id: gig_id || entry.gig, user_id: entry.user })),
+            });
+            await em.insertMany(
               GigLineupInstrument,
-              entry.user_instruments.map((ui) => ({ ...ui, gig_id: gig_id || entry.gig, user_id: entry.user })),
+              entry.user_instruments.map((ui) => ({
+                ...ui,
+                gig_id: gig_id || entry.gig,
+                user_id: entry.user,
+              })),
             );
           }
         }

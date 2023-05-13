@@ -1,6 +1,8 @@
 /// <reference types="Cypress" />
 
-import { HASHED_PASSWORDS } from "../../database/users";
+const HASHED_PASSWORDS = {
+  abc123: "$2b$10$fsfeK3cSN/04rNTVm3dkNuKaaFzo/Xj6HBBzgi1uooabY7XX1vABq",
+};
 
 describe("theme editor", () => {
   before(() => {
