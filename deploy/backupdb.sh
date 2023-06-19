@@ -13,4 +13,4 @@ docker-compose -f docker-compose.prod.yml run -v "$BLOCK/db_backup:/db_backup" p
 
 FILES=$(ls -d $BLOCK/db_backup/* | tail -n 2)
 
-source /root/.env/dropbox_access_token && node /var/www/deploy/js/backup.js $FILES
+source /root/.env/dropbox_access_token && nvm run 16 /var/www/deploy/js/backup.js $FILES
