@@ -6,7 +6,7 @@ import { error } from "@sveltejs/kit";
 import fetch from "node-fetch";
 import { Committee } from "$lib/entities/Committee";
 import orm from "$lib/database";
-import { LoadStrategy } from "@mikro-orm/core";
+import { LoadStrategy, QueryOrder } from "@mikro-orm/core";
 import { env } from "$env/dynamic/private";
 import { captureException } from "@sentry/node";
 dotenv.config();
@@ -44,6 +44,7 @@ export const POST: RequestHandler = async ({ request }) => {
         {
           fields: ["members.casual_name", "members.email", "members.lookup_name", "members.lookup_name.name"],
           strategy: LoadStrategy.JOINED,
+          orderBy: { started: QueryOrder.DESC },
         },
       )
       .then((committee) => committee?.members?.toArray());

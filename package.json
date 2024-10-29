@@ -15,8 +15,8 @@
     "test": "run-p --race dev cy:run",
     "test:unit": "vitest",
     "format": "pretty-quick",
-    "docker:start": "docker-compose up -d && npm run dev",
-    "docker:down": "docker-compose down",
+    "docker:start": "docker compose up -d && npm run dev",
+    "docker:down": "docker compose down",
     "svelte-check": "svelte-check",
     "orm": "env NODE_OPTIONS='--loader ts-node/esm' npx mikro-orm",
     "resetdb": "npm run orm -- migration:fresh && npm run orm -- seeder:run"
