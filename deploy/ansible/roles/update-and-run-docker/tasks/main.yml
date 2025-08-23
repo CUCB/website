@@ -9,7 +9,7 @@
     registry_url: "{{ deploy_registry }}"
 
 - name: Pull images and restart containers
-  community.docker.docker_compose:
+  community.docker.docker_compose_v2:
     files: "{{ docker_compose_files }}"
     pull: yes
     restarted: yes
