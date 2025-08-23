@@ -62,10 +62,10 @@
   </p>
 {/if}
 <!-- TODO should we put a pic in here -->
-<noscript>
   <p>
     To make a booking enquiry, please
     <Mailto person="{$committee.secretary}">email the secretary</Mailto>.
   </p>
-</noscript>
-<BookingForm on:complete="{() => (bookingFormComplete = true)}" />
+  <p>
+    <i>We have been having some problems with the booking form. Apologies if you have previously tried to contact us using it and haven't heard back. Please use the email link above.</i>
+  </p>
