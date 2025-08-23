@@ -12,7 +12,6 @@
   community.docker.docker_compose_v2:
     files: "{{ docker_compose_files }}"
     pull: always
-    restarted: assume_yes
     recreate: always
     project_src: "{{ repo_root }}"
   environment:
